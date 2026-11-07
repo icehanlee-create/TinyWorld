@@ -4,7 +4,7 @@
 (function(){
 const H=window.TH;if(!H)return;
 const {T,f,r,sr,pk,ri,limb,shade,OL,SKIN,SHIRT,kid,act,wrapAn,heart,bubble,peekHead,frog,owl,pine,roundTree,bush,rock,crate,barrel,pot,tent,campfire,swirl,signpost,lily,reeds,
- add,mark,canPlace,scatter,KIND,POOL,VPLAN,REG,SCREG,LEVELS,ART,DECOY,BORROW,OCCK,HEAVY,ANIM,ALWAYS,DUR,SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,HERE,tone,steamPuff,pickView,walkPose}=H;
+ add,mark,canPlace,scatter,KIND,POOL,VPLAN,REG,SCREG,LEVELS,ART,DECOY,BORROW,OCCK,HEAVY,ANIM,ALWAYS,DUR,SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,TAPHOOKS,HERE,tone,steamPuff,pickView,walkPose}=H;
 
 Object.assign(DUR,{fire:[.5,.8],flag:[1.2,1.8]});
 const STONE='#b9ab8c',STONE2='#c6b99a',STONED='#8f8268',VINE='#5f7a3f',LEAF='#6f9a4a',OCHRE='#a8461f',FLOOR='#8a9658';
@@ -53,6 +53,16 @@ const POOL4={cx:740,cy:945,rx:190,ry:70},FALL={x0:705,x1:775,y0:546,y1:890};
 const K=1.25,MX=x=>500+(x-500)*K,MY=y=>y*K,IX=x=>500+(x-500)/K,IY=y=>y/K;
 const w4=(x,y)=>(((x-POOL4.cx)/POOL4.rx)**2+((y-POOL4.cy)/POOL4.ry)**2<1)||(x>FALL.x0&&x<FALL.x1&&y>FALL.y0&&y<FALL.y1);
 WATERFN[4]=(x,y)=>w4(IX(x),IY(y));
+/* 點瀑布後面的圖騰：眼睛眨一下、光暈亮一下（不算點錯） */
+let blinking=false;
+TAPHOOKS[4]=(x,y)=>{const ex=MX(740),ey=MY(886-41*1.16);if(Math.hypot(x-ex,(y-ey)*.9)>34)return false;
+ if(blinking)return true;const lid=document.getElementById('totemLid'),lash=document.getElementById('totemLash'),glow=document.getElementById('totemGlow');if(!lid)return false;
+ blinking=true;const R=18*.43,t0=performance.now(),D=420;
+ try{tone(660,.08,'sine',.04);setTimeout(()=>tone(880,.1,'sine',.035),140)}catch(_){}
+ const step=now=>{const k=Math.min(1,(now-t0)/D),c=k<.45?k/.45:k<.6?1:1-(k-.6)/.4;
+  lid.setAttribute('ry',(R*c).toFixed(2));if(lash)lash.setAttribute('opacity',c>.85?1:0);if(glow)glow.setAttribute('opacity',(.32+.45*Math.sin(Math.PI*k)).toFixed(2));
+  if(k<1)requestAnimationFrame(step);else{lid.setAttribute('ry','0');if(lash)lash.setAttribute('opacity',0);if(glow)glow.setAttribute('opacity','.32');blinking=false}};
+ requestAnimationFrame(step);return true};
 Object.assign(REG,{falls:{x:520,y:860,w:480,h:200},temple:{x:1000,y:880,w:860,h:260},plaza4:{x:900,y:1140,w:940,h:330},grove:{x:520,y:1080,w:440,h:640},
  camp:{x:1180,y:1520,w:680,h:600},trail:{x:520,y:1740,w:640,h:400},all4:{x:520,y:600,w:1340,h:1540},back4:{x:1000,y:600,w:860,h:300}});
 ['falls','temple','plaza4','grove','camp','trail','all4','back4'].forEach(k=>{const g=REG[k];REG[k]={x:MX(g.x),y:MY(g.y),w:g.w*K,h:g.h*K}});
@@ -91,7 +101,7 @@ function ground4(){const NS_='stroke="none"';let s=`<defs><pattern id="pave4" wi
  // 瀑布：從崖頂的溪流流出，蓋在青苔上（不從樹叢裡冒出來）
  s+=`<path d="M650,546 Q700,526 740,528 Q790,526 830,546 Q790,556 740,556 Q690,556 650,546Z" fill="#9d9684" stroke-width="2"/><path d="M672,546 Q706,534 740,535 Q776,534 808,546 Q776,551 740,551 Q704,551 672,546Z" fill="#8fc4bb" stroke-width="1.6"/>`;
  [[660,540],[820,540],[690,532],[792,532]].forEach(([x,y])=>s+=`<ellipse cx="${x}" cy="${y}" rx="11" ry="7" fill="#b0a996" stroke-width="1.5"/>`);
- s+=`<path d="M${FALL.x0-3},548 Q740,538 ${FALL.x1+3},548 L${FALL.x1},${FALL.y1} L${FALL.x0},${FALL.y1}Z" fill="#cfe6e0" stroke-width="2"/>`;
+ s+=T(740,886,1.16,totem4(true)); /* 使用者指定的圖騰：站在瀑布後面，隔著半透明水幕淡淡顯影（A） */s+=`<path d="M${FALL.x0-3},548 Q740,538 ${FALL.x1+3},548 L${FALL.x1},${FALL.y1} L${FALL.x0},${FALL.y1}Z" fill="#cfe6e0" fill-opacity=".68" stroke-width="2"/>`;
  let fl='';for(let x=FALL.x0+8;x<FALL.x1-4;x+=10)fl+=`M${x},${552+sr(2,24)} V${FALL.y1-sr(10,50)} `;s+=`<path d="${fl}" fill="none" stroke="#fbfcfb" stroke-width="3" stroke-dasharray="26 10"/>`;
  s+=`<path d="M${FALL.x0-2},549 Q740,541 ${FALL.x1+2},549" fill="none" stroke="#fbfcfb" stroke-width="4"/>`;
  // 水池
@@ -100,7 +110,7 @@ function ground4(){const NS_='stroke="none"';let s=`<defs><pattern id="pave4" wi
  s+=`<ellipse cx="${P.cx}" cy="${P.cy}" rx="${P.rx}" ry="${P.ry}" fill="#8fc4bb" stroke-width="2.2"/><ellipse cx="${P.cx-30}" cy="${P.cy-12}" rx="${P.rx*.6}" ry="${P.ry*.45}" fill="#a8d4cc" ${NS_}/>`;
  s+=`<path d="M${P.cx-60},${P.cy+20} q8,-4 16,0 q8,4 16,0 M${P.cx+50},${P.cy+6} q8,-4 16,0 q8,4 16,0 M${P.cx-120},${P.cy-6} q8,-4 16,0 q8,4 16,0" fill="none" stroke="#e6f4f2" stroke-width="1.6"/>`;
  // 瀑布下端蓋過池邊岩石，落進水面的白色水花
- s+=`<rect x="${FALL.x0}" y="852" width="${FALL.x1-FALL.x0}" height="52" fill="#cfe6e0" ${NS_}/><path d="M${FALL.x0},852 V902 M${FALL.x1},852 V902" fill="none" stroke-width="2"/>`;
+ s+=`<rect x="${FALL.x0}" y="852" width="${FALL.x1-FALL.x0}" height="52" fill="#cfe6e0" fill-opacity=".68" ${NS_}/><path d="M${FALL.x0},852 V902 M${FALL.x1},852 V902" fill="none" stroke-width="2"/>`;
  let fl2='';for(let x=FALL.x0+8;x<FALL.x1-4;x+=10)fl2+=`M${x},852 V${f(896-sr(0,10))} `;s+=`<path d="${fl2}" fill="none" stroke="#fbfcfb" stroke-width="3" stroke-dasharray="20 8"/>`;
  s+=`<ellipse cx="740" cy="904" rx="62" ry="15" fill="#fbfcfb" stroke-width="1.6"/>`+[[690,898,7],[788,898,7],[712,890,5],[770,889,6],[740,892,8]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#fbfcfb" stroke-width="1.3"/>`).join('');
  // 鋪石廣場（大神殿前）
@@ -169,6 +179,14 @@ const altar=()=>`<ellipse cx="4" cy="2" rx="60" ry="8" fill="#000" opacity=".12"
  `<path d="M-12,-52 Q0,-44 12,-52Z" fill="#7f786a"/>`+wrapAn('fire',`<path d="M0,-52 q-9,-10 0,-24 q9,12 0,24Z" fill="#f0a030"/><path d="M0,-54 q-4,-5 0,-12 q4,6 0,12Z" fill="#f6d27a" stroke="none"/>`,true)+`<circle cx="-30" cy="-56" r="5" fill="#d98c46"/><circle cx="-22" cy="-55" r="4" fill="#c4473c"/><circle cx="32" cy="-56" r="5" fill="#e8c46a"/>`;
 const stele=()=>`<ellipse cx="3" cy="1" rx="18" ry="4" fill="#000" opacity=".12" stroke="none"/><path d="M-14,0 L-14,-48 Q0,-62 14,-48 L14,0Z" fill="${STONE}"/><path d="M14,0 L19,-3 L19,-48 Q17,-54 14,-48Z" fill="${STONED}"/>`+[-44,-34,-24,-14].map((y,i)=>`<path d="M-8,${y} h4 v4 h-4z M0,${y} ${i%2?'q4,-4 8,0':'h8'} M-2,${y+6} h10" fill="none" stroke="${OCHRE}" stroke-width="1.4"/>`).join('');
 const sunDisk=()=>`<ellipse cx="3" cy="1" rx="26" ry="5" fill="#000" opacity=".12" stroke="none"/><circle cx="0" cy="-26" r="25" fill="${STONE}"/><circle cx="0" cy="-26" r="18" fill="none" stroke="${STONED}" stroke-width="1.6"/><circle cx="0" cy="-26" r="7" fill="${STONE2}"/>`+[...Array(12)].map((_,i)=>{const a=i*Math.PI/6;return `<path d="M${f(Math.cos(a)*9)},${f(-26+Math.sin(a)*9)} L${f(Math.cos(a)*16)},${f(-26+Math.sin(a)*16)}" fill="none" stroke="${OCHRE}" stroke-width="1.6"/>`}).join('')+vine(16,-44,3,.7);
+/* 瀑布旁的圖騰石像：圓形生物、中間大眼睛、微笑、頭上兩個小尖角（使用者指定造型 C） */
+const totem4=(live)=>{const R=18,cy=-38;return `<ellipse cx="3" cy="1" rx="24" ry="5" fill="#000" opacity=".12" stroke="none"/><path d="M-20,0 L-17,-12 H17 L20,0Z" fill="${STONED}"/><rect x="-14" y="-16" width="28" height="5" fill="${STONE2}"/>`+
+ `<circle ${live?'id="totemGlow"':''} cx="0" cy="${cy}" r="23" fill="#9fe0d6" opacity=".32" stroke="none"/>`+
+ `<path d="M${-R*.88},${cy-R*.45} L${-R*1.02},${cy-R*1.12} L${-R*.5},${cy-R*.87}Z M${R*.88},${cy-R*.45} L${R*1.02},${cy-R*1.12} L${R*.5},${cy-R*.87}Z" fill="${STONED}"/>`+
+ `<circle cx="0" cy="${cy}" r="${R}" fill="${STONE}"/>`+
+ `<circle cx="0" cy="${cy-R*.16}" r="${R*.42}" fill="${STONE2}"/><circle cx="0" cy="${cy-R*.16}" r="${R*.24}" fill="#4fb8b0" stroke-width="1.4"/><circle cx="0" cy="${cy-R*.16}" r="${R*.1}" fill="${OL}" stroke="none"/><circle cx="${R*.09}" cy="${cy-R*.26}" r="${R*.055}" fill="#fff" stroke="none"/>`+(live?`<ellipse id="totemLid" cx="0" cy="${cy-R*.16}" rx="${R*.43}" ry="0" fill="${STONE2}" stroke-width="1.6"/><path id="totemLash" d="M${-R*.42},${cy-R*.16} Q0,${cy-R*.02} ${R*.42},${cy-R*.16}" fill="none" stroke-width="1.6" opacity="0"/>`:'')+
+ `<path d="M${-R*.42},${cy+R*.4} Q0,${cy+R*.8} ${R*.42},${cy+R*.4}" fill="${STONED}"/>`+
+ `<path d="M-17,${cy+8} q4,-5 9,-2 q-3,5 -9,2Z M10,${cy+16} q5,-3 8,1 q-4,3 -8,-1Z M-5,${cy-17} q3,-3 7,-1 q-3,3 -7,1Z" fill="${LEAF}" stroke-width="1.2"/>`};
 const guardian=()=>`<ellipse cx="3" cy="1" rx="26" ry="5" fill="#000" opacity=".12" stroke="none"/><rect x="-22" y="-14" width="44" height="14" fill="${STONED}"/><path d="M-16,-14 Q-20,-44 -12,-58 Q0,-66 12,-58 Q20,-44 16,-14Z" fill="${STONE}"/><path d="M-10,-46 h7 M3,-46 h7" fill="none" stroke-width="2.6"/><path d="M-6,-32 Q0,-28 6,-32" fill="none" stroke-width="2"/><path d="M-14,-58 L-10,-70 L-4,-60 M14,-58 L10,-70 L4,-60" fill="${STONE2}" stroke-width="1.6"/>`+vine(10,-60,4,.7);
 const rubble=()=>`<path d="M-16,0 l4,-10 l10,-2 l4,10Z" fill="${STONE}"/><path d="M2,0 l3,-8 l9,0 l3,8Z" fill="${STONE2}"/><path d="M-6,-8 l3,-7 l8,1 l1,6Z" fill="${STONED}"/>`;
 const fern=()=>{let s='';for(let i=0;i<5;i++){const a=-150+i*30,len=sr(16,24),x2=f(Math.cos(a*Math.PI/180)*len),y2=f(Math.sin(a*Math.PI/180)*len);s+=`<path d="M0,0 Q${f(x2*.4)},${f(y2*.9)} ${x2},${y2}" fill="none" stroke="#56703f" stroke-width="2.2"/>`;for(let k=1;k<4;k++){const t=k/4;s+=`<ellipse cx="${f(x2*t)}" cy="${f(y2*t-1)}" rx="3" ry="1.6" fill="#7f9d48" stroke-width=".8"/>`}}return s};
@@ -198,7 +216,7 @@ const ex=(o={})=>({hat:pk([HELMET,HELMET,HELMET,HELMET,-1]),...o,extra:(o.extra|
 
 Object.assign(KIND,{
  pillar:{w:34,h:100,fn:()=>pillar(false)},pillarB:{w:34,h:60,fn:()=>pillar(true)},rubble:{w:34,h:16,fn:rubble},fern:{w:40,h:22,fn:fern},turtle:{w:30,h:16,fn:turtle},
- stele:{w:34,h:62,fn:stele},lantern4:{w:20,h:34,fn:lantern4},bfly:{w:20,h:40,fn:bfly},
+ stele:{w:34,h:62,fn:stele},totem4:{w:46,h:66,fn:totem4},lantern4:{w:20,h:34,fn:lantern4},bfly:{w:20,h:40,fn:bfly},
  scarabG:{w:30,h:30,fn:()=>T(0,-13,.9,DECOY.scarabG)},maskWood:{w:28,h:32,fn:()=>T(0,-15,.95,DECOY.maskWood)},scrollPlain:{w:30,h:32,fn:()=>T(0,-16,.95,DECOY.scrollPlain)},
  mirror:{w:32,h:32,fn:()=>T(0,-16,.9,DECOY.mirror)},berries:{w:22,h:24,fn:()=>T(0,-11,.9,DECOY.berries)},paintbrush:{w:28,h:30,fn:()=>T(0,-14,.95,DECOY.paintbrush)},
  watch:{w:28,h:32,fn:()=>T(0,-15,.95,DECOY.watch)},jarBroken:{w:26,h:30,fn:()=>T(0,-15,1,DECOY.jarBroken)},parrotR:{w:22,h:36,fn:()=>T(0,-18,1,DECOY.parrotR)},
@@ -211,7 +229,7 @@ Object.assign(KIND,{
  measure:{w:96,h:62,fn:()=>act(-30,0,1,ex({pose:'reach'}),'bob')+`<path d="M-18,-20 L28,-6" fill="none" stroke="#e0b44a" stroke-width="2.2"/>`+act(32,0,-1,ex({pose:'low'}),'bob')},
  hikerPair:{w:66,h:66,fn:()=>act(-12,0,1,ex({view:'back',pose:'walk',pack:true}),'bob')+act(13,0,1,ex({view:'back',pose:'walk',pack:true}),'bob')}
 });
-['torch','pillar','pillarB','stele','rubble','temple','arch','wallGlyph','altar','sunDisk','guardian','bigTree','mapTable'].forEach(k=>HEAVY.add(k));
+['totem4','torch','pillar','pillarB','stele','rubble','temple','arch','wallGlyph','altar','sunDisk','guardian','bigTree','mapTable'].forEach(k=>HEAVY.add(k));
 ['pillar','pillarB','stele','rubble','fern','wallGlyph','suitcase'].forEach(k=>OCCK.add(k));
 Object.assign(ANIM,{turtle:['bob'],bfly:['flap','float']});ALWAYS.add('bfly');
 Object.assign(POOL,{
@@ -250,6 +268,7 @@ function structures4(){
  add(1690,1380,56,56,'sunDisk',sunDisk());
  add(1160,1490,50,50,'sign',signpost('遺跡'));
  // 瀑布：薄霧、荷葉、烏龜、青蛙
+ // 圖騰石像畫在地形裡（瀑布後面），見 ground4
  for(let k=0;k<5;k++)add(sr(700,790),sr(880,905),40,30,'steam',steamPuff(),{mark:false,s:sr(1,1.5)});
  for(let k=0;k<10;k++)for(let t=0;t<40;t++){const x=POOL4.cx+sr(-POOL4.rx*.85,POOL4.rx*.85),y=POOL4.cy+sr(-POOL4.ry*.6,POOL4.ry*.7);if(canPlace(x,y,30,14,true,.6)){add(x,y,30,14,'lily',lily(),{fl:r()<.5});break}}
  [[575,958],[912,962],[620,1000]].forEach(([x,y])=>add(x,y,30,16,'turtle',turtle(),{fl:x>740}));
