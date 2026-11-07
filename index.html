@@ -15,7 +15,7 @@ html,body{margin:0;height:100%;background:#2f3a4a;color:var(--ink);font-family:"
 #fogWorld{pointer-events:none}
 .drift{transform-box:fill-box;animation:drift var(--d,24s) ease-in-out infinite}@keyframes drift{0%,100%{transform:translateX(-26px)}50%{transform:translateX(26px)}}
 .jig{transform-box:fill-box;transform-origin:50% 100%;animation:jig .5s ease-out}@keyframes jig{0%,100%{transform:translateY(0) rotate(0)}20%{transform:translateY(-7px) rotate(-6deg)}40%{transform:translateY(0) rotate(5deg) scale(1.05,.95)}60%{transform:translateY(-3px) rotate(-3deg)}80%{transform:rotate(2deg)}}
-#world svg,#fogWorld svg{position:absolute;left:-300px;top:-300px;width:3400px;height:2900px;overflow:visible}
+#world svg,#fogWorld svg{position:absolute;left:-300px;top:-300px;width:3400px;height:2400px;overflow:hidden}
 .fc{transition:opacity .9s,transform .9s;transform-box:fill-box;transform-origin:center}.fc.gone{opacity:0;transform:scale(1.35)}
 #lockWall{transition:opacity 2.2s}#lockWall.gone2{opacity:0}
 #ride{position:absolute;inset:0;z-index:6;opacity:0;pointer-events:none;transition:opacity .5s;background:#f6efe0}#ride.on{opacity:1;pointer-events:auto}#ride svg{position:absolute;inset:0;width:100%;height:100%}#ride span{position:absolute;left:50%;top:12%;transform:translateX(-50%);white-space:nowrap;font-size:16px;font-weight:700;color:#2b2420;background:rgba(255,250,240,.9);padding:8px 16px;border-radius:999px;border:2px solid #2b2420}
@@ -69,6 +69,9 @@ button{font-family:var(--ui);cursor:pointer}
 .chip.done .ok{display:grid}
 .overlay{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(43,36,32,.55);font-family:var(--ui);color:var(--ink)}
 .overlay.hide{display:none}
+#mapOv{z-index:12;isolation:isolate}#mapOv .mapc{-webkit-transform:translateZ(0);transform:translateZ(0)}
+/* 有任何面板打開時，背景場景暫停動畫，減少手機重繪與閃爍 */
+body:has(.overlay:not(.hide)) #world .an,body:has(.overlay:not(.hide)) .drift{animation-play-state:paused!important}
 .pcard{position:relative;width:100%;max-width:400px;background:var(--paper);border:2.5px solid var(--ink);border-radius:22px;box-shadow:0 5px 0 var(--ink)}
 .pbtn{width:100%;min-height:54px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--acc);color:#fff;border:2.5px solid var(--ink);border-radius:16px;box-shadow:0 4px 0 var(--ink);font-size:19px}
 .sbtn{flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--paper);color:var(--ink);border:2.5px solid var(--ink);border-radius:14px;font-size:15px;padding:0 12px}
@@ -87,12 +90,14 @@ button{font-family:var(--ui);cursor:pointer}
 .rule{margin:0;font-size:13px;color:var(--muted);text-align:center}
 #startBest{font-size:12px;color:var(--muted);text-align:center;margin-top:-4px}#startBest:empty{display:none}
 .testrow{display:flex;flex-direction:column;align-items:center;gap:6px}#testBadge{margin:0;color:var(--ok);font-size:13px}
-.mapc{background:var(--parch);padding:14px 12px 16px;display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow:auto}
+.mapc{background:var(--parch);padding:14px 12px 16px;display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto;overflow-x:hidden}
 .mhead{display:flex;justify-content:space-between;align-items:center;gap:8px}.mhead b{font-size:26px;font-weight:400;display:block}.mhead span{font-size:13px;color:var(--muted)}
 #mapSvg svg{display:block;width:100%;height:auto}
-#mapCards{display:flex;gap:10px}
-.lcard{flex:1;text-align:left;background:var(--paper);border:2.5px solid var(--ink);border-radius:16px;box-shadow:0 3px 0 var(--ink);padding:10px 12px;display:flex;flex-direction:column;gap:4px;color:var(--ink);min-height:44px}
-.lcard .top{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:16px}.lcard .top>span:first-child,.lcard .top>b:first-child{white-space:nowrap}body:has(#startOv:not(.hide)) #hud,body:has(#startOv:not(.hide)) .zpill,body:has(#startOv:not(.hide)) #tray{visibility:hidden}.lcard small{font-size:12px;color:var(--muted)}
+#mapCards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 8px;padding-top:6px}
+.lcard{position:relative;min-width:0;text-align:left;background:var(--paper);border:2.5px solid var(--ink);border-radius:16px;box-shadow:0 3px 0 var(--ink);padding:9px 8px;display:flex;flex-direction:column;gap:3px;color:var(--ink);min-height:44px}
+.lcard.here{background:#fdf0c4}.lcard .here-tag{position:absolute;top:-11px;right:6px;background:var(--gold,#f5c842);border:2px solid var(--ink);border-radius:999px;font-size:11px;font-weight:700;line-height:1;padding:3px 7px;white-space:nowrap}
+.lcard .nm{font-size:14px;letter-spacing:-.3px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lcard .stars{display:flex;gap:1px}
+.lcard .top{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:16px}.lcard .top>span:first-child,.lcard .top>b:first-child{white-space:nowrap}body:has(#startOv:not(.hide)) #hud,body:has(#startOv:not(.hide)) .zpill,body:has(#startOv:not(.hide)) #tray{visibility:hidden}body:has(#mapOv:not(.hide)) #hud,body:has(#mapOv:not(.hide)) .zpill,body:has(#mapOv:not(.hide)) #tray{visibility:hidden}.lcard small{font-size:12px;color:var(--muted)}
 .tag{font-size:12px;background:var(--gold);border:2px solid var(--ink);border-radius:999px;padding:1px 8px;white-space:nowrap}
 .stars{display:flex;gap:2px}
 .mnode{cursor:pointer}
@@ -136,7 +141,7 @@ button{font-family:var(--ui);cursor:pointer}
 <div id="stage">
     <div id="loading">小鎮建造中…</div>
     <div id="world">
-      <svg id="bgSvg" viewBox="-300 -300 3400 2900" xmlns="http://www.w3.org/2000/svg">
+      <svg id="bgSvg" viewBox="-300 -300 3400 2400" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <pattern id="cob" width="34" height="22" patternUnits="userSpaceOnUse"><rect width="34" height="22" fill="#e6d3a6"/><path d="M1,1 h15 v9 h-15z M18,1 h15 v9 h-15z M-8,12 h15 v9 h-15z M9,12 h15 v9 h-15z M26,12 h15 v9 h-15z" fill="#ead9b0" stroke="#c9b083" stroke-width="1.2"/></pattern>
           <pattern id="stp" width="10" height="12" patternUnits="userSpaceOnUse"><rect width="10" height="12" fill="#d9bf8c"/><path d="M0,11 H10" stroke="#8a6a4a" stroke-width="2"/></pattern>
@@ -152,11 +157,11 @@ button{font-family:var(--ui);cursor:pointer}
         </defs>
         <g id="bg"></g>
       </svg>
-      <svg id="fgSvg" viewBox="-300 -300 3400 2900" xmlns="http://www.w3.org/2000/svg">
+      <svg id="fgSvg" viewBox="-300 -300 3400 2400" xmlns="http://www.w3.org/2000/svg">
         <g id="itemsL" stroke="#2b2420" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></g><g id="marks"></g><g id="fx"></g>
       </svg>
     </div>
-    <div id="fogWorld"><svg id="fogSvg" viewBox="-300 -300 3400 2900" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gL" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#f4ede0"/><stop offset=".38" stop-color="#f4ede0" stop-opacity=".93"/><stop offset="1" stop-color="#f4ede0" stop-opacity="0"/></linearGradient><linearGradient id="gR" x1="1" x2="0" y1="0" y2="0"><stop offset="0" stop-color="#f4ede0"/><stop offset=".38" stop-color="#f4ede0" stop-opacity=".93"/><stop offset="1" stop-color="#f4ede0" stop-opacity="0"/></linearGradient><linearGradient id="gT" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f4ede0"/><stop offset=".38" stop-color="#f4ede0" stop-opacity=".93"/><stop offset="1" stop-color="#f4ede0" stop-opacity="0"/></linearGradient><linearGradient id="gB" x1="0" x2="0" y1="1" y2="0"><stop offset="0" stop-color="#f4ede0"/><stop offset=".38" stop-color="#f4ede0" stop-opacity=".93"/><stop offset="1" stop-color="#f4ede0" stop-opacity="0"/></linearGradient></defs><g id="fogG"></g><g id="fogCells" fill="#f1e9da" stroke="#ddd0b8" stroke-width="2.5"></g><g id="lockWall"></g></svg></div>
+    <div id="fogWorld"><svg id="fogSvg" viewBox="-300 -300 3400 2400" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gL" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#f4ede0"/><stop offset=".38" stop-color="#f4ede0" stop-opacity=".93"/><stop offset="1" stop-color="#f4ede0" stop-opacity="0"/></linearGradient><linearGradient id="gR" x1="1" x2="0" y1="0" y2="0"><stop offset="0" stop-color="#f4ede0"/><stop offset=".38" stop-color="#f4ede0" stop-opacity=".93"/><stop offset="1" stop-color="#f4ede0" stop-opacity="0"/></linearGradient><linearGradient id="gT" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f4ede0"/><stop offset=".38" stop-color="#f4ede0" stop-opacity=".93"/><stop offset="1" stop-color="#f4ede0" stop-opacity="0"/></linearGradient><linearGradient id="gB" x1="0" x2="0" y1="1" y2="0"><stop offset="0" stop-color="#f4ede0"/><stop offset=".38" stop-color="#f4ede0" stop-opacity=".93"/><stop offset="1" stop-color="#f4ede0" stop-opacity="0"/></linearGradient></defs><g id="fogG"></g><g id="fogCells" fill="#f1e9da" stroke="#ddd0b8" stroke-width="2.5"></g><g id="lockWall"></g></svg></div>
     <div class="zpill"><button id="zin" aria-label="放大"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button><i></i><button id="zout" aria-label="縮小"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/></svg></button><i></i><button id="zfit" aria-label="回到中心"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/></svg></button></div>
     <div id="toast"></div>
     <div id="ride"></div>
@@ -703,7 +708,7 @@ const REG={
  river:{x:100,y:780,w:1600,h:1000},banks:{x:180,y:1000,w:1480,h:420},forest:{x:170,y:1150,w:610,h:550},
  plaza:{x:780,y:1360,w:600,h:340},harbor:{x:560,y:1712,w:1180,h:80},
  farm:{x:1840,y:560,w:900,h:700},farmS:{x:1840,y:1260,w:900,h:430},pond:{x:2130,y:1270,w:340,h:160},
- slope:{x:550,y:588,w:1300,h:350},inn:{x:538,y:1038,w:588,h:500},onsen:{x:1188,y:1038,w:675,h:500},lake:{x:550,y:1663,w:625,h:375},station:{x:1238,y:1625,w:612,h:500}
+ slope:{x:550,y:588,w:1300,h:380},inn:{x:538,y:1038,w:620,h:620},onsen:{x:1188,y:1038,w:675,h:520},lake:{x:540,y:1640,w:690,h:480},station:{x:1215,y:1590,w:635,h:535},all3:{x:530,y:600,w:1330,h:1520}
 };
 
 
@@ -970,9 +975,9 @@ function buildStructures3(){const A=(x,y,...o)=>add(zx(x),zy(y),...o);
  A(1100,640,40,62,'snowmanBig',snowmanBig());A(1380,700,40,62,'snowmanBig',snowmanBig());
  A(800,780,50,50,'sign',signpost('滑雪場'));
  // lake: ice fishers + tent + skaters
- HOLES.forEach(([x,y],i)=>{if(i%3===0)add(x-36,y+8,30,50,'fisher',iceFisher())});
+ HOLES.forEach(([x,y],i)=>{if(i%2===0)add(x-36,y+8,30,50,'fisher',iceFisher())});
  A(1010,1385,70,56,'tent',tent('#d98c46'));
- for(let k=0;k<12;k++){const L=LAKE3,a=sr(0,Math.PI*2),q=Math.sqrt(r())*.82,x=L.cx+Math.cos(a)*L.rx*q,y=L.cy+Math.sin(a)*L.ry*q+20,kind=r()<.25?'skatePair':'skate',K=KIND[kind];
+ for(let k=0;k<16;k++){const L=LAKE3,a=sr(0,Math.PI*2),q=Math.sqrt(r())*.82,x=L.cx+Math.cos(a)*L.rx*q,y=L.cy+Math.sin(a)*L.ry*q+20,kind=r()<.25?'skatePair':'skate',K=KIND[kind];
   if(canPlace(x,y,K.w,K.h,false,.6))add(x,y,K.w,K.h,kind,K.fn(),{fl:r()<.5,sh:.6})}
  // station
  A(1180,1450,120,90,'stall',stall('cocoa'));A(1250,1640,120,90,'stall',stall('knit'));A(1470,1660,120,90,'stall',stall('cocoa'));
@@ -1045,6 +1050,7 @@ POOL.slope=[['pineS',3.2],['rockS',.8],['snowMound',1.6],['walker3',.9],['snowma
 POOL.inn=[['walker3',2.6],['snowMound',1],['pineS',.5],['barrel',.8],['crate',.6],['woodpile',.8],['toro',.6],['lamp',.4],['tubPlain',.4],['bucket',.3],['coffee',.35],['scarfBlue',.3],['mittenPlain',.3],['mittenGreen',.2],['beanieRed',.3],['beanieTeal',.2],['acorn',.3],['cat',.5],['dog',.3],['peekBarrel',.3],['peekCrate',.25],['crateStack',.3],['keyGrey',.25],['snowmanPlain',.3]];
 POOL.onsen=[['tubStack',.8],['tubPlain',1.2],['toro',.5],['rockS',1],['walker3',.8],['monkeyR',.7],['bucket',.3],['coffee',.4],['scarfBlue',.2],['keyGrey',.2]];
 POOL.lake=[['snowMound',.6],['walker3',.5],['acorn',.3],['mittenGreen',.3],['mittenPlain',.25],['beanieTeal',.3],['snowmanPlain',.4],['skisBlue',.3],['sled',.4],['rockS',.4],['pineS',.5],['scarfBlue',.25]];
+POOL.decor3=[['walker3',3],['pineS',2.2],['snowMound',1.6],['rockS',.9],['woodpile',.5],['toro',.4],['barrel',.5],['crate',.5],['crateStack',.25],['lamp',.3],['bench',.25],['snowmanBig',.35],['dog',.35],['peekBarrel',.25],['peekCrate',.2]];
 POOL.station=[['walker3',3],['crate',.6],['barrel',.6],['crateStack',.3],['lamp',.4],['bench',.3],['peekBarrel',.3],['snowMound',.6],['coffee',.45],['tubPlain',.2],['scarfBlue',.3],['mittenPlain',.3],['beanieRed',.3],['beanieTeal',.2],['skisBlue',.3],['sled',.3],['cat',.4],['dog',.3],['keyGrey',.2],['snowmanPlain',.3],['pineS',.3]];
 function scatter(regKey,pool,tries,cap,water){
  const g=REG[{harborW:'harbor',water:'river',pondW:'pond'}[regKey]||regKey];
@@ -1072,7 +1078,8 @@ const VPLAN={
   slope:{skier:6,sledKid:3,buildSnowman:2,snowballFight:2,dogWalk:1},
   inn:{chat:3,cocoaChat:2,shovel:3,dogWalk:2,handInHand:2,carryBox:2,petCat:2},
   onsen:{cocoaChat:1},
-  lake:{snowballFight:1},
+  lake:{snowballFight:1,skatePair:1},
+  all3:{chat:5,shovel:4,dogWalk:3,buildSnowman:3,snowballFight:2,cocoaChat:3,handInHand:3,carryBox:3,petDog:2,petCat:1,throwCatch:2,sledKid:1},
   station:{chat:3,cocoaChat:3,handInHand:2,carryBox:2,dogWalk:2,petDog:1,shovel:1,throwCatch:1},
   plaza:{petDog:2,chat:6,handInHand:3,benchPair:3,violin:2,flute:2,jumpRope:2,seesaw:2,throwCatch:2,dogWalk:3,sweep:2,carryBox:3,petCat:2,feedChickens:2,chase:2,stretch:1}};
  for(const [reg,plan] of Object.entries(VPLAN)){if(!SCREG[sc].includes(reg))continue;const g=REG[reg];
@@ -1095,6 +1102,7 @@ const VPLAN={
  scatter('onsen',POOL.onsen,2500,45);
  scatter('lake',POOL.lake,2500,60);
  scatter('station',POOL.station,5000,150);
+ scatter('all3',POOL.decor3,12000,260);
  }else{
  scatter('farm',POOL.farm,9000,340);
  scatter('farmS',POOL.farmS,7000,240);
@@ -1313,7 +1321,7 @@ document.addEventListener('pointerdown',e=>{if(!e.target.closest('#menu')&&!e.ta
 $('#mapBtn').onclick=()=>{closeMenu();openMap()};
 $('#startMap').onclick=()=>{ac();openMap()};
 $('#winMap').onclick=()=>{$('#winOv').classList.add('hide');openMap()};
-$('#mapClose').onclick=()=>$('#mapOv').classList.add('hide');
+$('#mapClose').onclick=()=>{$('#mapOv').classList.add('hide');mapUnder.forEach(id=>$('#'+id).classList.remove('hide'));mapUnder=[]};
 $('#trayToggle').onclick=()=>{const t=$('#tray'),c=t.classList.toggle('collapsed');$('#trayToggle').innerHTML=(c?'展開'+ICO.up:'收合'+ICO.down);$('#trayToggle').setAttribute('aria-label',c?'展開清單':'收合清單');clampV();apply()};
 $('#nextBtn').onclick=()=>{$('#winOv').classList.add('hide');const a=$('#nextBtn').dataset.act;if(a==='map'){openMap();return}
  if(a==='again'){curtain(()=>{setLevel(level);newGame()});return}
@@ -1332,9 +1340,12 @@ function buildFog(sc){const SC=SCENES[sc],X0=SC.x0,X1=SC.x1,Y1=SC.y1||H;
 }
 /* ================= scenes, world map, hay-cart ride ================= */
 const SCENES={1:{x0:0,x1:1800,c:[900,760]},2:{x0:1760,x1:2800,c:[2250,880]},3:{x0:500,x1:1875,y1:2250,c:[1188,1250]}};
-const SCREG={1:['top','meadow','village','banks','forest','plaza'],2:['farm','farmS'],3:['slope','inn','onsen','lake','station']};
+const SCREG={1:['top','meadow','village','banks','forest','plaza'],2:['farm','farmS'],3:['slope','inn','onsen','lake','station','all3']};
 let scene=0;
-function loadScene(n){if(scene===n)return;scene=n;SCN=n;sprites.length=0;occ.fill(0);
+/* 每關只畫自己用到的範圍，避免手機繪圖記憶體不夠而破圖、閃爍 */
+function sizeCanvas(n){const SC=SCENES[n],x=SC.x0-300,y=-300,w=SC.x1-SC.x0+600,h=(SC.y1||H)+600;
+ ['bgSvg','fgSvg','fogSvg'].forEach(id=>{const e=document.getElementById(id);e.setAttribute('viewBox',`${x} ${y} ${w} ${h}`);Object.assign(e.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'})})}
+function loadScene(n){if(scene===n)return;scene=n;SCN=n;sizeCanvas(n);sprites.length=0;occ.fill(0);
  for(let j=0;j<GR;j++)for(let i=0;i<GC;i++)wat[j*GC+i]=isWater(i*CELL+CELL/2,j*CELL+CELL/2)?1:0;rng=mulberry32(77+n*101);
  items=[];itemsL.innerHTML='';
  $('#bg').innerHTML=buildScene(n);
@@ -1447,14 +1458,16 @@ function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,
  $('#mapSvg').innerHTML=g;
  $('#mapSub').textContent=U>1?`已走過 ${U} 個地方，下一段路要拿到 ${NEED_STARS} 顆星才會出現`:`這一關拿到 ${NEED_STARS} 顆星，地圖上就會出現新的路`;
  let cards='';for(let n=1;n<=U;n++){if(!SCENES[n])continue;const m=MAPNODES.find(x=>x.n===n),b=bestOf(n),st_=starsOf(n);
-  cards+=`<button class="lcard" data-n="${n}"><span class="top"><span>${m.name}</span>${n===level?'<span class="tag">你在這裡</span>':''}</span><span class="stars">${[0,1,2].map(k=>starSvg(k<st_,18)).join('')}</span><small>${b?'最佳 '+fmt(b):'還沒完成'}</small></button>`}
+  cards+=`<button class="lcard${n===level?' here':''}" data-n="${n}" aria-label="${m.name}${n===level?'（你在這裡）':''}">${n===level?'<span class="here-tag">你在這裡</span>':''}<span class="nm">${m.name}</span><span class="stars">${[0,1,2].map(k=>starSvg(k<st_,16)).join('')}</span><small>${b?'最佳 '+fmt(b):'還沒完成'}</small></button>`}
  $('#mapCards').innerHTML=cards;
  document.querySelectorAll('#mapSvg .mnode,#mapCards .lcard').forEach(el=>el.onclick=()=>goLevel(+el.dataset.n));
 }
-function goLevel(n){$('#mapOv').classList.add('hide');if(n===level&&scene===n&&st.running)return;st.running=false;clearInterval(timer);$('#winOv').classList.add('hide');
+function goLevel(n){$('#mapOv').classList.add('hide');const under=mapUnder;mapUnder=[];if(n===level&&scene===n&&!st.running&&under.includes('startOv')){$('#startOv').classList.remove('hide');return}if(n===level&&scene===n&&st.running)return;st.running=false;clearInterval(timer);$('#winOv').classList.add('hide');
  if(scene!==n){curtain(()=>{loadScene(n);setLevel(n);measure();const c=LEVELS[n].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base};clampV();apply();$('#startOv').classList.remove('hide')},'前往'+MAPNODES.find(m=>m.n===n).name+'⋯')}
  else{setLevel(n);$('#startOv').classList.remove('hide')}}
-function openMap(){renderMap();$('#mapOv').classList.remove('hide')}
+/* 地圖打開時先把底下的開始／過關面板收起來，關地圖再放回去（避免 iPhone 疊圖錯亂） */
+let mapUnder=[];
+function openMap(){renderMap();mapUnder=['startOv','winOv'].filter(id=>!$('#'+id).classList.contains('hide'));mapUnder.forEach(id=>$('#'+id).classList.add('hide'));$('#mapOv').classList.remove('hide')}
 /* ---- hay cart ride ---- */
 function horseCart(){
  const legs=[[52,0],[60,.2],[80,.1],[88,.3]].map(([x,d])=>`<g class="gallop" style="animation-delay:-${d}s">${limb(`M${x},-34 L${x+2},-17 L${x},0`,'#8a4e2e',4.5)}</g>`).join('');
