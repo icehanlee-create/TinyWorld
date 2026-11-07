@@ -52,6 +52,8 @@ button{font-family:var(--ui);cursor:pointer}
 .zpill i{display:block;height:2px;background:var(--ink);opacity:.15}
 #toast{position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 90px);transform:translate(-50%,-8px);background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:18px;font-size:14px;line-height:1.5;text-align:center;opacity:0;transition:.25s;pointer-events:none;white-space:pre-line;width:max-content;max-width:min(94%,360px);z-index:7}
 #toast.show{opacity:1;transform:translate(-50%,0)}
+#trayTip{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translate(-50%,6px);background:var(--ink);color:var(--paper);padding:7px 14px;border-radius:14px;font-size:15px;line-height:1.35;white-space:nowrap;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:8}
+#trayTip.show{opacity:1;transform:translate(-50%,0)}#trayTip::after{content:'';position:absolute;top:100%;left:var(--ax,50%);margin-left:-7px;border:7px solid transparent;border-top-color:var(--ink)}
 #tray{position:absolute;left:0;right:0;bottom:0;z-index:7;background:var(--parch);border-top:2.5px solid var(--ink);border-radius:22px 22px 0 0;padding:10px 0 calc(env(safe-area-inset-bottom) + 10px);display:flex;flex-direction:column;gap:8px;color:var(--ink)}
 .thead,.handle{display:none!important}
 .handle{width:44px;height:5px;border-radius:3px;background:var(--ink);opacity:.3;align-self:center}
@@ -1225,8 +1227,12 @@ function sampleIn(reg,t){const g=REG[reg];
  for(let i=0;i<60;i++){const x=rnd(g.x+10,g.x+g.w-10),y=rnd(g.y+10,g.y+g.h-10);
   const water=isWater(x,y);
   if(t.id==='fish'){if(reg==='fishstall')return{x,y};if(water&&isWater(x-16,y)&&isWater(x+16,y))return{x,y}}
-  else if(!water)return{x,y};}
+  else if(!water)return{x,y};
+  else if(t.float&&canFloat(x,y,t))return{x,y,float:true};}
  return null}
+/* 少量物件可以漂在岸邊淺水：每局最多 3 個、同一種最多 1 個 */
+function canFloat(x,y,t){if(Math.random()>.12)return false;if(items.filter(o=>o.float).length>=3||items.some(o=>o.float&&o.t.id===t.id))return false;
+ for(let k=0;k<8;k++){const a=k*Math.PI/4;if(!isWater(x+Math.cos(a)*55,y+Math.sin(a)*55))return isWater(x-14,y)&&isWater(x+14,y)&&isWater(x,y+10)}return false}
 function frontBlocked(sp){return sprites.some(o=>o!==sp&&o.y>sp.y&&o.y-o.h*.9<sp.y&&Math.abs(o.x-sp.x)<(o.w+sp.w)/2.2)}
 function placeItems(){
  items=[];
@@ -1250,7 +1256,7 @@ function placeItems(){
     p=c;
    }
    if(!p)p=sampleIn(regs[0],t)||{x:500,y:1500};
-   items.push({t,x:p.x,y:p.y,occ:p.occ||null,r:t.r,rot:rnd(-t.rot,t.rot),sc:rnd(.85,1.02),fl:Math.random()<.5,found:false});
+   items.push({t,x:p.x,y:p.y,float:!!p.float,occ:p.occ||null,r:t.r,rot:rnd(-t.rot,t.rot),sc:rnd(.85,1.02),fl:Math.random()<.5,found:false});
   }
  }
 }
@@ -1287,7 +1293,7 @@ const STORIES={
     need:'橘貓爬到石柱上下不來了⋯要找梯子！好像有個隊員扛著梯子。',
     got:'隊員：梯子借你，慢慢爬！',
     ok:'把橘貓抱下來了！牠乖乖跟著你。快去告訴隊長！'},
- 5:{title:'纏住的小海豹',giver:()=>act(0,0,1,{view:'fq',pose:'reach',hair:'#e8e4dc',hs:3,shirt:'#3b5a8a',pants:'#5a4a3a',mood:2}),who:'燈塔奶奶',
+ 5:{title:'纏住的小海豹',giver:()=>act(0,0,1,{view:'fq',pose:'reach',hat:-1,hair:'#e8e4dc',hs:3,shirt:'#3b5a8a',pants:'#5a4a3a',mood:2}),who:'燈塔奶奶',
     target:()=>`<path d="M-20,0 Q-22,-12 -10,-16 Q4,-20 14,-12 Q20,-6 16,0Z" fill="#8f9aa6"/><path d="M-20,0 Q-22,-12 -10,-16" fill="none"/>`+`<circle cx="8" cy="-20" r="9" fill="#a3adb8"/><circle cx="5" cy="-22" r="1.6" fill="${OL}" stroke="none"/><circle cx="11" cy="-22" r="1.6" fill="${OL}" stroke="none"/><ellipse cx="8" cy="-17.5" rx="2" ry="1.4" fill="${OL}" stroke="none"/><path d="M-1,-26 Q-2,-35 8,-38 Q18,-35 17,-26 Q8,-23 -1,-26Z" fill="#f5c842"/><path d="M0,-29 Q8,-26.5 16,-29" fill="none" stroke="#fbf6ea" stroke-width="2"/><path d="M5,-36 l2,-2" fill="none" stroke="#fff" stroke-width="1.4"/>`+`<path d="M-22,-4 L14,-16 M-18,2 L18,-10 M-12,-14 L-4,4 M-2,-18 L6,2 M8,-14 L14,4 M-20,-10 L18,0" fill="none" stroke="#6f8f8a" stroke-width="1.6"/><circle cx="-14" cy="-14" r="3" fill="#f0802a" stroke-width="1.2"/>`,tw:44,th:38,
     helper:()=>act(0,0,1,{view:'side',pose:'hold',hat:1,shirt:'#3b5a8a',pants:'#3d3833',beard:true,extra:`<g transform="translate(16,-20) rotate(-30)"><path d="M0,0 L16,-3 M0,0 L16,3" fill="none" stroke="#6f7f8f" stroke-width="3"/><circle cx="-3" cy="-3" r="3.2" fill="none" stroke="#d8413a" stroke-width="2.2"/><circle cx="-3" cy="3" r="3.2" fill="none" stroke="#d8413a" stroke-width="2.2"/></g>`}),hw:48,hh:64,
     ask:'燈塔奶奶：我的小海豹不見了！牠戴著一頂黃色小水手帽。',
@@ -1352,7 +1358,7 @@ function foundClover(c){c.found=true;if(c.kind==='story'){st.clover=true;colClov
 function renderItems(){
  itemsL.innerHTML=items.map((it,i)=>{
   const sx=it.fl&&it.t.id!=='letter'?-it.sc:it.sc;
-  let s=`<g class="item" data-i="${i}" transform="translate(${f(it.x)},${f(it.y)}) rotate(${f(it.rot)}) scale(${f(sx)},${f(it.sc)})"><g class="inner">${it.t.id==='fish'?'':`<ellipse cx="2" cy="${f(it.r*.75)}" rx="${f(it.r*.9)}" ry="3" fill="#000" opacity=".18" stroke="none"/>`}${ART[it.t.id]}</g></g>`;
+  let s=`<g class="item" data-i="${i}" transform="translate(${f(it.x)},${f(it.y)}) rotate(${f(it.rot)}) scale(${f(sx)},${f(it.sc)})"><g class="inner">${it.t.id==='fish'?'':it.float?`<ellipse cx="0" cy="${f(it.r*.55)}" rx="${f(it.r*1.25)}" ry="4" fill="#e6faf6" opacity=".85" stroke="#fff" stroke-width="1.2"/><path d="M${f(-it.r*1.6)},${f(it.r*.7)} q4,-3 8,0 M${f(it.r*1.0)},${f(it.r*.8)} q4,-3 8,0" fill="none" stroke="#fff" stroke-width="1.4"/>`:`<ellipse cx="2" cy="${f(it.r*.75)}" rx="${f(it.r*.9)}" ry="3" fill="#000" opacity=".18" stroke="none"/>`}${ART[it.t.id]}</g></g>`;
   if(it.occ)s+=`<g class="still">${it.occ.svg}</g>`;
   return s}).join('');
  [clovers.story,clovers.bonus].forEach(c=>{if(!c)return;itemsL.insertAdjacentHTML('afterbegin',`<g id="cloverEl-${c.kind}" class="item" style="display:none" transform="translate(${f(c.x)},${f(c.y)}) rotate(${f(c.rot)})"><g class="inner">${CLOVER}</g></g>`);
@@ -1366,7 +1372,7 @@ function renderItems(){
 /* ================= view ================= */
 const stage=$('#stage'),world=$('#world');
 let SW=1,SH=1,base=.6,minS=.3,maxS=2,view={s:.6,tx:0,ty:0};
-function measure(){const r_=stage.getBoundingClientRect();SW=r_.width;SH=r_.height;base=Math.min(SW,SH*.8)/640;minS=Math.min(base,Math.max(SW/900,SH/1300));maxS=base*3.2}
+function measure(){const r_=stage.getBoundingClientRect();SW=r_.width;SH=r_.height;base=Math.min(SW,SH*.8)/640*1.2;minS=base;maxS=base*2.8} /* 開場比原本大 1.2 倍；最多只能縮回開場大小，不能拉遠看全圖 */
 function clampV(){view.s=Math.max(minS,Math.min(maxS,view.s));const s_=view.s,SC=SCENES[scene]||SCENES[1];
  view.tx=Math.min(-(SC.x0-EX)*s_,Math.max(SW-(SC.x1+EX)*s_,view.tx));const P=pads();view.ty=Math.min(EX*s_+P.t,Math.max(SH-((SC.y1||H)+EX)*s_-P.b,view.ty))}
 function pads(){const hd=document.getElementById('hud'),tr=document.getElementById('tray');return{t:hd?hd.offsetTop+hd.offsetHeight+6:0,b:tr?tr.offsetHeight:0}}
@@ -1417,7 +1423,12 @@ const toastEl=$('#toast');let toastT;function toast(m,ms=1500){toastEl.textConte
 const icon=id=>`<svg viewBox="-21 -21 42 42"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${ART[id]}</g></svg>`;
 const leftOf=id=>items.filter(it=>!it.found&&(!id||it.t.id===id)).length;
 function renderTray(){$('#chips').innerHTML=TYPES.map(t=>`<button class="chip" data-t="${t.id}" aria-label="${t.name}"><span class="ic">${icon(t.id)}<span class="ok">✓</span></span><span class="dots"><i></i><i></i><i></i><i></i></span></button>`).join('');
- $('#chips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{const t=TYPES.find(x=>x.id===b.dataset.t),n=leftOf(t.id);toast(n?`${t.name}：還有 ${n} 個`:`${t.name}：全部找到了 ✓`)})}
+ $('#chips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{const t=TYPES.find(x=>x.id===b.dataset.t),n=leftOf(t.id);trayTip(b,n?`${t.name}：還有 ${n} 個`:`${t.name}：全部找到了 ✓`)})}
+/* 點下方列的物件：說明直接顯示在那個物件正上方，不跑到畫面最上面 */
+let trayTipT;function trayTip(chip,msg){const tray=$('#tray');let el=document.getElementById('trayTip');if(!el){el=document.createElement('div');el.id='trayTip';tray.appendChild(el)}
+ el.textContent=msg;const tr=tray.getBoundingClientRect(),cr=chip.getBoundingClientRect(),cx=cr.left+cr.width/2-tr.left;el.style.left='0px';el.classList.add('show');
+ const w=el.offsetWidth,L=Math.max(w/2+8,Math.min(tr.width-w/2-8,cx));el.style.left=L+'px';el.style.setProperty('--ax',(cx-L+w/2)+'px');
+ clearTimeout(trayTipT);trayTipT=setTimeout(()=>el.classList.remove('show'),1800)}
 function updateCounts(bump){const tot=TYPES.length*4,got=tot-leftOf();$('#foundN').textContent=got;$('#foundTxt').textContent=`${got} / ${tot}`;$('#trayProg').textContent=`${got}/${tot}`;
  const C=2*Math.PI*18;$('#ringArc').setAttribute('stroke-dasharray',`${f(C*got/tot)} ${f(C)}`);
  TYPES.forEach(t=>{const n=leftOf(t.id),c=$(`.chip[data-t="${t.id}"]`);if(!c)return;if(n===0&&!c.classList.contains('done'))$('#chips').appendChild(c);c.classList.toggle('done',n===0);c.querySelectorAll('.dots i').forEach((d,k)=>d.classList.toggle('on',k<4-n))});
@@ -1432,7 +1443,7 @@ const LEVELS=[null,{n:1,title:'第 1 關．奇幻小鎮',desc:'城堡山腳下�
  {n:2,title:'第 2 關．東方農莊',desc:'乾草車載你來到農莊市集：6 種老朋友加上 <b>6 種農莊新東西</b>。',types:TYPES2,c:[2250,880]},
  {n:3,title:'第 3 關．雪山溫泉村',desc:'纜車載你上山：4 種老朋友加上 <b>8 種雪山新東西</b>。',types:TYPES3,c:[1360,1562]},
  {n:4,title:'第 4 關．森林古代遺跡',desc:'沿著森林步道走進遺跡：2 種老朋友加上 <b>10 種遺跡新東西</b>。',types:null,file:'level4.js',c:[1360,1562]},
- {n:5,title:'第 5 關．海島港口',desc:'搭小渡輪來到海島：2 種老朋友加上 <b>10 種海邊新東西</b>。',types:null,file:'level5.js',c:[1300,1500]}];
+ {n:5,title:'第 5 關．海島港口',desc:'搭小渡輪來到海島：2 種老朋友加上 <b>10 種海邊新東西</b>。',types:null,file:'level5.js',c:[1300,1460]}];
 /* 過場只在第一次前往時播放；記錄已看過的過場（第一次更新時，先把原本已解鎖的關卡記成看過） */
 let RODE=[];try{const v=localStorage.getItem('townhunt-rode');RODE=v?JSON.parse(v):[...Array(prog.unlocked)].map((_,i)=>i+1);if(!v)localStorage.setItem('townhunt-rode',JSON.stringify(RODE))}catch(_){}
 const rodeHas=n=>n<=1||RODE.includes(n),rodeAdd=n=>{if(!RODE.includes(n)){RODE.push(n);try{localStorage.setItem('townhunt-rode',JSON.stringify(RODE))}catch(_){}}};
@@ -1561,7 +1572,7 @@ function buildFog(sc){const SC=SCENES[sc],X0=SC.x0,X1=SC.x1,Y1=SC.y1||H;
  document.getElementById('fogG').innerHTML=g;document.getElementById('lockWall').innerHTML='';
 }
 /* ================= scenes, world map, hay-cart ride ================= */
-const SCENES={1:{x0:0,x1:1800,c:[900,760]},2:{x0:1760,x1:2800,c:[2250,880]},3:{x0:500,x1:2219,y1:2812,c:[1360,1562]},4:{x0:500,x1:2219,y1:2812,c:[1360,1562]},5:{x0:500,x1:2219,y1:2812,c:[1300,1500]}};
+const SCENES={1:{x0:0,x1:1800,c:[900,760]},2:{x0:1760,x1:2800,c:[2250,880]},3:{x0:500,x1:2219,y1:2812,c:[1360,1562]},4:{x0:500,x1:2219,y1:2812,c:[1360,1562]},5:{x0:500,x1:2219,y1:2520,c:[1300,1460]}};
 const SCREG={1:['top','meadow','village','banks','forest','plaza'],2:['farm','farmS'],3:['slope','inn','onsen','lake','station','all3'],4:[],5:[]};
 let scene=0;
 /* 每關只畫自己用到的範圍，避免手機繪圖記憶體不夠而破圖、閃爍 */
