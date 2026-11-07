@@ -722,7 +722,7 @@ function canPlace(x,y,w,h,water,sh){const[a,b,c,d]=cellsOf(x,y,w,h,sh);if(a<0||b
 function mark(x,y,w,h,sh=.8){const[a,b,c,d]=cellsOf(x,y,w,h,sh);for(let j=Math.max(0,b);j<=Math.min(GR-1,d);j++)for(let i=Math.max(0,a);i<=Math.min(GC-1,c);i++)occ[j*GC+i]=1}
 
 const sprites=[];
-const ANIM={steam:['steam'],monkeyR:['bob','wig'],monkeyW:['bob'],bather:['bob'],cow:['bob','wig'],pig:['bob','wig'],scarecrow:['sway'],cat:['bob','wig','sway'],dog:['hop','bob','wig'],chicken:['peck','peck','bob'],sheep:['bob','sway'],frog:['hop'],owl:['wig','bob'],
+const ANIM={capyW:['bob'],capyR:['bob','wig'],monkeyFam:['bob'],monkeyFamW:['bob'],steam:['steam'],monkeyR:['bob','wig'],monkeyW:['bob'],bather:['bob'],cow:['bob','wig'],pig:['bob','wig'],scarecrow:['sway'],cat:['bob','wig','sway'],dog:['hop','bob','wig'],chicken:['peck','peck','bob'],sheep:['bob','sway'],frog:['hop'],owl:['wig','bob'],
  swan:['rock'],boat:['rock'],sail:['rock'],balloon:['float'],bird:['flap'],koi:['swim'],seaFish:['swim']};
 const ALWAYS=new Set(['steam','bather','swan','boat','sail','balloon','bird']);
 const DUR={steam:[3,5],swing:[1.8,2.8],bob:[1.6,2.6],sway:[2.2,3.4],hop:[2.4,4],wig:[3,5],peck:[1.8,3],rock:[2.6,4],float:[4,6],flap:[.5,.8],swim:[2.5,4]};
@@ -902,8 +902,17 @@ function cabinSVG(c,ppl){let g=`<g><animateTransform attributeName="transform" t
  if(ppl)[[-9,'#d98c46'],[9,'#6fa8a0']].forEach(([x,hc])=>g+=`<circle cx="${x}" cy="26" r="4.6" fill="${pk(SKIN)}" stroke-width="1.1"/><path d="M${x-4.8},24.5 Q${x},16 ${x+4.8},24.5Z" fill="${hc}" stroke-width="1"/><circle cx="${x}" cy="18.5" r="1.6" fill="#fbf6ea" stroke-width=".8"/>`);
  return g+'</g>'}
 const steamPuff=()=>`<g fill="#ffffff" opacity=".8" stroke="none"><circle cx="-8" cy="-10" r="9"/><circle cx="4" cy="-17" r="11"/><circle cx="13" cy="-8" r="7"/></g>`;
-const monkey=()=>`<ellipse cx="0" cy="-9" rx="10" ry="9" fill="#b9a48a"/><circle cx="0" cy="-22" r="8" fill="#b9a48a"/><ellipse cx="0" cy="-21" rx="5.5" ry="5" fill="#e8a0a0"/><g fill="${OL}" stroke="none"><circle cx="-2" cy="-22.5" r="1"/><circle cx="2" cy="-22.5" r="1"/></g><path d="M-1.5,-18.5 q1.5,1 3,0" fill="none" stroke-width="1"/>`;
+/* 岸上的雪猴有尾巴（泡在水裡的看不到尾巴） */
+const monkey=()=>limb('M-6,-4 Q-17,-3 -18,-11 Q-18,-16 -14,-17','#a8937a',2.8)+`<ellipse cx="0" cy="-9" rx="10" ry="9" fill="#b9a48a"/><circle cx="0" cy="-22" r="8" fill="#b9a48a"/><ellipse cx="0" cy="-21" rx="5.5" ry="5" fill="#e8a0a0"/><g fill="${OL}" stroke="none"><circle cx="-2" cy="-22.5" r="1"/><circle cx="2" cy="-22.5" r="1"/></g><path d="M-1.5,-18.5 q1.5,1 3,0" fill="none" stroke-width="1"/>`;
 const monkeyW=()=>`<circle cx="0" cy="-8" r="8" fill="#b9a48a"/><ellipse cx="0" cy="-7" rx="5.5" ry="5" fill="#e8a0a0"/><g fill="${OL}" stroke="none"><circle cx="-2" cy="-8.5" r="1"/><circle cx="2" cy="-8.5" r="1"/></g><path d="M-12,-1 Q0,4 12,-1 L12,3 L-12,3Z" fill="#9fd3cf" stroke="none"/><ellipse cx="0" cy="0" rx="13" ry="3.5" fill="none" stroke="#e6f4f2" stroke-width="1.6"/>`;
+const waterLine=(w=13)=>`<path d="M-${w},-1 Q0,4 ${w},-1 L${w},3 L-${w},3Z" fill="#9fd3cf" stroke="none"/><ellipse cx="0" cy="0" rx="${w+1}" ry="3.5" fill="none" stroke="#e6f4f2" stroke-width="1.6"/>`;
+const capyHead=()=>`<path d="M-14,2 Q-17,-11 -9,-16 Q3,-21 13,-15 Q19,-11 18,-3 Q17,2 10,2Z" fill="#a9784f"/><ellipse cx="-8" cy="-16" rx="3.2" ry="2.4" fill="#7f5638"/><path d="M0,-11 q2.4,-2 4.8,0" fill="none" stroke-width="1.5"/><ellipse cx="15.5" cy="-9" rx="1.2" ry=".9" fill="${OL}" stroke="none"/><path d="M12,-3 q2.5,1.2 5,0" fill="none" stroke-width="1.1"/><ellipse cx="-2" cy="-6" rx="3" ry="1.8" fill="#e8a0a0" opacity=".5" stroke="none"/>`;
+const yuzu=(x,y)=>`<circle cx="${x}" cy="${y}" r="4.6" fill="#f2b632" stroke-width="1.4"/><path d="M${x},${y-4.6} l1.6,-2.4" fill="none" stroke="#6f9a4a" stroke-width="1.6"/>`;
+/* 原創水豚（泡湯／在池邊），不是任何角色 */
+const capyW=()=>T(0,0,1.25,capyHead()+(r()<.6?yuzu(-1,-21):`<path d="M-7,-20 h12 l-1,3 h-10Z" fill="#fbf6ea" stroke-width="1"/>`))+waterLine(19);
+const capyR=()=>`<ellipse cx="2" cy="1" rx="24" ry="4" fill="#9fb1b8" opacity=".35" stroke="none"/><path d="M-14,0 v-5 M-6,0 v-5 M8,0 v-5 M15,0 v-5" fill="none" stroke-width="2.8"/><path d="M-24,-4 Q-26,-24 -6,-26 Q6,-27 12,-22 L12,-8 Q12,-4 8,-4Z" fill="#a9784f"/>`+T(12,-10,1.05,capyHead())+(r()<.4?yuzu(10,-32):'');
+const monkeyFam=()=>T(-11,0,1,monkey())+T(11,0,1,monkey(),true)+T(0,2,.58,monkey())+wrapAn('float',heart(0,-38,'#e8a0a0'),true);
+const monkeyFamW=()=>T(-12,0,1,monkeyW())+T(12,0,1,monkeyW(),true)+T(0,1,.6,monkeyW());
 const bather=()=>`<g transform="translate(0,4)">${peekHead(0,-6,.55,false)}</g><path d="M-6,-21 h12 l-1,4 h-10Z" fill="#fbf6ea" stroke-width="1"/><path d="M-14,0 Q0,5 14,0 L14,5 L-14,5Z" fill="#9fd3cf" stroke="none"/><ellipse cx="0" cy="0" rx="15" ry="4" fill="none" stroke="#e6f4f2" stroke-width="1.6"/>`;
 const woodpile=()=>`<rect x="-22" y="-20" width="44" height="20" fill="#a8703f"/>`+[[-15,-5],[-5,-5],[5,-5],[15,-5],[-10,-14],[0,-14],[10,-14]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="5" fill="#d6a868" stroke-width="1.4"/><circle cx="${x}" cy="${y}" r="1.6" fill="none" stroke-width="1"/>`).join('')+`<path d="M-24,-18 Q-10,-28 2,-21 Q14,-28 24,-18 Q10,-16 -24,-18Z" fill="${SNOW}"/>`;
 const toro=()=>`<rect x="-9" y="-8" width="18" height="8" fill="#b0a996"/><rect x="-3" y="-24" width="6" height="16" fill="#b0a996"/><rect x="-10" y="-36" width="20" height="12" fill="#c6bfae"/><rect x="-5" y="-33" width="10" height="7" fill="#f6d27a"/><path d="M-15,-36 L0,-46 L15,-36Z" fill="#9d9684"/><path d="M-13,-38 Q0,-50 13,-38 Q0,-41 -13,-38Z" fill="${SNOW}"/><circle cy="-48" r="2.4" fill="#9d9684"/>`;
@@ -914,11 +923,31 @@ const snowMound=()=>`<path d="M-18,0 Q-14,-10 -4,-9 Q2,-15 10,-9 Q18,-8 18,0Z" f
 function snowmanBig(){const sc=pk(['#c4473c','#5a86b0','#e0b44a','#6f9a4a']);return `<ellipse cx="0" cy="0" rx="20" ry="5" fill="#c9d6dc" stroke="none" opacity=".6"/><circle cy="-15" r="16" fill="#fbf7ef"/><circle cy="-40" r="11" fill="#fbf7ef"/><path d="M-10,-31 Q0,-26 10,-31 L10,-27 Q0,-22 -10,-27Z" fill="${sc}"/><path d="M4,-28 L8,-14 L3,-14Z" fill="${sc}"/>`+(r()<.5?`<path d="M-10,-47 Q0,-62 10,-47Z" fill="${sc}"/><circle cy="-58" r="3" fill="#fbf6ea"/>`:`<path d="M-14,-24 l-14,-12 M14,-24 l13,-10" fill="none" stroke="#7a5235" stroke-width="2.2"/>`)+`<path d="M0,-40 l9,2 l-9,2Z" fill="#e07a32" stroke-width="1.2"/><g fill="${OL}" stroke="none"><circle cx="-4" cy="-43" r="1.4"/><circle cx="3" cy="-43" r="1.4"/><circle cy="-18" r="1.6"/><circle cy="-10" r="1.6"/></g>`}
 const skiBoard=c=>`<path d="M-18,1 L16,1 Q22,1 22,-4" fill="none" stroke="${OL}" stroke-width="5"/><path d="M-18,1 L16,1 Q22,1 22,-4" fill="none" stroke="${c}" stroke-width="2.6"/>`;
 const sledBig=()=>T(0,-6,1.6,DECOY.sled);
+const BOARDC=['#c4473c','#2b2420','#5a86b0','#e0b44a','#6f9a4a','#9a6fa8','#d98c46'];
+const snowboard=(c,st)=>`<rect x="-23" y="-2" width="46" height="7" rx="3.5" fill="${c}"/><path d="M-19,1.5 H19" fill="none" stroke="${st}" stroke-width="1.6"/><rect x="-14" y="-4" width="7" height="5" rx="1.5" fill="#3d3833" stroke-width="1"/><rect x="6" y="-4" width="7" height="5" rx="1.5" fill="#3d3833" stroke-width="1"/>`;
+/* 單板：一般是壓雪轉彎濺起雪花，約三成在跳台騰空 */
+function boarder(down){const c=pk(BOARDC),st=pk(['#fbf6ea','#f5c842','#6fd0c0']),air=r()<.3,dir=r()<.5?1:-1;
+ const gog=r()<.65?`<path d="M-15,-35 Q-6,-38 3,-34" fill="none" stroke="${OL}" stroke-width="2.4"/><rect x="2" y="-37" width="14" height="8" rx="4" fill="${pk(['#f5c842','#6fd0c0','#e86a6a','#9fb7e8'])}" stroke-width="1.5"/><path d="M5,-35 h4" fill="none" stroke="#fff" stroke-width="1.2"/>`:'';
+ const rider=act(1,-2,1,{pose:pk(['reach','up','run','up2']),legs:'walk',hat:pk([0,0,4,-1,0]),extra:gog});
+ if(air){const body=`<g transform="translate(0,-26) rotate(${down?pk([14,20]):pk([-22,-14,16])})">`+snowboard(c,st)+rider+`</g>`;
+  return `<ellipse cx="0" cy="0" rx="20" ry="4" fill="#c9d6dc" stroke="none" opacity=".7"/><path d="M-30,-6 q-6,-8 -2,-16 M-36,-2 q-8,-10 -4,-20" fill="none" stroke="#b7c5cc" stroke-width="1.8"/>`+wrapAn('float',body,true)}
+ const spray=`<g fill="${SNOW}" stroke-width="1.3"><circle cx="-27" cy="-3" r="5.5"/><circle cx="-35" cy="-9" r="4.5"/><circle cx="-40" cy="-1" r="3.6"/><circle cx="-31" cy="-15" r="3"/></g><path d="M-48,4 q14,-4 26,0" fill="none" stroke="#b7c5cc" stroke-width="2"/>`;
+ return spray+wrapAn('bob',`<g transform="rotate(${down?pk([12,16,20]):pk([-12,-8,8])})">`+snowboard(c,st)+rider+`</g>`,true)}
 function iceFisher(){return act(0,-4,1,{pose:'sit',hat:0,extra:`<path d="M6,-20 L30,-38" fill="none" stroke="#7a5235" stroke-width="2"/><path d="M30,-38 L36,4" fill="none" stroke-width=".9"/>`},'bob')+`<rect x="-9" y="-5" width="16" height="5" rx="1.5" fill="#a8703f"/><path d="M-6,0 v4 M4,0 v4" fill="none" stroke-width="1.6"/>`}
 function liftSVG(dx,dy){let g=`<path d="M0,-58 L${dx},${dy-58}" fill="none" stroke-width="1.6"/>`;
  [0,.5,1].forEach(t=>{const x=f(dx*t),y=f(dy*t);g+=`<path d="M${x},${y} V${f(y-58)} M${f(x-8)},${f(y-58)} H${f(+x+8)}" fill="none" stroke="#6a7488" stroke-width="4"/>`});
  [.18,.36,.66,.84].forEach(t=>{const x=dx*t,y=dy*t-58;g+=`<g transform="translate(${f(x)},${f(y)})"><path d="M0,0 V16" fill="none" stroke-width="1.4"/><path d="M-9,26 H9 M-9,16 V26" fill="none" stroke="#5a5f64" stroke-width="2.4"/>`+(r()<.7?`<g transform="translate(0,26) scale(.55)">${kid({pose:'sit',hat:0})}</g>`:'')+`</g>`});
  return g}
+ // 山腳到山頂的纜車（遠景，所以畫得小；車廂沿纜繩上下移動）
+function liftUp(x0,y0,x1,y1){const dx=x1-x0,dy=y1-y0;let g=`<g stroke-width="1.6">`;
+  g+=`<path d="M${x0},${y0-22} L${x1},${y1-22} M${x0+9},${y0-20} L${x1+9},${y1-20}" fill="none" stroke-width="1.3"/>`;
+  [.3,.62].forEach(t=>{const x=f(x0+dx*t),y=f(y0+dy*t);g+=`<path d="M${x},${f(+y-21)} V${f(+y+6)} M${f(x-6)},${f(+y-21)} H${f(+x+15)}" fill="none" stroke="#6a7488" stroke-width="3"/>`});
+  const hut=(x,y,c)=>`<g transform="translate(${x},${y})"><rect x="-16" y="-20" width="32" height="20" fill="#ddd5c6"/><path d="M-19,-20 L19,-20 L14,-29 L-14,-29Z" fill="${c}"/><path d="M-19,-21 L19,-21 L15,-28 L-15,-28Z" fill="${SNOW}"/><rect x="-6" y="-13" width="12" height="13" fill="#3d3833"/><ellipse cx="4" cy="-31" rx="8" ry="2.4" fill="#c4473c"/></g>`;
+  g+=hut(x0,y0,'#6a7488')+hut(x1,y1+4,'#6a7488');
+  const cab=c=>`<g transform="scale(.48)">${cabinSVG(c,r()<.6)}</g>`;
+  [0,1,2].forEach(k=>{g+=`<g><animateMotion dur="30s" begin="-${k*10}s" repeatCount="indefinite" path="M0,0 L${f(dx)},${f(dy)}"/><g transform="translate(${x0},${y0-22})">${cab(pk(['#c4473c','#e0b44a','#5a86b0']))}</g></g>`;
+   g+=`<g><animateMotion dur="30s" begin="-${k*10+5}s" repeatCount="indefinite" path="M0,0 L${f(-dx)},${f(-dy)}"/><g transform="translate(${x1+9},${y1-20})">${cab(pk(['#c4473c','#e0b44a','#5a86b0']))}</g></g>`});
+  return g+`</g>`}
 function buildGround3(){const NS_=`stroke="none"`;let s='';
  s+=`<rect x="0" y="-400" width="2600" height="3400" fill="#f7f5ef" ${NS_}/><rect x="0" y="-400" width="2600" height="1010" fill="#e6eef0" ${NS_}/>`;
  const peak=(x,y,w,h,c)=>`<path d="M${x-w},${y} L${f(x-w*.35)},${f(y-h*.7)} L${x},${y-h} L${f(x+w*.4)},${f(y-h*.62)} L${x+w},${y}Z" fill="${c}"/><path d="M${x},${y-h} L${f(x+w*.4)},${f(y-h*.62)} L${x+w},${y} L${f(x+w*.15)},${y}Z" fill="#b8c7ce" ${NS_} opacity=".75"/><path d="M${f(x-w*.35)},${f(y-h*.7)} L${x},${y-h} L${f(x+w*.4)},${f(y-h*.62)} L${f(x+w*.22)},${f(y-h*.52)} L${f(x+w*.06)},${f(y-h*.64)} L${f(x-w*.12)},${f(y-h*.5)} L${f(x-w*.24)},${f(y-h*.6)}Z" fill="${SNOW}"/>`;
@@ -945,7 +974,6 @@ function buildGround3(){const NS_=`stroke="none"`;let s='';
  let sk='';for(let i=0;i<8;i++){const cx=L.cx+sr(-150,150),cy=L.cy+sr(-60,60),rx=sr(50,120),ry=sr(18,44);sk+=`M${f(cx-rx)},${f(cy)} a${f(rx)},${f(ry)} 0 1 1 ${f(rx*1.6)},${f(ry*.8)} `}s+=`<path d="${sk}" fill="none" stroke="#f6fbfc" stroke-width="1.6"/>`;
  HOLES.forEach(([x,y])=>s+=`<ellipse cx="${x}" cy="${y}" rx="30" ry="13" fill="#f4f8f8" stroke-width="1.4"/><ellipse cx="${x}" cy="${y}" rx="26" ry="11" fill="#4f7f90" stroke-width="2"/><ellipse cx="${x-4}" cy="${y+2}" rx="16" ry="5" fill="#6f9fae" ${NS_}/>`);
  // cable (station wheel -> down the mountain)
- const cx0=zx(1440)+30,cy0=zy(1400)-132;s+=`<path d="M${cx0},${cy0} L${cx0+520},${cy0+956} M${cx0+12},${cy0-2} L${cx0+532},${cy0+954}" fill="none" stroke-width="2"/>`;
  // little tufts / snow bumps
  const DX0=zx(1062),DY0=zy(866),DX1=DX0+516*Z3,DY1=DY0+358*Z3;
  let tf='';for(let i=0;i<780;i++){const x=sr(400,2220),y=sr(620,2200);if(isWater3(x,y)||((x-L.cx)/L.rx)**2+((y-L.cy)/L.ry)**2<1.05||(x>DX0&&x<DX1&&y>DY0&&y<DY1))continue;tf+=r()<.3?`M${f(x)},${f(y)} l-3,-6 M${f(x)},${f(y)} l3,-6 `:`M${f(x-6)},${f(y)} q6,-5 12,0 `}
@@ -954,8 +982,11 @@ function buildGround3(){const NS_=`stroke="none"`;let s='';
 function buildStructures3(){const A=(x,y,...o)=>add(zx(x),zy(y),...o);
  const sx=zx(1440),sy=zy(1400),cx0=sx+30,cy0=sy-132,onCable=dx=>[cx0+dx,cy0+dx*1.838];
  add(sx,sy,240,150,'house',cableStation(),{sh:.85});
- {const[a,b]=onCable(110);add(a,b,50,50,'cabin',cabinSVG('#c4473c',true),{mark:false})}
- {const[a,b]=onCable(230);add(a,b,50,50,'cabin',cabinSVG('#e0b44a',false),{mark:false,s:.9})}
+ /* 纜車類（繩索、車廂、支柱）一律畫在人物上面：用排序值把它們放到最後 */
+ const onTop=(sp,y=1e6)=>{sp.y=y;return sp};
+ onTop(add(cx0,cy0,10,10,'lift',`<path d="M0,0 L520,956 M12,-2 L532,954" fill="none" stroke-width="2"/>`,{mark:false}));
+ [[700,578,662,112],[1470,566,1532,64]].forEach(([a,b,c,d])=>onTop(add(a,b,30,30,'lift',`<g transform="translate(${-a},${-b})">${liftUp(a,b,c,d)}</g>`,{mark:false})));
+
  // lodges: same size, the longer street fits more of them
  for(const [yy,x0] of [[zy(935),zx(545)],[zy(1125),zx(560)]]){let x=x0;while(x<zx(990)){const w=sr(95,125);if(x+w>zx(1000))break;add(x+w/2,yy,w+16,w*1.3,'house',lodge(w,sr(48,60)),{sh:.9});x+=w+sr(26,48)}}
  [[600,950],[880,948],[720,1140],[950,1140]].forEach(([x,y])=>add(zx(x),zy(y)-110,30,30,'steam',steamPuff(),{mark:false}));
@@ -966,14 +997,25 @@ function buildStructures3(){const A=(x,y,...o)=>add(zx(x),zy(y),...o);
  POOLS3.forEach(([cx,cy,rx,ry],i)=>{const n=i===2?3:2;for(let k=0;k<n;k++){for(let t=0;t<40;t++){const x=cx+sr(-rx*.6,rx*.6),y=cy+sr(-ry*.3,ry*.5);if(canPlace(x,y,30,24,true,.6)){add(x,y,30,24,'bather',bather(),{fl:r()<.5});break}}}
   for(let k=0;k<4;k++)add(cx+sr(-rx*.7,rx*.7),cy+sr(-ry*.6,0),40,30,'steam',steamPuff(),{mark:false,s:sr(1,1.6)});});
  add(POOLS3[1][0]+20,POOLS3[1][1]+13,28,20,'monkeyW',monkeyW(),{mark:false});
+ // 溫泉的猴子、猴子家庭、水豚
+ const inPool=(kind,fn,w,h,n)=>{for(let k=0;k<n;k++)for(let t=0;t<80;t++){const P=pk(POOLS3),x=P[0]+sr(-P[2]*.65,P[2]*.65),y=P[1]+sr(-P[3]*.35,P[3]*.55);if(canPlace(x,y,w,h,true,.6)){add(x,y,w,h,kind,fn(),{fl:r()<.5});break}}};
+ const onDeck=(kind,fn,w,h,n)=>{for(let k=0;k<n;k++)for(let t=0;t<300;t++){const x=sr(zx(1070),zx(1570)),y=sr(zy(880),zy(1222));if(canPlace(x,y,w,h,false,.6)){add(x,y,w,h,kind,fn(),{fl:r()<.5});break}}};
+ inPool('capyW',capyW,40,26,4);inPool('monkeyW',monkeyW,28,20,3);inPool('monkeyFamW',monkeyFamW,46,22,2);
+ onDeck('monkeyFam',monkeyFam,50,40,3);onDeck('capyR',capyR,46,30,3);onDeck('monkeyR',monkey,24,30,3);
  A(1250,1100,24,30,'monkeyR',monkey());A(1092,1190,24,30,'monkeyR',monkey(),{fl:true});
  A(1046,842,50,50,'sign',signpost('溫泉'));
  // slope: chairlift, pines, snowmen
- A(600,770,40,70,'lift',liftSVG(360*Z3,-300*Z3),{mark:false});
+ onTop(A(600,770,40,70,'lift',liftSVG(360*Z3,-300*Z3),{mark:false}));
+ {const[a,b]=onCable(110);onTop(add(a,b,50,50,'cabin',cabinSVG('#c4473c',true),{mark:false}),1e6+1)}
+ {const[a,b]=onCable(230);onTop(add(a,b,50,50,'cabin',cabinSVG('#e0b44a',false),{mark:false,s:.9}),1e6+1)}
  [[600,770],[780,620],[960,470]].forEach(([x,y])=>mark(zx(x),zy(y),20,60));
  [[530,520],[555,640],[1570,520],[1560,660],[1500,740],[545,740],[1210,500],[1260,560]].forEach(([x,y])=>A(x,y,50,98,'pineS',pineS()));
  A(1100,640,40,62,'snowmanBig',snowmanBig());A(1380,700,40,62,'snowmanBig',snowmanBig());
  A(800,780,50,50,'sign',signpost('滑雪場'));
+ // 雪山山坡上往下滑的單板（帶 S 形滑行雪痕）
+ [[620,450,300,390,4],[1330,450,320,430,5]].forEach(([x,y,w,h,n])=>{const px=zx(x),py=zy(y),W=w*Z3,Hh=h*Z3;
+  for(let k=0;k<n;k++){const t=.3+.6*(k+r()*.8)/n,yy=py-Hh+Hh*t,half=W*t*.6,xx=px+sr(-half,half);
+   add(xx,yy,62,72,'boarder',`<path d="M${f(sr(-20,20))},-92 q36,16 6,36 q-32,16 -6,34" fill="none" stroke="#c9d6dc" stroke-width="3.2"/>`+boarder(true),{mark:false,fl:xx<px,s:.72})}}); /* 在山峰左側就面向左、右側面向右，眼睛朝山下 */
  // lake: ice fishers + tent + skaters
  HOLES.forEach(([x,y],i)=>{if(i%2===0)add(x-36,y+8,30,50,'fisher',iceFisher())});
  A(1010,1385,70,56,'tent',tent('#d98c46'));
@@ -1037,6 +1079,7 @@ Object.assign(KIND,{
  beanieTeal:{w:30,h:26,fn:()=>T(0,-11,.95,DECOY.beanieTeal)},beanieRed:{w:30,h:26,fn:()=>T(0,-11,.95,DECOY.beanieRed)},snowmanPlain:{w:30,h:32,fn:()=>T(0,-15,.95,DECOY.snowmanPlain)},
  sled:{w:38,h:14,fn:()=>T(0,-5,1,DECOY.sled)},acorn:{w:20,h:24,fn:()=>T(0,-11,.9,DECOY.acorn)},
  walker3:{w:30,h:62,fn:()=>{const v=r()<.12?'front':(r()<.62?'side':'back'),p=v==='front'?'stand':pk(['walk','stand','walk','reach','stand']);return act(0,0,r()<.5?1:-1,{view:v,pose:p,hat:pk([0,0,0,3,4,-1])},true)}},
+ boarder:{w:62,h:72,fn:boarder},
  skier:{w:50,h:62,fn:()=>`<path d="M-32,-4 h-12 M-30,-14 h-9" fill="none" stroke="#b7c5cc" stroke-width="2"/>`+act(0,0,1,{pose:'run',hat:0,extra:skiBoard(pk(['#5a86b0','#e0b44a','#6f9a4a','#9a6fa8']))},'bob')},
  sledKid:{w:56,h:52,fn:()=>`<path d="M-36,-4 h-12 M-34,-12 h-8" fill="none" stroke="#b7c5cc" stroke-width="2"/>`+sledBig()+act(-2,-10,1,{pose:'sit',hat:0,mood:1,s:.9},'bob')},
  buildSnowman:{w:96,h:62,fn:()=>act(-30,0,1,{pose:'low',hat:0},'bob')+`<circle cx="-6" cy="-9" r="10" fill="#fbf7ef"/>`+act(32,0,-1,{pose:'reach',hat:pk([0,4])},'bob')+`<circle cx="14" cy="-7" r="7" fill="#fbf7ef"/>`},
@@ -1075,7 +1118,7 @@ const VPLAN={
   village:{petDog:2,dogWalk:4,chat:5,handInHand:3,carryBox:3,sweep:3,watering:3,laundry:2,petCat:3,feedChickens:2,throwCatch:3,chase:2,jumpRope:2,violin:1,reading:2,stretch:1},
   banks:{flowerWatch:3,kiteFly:2,sleeping:2,reading:2,throwCatch:2,painting:1,chat:2,dogWalk:1},
   forest:{mushroomPick:4,flowerWatch:3,chase:2,flute:2,sleeping:2,painting:1,chat:2,petCat:1,feedChickens:1},
-  slope:{skier:6,sledKid:3,buildSnowman:2,snowballFight:2,dogWalk:1},
+  slope:{boarder:5,skier:2,sledKid:3,buildSnowman:2,snowballFight:2,dogWalk:1},
   inn:{chat:3,cocoaChat:2,shovel:3,dogWalk:2,handInHand:2,carryBox:2,petCat:2},
   onsen:{cocoaChat:1},
   lake:{snowballFight:1,skatePair:1},
@@ -1229,6 +1272,9 @@ const NEED_STARS=2;
 const LEVELS=[null,{n:1,title:'第 1 關．奇幻小鎮',desc:'城堡山腳下的小鎮藏了 12 種東西，<b>每種各 4 個</b>，共 48 個。',desc2:'城堡山腳下的小鎮藏了 12 種東西，每種各 4 個。<b>農莊的雞蛋和蘋果也混進小鎮了！</b>',types:TYPES1,c:[900,760]},
  {n:2,title:'第 2 關．東方農莊',desc:'乾草車載你來到農莊市集：6 種老朋友加上 <b>6 種農莊新東西</b>。',types:TYPES2,c:[2250,880]},
  {n:3,title:'第 3 關．雪山溫泉村',desc:'纜車載你上山：4 種老朋友加上 <b>8 種雪山新東西</b>。',types:TYPES3,c:[1188,1250]}];
+/* 舊玩家補解鎖：已解鎖的最後一關若曾拿到 2 顆星以上，開遊戲時直接開放下一關 */
+{const before=prog.unlocked;while(LEVELS[prog.unlocked+1]&&starsOf(prog.unlocked)>=NEED_STARS)prog.unlocked++;
+ if(prog.unlocked>before){saveProg();setTimeout(()=>{const m=MAPNODES.find(m=>m.n===prog.unlocked);toast(`新地點開放：${m?m.name:'新地點'}，打開冒險地圖看看！`,3200)},1200)}}
 let level=Math.min(prog.unlocked,3);
 function setLevel(n){level=n;TYPES=typesFor(n);renderStart();renderTray()}
 function renderStart(){const L=LEVELS[level];$('#startTitle').textContent=L.title;$('#startDesc').innerHTML=borrowed.length?`這次<b>${borrowed.map(t=>t.short).join('、')}</b>也跑來這裡了！`:'';
