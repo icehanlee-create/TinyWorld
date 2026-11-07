@@ -50,7 +50,7 @@ button{font-family:var(--ui);cursor:pointer}
 .zpill{position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:6;display:flex;flex-direction:column;background:var(--paper);border:2.5px solid var(--ink);border-radius:16px;box-shadow:0 4px 0 var(--ink);overflow:hidden}
 .zpill button{width:44px;height:44px;border:none;background:none;display:grid;place-items:center;color:var(--ink);padding:0}.zpill button:active{background:#f1e6cf}
 .zpill i{display:block;height:2px;background:var(--ink);opacity:.15}
-#toast{position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 90px);transform:translate(-50%,-8px);background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:999px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis;z-index:7}
+#toast{position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 90px);transform:translate(-50%,-8px);background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:18px;font-size:14px;line-height:1.5;text-align:center;opacity:0;transition:.25s;pointer-events:none;white-space:pre-line;width:max-content;max-width:min(94%,360px);z-index:7}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 #tray{position:absolute;left:0;right:0;bottom:0;z-index:7;background:var(--parch);border-top:2.5px solid var(--ink);border-radius:22px 22px 0 0;padding:10px 0 calc(env(safe-area-inset-bottom) + 10px);display:flex;flex-direction:column;gap:8px;color:var(--ink)}
 .thead,.handle{display:none!important}
@@ -71,7 +71,7 @@ button{font-family:var(--ui);cursor:pointer}
 .overlay{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(43,36,32,.55);font-family:var(--ui);color:var(--ink)}
 .overlay.hide{display:none}
 @keyframes twinkle{0%,70%,100%{opacity:0;transform:scale(.4)}80%{opacity:1;transform:scale(1.15)}90%{opacity:.6;transform:scale(.9)}}
-.spark{transform-box:fill-box;transform-origin:center;animation:twinkle 5s ease-in-out infinite}
+.spark{transform-box:fill-box;transform-origin:center;animation:twinkle 5s ease-in-out infinite}.spark.fast{animation-duration:2.2s}.spark.slow{animation-duration:12s}
 @keyframes cpop{0%{transform:translateY(10px) scale(.2);opacity:0}60%{transform:translateY(-14px) scale(1.25);opacity:1}100%{transform:translateY(0) scale(1)}}
 .cpop{transform-box:fill-box;transform-origin:center bottom;animation:cpop .6s ease-out}
 .storyrow{margin-top:8px;font-size:12.5px;display:flex;gap:6px;align-items:center}.storyrow.no{color:var(--muted)}
@@ -116,7 +116,7 @@ body:has(.overlay:not(.hide)) #world .an,body:has(.overlay:not(.hide)) .drift{an
 .mnode{cursor:pointer}
 .winc{padding:42px 18px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:26px}
 .ribbon{position:absolute;top:-26px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;border:2.5px solid var(--ink);border-radius:12px;padding:8px 22px;font-size:22px;white-space:nowrap;box-shadow:0 4px 0 var(--ink)}
-.wstars{display:flex;gap:10px;align-items:flex-start}.wstars div{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;margin-top:10px;animation:starpop .45s both}.wstars div.mid{margin-top:0}
+.wstars{display:flex;gap:10px;justify-content:center;}.wstars.four{gap:4px}.wstars{align-items:flex-start}.wstars div{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;margin-top:10px;animation:starpop .45s both}.wstars div.mid{margin-top:0}
 @keyframes starpop{0%{transform:scale(0) rotate(-30deg);opacity:0}70%{transform:scale(1.2) rotate(6deg);opacity:1}100%{transform:scale(1) rotate(0)}}
 .wstats{display:flex;gap:8px;width:100%}.wstats div{flex:1;background:var(--parch);border:2px solid #e2d4b6;border-radius:12px;padding:6px 4px;display:flex;flex-direction:column;align-items:center}.wstats b{font-size:20px;font-weight:400}.wstats span{font-size:12px;color:var(--muted)}
 #winTag{font-size:13px;background:var(--gold);border:2px solid var(--ink);border-radius:999px;padding:2px 12px}
@@ -209,7 +209,7 @@ body:has(.overlay:not(.hide)) #world .an,body:has(.overlay:not(.hide)) .drift{an
     <p id="startDesc"></p>
     <div class="sgrid" id="startGrid"></div>
     <div class="how"><div><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M11 10.5V4a1.5 1.5 0 0 1 3 0v6.5"/><path d="M14 10.5V5.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-.5a6 6 0 0 1-4.6-2.2L4 15.5a1.6 1.6 0 0 1 2.4-2.1L8 15"/></svg>單指拖曳<br>移動畫面</div><div><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l-3-3"/><path d="M4 8V4h4"/><path d="M17 17l3 3"/><path d="M20 16v4h-4"/><circle cx="12" cy="12" r="3"/></svg>雙指縮放</div><div><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="3"/><path d="M12 3v1.5"/><path d="M6.5 5.5l1 1"/><path d="M17.5 5.5l-1 1"/><path d="M12 12v8"/></svg>點一下<br>就找到</div></div>
-    <p class="rule">小心長得很像的假貨，也有東西只露出一半。<br>每關藏著一株 🍀 幸運草：點點看場景裡的東西，或幫頭上有「？」的人完成一連串的小任務，都能拿到第三顆星</p>
+    <p class="rule">小心長得很像的假貨，也有東西只露出一半。<br>幫頭上有「？」的人完成一連串的小任務，他會告訴你 🍀 幸運草藏在哪裡，找到就能拿第三顆星。（聽說每一關還藏著別的秘密⋯）</p>
     <button class="pbtn" id="startBtn">開始尋找</button>
     <div id="startBest"></div>
     <div class="testrow"><p id="testBadge" style="display:none">🧪 測試模式：提示無限次・上方 ✓ 可直接過關</p><button class="sbtn" id="resetBtn" style="display:none;flex:none">重置進度（回到只開放第 1 關）</button></div>
@@ -225,7 +225,7 @@ body:has(.overlay:not(.hide)) #world .an,body:has(.overlay:not(.hide)) .drift{an
 <div class="overlay hide" id="winOv"><div class="pcard winc">
   <div class="ribbon" id="winTitle">過關！</div>
   <div class="wstars" id="winStars"></div>
-  <div class="wstats"><div><b id="rTime">0:00</b><span>時間</span></div><div><b id="rHint">0</b><span>提示</span></div><div><b id="rMiss">0</b><span>點錯</span></div></div>
+  <div class="wstats"><div><b id="rTime">0:00</b><span>時間</span></div><div><b id="rHint">0</b><span>提示</span></div></div>
   <span id="winTag"></span>
   <div class="wnext" id="winNext"></div>
   <button class="pbtn" id="nextBtn"></button>
@@ -673,7 +673,7 @@ function barn(){const w=120,h=66,sd=30,sy=15,c='#a85640';let g=`<path d="M${-w/2
  g+=`<rect x="-9" y="${-h-28}" width="18" height="16" fill="#3d3833"/>`+`<g transform="translate(0,${-h-14}) scale(.5)">${headOnly()}</g>`;
  return g}
 const scarecrow=()=>`<path d="M0,0 V-48 M-20,-36 H20" fill="none" stroke="#7a5235" stroke-width="3.5"/><path d="M-10,-38 L10,-38 L12,-18 L-12,-18Z" fill="#6a7488"/><rect x="-5" y="-30" width="6" height="6" fill="#d4ac52" stroke-width="1"/><path d="M-22,-38 l-5,-3 M-22,-36 l-6,1 M22,-38 l5,-3 M22,-36 l6,1" fill="none" stroke="#d4ac52" stroke-width="1.6"/><circle cx="0" cy="-48" r="9" fill="#e2cfa0"/><path d="M-4,-50 l2,2 M-2,-50 l-2,2 M3,-50 l2,2 M5,-50 l-2,2 M-3,-44 q3,2 6,0" fill="none" stroke-width="1.1"/><ellipse cx="0" cy="-55" rx="15" ry="3.5" fill="#d4ac52"/><path d="M-7,-56 Q-7,-64 0,-64 Q7,-64 7,-56Z" fill="#d4ac52"/>`;
-const cow=()=>`<path d="M-11,0 V-8 M-5,0 V-8 M6,0 V-8 M11,0 V-8" fill="none" stroke-width="2.8"/><rect x="-17" y="-22" width="32" height="15" rx="7" fill="#fbf6ea"/><g fill="${OL}" stroke="none"><ellipse cx="-8" cy="-17" rx="5" ry="3.5"/><ellipse cx="4" cy="-12" rx="4" ry="3"/></g><path d="M-16,-18 Q-22,-14 -20,-6" fill="none" stroke-width="1.6"/><rect x="11" y="-29" width="13" height="14" rx="5" fill="#fbf6ea"/><ellipse cx="20" cy="-17" rx="6" ry="4" fill="#f0b4a8"/><path d="M12,-29 l-3,-4 M22,-29 l3,-4" fill="none" stroke="#5c4a3d" stroke-width="2.2"/><circle cx="14" cy="-24" r="1.2" fill="${OL}" stroke="none"/><circle cx="20" cy="-24" r="1.2" fill="${OL}" stroke="none"/>`;
+const cow=()=>`<path d="M-17,-17 Q-23,-12 -21,-5" fill="none" stroke-width="1.6"/><circle cx="-21" cy="-4" r="2.2" fill="${OL}" stroke="none"/><path d="M-11,0 V-8 M-5,0 V-8 M5,0 V-8 M10,0 V-8" fill="none" stroke-width="3.4"/><ellipse cx="-2" cy="-15" rx="16" ry="10" fill="#fbf6ea"/><path d="M-14,-21 q4,-4 9,-1 q2,5 -3,7 q-6,1 -6,-6Z M2,-12 q3,-3 7,0 q0,4 -4,4 q-4,0 -3,-4Z" fill="${OL}" stroke="none"/><ellipse cx="0" cy="-5.5" rx="3.4" ry="2" fill="#f0b4a8" stroke-width="1.4"/><path d="M8,-31 q-3,-3 -1,-7 M19,-31 q3,-3 1,-7" fill="none" stroke="#5c4a3d" stroke-width="2.6"/><ellipse cx="6" cy="-27" rx="4.5" ry="2.2" fill="#fbf6ea" transform="rotate(-25 6 -27)"/><ellipse cx="22" cy="-27" rx="4.5" ry="2.2" fill="#fbf6ea" transform="rotate(25 22 -27)"/><ellipse cx="14" cy="-24" rx="9" ry="8.5" fill="#fbf6ea"/><path d="M9,-31 q3,4 7,1 q-1,-3 -5,-3Z" fill="${OL}" stroke="none"/><ellipse cx="14" cy="-18" rx="7.5" ry="4.8" fill="#f0b4a8"/><circle cx="11.5" cy="-18" r=".9" fill="${OL}" stroke="none"/><circle cx="16.5" cy="-18" r=".9" fill="${OL}" stroke="none"/><circle cx="10.5" cy="-25" r="1.4" fill="${OL}" stroke="none"/><circle cx="17.5" cy="-25" r="1.4" fill="${OL}" stroke="none"/><path d="M7,-13.5 Q14,-11 21,-13.5" fill="none" stroke="#c4473c" stroke-width="2"/><circle cx="14" cy="-10.5" r="2.4" fill="#f5c842" stroke-width="1.3"/>`;
 const fruitTree=()=>roundTree()+`<g stroke-width="1">${[[-14,-58],[6,-70],[18,-52],[-4,-46],[-22,-48],[12,-80]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="3.2" fill="#c4473c"/>`).join('')}</g>`;
 const signpost=t=>`<path d="M0,0 V-40" fill="none" stroke="#7a5235" stroke-width="3"/><path d="M-22,-48 L16,-48 L24,-39 L16,-30 L-22,-30Z" fill="#d4ac52"/><text x="-2" y="-35" font-size="10" text-anchor="middle" fill="${OL}" stroke="none" font-weight="700" font-family="PingFang TC,Noto Sans TC,sans-serif">${t}</text>`;
 function buildStructures(sc){const SC=SCENES[sc];
@@ -1108,7 +1108,7 @@ const KIND={
  umbYellow:{w:34,h:34,fn:()=>T(0,-17,1,DECOY.umbYellow)},umbRed:{w:34,h:34,fn:()=>T(0,-17,1,DECOY.umbRed)}
 };
 Object.assign(KIND,VIG);
-Object.assign(KIND,{cow:{w:44,h:32,fn:cow},pig:{w:34,h:26,fn:pig},scarecrow:{w:44,h:70,fn:scarecrow},fruitTree:{w:64,h:88,fn:fruitTree},
+Object.assign(KIND,{cow:{w:46,h:38,fn:cow},pig:{w:34,h:26,fn:pig},scarecrow:{w:44,h:70,fn:scarecrow},fruitTree:{w:64,h:88,fn:fruitTree},
  whiteCarrot:{w:20,h:30,fn:()=>T(0,-12,.9,DECOY.whiteCarrot)},tomato:{w:18,h:18,fn:()=>T(0,-8,.8,DECOY.tomato)},bucket:{w:22,h:24,fn:()=>T(0,-4,1,DECOY.bucket)}});
 Object.assign(KIND,{
  grassClump:{w:20,h:16,fn:()=>`<path d="M-8,0 q2,-8 4,-12 M-3,0 q0,-10 1,-14 M2,0 q1,-8 4,-11 M7,0 q1,-6 3,-8" fill="none" stroke="#56603a" stroke-width="1.6"/>`+(r()<.5?`<circle cx="-2" cy="-14" r="2.4" fill="${pk(['#e3a89e','#f1ead8','#c58be0'])}" stroke-width="1"/>`:'')},
@@ -1303,32 +1303,44 @@ function onSpriteTap(sp){const S=STORIES[scene];
    :role==='target'?(story.step===0?'這是誰家的寶貝？好像有人在找牠⋯':story.step===2?S.need:'牠乖乖跟著你，快帶回去吧！')
    :(story.step<2?'（看起來正在忙⋯也許之後會需要幫忙）':'已經幫過你囉！');
   toast(hint,3200);if(story.step===0&&role==='giver')story.step=1;return true}
- if(clover&&!clover.revealed&&!clover.found&&sp===clover.host){revealClover();return true}
+ for(const c of [clovers.story,clovers.bonus]){if(c&&!c.revealed&&!c.found&&sp===c.host){if(c.kind==='story'&&!(story&&story.done))return false;revealClover(c);return true}}
  return false}
-function finishStory(){if(!story||story.done)return;story.done=true;story.step=SEQ.length;const S=STORIES[scene];storyBubble('♥');colStory(level);
- toast(clover&&!clover.found?`📖 故事完成：${S.title}！送你一株幸運草 🍀`:`📖 故事完成：${S.title}！`,3200);sfx.typeDone();
- if(clover&&!clover.found){clover.found=true;st.clover=true;colClover(level);const el=document.getElementById('cloverEl');if(el)el.style.display='none';const sp=document.getElementById('cloverSpark');if(sp)sp.remove();
-  const g=storySp.giver;if(g){burst(g.x,g.y-40);floatText(g.x,g.y-70,'🍀 幸運草！')}}}
+function finishStory(){if(!story||story.done)return;story.done=true;story.step=SEQ.length;const S=STORIES[scene];storyBubble('♥');colStory(level);sfx.typeDone();
+ const c=clovers.story,g=storySp.giver;if(g){burst(g.x,g.y-40);floatText(g.x,g.y-70,'📖 故事完成！')}
+ if(c&&!c.found){addSpark(c,'fast');toast(`📖 ${S.title}：完成！\n${S.who}：謝謝你！我剛剛看到 🍀 幸運草藏在${dirFrom(g||{x:c.x,y:c.y},c)}的${HOSTN[c.host.kind]||'東西'}後面，去點點看！`,6000)}
+ else if(!c){st.clover=true;colClover(level);toast(`📖 故事完成：${S.title}！送你一株幸運草 🍀`,3200)}
+ else toast(`📖 故事完成：${S.title}！`,3200)}
+function dirFrom(a,b){const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);if(d<160)return '這附近';
+ const ang=Math.atan2(dy,dx)*180/Math.PI,dirs=['右邊','右下方','下面','左下方','左邊','左上方','上面','右上方'];const k=Math.round(((ang+360)%360)/45)%8;
+ return dirs[k]+(d>900?'很遠處':d>450?'':'不遠處')}
 /* ---- 幸運草（每關一株，不在清單裡；找到可拿第三顆星） ---- */
 const CLOVER=`<g transform="scale(.85)"><path d="M0,2 Q2,10 -2,16" fill="none" stroke="#4f7a3a" stroke-width="2"/>`+[0,90,180,270].map(a=>`<g transform="rotate(${a})"><path d="M0,0 C-7,-3 -9,-12 -3,-13 C-1,-13 0,-11 0,-10 C0,-11 1,-13 3,-13 C9,-12 7,-3 0,0Z" fill="#6fae4a"/></g>`).join('')+`<circle r="2" fill="#f5c842" stroke-width="1"/></g>`;
-let clover=null;
+let clovers={story:null,bonus:null};
 const HOSTK=new Set(['bush','round','pine','pineS','barrel','crate','crateStack','hay','rock','rockS','woodpile','tubStack','fern','rubble','snowMound','fruitTree','pillarB','stele','suitcase','well','pot']);
-function placeClover(){clover=null;const SC=SCENES[scene],used=new Set(items.map(it=>it.occ).filter(Boolean));
+const HOSTN={bush:'草叢',round:'大樹',pine:'松樹',pineS:'小松樹',barrel:'木桶',crate:'箱子',crateStack:'一疊箱子',hay:'乾草堆',rock:'大石頭',rockS:'小石頭',woodpile:'柴堆',tubStack:'一疊木盆',fern:'蕨類',rubble:'碎石堆',snowMound:'雪堆',fruitTree:'果樹',pillarB:'斷掉的石柱',stele:'刻字石碑',suitcase:'皮箱',well:'水井',pot:'花盆'};
+/* 每關兩株：story＝完成小故事後才點得出來（第三顆星）；bonus＝自己找的隱藏幸運草（隱藏第四顆星） */
+function placeClover(){clovers={story:null,bonus:null};const SC=SCENES[scene],used=new Set(items.map(it=>it.occ).filter(Boolean));
  const hosts=sprites.filter(sp=>HOSTK.has(sp.kind)&&!used.has(sp)&&sp.x>SC.x0+60&&sp.x<SC.x1-60&&sp.y>420&&sp.y<(SC.y1||H)-60);
- for(let t=0;t<60&&!clover&&hosts.length;t++){const h=hosts[Math.floor(Math.random()*hosts.length)],side=Math.random()<.5?-1:1,x=h.x+side*h.w*.45,y=h.y-Math.min(h.h*.3,14);
-  if(isWater(x,y)||items.some(o=>Math.hypot(o.x-x,o.y-y)<50))continue;clover={x,y,host:h,found:false,revealed:false,rot:rnd(-30,30)}}}
-function revealClover(){clover.revealed=true;const el=document.getElementById('cloverEl');if(el){el.style.display='';el.classList.add('cpop')}const sp=document.getElementById('cloverSpark');if(sp)sp.remove();
- burst(clover.x,clover.y);toast('咦？有東西跳出來了！',1800);sfx.found()}
-function foundClover(){clover.found=true;st.clover=true;colClover(level);const spk=document.getElementById('cloverSpark');if(spk)spk.remove();const el=document.getElementById('cloverEl');if(el){el.classList.add('got');setTimeout(()=>el.style.display='none',600)}
- burst(clover.x,clover.y);floatText(clover.x,clover.y-20,'幸運草！');toast('🍀 找到這一關的隱藏幸運草了！',2400);sfx.typeDone()}
+ const pick=(kind,ok)=>{for(let t=0;t<80&&hosts.length;t++){const h=hosts[Math.floor(Math.random()*hosts.length)];if(used.has(h)||!ok(h))continue;const side=Math.random()<.5?-1:1,x=h.x+side*h.w*.45,y=h.y-Math.min(h.h*.3,14);
+  if(isWater(x,y)||items.some(o=>Math.hypot(o.x-x,o.y-y)<50))continue;used.add(h);return {kind,x,y,host:h,found:false,revealed:false,rot:rnd(-30,30)}}return null};
+ const g=storySp.giver;
+ if(STORIES[scene]&&g)clovers.story=pick('story',h=>Math.hypot(h.x-g.x,h.y-g.y)>350)||pick('story',()=>true);
+ const cs=clovers.story;clovers.bonus=pick('bonus',h=>!cs||Math.hypot(h.x-cs.x,h.y-cs.y)>450)||pick('bonus',()=>true)}
+function addSpark(c,cls){const h=c.host;const old=document.getElementById('cloverSpark-'+c.kind);if(old)old.remove();
+ itemsL.insertAdjacentHTML('beforeend',`<g id="cloverSpark-${c.kind}" transform="translate(${f(h.x+sr(-h.w*.25,h.w*.25))},${f(h.y-h.h*.7)})"><path class="spark ${cls}" style="animation-delay:-${f(Math.random()*5)}s" d="M0,-7 L1.6,-1.6 L7,0 L1.6,1.6 L0,7 L-1.6,1.6 L-7,0 L-1.6,-1.6Z" fill="#fff6b0" stroke="#e0b44a" stroke-width="1"/></g>`)}
+function revealClover(c){c.revealed=true;const el=document.getElementById('cloverEl-'+c.kind);if(el){el.style.display='';el.classList.add('cpop')}const sp=document.getElementById('cloverSpark-'+c.kind);if(sp)sp.remove();
+ burst(c.x,c.y);toast(c.kind==='bonus'?'咦？這裡竟然也藏著一株！':'找到了！幸運草跳出來了！',1800);sfx.found()}
+function foundClover(c){c.found=true;if(c.kind==='story'){st.clover=true;colClover(level)}else{st.bonus=true;colBonus(level)}
+ const spk=document.getElementById('cloverSpark-'+c.kind);if(spk)spk.remove();const el=document.getElementById('cloverEl-'+c.kind);if(el){el.classList.add('got');setTimeout(()=>el.style.display='none',600)}
+ burst(c.x,c.y);floatText(c.x,c.y-20,c.kind==='bonus'?'隱藏幸運草！':'幸運草！');toast(c.kind==='bonus'?'✨ 找到隱藏的幸運草！過關時會多一顆隱藏星星':'🍀 拿到這一關的幸運草了！',2600);sfx.typeDone()}
 function renderItems(){
  itemsL.innerHTML=items.map((it,i)=>{
   const sx=it.fl&&it.t.id!=='letter'?-it.sc:it.sc;
   let s=`<g class="item" data-i="${i}" transform="translate(${f(it.x)},${f(it.y)}) rotate(${f(it.rot)}) scale(${f(sx)},${f(it.sc)})"><g class="inner">${it.t.id==='fish'?'':`<ellipse cx="2" cy="${f(it.r*.75)}" rx="${f(it.r*.9)}" ry="3" fill="#000" opacity=".18" stroke="none"/>`}${ART[it.t.id]}</g></g>`;
   if(it.occ)s+=`<g class="still">${it.occ.svg}</g>`;
   return s}).join('');
- if(clover){itemsL.insertAdjacentHTML('afterbegin',`<g id="cloverEl" class="item" style="display:none" transform="translate(${f(clover.x)},${f(clover.y)}) rotate(${f(clover.rot)})"><g class="inner">${CLOVER}</g></g>`);
-  const h=clover.host;itemsL.insertAdjacentHTML('beforeend',`<g id="cloverSpark" transform="translate(${f(h.x+sr(-h.w*.25,h.w*.25))},${f(h.y-h.h*.7)})"><path class="spark" style="animation-delay:-${f(Math.random()*5)}s" d="M0,-7 L1.6,-1.6 L7,0 L1.6,1.6 L0,7 L-1.6,1.6 L-7,0 L-1.6,-1.6Z" fill="#fff6b0" stroke="#e0b44a" stroke-width="1"/></g>`)}
+ [clovers.story,clovers.bonus].forEach(c=>{if(!c)return;itemsL.insertAdjacentHTML('afterbegin',`<g id="cloverEl-${c.kind}" class="item" style="display:none" transform="translate(${f(c.x)},${f(c.y)}) rotate(${f(c.rot)})"><g class="inner">${CLOVER}</g></g>`);
+  if(c.kind==='bonus')addSpark(c,'slow')});
  itemsL.querySelectorAll('.item[data-i]').forEach(el=>items[+el.dataset.i].el=el);
  marks.innerHTML='';fx.innerHTML='';
  document.querySelectorAll('#bg .still').forEach(e=>e.classList.remove('still'));
@@ -1439,10 +1451,10 @@ let testMode=false;try{testMode=localStorage.getItem('townhunt-test')==='1'}catc
 function setHintUI(){const b=$('#hintBtn');$('#hintN').textContent=testMode?'∞':st.hintsLeft;b.disabled=(!testMode&&st.hintsLeft<=0)||hintLock}
 function applyTestUI(){document.querySelectorAll('.tbtn').forEach(b=>b.style.display=testMode?'':'none');$('#testBadge').style.display=testMode?'':'none';$('#winBtn').style.display=testMode?'':'none';$('#resetBtn').style.display=testMode?'':'none';setHintUI()}
 function newGame(keepView){placeItems();placeClover();renderItems();story={step:0,done:false};storyBubble('？');renderTray();updateCounts();
- st={running:true,t0:performance.now(),hintsLeft:HINTS,misses:0,clover:false};setHintUI();
+ st={running:true,t0:performance.now(),hintsLeft:HINTS,misses:0,clover:false,bonus:false};setHintUI();
  measure();if(!keepView){const c=LEVELS[level].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base}}clampV();apply();reveal(true);clearInterval(timer);timer=setInterval(tick,250);tick()}
 function onTap(sx,sy){if(!st.running)return;const wx=(sx-view.tx)/view.s,wy=(sy-view.ty)/view.s;if(!isRevealed(wx,wy))return;let best=null,bd=1e9,near=false;
- if(clover&&clover.revealed&&!clover.found&&Math.hypot(clover.x-wx,clover.y-wy)<Math.max(14,13/view.s)){foundClover();return}
+ for(const c of [clovers.story,clovers.bonus])if(c&&c.revealed&&!c.found&&Math.hypot(c.x-wx,c.y-wy)<Math.max(14,13/view.s)){foundClover(c);return}
  for(const it of items){if(!isRevealed(it.x,it.y))continue;const d=Math.hypot(it.x-wx,it.y-wy),lim=Math.max(it.r*it.sc+3,13/view.s);if(d<lim){if(it.found)near=true;else if(d<bd){best=it;bd=d}}}
  if(best)found(best);else if(!near)miss(wx,wy)}
 function svgEl(tag,a,p){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
@@ -1454,7 +1466,7 @@ function found(it){it.found=true;colAdd(it.t.id);it.el.classList.add('got');cons
 function miss(wx,wy){st.misses++;sfx.miss();
  let hit=null;for(let i=sprites.length-1;i>=0;i--){const sp=sprites[i],sc=(sp.s||1);if(['bird','balloon'].includes(sp.kind))continue;if(Math.abs(wx-sp.x)<sp.w*.5&&wy<=sp.y+4&&wy>=sp.y-sp.h){hit=i;break}}
  /* 故事角色、走失的動物、藏幸運草的東西優先判定（就算前面有別人擋著） */
- for(const sp of [storySp.target,storySp.giver,storySp.helper,clover&&!clover.revealed?clover.host:null]){if(sp&&Math.abs(wx-sp.x)<Math.max(sp.w*.6,14)&&wy<=sp.y+6&&wy>=sp.y-sp.h-4){hit=sprites.indexOf(sp);break}}
+ for(const sp of [storySp.target,storySp.giver,storySp.helper,clovers.story&&!clovers.story.revealed&&story&&story.done?clovers.story.host:null,clovers.bonus&&!clovers.bonus.revealed?clovers.bonus.host:null]){if(sp&&Math.abs(wx-sp.x)<Math.max(sp.w*.6,14)&&wy<=sp.y+6&&wy>=sp.y-sp.h-4){hit=sprites.indexOf(sp);break}}
  if(hit!==null&&onSpriteTap(sprites[hit]))st.misses--;
  if(hit!==null){const el=document.querySelector(`#bg [data-n="${sprites[hit].n}"]`);if(el&&!el.querySelector(':scope > .jig')){const w=document.createElementNS(NS,'g');w.setAttribute('class','jig');while(el.firstChild)w.appendChild(el.firstChild);el.appendChild(w);setTimeout(()=>{while(w.firstChild)el.insertBefore(w.firstChild,w);w.remove()},520)}return}
  const g=svgEl('g',{transform:`translate(${f(wx)},${f(wy)}) scale(${f(1/view.s)})`},fx);const c=svgEl('circle',{r:4,fill:'none',stroke:'#7a6e60','stroke-width':2},g);anim(400,k=>{c.setAttribute('r',4+12*k);g.setAttribute('opacity',1-k)},()=>g.remove())}
@@ -1473,7 +1485,7 @@ function curtain(fn,msg){const c=$('#curtain');c.querySelector('span').textConte
 $('#restartBtn').onclick=()=>{const sp=$('#restartBtn span');if(st.running&&!restartArm){restartArm=true;sp.textContent='確定重新開始？';setTimeout(()=>{restartArm=false;sp.textContent='重新開始'},2500);return}
  restartArm=false;sp.textContent='重新開始';closeMenu();$('#winOv').classList.add('hide');curtain(()=>{setLevel(level);newGame();setTimeout(()=>toast('新的一局，東西都換位置了！'),400)})};
 const TARGET={1:360,2:330,3:330,4:330};
-const starSvg=(on,sz)=>`<svg width="${sz}" height="${sz}" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4l6 12.6 13.8 1.8-10.1 9.6 2.6 13.7L24 35.2l-12.3 6.5 2.6-13.7L4.2 18.4 18 16.6z" fill="${on?'#f5c842':'#efe6d2'}" stroke="#2b2420" stroke-width="3" stroke-linejoin="round"/></svg>`;
+const starSvg=(on,sz,col)=>`<svg width="${sz}" height="${sz}" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4l6 12.6 13.8 1.8-10.1 9.6 2.6 13.7L24 35.2l-12.3 6.5 2.6-13.7L4.2 18.4 18 16.6z" fill="${on?(col||'#f5c842'):'#efe6d2'}" stroke="#2b2420" stroke-width="3" stroke-linejoin="round"/></svg>`;
 const farmPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#f6efe0"/><path d="M0,52 Q30,38 60,48 Q90,36 120,46 V84 H0Z" fill="#a3ad66"/><rect y="60" width="120" height="24" fill="#d9c06a"/><path d="M0,60 H120" stroke="#2b2420" stroke-width="1.6"/><g transform="translate(44,58)"><path d="M-20,0 V-20 L-12,-30 L0,-35 L12,-30 L20,-20 V0Z" fill="#b14d27" stroke="#2b2420" stroke-width="2"/><path d="M-7,0 V-15 H7 V0 M-7,-15 L7,0 M7,-15 L-7,0" stroke="#fffaf0" stroke-width="1.6" fill="#7a3e2a"/></g><g transform="translate(78,58)"><path d="M-7,0 V-34 Q0,-42 7,-34 V0Z" fill="#c6ccc2" stroke="#2b2420" stroke-width="2"/></g><g transform="translate(98,58)"><path d="M-6,0 L-4,-26 L4,-26 L6,0Z" fill="#e2dccb" stroke="#2b2420" stroke-width="1.6"/><path d="M0,-28 l-12,-9 M0,-28 l12,-9 M0,-28 l-9,12 M0,-28 l9,12" stroke="#2b2420" stroke-width="2.4"/></g></svg>`;
 const mistPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#f1e2bf"/><path d="M0,60 L22,34 L38,50 L58,22 L80,46 L98,30 L120,52 V84 H0Z" fill="#b3b8b2" stroke="#2b2420" stroke-width="1.5"/><path d="M52,30 L58,22 L64,30 L61,28 L58,32 L55,28Z" fill="#fbf7ef"/><path d="M0,66 Q30,58 60,66 T120,62 V84 H0Z" fill="#c6cb8c"/><path d="M14,80 Q40,70 62,72 Q84,74 100,62" fill="none" stroke="#a8461f" stroke-width="2.2" stroke-dasharray="4 4" stroke-linecap="round"/><path d="M100,62 l3,-2" stroke="#a8461f" stroke-width="2.2" opacity=".4" stroke-linecap="round"/></svg>`;
 const snowPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#e6eef0"/><g stroke="#2b2420" stroke-width="1.5" stroke-linejoin="round"><path d="M0,56 L26,22 L44,40 L66,12 L90,38 L120,24 V84 H0Z" fill="#dfe7ea"/><path d="M19,31 L26,22 L33,31 L29,29 L26,33 L22,29Z M58,23 L66,12 L74,23 L70,21 L66,25 L62,21Z" fill="#fbf9f3"/><path d="M0,62 Q40,52 80,60 T120,58 V84 H0Z" fill="#f7f5ef"/><path d="M10,84 L112,6" fill="none" stroke-width="1.2"/><g transform="translate(70,38)"><path d="M0,0 V6" fill="none"/><path d="M-8,6 H8 L9,18 Q0,21 -9,18Z" fill="#c4473c"/><rect x="-6" y="8" width="5" height="5" fill="#d6ecf0" stroke-width="1"/><rect x="1" y="8" width="5" height="5" fill="#d6ecf0" stroke-width="1"/></g><g transform="translate(30,72)"><rect x="-12" y="-14" width="24" height="14" fill="#c99a6a"/><path d="M-16,-14 L0,-26 L16,-14Z" fill="#fbf9f3"/></g><ellipse cx="88" cy="72" rx="16" ry="6" fill="#9fd3cf"/></g><g fill="#fff" opacity=".85"><circle cx="84" cy="62" r="5"/><circle cx="92" cy="58" r="6"/></g></svg>`;
@@ -1484,11 +1496,12 @@ Object.assign(NEXTINFO,{2:{pv:()=>farmPreview(),btn:'搭乾草車出發',had:'�
 function win(){st.running=false;clearInterval(timer);const total=elapsed();$('#time').textContent=fmt(total);
  const BK='townhunt-best-L'+level;let best=null;try{best=parseFloat(localStorage.getItem(BK))}catch(_){}
  const isBest=!best||total<best;if(isBest){best=total;try{localStorage.setItem(BK,String(total))}catch(_){}}
- const crit=[['全部找到',true],['提示 1 次內',(st.hintsUsed||0)<=1],['找到幸運草',!!st.clover]],ns=crit.filter(c=>c[1]).length;
+ const crit=[['全部找到',true],['提示 1 次內',(st.hintsUsed||0)<=1],['故事幸運草',!!st.clover]],ns=crit.filter(c=>c[1]).length;
+ if(st.bonus)crit.push(['隱藏幸運草',true]);
  try{const SK='townhunt-stars-L'+level,old=+localStorage.getItem(SK)||0;if(ns>old)localStorage.setItem(SK,String(ns))}catch(_){}
  $('#winTitle').textContent=`第 ${level} 關完成！`;
- $('#winStars').innerHTML=crit.map(([c,ok],k)=>`<div class="${k===1?'mid':''}" style="animation-delay:${.9+k*.28}s">${starSvg(ok,k===1?58:46)}<span style="color:${ok?'var(--ink)':'var(--muted)'}">${c}</span></div>`).join('');
- $('#rTime').textContent=fmt(total);$('#rHint').textContent=st.hintsUsed||0;$('#rMiss').textContent=st.misses;
+ $('#winStars').classList.toggle('four',crit.length>3);$('#winStars').innerHTML=crit.map(([c,ok],k)=>`<div class="${k===1?'mid':''}" style="animation-delay:${.9+k*.28}s">${starSvg(ok,k===1?58:46,k===3?'#7fc45a':0)}<span style="color:${ok?'var(--ink)':'var(--muted)'}">${c}</span></div>`).join('');
+ $('#rTime').textContent=fmt(total);$('#rHint').textContent=st.hintsUsed||0;
  $('#winTag').textContent=isBest?'這一關的新紀錄':`最佳紀錄 ${fmt(best)}`;
  const nx=$('#winNext'),nb=$('#nextBtn');
  const nl=level+1,hasNext=!!LEVELS[nl],had=prog.unlocked>=nl,gotS=starsOf(level);
@@ -1501,7 +1514,7 @@ $('#againBtn').onclick=()=>{$('#winOv').classList.add('hide');curtain(()=>{setLe
 $('#startBtn').onclick=()=>{ac();curtain(()=>{loadScene(level);$('#startOv').classList.add('hide');newGame()},'把東西藏好⋯')};
 let tCount=0,tTimer;
 $('#gameTitle').onclick=()=>{tCount++;clearTimeout(tTimer);tTimer=setTimeout(()=>tCount=0,2500);if(tCount>=5){tCount=0;testMode=!testMode;try{localStorage.setItem('townhunt-test',testMode?'1':'0')}catch(_){}applyTestUI();toast(testMode?'🧪 測試模式：開啟':'測試模式：關閉')}};
-$('#winBtn').onclick=()=>{if(!st.running)return;items.forEach(it=>{it.found=true;colAdd(it.t.id)});st.clover=true;colClover(level);if(story)story.done=true;colStory(level);updateCounts();win()};
+$('#winBtn').onclick=()=>{if(!st.running)return;items.forEach(it=>{it.found=true;colAdd(it.t.id)});st.clover=true;st.bonus=true;colClover(level);colBonus(level);if(story)story.done=true;colStory(level);updateCounts();win()};
 $('#resetBtn').onclick=()=>{prog={unlocked:1};saveProg();try{[1,2,3,4,5].forEach(n=>{localStorage.removeItem('townhunt-best-L'+n);localStorage.removeItem('townhunt-stars-L'+n)})}catch(_){}st.running=false;clearInterval(timer);setLevel(1);toast('進度已重置，只開放第 1 關');return;
  items=[];itemsL.innerHTML='';const lw=document.getElementById('lockWall');lw.classList.remove('gone2');buildFog();setLevel(1);measure();const c=LEVELS[1].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base};clampV();apply();toast('進度已重置，只開放第 1 關')};
 const closeMenu=()=>$('#menu').classList.add('hide');
@@ -1648,7 +1661,7 @@ function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,
  $('#mapSvg').innerHTML=g;
  $('#mapSub').textContent=U>1?`已走過 ${U} 個地方，下一段路要拿到 ${NEED_STARS} 顆星才會出現`:`這一關拿到 ${NEED_STARS} 顆星，地圖上就會出現新的路`;
  let cards='';for(let n=1;n<=U;n++){if(!SCENES[n])continue;const m=MAPNODES.find(x=>x.n===n),b=bestOf(n),st_=starsOf(n);
-  cards+=`<button class="lcard${n===level?' here':''}" data-n="${n}" aria-label="${m.name}${n===level?'（你在這裡）':''}">${n===level?'<span class="here-tag">你在這裡</span>':''}<span class="nm">${m.name}</span><span class="stars">${[0,1,2].map(k=>starSvg(k<st_,16)).join('')}</span><small>${b?'最佳 '+fmt(b):'還沒完成'}</small></button>`}
+  cards+=`<button class="lcard${n===level?' here':''}" data-n="${n}" aria-label="${m.name}${n===level?'（你在這裡）':''}">${n===level?'<span class="here-tag">你在這裡</span>':''}<span class="nm">${m.name}</span><span class="stars">${[0,1,2].map(k=>starSvg(k<st_,16)).join('')}${COL.b&&COL.b[n]?starSvg(true,16,'#7fc45a'):''}</span><small>${b?'最佳 '+fmt(b):'還沒完成'}</small></button>`}
  $('#mapCards').innerHTML=cards;
  document.querySelectorAll('#mapSvg .mnode,#mapCards .lcard').forEach(el=>el.onclick=()=>goLevel(+el.dataset.n));
 }
@@ -1709,12 +1722,13 @@ function ride(mid,done,kind){const RX=RIDES[kind],cab=kind==='cable',el=$('#ride
  setTimeout(()=>{clearInterval(ci);el.classList.remove('on');setTimeout(()=>{el.innerHTML='';done&&done()},520)},4300)}
 
 /* ================= 收集冊 ================= */
-let COL={i:{},c:{},s:{}};try{const v=JSON.parse(localStorage.getItem('townhunt-col')||'null');if(v&&v.i)COL={s:{},...v}}catch(_){}
+let COL={i:{},c:{},s:{},b:{}};try{const v=JSON.parse(localStorage.getItem('townhunt-col')||'null');if(v&&v.i)COL={s:{},b:{},...v}}catch(_){}
 const saveCol=()=>{try{localStorage.setItem('townhunt-col',JSON.stringify(COL))}catch(_){}};
 /* 收集冊不分關卡：同一種物件只記一次（舊的「關卡:id」記錄自動轉回 id） */
 Object.keys(COL.i).forEach(k=>{if(k.includes(':')){COL.i[k.split(':')[1]]=1;delete COL.i[k]}});
 function colAdd(id){if(!COL.i[id]){COL.i[id]=1;saveCol()}}
 function colClover(n){if(!COL.c[n]){COL.c[n]=1;saveCol()}}
+function colBonus(n){if(!COL.b[n]){COL.b[n]=1;saveCol()}}
 function colStory(n){if(!COL.s[n]){COL.s[n]=1;saveCol()}}
 (()=>{const ov=document.createElement('div');ov.className='overlay hide';ov.id='colOv';
  ov.innerHTML=`<div class="pcard colc"><div class="mhead"><div><b>收集冊</b><span id="colSub"></span></div><button class="hb" id="colClose" aria-label="關閉收集冊"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button></div><div id="colBody"></div></div>`;
@@ -1722,19 +1736,22 @@ function colStory(n){if(!COL.s[n]){COL.s[n]=1;saveCol()}}
  const mb=document.createElement('button');mb.id='colBtn';mb.innerHTML=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/><path d="M9 8h6"/></svg><span>收集冊</span>`;
  const mapB=document.getElementById('mapBtn');mapB.parentNode.insertBefore(mb,mapB.nextSibling);
  /* 測試模式專用：快速找到提問的人、目標物、幸運草 */
- [['tClover','🧪 找幸運草'],['tHelper','🧪 找幫手'],['tTarget','🧪 找走失的目標'],['tGiver','🧪 找提問的人']].forEach(([id,t])=>{const b=document.createElement('button');b.id=id;b.className='tbtn';b.style.display='none';b.innerHTML=`<span>${t}</span>`;mb.parentNode.insertBefore(b,mb.nextSibling.nextSibling)})})();
+ [['tBonus','🧪 找隱藏幸運草'],['tClover','🧪 找故事幸運草'],['tHelper','🧪 找幫手'],['tTarget','🧪 找走失的目標'],['tGiver','🧪 找提問的人']].forEach(([id,t])=>{const b=document.createElement('button');b.id=id;b.className='tbtn';b.style.display='none';b.innerHTML=`<span>${t}</span>`;mb.parentNode.insertBefore(b,mb.nextSibling.nextSibling)})})();
 function testGo(p,label){closeMenu();if(!p){toast('這一關沒有'+label,1600);return}const s2=Math.max(view.s,base*1.5);tweenTo(s2,p[0],p[1],600);
  setTimeout(()=>{const g=svgEl('g',{},fx),c=svgEl('circle',{cx:p[0],cy:p[1],r:10,fill:'none',stroke:'#d8413a','stroke-width':4},g);anim(1600,k=>{c.setAttribute('r',10+30*(k*3%1));g.setAttribute('opacity',1-k*.7)},()=>g.remove())},620);toast('🧪 '+label,1400)}
 document.getElementById('tGiver').onclick=()=>{const g=storySp.giver;testGo(g&&[g.x,g.y-30],'提問的人')};
 document.getElementById('tHelper').onclick=()=>{const t=storySp.helper;testGo(t&&[t.x,t.y-30],'幫手')};
 document.getElementById('tTarget').onclick=()=>{const t=storySp.target;testGo(t&&[t.x,t.y-t.h*.4],'走失的目標')};
-document.getElementById('tClover').onclick=()=>{if(!clover){testGo(null,'幸運草');return}if(clover.found){toast('幸運草已經找到了',1400);return}const h=clover.host;testGo(clover.revealed?[clover.x,clover.y]:[h.x,h.y-h.h*.4],clover.revealed?'幸運草':'幸運草藏在這個東西後面（點它）')};
+const cloverGo=(c,nm)=>{if(!c){testGo(null,nm);return}if(c.found){toast(nm+'已經找到了',1400);return}const h=c.host;
+ testGo(c.revealed?[c.x,c.y]:[h.x,h.y-h.h*.4],c.revealed?nm:nm+'藏在這個東西後面'+(c.kind==='story'&&!(story&&story.done)?'（要先完成小故事才點得出來）':'（點它）'))};
+document.getElementById('tClover').onclick=()=>cloverGo(clovers.story,'故事幸運草');
+document.getElementById('tBonus').onclick=()=>cloverGo(clovers.bonus,'隱藏幸運草');
 let colUnder=[];
 function openCol(){const U=prog.unlocked;let html='',got=0,tot=0;const seen=new Set();
  for(let n=1;n<=U;n++){const L=LEVELS[n];if(!L||!L.types)continue;const m=MAPNODES.find(x=>x.n===n);
   const fresh=L.types.filter(t=>!seen.has(t.id));fresh.forEach(t=>seen.add(t.id));
   const cells=fresh.map(t=>{const ok=!!COL.i[t.id];tot++;if(ok)got++;return `<div class="${ok?'':'no'}"><span class="ic">${icon(t.id)}</span><span>${ok?t.short:'？'}</span></div>`}).join('');
-  html+=`<section class="colsec"><h4><span>${m?m.name:'第 '+n+' 關'}</span><span class="clv4 ${COL.c[n]?'':'no'}">🍀 ${COL.c[n]?'已找到':'還沒找到'}</span></h4><div class="colgrid">${cells}</div>${STORIES[n]?`<div class="storyrow ${COL.s[n]?'':'no'}">📖 小故事：${COL.s[n]?STORIES[n].title+' ✓':'還沒完成'}</div>`:''}</section>`}
+  html+=`<section class="colsec"><h4><span>${m?m.name:'第 '+n+' 關'}</span><span class="clv4 ${COL.c[n]?'':'no'}">🍀 ${COL.c[n]?'已找到':'還沒找到'}</span>${COL.b[n]?'<span class="clv4">✨ 隱藏幸運草</span>':''}</h4><div class="colgrid">${cells}</div>${STORIES[n]?`<div class="storyrow ${COL.s[n]?'':'no'}">📖 小故事：${COL.s[n]?STORIES[n].title+' ✓':'還沒完成'}</div>`:''}</section>`}
  $('#colBody').innerHTML=html;$('#colSub').textContent=`已收集 ${got} / ${tot} 種東西（每種只記一次）`;
  colUnder=['startOv','winOv'].filter(id=>!$('#'+id).classList.contains('hide'));colUnder.forEach(id=>$('#'+id).classList.add('hide'));$('#colOv').classList.remove('hide')}
 document.getElementById('colBtn').onclick=()=>{closeMenu&&closeMenu();openCol()};
@@ -1753,7 +1770,7 @@ function ensureUpTo(m,cb){const need=[];for(let n=1;n<=m;n++)if(LEVELS[n]&&LEVEL
 window.TH={T,f,r,sr,pk,ri,rnd,shuffle,limb,shade,wob,OL,SNOW,SKIN,HAIR,SHIRT,PANTS,HATS,kid,chibi,act,wrapAn,heart,bubble,noteM,peekHead,faceHead,headOnly,
  cat,frog,owl,sheep,chicken,anyDog,dog,swan,pine,roundTree,bush,rock,barrel,crate,pot,lamp,bench,sign,fence,reeds,lily,well,tent,campfire,swirl,signpost,stall,
  add,mark,canPlace,scatter,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,HEAVY,ANIM,ALWAYS,DUR,
- SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,NEXTINFO,HERE,pickView,walkPose,DENS,dbg:{clover:()=>clover,step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG,horseCart,rideSVG};
+ SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,NEXTINFO,HERE,pickView,walkPose,DENS,dbg:{clover:()=>clovers,step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG,horseCart,rideSVG};
 /* ================= boot ================= */
 applyTestUI();
 ensureUpTo(prog.unlocked,()=>{while(level>1&&!rodeHas(level))level--;if(LEVELS[level].file&&!LEVELS[level].types)level=Math.max(1,level-1);setLevel(level);
