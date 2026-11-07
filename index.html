@@ -112,6 +112,7 @@ button{font-family:var(--ui);cursor:pointer}
 .a-float{animation-name:float}.a-rock{animation-name:rock}.a-swim{animation-name:swim}.a-flap{animation-name:flap}
 .a-swing{transform-origin:50% 0%;animation-name:swing}@keyframes swing{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
 .a-spin{transform-origin:50% 50%;animation-name:spin;animation-timing-function:linear}
+.a-steam{animation-name:steam;animation-timing-function:ease-out}@keyframes steam{0%{transform:translateY(8px) scale(.75);opacity:0}30%{opacity:.85}100%{transform:translateY(-26px) scale(1.25);opacity:0}}
 .a-flag{transform-origin:0% 50%;animation-name:flag}.a-fire{animation-name:fire}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
 @keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
@@ -219,7 +220,7 @@ const W=2800,H=1800,EX=140,NS='http://www.w3.org/2000/svg',OL='#2b2420',CELL=16;
 const $=s=>document.querySelector(s);
 const f=n=>Math.round(n*10)/10;
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-let rng=mulberry32(77);
+let rng=mulberry32(77),SCN=0;
 const r=()=>rng(),sr=(a,b)=>a+r()*(b-a),ri=(a,b)=>Math.floor(sr(a,b+1)),pk=a=>a[Math.floor(r()*a.length)];
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -436,6 +437,22 @@ const DECOY={
  tomato:`<circle cy="0" r="8" fill="#d65a3c"/><path d="M-4,-7 L0,-4 L4,-7 L1,-8 L0,-11 L-1,-8Z" fill="#6f9a4a" stroke-width="1"/>`,
  bucket:`<path d="M-8,-12 Q0,-22 8,-12" fill="none" stroke-width="1.4"/><path d="M-9,-12 L9,-12 L7,4 L-7,4Z" fill="#a9b0b4"/><path d="M-8,-6 H8" fill="none" stroke-width="1"/>`
 };
+
+/* ---- L3 (雪山溫泉村) item art ---- */
+const scarfShape=(c,st)=>{const band=(d,w)=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w+3.4}"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}"/>`;return band('M-12,-9 Q0,3 12,-9 Q14,-14 8,-14 Q0,-6 -8,-14 Q-14,-14 -12,-9',4.5)+band('M-8,-6 Q-11,3 -12,12',6)+band('M-3,-3 Q-1,5 1,13',6)+`<path d="M-11.5,4 h-1 M-11,8 h-1 M-1,6 h1.5 M0,10 h1.5" fill="none" stroke="${st}" stroke-width="2.4"/><path d="M-14,13 l-1,4 M-12,14 v4 M-10,13 l1,4 M-1,14 v4 M1,14 l1,4 M3,13 l1,4" fill="none" stroke-width="1.2"/>`};
+const mittenShape=(c,heart)=>`<path d="M-7,12 L-8,-2 Q-9,-14 0,-14 Q8,-14 7,-3 L9,-6 Q13,-9 14,-5 Q15,-1 9,4 L8,12Z" fill="${c}"/><rect x="-9" y="8" width="19" height="7" rx="2" fill="#fbf6ea"/>`+(heart?`<path d="M0,-1 c-2,-3 -6,-1 -4,2 l4,4 4,-4 c2,-3 -2,-5 -4,-2z" fill="#fbf6ea" stroke-width="1"/>`:'');
+const mugShape=cream=>`<path d="M10,-2 Q18,-2 17,5 Q16,11 9,9" fill="none" stroke-width="2.4"/><path d="M-10,-6 L-9,12 Q0,15 9,12 L10,-6Z" fill="#f1ead8"/><path d="M-9.6,2 L9.6,2" fill="none" stroke="#c4473c" stroke-width="3"/>`+(cream?`<path d="M-11,-5 Q-13,-12 -5,-12 Q-2,-19 4,-15 Q11,-15 11,-5Z" fill="#fffaf0"/><circle cx="2" cy="-15" r="2" fill="#a0623a" stroke-width="1"/>`:`<ellipse cx="0" cy="-6" rx="10" ry="3" fill="#6b4a2b"/>`);
+const tubShape=towel=>`<path d="M-12,-6 L-10,12 L10,12 L12,-6Z" fill="#d6a868"/><path d="M-4,-6 L-3.5,12 M4,-6 L3.5,12" fill="none" stroke="#a8703f" stroke-width="1"/><path d="M-11.5,-1 H11.5 M-10.5,8 H10.5" fill="none" stroke="#6b4a2b" stroke-width="2.2"/><ellipse cx="0" cy="-6" rx="12" ry="3.2" fill="#a8703f"/>`+(towel?`<path d="M-9,-8 Q-4,-11 3,-9 L6,6 L-1,7 L-3,-5 Q-7,-5 -9,-8Z" fill="#fbf6ea"/><path d="M1,1 L5.5,0.5" fill="none" stroke="#6fa8d0" stroke-width="1.8"/>`:'');
+const skisShape=(c,st)=>[-5,5].map(dx=>`<g transform="translate(${dx},0) rotate(${dx*2.4})"><path d="M-3,16 L-3,-11 Q-3,-17 0,-18 Q3,-17 3,-11 L3,16Z" fill="${c}"/><path d="M0,-12 V14" fill="none" stroke="${st}" stroke-width="1.6"/><rect x="-3.6" y="0" width="7.2" height="4" fill="#3d3833" stroke-width="1"/></g>`).join('');
+const beanieShape=c=>`<path d="M-13,6 Q-14,-12 0,-12 Q14,-12 13,6Z" fill="${c}"/><path d="M-6,-9 V5 M0,-11 V5 M6,-9 V5" fill="none" stroke-width="1" opacity=".4"/><rect x="-14.5" y="3" width="29" height="8" rx="3.5" fill="#fbf6ea"/><circle cx="0" cy="-14" r="5" fill="#fbf6ea"/>`;
+const snowmanShape=hat=>`<circle cy="7" r="9" fill="#fbf7ef"/><circle cy="-6" r="6.5" fill="#fbf7ef"/>`+(hat?`<rect x="-5" y="-20" width="10" height="9" fill="${OL}"/><rect x="-8" y="-12.5" width="16" height="2.6" rx="1" fill="${OL}"/><path d="M-5,-14.5 H5" fill="none" stroke="#c4473c" stroke-width="1.6"/>`:'')+`<path d="M0,-5.5 l6.5,1.6 l-6.5,1.2Z" fill="#e07a32" stroke-width="1"/><g fill="${OL}" stroke="none"><circle cx="-2.6" cy="-8" r="1"/><circle cx="1.8" cy="-8" r="1"/><circle cy="4" r="1.1"/><circle cy="8.5" r="1.1"/></g><path d="M-8,4 L-15,-2 M8,4 L15,-1" fill="none" stroke="#7a5235" stroke-width="1.6"/>`;
+Object.assign(ART,{scarf:scarfShape('#c4473c','#fbf6ea'),mitten:mittenShape('#9a6fa8',true),cocoa:mugShape(true),tub:tubShape(true),skis:skisShape('#c4473c','#e0b44a'),
+ pinecone:`<path d="M0,-14 Q11,-8 9,4 Q6,13 0,15 Q-6,13 -9,4 Q-11,-8 0,-14Z" fill="#9a6a3a"/><path d="M-7,-5 q3.5,3 7,0 q3.5,3 7,0 M-8.5,1 q4.2,3.5 8.5,0 q4.2,3.5 8.5,0 M-7,7 q3.5,3 7,0 q3.5,3 7,0 M-3.5,12 q1.75,2 3.5,0 q1.75,2 3.5,0" fill="none" stroke-width="1.2"/><path d="M0,-14 q1,-4 3,-5" fill="none" stroke-width="1.6"/>`,
+ beanie:beanieShape('#d98c46'),snowman:snowmanShape(true)});
+Object.assign(DECOY,{scarfBlue:scarfShape('#5a86b0','#fbf6ea'),mittenPlain:mittenShape('#9a6fa8',false),mittenGreen:mittenShape('#6f9a4a',true),coffee:mugShape(false),tubPlain:tubShape(false),
+ skisBlue:skisShape('#5a86b0','#fbf6ea'),beanieTeal:beanieShape('#6fa8a0'),beanieRed:beanieShape('#c4473c'),snowmanPlain:snowmanShape(false),
+ sled:`<path d="M-17,5 L14,5 Q20,5 19,-1" fill="none" stroke="#c4473c" stroke-width="2.4"/><rect x="-15" y="-5" width="27" height="6" rx="2" fill="#c99a5b"/><path d="M-10,1 V5 M7,1 V5" fill="none" stroke-width="1.6"/>`,
+ acorn:`<ellipse cx="0" cy="3" rx="8" ry="10" fill="#c99a5b"/><path d="M-10,-1 Q-10,-11 0,-11 Q10,-11 10,-1 Q0,2 -10,-1Z" fill="#7a5235"/><path d="M0,-11 q1,-4 3,-5" fill="none" stroke-width="1.8"/>`});
 const TYPES1=[
  {id:'hat',name:'紫色魔法帽',short:'魔法帽',r:16,rot:20,regions:['top','village','forest','plaza']},
  {id:'key',name:'金鑰匙',short:'金鑰匙',r:15,rot:180,regions:['village','plaza','top','banks']},
@@ -460,6 +477,17 @@ const TYPES2=(()=>{const base=id=>TYPES1.find(t=>t.id===id);const fx=(id,regions
  {id:'milk',name:'牛奶罐',short:'牛奶罐',r:15,rot:8,regions:['farm','farmS','farm','farmS']},
  {id:'sunflower',name:'向日葵',short:'向日葵',r:16,rot:15,regions:['farm','farm','farmS','farm']},
  {id:'apple',name:'紅蘋果',short:'蘋果',r:14,rot:20,regions:['farm','farmS','farm','farmS']}]})()
+
+const TYPES3=(()=>{const g=id=>[...TYPES1,...TYPES2].find(t=>t.id===id);
+ return [{...g('fish'),regions:['lake','lake','lake','lake']},{...g('egg'),name:'溫泉蛋',short:'溫泉蛋',regions:['onsen','onsen','inn','station']},{...g('cat'),regions:['inn','station','slope','onsen']},{...g('key'),regions:['inn','station','lake','slope']},
+ {id:'scarf',name:'紅圍巾',short:'圍巾',r:15,rot:25,regions:['station','inn','slope','lake']},
+ {id:'mitten',name:'愛心毛線手套',short:'手套',r:14,rot:30,regions:['slope','lake','station','inn']},
+ {id:'cocoa',name:'熱可可',short:'熱可可',r:14,rot:8,regions:['station','inn','onsen','station']},
+ {id:'tub',name:'溫泉木桶',short:'木桶',r:14,rot:8,regions:['onsen','onsen','inn','station']},
+ {id:'skis',name:'紅色滑雪板',short:'滑雪板',r:16,rot:40,regions:['slope','slope','station','lake']},
+ {id:'pinecone',name:'松果',short:'松果',r:13,rot:30,regions:['slope','slope','inn','lake']},
+ {id:'beanie',name:'橘色毛線帽',short:'毛線帽',r:15,rot:20,regions:['slope','station','lake','inn']},
+ {id:'snowman',name:'戴帽小雪人',short:'小雪人',r:15,rot:6,regions:['slope','lake','station','slope']}]})();
 let TYPES=TYPES1;
 /* ================= terrain (world: N & W mountains, S sea, E land) ================= */
 const chaikin=(P,n=2)=>{for(let k=0;k<n;k++){const Q=[P[0]];for(let i=0;i<P.length-1;i++){const a=P[i],b=P[i+1];Q.push([a[0]*.75+b[0]*.25,a[1]*.75+b[1]*.25],[a[0]*.25+b[0]*.75,a[1]*.25+b[1]*.75])}Q.push(P[P.length-1]);P=Q}return P};
@@ -476,7 +504,11 @@ const LANDPATH='M'+LAND.map(p=>f(p[0])+','+f(p[1])).join(' L')+'Z';
 function isLand(x,y){if(y<330)return true;let c=false;for(let i=0,j=LAND.length-1;i<LAND.length;j=i++){const[xi,yi]=LAND[i],[xj,yj]=LAND[j];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c}return c}
 const BRIDGE={x0:975,x1:1025,y0:1165,y1:1320};
 const DOCKS=[[930,1690,1060,1795],[1180,1690,1310,1795],[2600,1690,2700,1795]];
-function isWater(x,y){
+const POOLS3=[[1180,975,105,46],[1430,945,115,50],[1310,1150,125,48]];
+const LAKE3={cx:790,cy:1490,rx:250,ry:140};
+const HOLES=[[640,1420],[760,1390],[880,1410],[980,1470],[600,1530],[720,1520],[840,1560],[950,1580],[700,1600],[800,1460]];
+function isWater3(x,y){for(const[cx,cy,rx,ry] of POOLS3)if(((x-cx)/rx)**2+((y-cy)/ry)**2<1)return true;for(const[cx,cy] of HOLES)if(((x-cx)/26)**2+((y-cy)/11)**2<1)return true;return false}
+function isWater(x,y){if(SCN===3)return isWater3(x,y);
  if(x>=BRIDGE.x0&&x<=BRIDGE.x1&&y>BRIDGE.y0&&y<BRIDGE.y1)return false;
  for(const[a,b,c,d] of DOCKS)if(x>=a&&x<=c&&y>=b&&y<=d)return false;
  if(x>108&&x<192&&y>600&&y<800)return true;
@@ -658,7 +690,8 @@ function buildStructures(sc){const SC=SCENES[sc];
  [[2100,1642],[2145,1644],[2345,1662],[2585,1642]].forEach(([x,y])=>add(x,y,28,58,'walker',act(0,0,1,{view:'back',pose:pk(['reach','stand'])},true)));
  add(2050,1460,62,72,'well',well());
  // teasers for future areas
- add(2632,590,50,50,'sign',signpost('山路'));
+ add(2632,590,50,50,'sign',signpost('纜車'));
+ add(2690,540,80,60,'cabin',`<path d="M20,-46 L130,-300 M30,-44 L140,-298" fill="none" stroke-width="1.8"/><rect x="-30" y="-34" width="60" height="34" fill="#ddd5c6"/><path d="M-34,-34 L34,-34 L28,-44 L-28,-44Z" fill="${SNOW}"/><rect x="-12" y="-24" width="24" height="24" fill="#3d3833"/><ellipse cx="22" cy="-46" rx="12" ry="3.5" fill="#c4473c"/><g transform="translate(78,-170)">${cabinSVG('#c4473c',false)}</g>`,{mark:false});
  add(2580,1688,50,50,'sign',signpost('小島'));
  add(2650,1785,80,30,'boat',rowboat(),{mark:false});
  }
@@ -667,7 +700,8 @@ const REG={
  sky:{x:150,y:90,w:1500,h:170},sky2:{x:1850,y:90,w:900,h:170},top:{x:300,y:430,w:1200,h:110},village:{x:300,y:560,w:1220,h:520},meadow:{x:1520,y:520,w:220,h:700},
  river:{x:100,y:780,w:1600,h:1000},banks:{x:180,y:1000,w:1480,h:420},forest:{x:170,y:1150,w:610,h:550},
  plaza:{x:780,y:1360,w:600,h:340},harbor:{x:560,y:1712,w:1180,h:80},
- farm:{x:1840,y:560,w:900,h:700},farmS:{x:1840,y:1260,w:900,h:430},pond:{x:2130,y:1270,w:340,h:160}
+ farm:{x:1840,y:560,w:900,h:700},farmS:{x:1840,y:1260,w:900,h:430},pond:{x:2130,y:1270,w:340,h:160},
+ slope:{x:540,y:470,w:1040,h:280},inn:{x:530,y:830,w:470,h:400},onsen:{x:1050,y:830,w:540,h:400},lake:{x:540,y:1330,w:500,h:300},station:{x:1090,y:1300,w:490,h:400}
 };
 
 
@@ -681,11 +715,11 @@ function canPlace(x,y,w,h,water,sh){const[a,b,c,d]=cellsOf(x,y,w,h,sh);if(a<0||b
 function mark(x,y,w,h,sh=.8){const[a,b,c,d]=cellsOf(x,y,w,h,sh);for(let j=Math.max(0,b);j<=Math.min(GR-1,d);j++)for(let i=Math.max(0,a);i<=Math.min(GC-1,c);i++)occ[j*GC+i]=1}
 
 const sprites=[];
-const ANIM={cow:['bob','wig'],pig:['bob','wig'],scarecrow:['sway'],cat:['bob','wig','sway'],dog:['hop','bob','wig'],chicken:['peck','peck','bob'],sheep:['bob','sway'],frog:['hop'],owl:['wig','bob'],
+const ANIM={steam:['steam'],monkeyR:['bob','wig'],monkeyW:['bob'],bather:['bob'],cow:['bob','wig'],pig:['bob','wig'],scarecrow:['sway'],cat:['bob','wig','sway'],dog:['hop','bob','wig'],chicken:['peck','peck','bob'],sheep:['bob','sway'],frog:['hop'],owl:['wig','bob'],
  swan:['rock'],boat:['rock'],sail:['rock'],balloon:['float'],bird:['flap'],koi:['swim'],seaFish:['swim']};
-const ALWAYS=new Set(['swan','boat','sail','balloon','bird']);
-const DUR={swing:[1.8,2.8],bob:[1.6,2.6],sway:[2.2,3.4],hop:[2.4,4],wig:[3,5],peck:[1.8,3],rock:[2.6,4],float:[4,6],flap:[.5,.8],swim:[2.5,4]};
-const HEAVY=new Set(['barn','fruitTree','house','tower','castle','mill','mush','stall','fountain','light','tent','well','pine','round','bush','rock','barrel','crate','crateStack','sail','boat']);
+const ALWAYS=new Set(['steam','bather','swan','boat','sail','balloon','bird']);
+const DUR={steam:[3,5],swing:[1.8,2.8],bob:[1.6,2.6],sway:[2.2,3.4],hop:[2.4,4],wig:[3,5],peck:[1.8,3],rock:[2.6,4],float:[4,6],flap:[.5,.8],swim:[2.5,4]};
+const HEAVY=new Set(['pineS','woodpile','toro','tubStack','snowmanBig','cabin','bfence','lift','rockS','barn','fruitTree','house','tower','castle','mill','mush','stall','fountain','light','tent','well','pine','round','bush','rock','barrel','crate','crateStack','sail','boat']);
 function add(x,y,w,h,kind,inner,o={}){
  const A=ANIM[kind];
  if(A&&(ALWAYS.has(kind)||r()<.75)){const a=pk(A),[d0,d1]=DUR[a];inner=`<g class="an a-${a}" style="--d:${f(sr(d0,d1))}s;animation-delay:-${f(sr(0,4))}s">${inner}</g>`}
@@ -801,7 +835,7 @@ function kayak(c){return `<path d="M-40,0 Q0,12 40,0 Q0,-8 -40,0Z" fill="${c}"/>
 function rowboat(){return `<path d="M-38,-6 Q0,20 38,-6 Z" fill="#a8703f"/><path d="M-32,-2 Q0,10 32,-2" fill="none" stroke-width="1.4"/>`+`<g transform="translate(-14,-4) scale(.75)">${kid({pose:'sit'})}</g><g transform="translate(14,-4) scale(-.75,.75)">${kid({pose:'sit'})}</g>${wrapAn('bob',bubble(0,-58,pk(['heart','note'])),true)}<path d="M-38,-6 Q0,20 38,-6 Q0,2 -38,-6Z" fill="#c99a5b"/>`}
 function sailboat(){return `<path d="M0,-6 V-70" fill="none" stroke-width="3"/><path d="M3,-66 L36,-14 L3,-14Z" fill="#fbf6ea"/><path d="M-3,-60 L-30,-18 L-3,-18Z" fill="#c4572f"/><path d="M-44,-8 L44,-8 L32,8 L-32,8Z" fill="#6f7f9a"/><path d="M-36,0 H36" fill="none" stroke="#fbf6ea" stroke-width="2"/>`}
 function stall(kind){
- const aw={fish:'aw2',potion:'aw4',bread:'aw3',pumpkin:'aw1',veg:'aw2',fruit:'aw1'}[kind];
+ const aw={fish:'aw2',potion:'aw4',bread:'aw3',pumpkin:'aw1',veg:'aw2',fruit:'aw1',cocoa:'aw1',knit:'aw4'}[kind];
  let g=`<path d="M-48,0 V-62 M48,0 V-62" fill="none" stroke-width="4"/><rect x="-52" y="-34" width="104" height="34" fill="#c99a5b"/><path d="M-52,-24 H52 M-52,-12 H52" fill="none" stroke-width="1.2"/>`;
  g+=`<path d="M-58,-62 L58,-62 L52,-82 L-52,-82Z" fill="url(#${aw})"/><path d="M-58,-62 ${[...Array(8)].map((_,i)=>`q7.25,8 14.5,0`).join(' ')}" fill="url(#${aw})"/>`;
  g+=`<g transform="translate(0,-34) scale(.8)">${chibi({arm:1})}</g>`;
@@ -812,7 +846,9 @@ function stall(kind){
   if(kind==='bread')goods.push(T(x,y-6,.75,i%2?DECOY.cupcake:`<ellipse cx="0" cy="0" rx="10" ry="6" fill="#d9a05a"/><path d="M-4,-4 l2,4 M1,-5 l2,4" fill="none" stroke-width="1.2"/>`));
   if(kind==='pumpkin')goods.push(T(x,y-6,.75,DECOY.pumpkinPlain));
   if(kind==='veg')goods.push(T(x,y-8,.7,i%2?DECOY.whiteCarrot:`<circle r="8" fill="#9db86a"/><path d="M-4,-2 q4,-5 8,0" fill="none" stroke-width="1"/>`));
-  if(kind==='fruit')goods.push(T(x,y-6,.75,DECOY.tomato));}
+  if(kind==='fruit')goods.push(T(x,y-6,.75,DECOY.tomato));
+  if(kind==='cocoa')goods.push(T(x,y-8,.7,DECOY.coffee));
+  if(kind==='knit')goods.push(T(x,y-8,.7,[DECOY.beanieTeal,DECOY.scarfBlue,DECOY.mittenGreen,DECOY.beanieRed,DECOY.mittenPlain][i]));}
  return g+goods.join('');
 }
 function fountain(){
@@ -820,6 +856,127 @@ function fountain(){
 }
 function lighthouse(){return `<path d="M-26,0 Q-34,-14 -18,-22 Q0,-30 22,-22 Q36,-12 26,0Z" fill="#9a9a8a"/>`+`<g transform="translate(0,-18)"><path d="M-16,0 L-11,-110 L11,-110 L16,0Z" fill="#fbf6ea"/><path d="M-15,-22 L15,-22 L14,-42 L-14,-42Z M-13,-64 L13,-64 L12,-86 L-12,-86Z" fill="#c4572f"/><rect x="-14" y="-128" width="28" height="18" fill="#f6d27a"/><path d="M-18,-128 L0,-146 L18,-128Z" fill="#c4572f"/><path d="M-20,-110 H20" fill="none" stroke-width="3"/></g>`}
 
+
+/* ================= L3 雪山溫泉村 props ================= */
+const SNOW='#fbf9f3';
+function pineS(){const c=pk(['#4f6a4a','#56703f','#5f7a4a']),d=shade(c,-.3);let g=`<ellipse cx="3" cy="1" rx="22" ry="5" fill="#c9d6dc" opacity=".6" stroke="none"/><rect x="-4" y="-14" width="8" height="15" fill="#7a5235"/>`;
+ [[24,-12,38],[19,-36,34],[14,-58,30]].forEach(([w,y,h])=>{g+=`<path d="M${-w},${y} L0,${y-h} L${w},${y}Z" fill="${c}"/><path d="M0,${y-h} L${w},${y} L${f(w*.3)},${y}Z" fill="${d}" stroke="none"/><path d="M${f(-w*.55)},${f(y-h*.45)} Q${f(-w*.25)},${f(y-h*.33)} 0,${f(y-h*.48)} Q${f(w*.25)},${f(y-h*.33)} ${f(w*.55)},${f(y-h*.45)} L0,${y-h}Z" fill="${SNOW}"/>`});
+ return g}
+function lodge(w,h,o={}){const wall=o.wall||pk(['#b98a5a','#c99a6a','#efe4cc','#e6d3b0']),roof=o.roof||pk(['#7f5a40','#a85640','#6a7488','#5d6640']),sd=f(w*.28),sy=f(w*.14),rh=f(w*.42),hw=w/2;
+ let g=`<path d="M${-hw-4},1 L${hw+sd+6},${-sy+1} L${hw+sd+16},6 L${-hw+8},10Z" fill="#9fb1b8" opacity=".35" stroke="none"/>`;
+ g+=`<path d="M${hw},0 L${hw+sd},${-sy} L${hw+sd},${-h-sy} L${hw},${-h}Z" fill="${shade(wall,-.22)}"/>`;
+ g+=`<path d="M0,${-h-rh} L${sd},${-h-rh-sy} L${hw+sd+8},${-h-sy} L${hw+8},${-h}Z" fill="${shade(roof,-.15)}"/><path d="M0,${-h-rh} L${sd},${-h-rh-sy} L${hw+sd+8},${-h-sy-6} L${hw+8},${-h-6}Z" fill="${SNOW}"/>`;
+ g+=`<rect x="${-hw}" y="${-h}" width="${w}" height="${h}" fill="${wall}"/><path d="M${-hw},${-h} L0,${-h-rh} L${hw},${-h}Z" fill="${wall}"/>`;
+ if(wall==='#efe4cc'||wall==='#e6d3b0')g+=`<path d="M${-hw},${f(-h*.55)} H${hw} M${-hw+4},${-h} V0 M${hw-4},${-h} V0 M${-hw/2},${-h} L0,${-h-rh+8} L${hw/2},${-h}" fill="none" stroke="#6b4a2b" stroke-width="3"/>`;
+ else g+=`<path d="${[...Array(Math.floor(h/9))].map((_,i)=>`M${-hw},${-h+9+i*9} H${hw}`).join(' ')}" fill="none" stroke="${shade(wall,-.3)}" stroke-width="1"/>`;
+ g+=`<path d="M${-hw-9},${-h+1} L0,${-h-rh-1} L${hw+9},${-h+1}" fill="none" stroke="${OL}" stroke-width="8"/><path d="M${-hw-9},${-h+1} L0,${-h-rh-1} L${hw+9},${-h+1}" fill="none" stroke="${roof}" stroke-width="4.6"/>`;
+ g+=`<path d="M${-hw-8},${-h-3} L0,${-h-rh-5} L${hw+8},${-h-3}" fill="none" stroke="${OL}" stroke-width="7"/><path d="M${-hw-8},${-h-3} L0,${-h-rh-5} L${hw+8},${-h-3}" fill="none" stroke="${SNOW}" stroke-width="4"/>`;
+ let ic='';for(let k=0;k<6;k++){const t=(k+.5)/6,x=hw+8+t*sd,y=-h-t*sy;ic+=`M${f(x-2)},${f(y)} L${f(x)},${f(y+5+(k%2)*4)} L${f(x+2)},${f(y)}Z `}g+=`<path d="${ic}" fill="#e6f2f5" stroke-width="1"/>`;
+ g+=`<circle cx="0" cy="${f(-h-rh*.42)}" r="5" fill="#f6d27a"/>`;
+ const dw=Math.min(22,w*.2);
+ g+=`<rect x="${-dw/2}" y="${-30}" width="${dw}" height="30" fill="#5a3a26"/>`;
+ if(o.noren!==false&&(o.noren||r()<.55)){const nc=pk(['#4a5a78','#6a7488','#a85640']);g+=`<path d="M${-dw/2-3},-31 H${dw/2+3} V-16 H${dw/2-4} V-21 H${-dw/2+4} V-16 H${-dw/2-3}Z" fill="${nc}"/><path d="M0,-31 V-21" fill="none" stroke="#fbf6ea" stroke-width="1.2"/><text x="0" y="-22.5" font-size="8" text-anchor="middle" fill="#fbf6ea" stroke="none" font-weight="700" font-family="PingFang TC,Noto Sans TC,sans-serif">湯</text>`}
+ [[-hw+10],[hw-10-16]].forEach(([x])=>{if(w>90)g+=`<rect x="${f(x)}" y="${f(-h+10)}" width="16" height="14" fill="#f6d27a"/><path d="M${f(x+8)},${f(-h+10)} v14 M${f(x)},${f(-h+17)} h16" fill="none" stroke-width="1.2"/>`});
+ g+=`<path d="M${f(-hw+8)},${f(-h+4)} v6" fill="none" stroke-width="1"/><ellipse cx="${f(-hw+8)}" cy="${f(-h+16)}" rx="5" ry="6.5" fill="#d8413a"/><path d="M${f(-hw+3)},${f(-h+16)} h10" fill="none" stroke-width="1"/>`;
+ g+=`<path d="M${-hw-6},2 Q${f(-hw/2)},-7 0,0 Q${f(hw/2)},-6 ${hw+sd},${-sy+2} L${hw+sd+4},2Z" fill="${SNOW}"/>`;
+ return g}
+function cableStation(){let g=`<path d="M-104,2 L124,-20 L134,10 L-90,14Z" fill="#9fb1b8" opacity=".3" stroke="none"/>`;
+ g+=`<path d="M90,0 L118,-16 L118,-92 L90,-76Z" fill="#a9a196"/><rect x="-90" y="-76" width="180" height="76" fill="#ddd5c6"/>`;
+ g+=`<path d="M-42,0 V-50 H42 V0Z" fill="#3d3833"/><g transform="translate(0,-48)"><path d="M0,0 V10" fill="none" stroke="#9aa0a4" stroke-width="2"/><path d="M-14,10 H14 L16,30 Q0,34 -16,30Z" fill="#c4473c"/><rect x="-11" y="13" width="9" height="8" fill="#d6ecf0"/><rect x="2" y="13" width="9" height="8" fill="#d6ecf0"/></g>`;
+ g+=[-78,-62,54,70].map(x=>`<rect x="${x}" y="-60" width="12" height="16" fill="#cfe4ea"/>`).join('');
+ g+=`<path d="M-98,-76 L98,-76 L126,-92 L-70,-92Z" fill="#6a7488"/><path d="M-98,-80 L96,-80 L124,-96 L-70,-96Z" fill="${SNOW}"/>`;
+ g+=`<path d="M12,-90 L18,-128 L42,-128 L48,-90" fill="#8a8f94"/><ellipse cx="30" cy="-132" rx="24" ry="7" fill="#c4473c"/><ellipse cx="30" cy="-132" rx="8" ry="2.4" fill="#3d3833"/>`;
+ g+=`<rect x="-34" y="-72" width="68" height="17" rx="3" fill="#fbf6ea"/><text x="0" y="-59" font-size="12" text-anchor="middle" fill="${OL}" stroke="none" font-weight="700" font-family="PingFang TC,Noto Sans TC,sans-serif">纜車站</text>`;
+ return g}
+function cabinSVG(c,ppl){let g=`<g><animateTransform attributeName="transform" type="rotate" values="-4;4;-4" dur="3.2s" repeatCount="indefinite"/>`;
+ g+=`<path d="M0,0 V13" fill="none" stroke-width="2.2"/><rect x="-7" y="-3" width="14" height="5" rx="2" fill="#8a8f94"/>`;
+ g+=`<path d="M-18,12 H18 Q22,12 22,16 L20,40 Q0,46 -20,40 L-22,16 Q-22,12 -18,12Z" fill="${c}"/><path d="M-21,33 Q0,37 21,33" fill="none" stroke="#fbf6ea" stroke-width="2"/>`;
+ g+=`<rect x="-16" y="16" width="14" height="12" rx="2" fill="#d6ecf0"/><rect x="2" y="16" width="14" height="12" rx="2" fill="#d6ecf0"/>`;
+ if(ppl)[[-9,'#d98c46'],[9,'#6fa8a0']].forEach(([x,hc])=>g+=`<circle cx="${x}" cy="26" r="4.6" fill="${pk(SKIN)}" stroke-width="1.1"/><path d="M${x-4.8},24.5 Q${x},16 ${x+4.8},24.5Z" fill="${hc}" stroke-width="1"/><circle cx="${x}" cy="18.5" r="1.6" fill="#fbf6ea" stroke-width=".8"/>`);
+ return g+'</g>'}
+const steamPuff=()=>`<g fill="#ffffff" opacity=".8" stroke="none"><circle cx="-8" cy="-10" r="9"/><circle cx="4" cy="-17" r="11"/><circle cx="13" cy="-8" r="7"/></g>`;
+const monkey=()=>`<ellipse cx="0" cy="-9" rx="10" ry="9" fill="#b9a48a"/><circle cx="0" cy="-22" r="8" fill="#b9a48a"/><ellipse cx="0" cy="-21" rx="5.5" ry="5" fill="#e8a0a0"/><g fill="${OL}" stroke="none"><circle cx="-2" cy="-22.5" r="1"/><circle cx="2" cy="-22.5" r="1"/></g><path d="M-1.5,-18.5 q1.5,1 3,0" fill="none" stroke-width="1"/>`;
+const monkeyW=()=>`<circle cx="0" cy="-8" r="8" fill="#b9a48a"/><ellipse cx="0" cy="-7" rx="5.5" ry="5" fill="#e8a0a0"/><g fill="${OL}" stroke="none"><circle cx="-2" cy="-8.5" r="1"/><circle cx="2" cy="-8.5" r="1"/></g><path d="M-12,-1 Q0,4 12,-1 L12,3 L-12,3Z" fill="#9fd3cf" stroke="none"/><ellipse cx="0" cy="0" rx="13" ry="3.5" fill="none" stroke="#e6f4f2" stroke-width="1.6"/>`;
+const bather=()=>`<g transform="translate(0,4)">${peekHead(0,-6,.55,false)}</g><path d="M-6,-21 h12 l-1,4 h-10Z" fill="#fbf6ea" stroke-width="1"/><path d="M-14,0 Q0,5 14,0 L14,5 L-14,5Z" fill="#9fd3cf" stroke="none"/><ellipse cx="0" cy="0" rx="15" ry="4" fill="none" stroke="#e6f4f2" stroke-width="1.6"/>`;
+const woodpile=()=>`<rect x="-22" y="-20" width="44" height="20" fill="#a8703f"/>`+[[-15,-5],[-5,-5],[5,-5],[15,-5],[-10,-14],[0,-14],[10,-14]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="5" fill="#d6a868" stroke-width="1.4"/><circle cx="${x}" cy="${y}" r="1.6" fill="none" stroke-width="1"/>`).join('')+`<path d="M-24,-18 Q-10,-28 2,-21 Q14,-28 24,-18 Q10,-16 -24,-18Z" fill="${SNOW}"/>`;
+const toro=()=>`<rect x="-9" y="-8" width="18" height="8" fill="#b0a996"/><rect x="-3" y="-24" width="6" height="16" fill="#b0a996"/><rect x="-10" y="-36" width="20" height="12" fill="#c6bfae"/><rect x="-5" y="-33" width="10" height="7" fill="#f6d27a"/><path d="M-15,-36 L0,-46 L15,-36Z" fill="#9d9684"/><path d="M-13,-38 Q0,-50 13,-38 Q0,-41 -13,-38Z" fill="${SNOW}"/><circle cy="-48" r="2.4" fill="#9d9684"/>`;
+const tubStack=()=>T(-11,-11,.9,tubShape(false))+T(11,-11,.9,tubShape(false))+T(0,-26,.9,tubShape(false));
+const bfence=()=>`<path d="M-27,-28 H27 M-27,-14 H27" fill="none" stroke="#7a8a46" stroke-width="3"/>`+[-24,-12,0,12,24].map(x=>`<rect x="${x-3}" y="-40" width="6" height="40" rx="2" fill="#b5bd7a"/><path d="M${x-3},-26 h6" fill="none" stroke-width="1"/><ellipse cx="${x}" cy="-40" rx="4" ry="2.4" fill="${SNOW}" stroke-width="1.2"/>`).join('');
+const rockS=()=>rock()+`<path d="M-13,-11 Q-2,-21 11,-13 Q2,-11 -13,-11Z" fill="${SNOW}"/>`;
+const snowMound=()=>`<path d="M-18,0 Q-14,-10 -4,-9 Q2,-15 10,-9 Q18,-8 18,0Z" fill="${SNOW}" stroke-width="1.6"/>`;
+function snowmanBig(){const sc=pk(['#c4473c','#5a86b0','#e0b44a','#6f9a4a']);return `<ellipse cx="0" cy="0" rx="20" ry="5" fill="#c9d6dc" stroke="none" opacity=".6"/><circle cy="-15" r="16" fill="#fbf7ef"/><circle cy="-40" r="11" fill="#fbf7ef"/><path d="M-10,-31 Q0,-26 10,-31 L10,-27 Q0,-22 -10,-27Z" fill="${sc}"/><path d="M4,-28 L8,-14 L3,-14Z" fill="${sc}"/>`+(r()<.5?`<path d="M-10,-47 Q0,-62 10,-47Z" fill="${sc}"/><circle cy="-58" r="3" fill="#fbf6ea"/>`:`<path d="M-14,-24 l-14,-12 M14,-24 l13,-10" fill="none" stroke="#7a5235" stroke-width="2.2"/>`)+`<path d="M0,-40 l9,2 l-9,2Z" fill="#e07a32" stroke-width="1.2"/><g fill="${OL}" stroke="none"><circle cx="-4" cy="-43" r="1.4"/><circle cx="3" cy="-43" r="1.4"/><circle cy="-18" r="1.6"/><circle cy="-10" r="1.6"/></g>`}
+const skiBoard=c=>`<path d="M-18,1 L16,1 Q22,1 22,-4" fill="none" stroke="${OL}" stroke-width="5"/><path d="M-18,1 L16,1 Q22,1 22,-4" fill="none" stroke="${c}" stroke-width="2.6"/>`;
+const sledBig=()=>T(0,-6,1.6,DECOY.sled);
+function iceFisher(){return act(0,-4,1,{pose:'sit',hat:0,extra:`<path d="M6,-20 L30,-38" fill="none" stroke="#7a5235" stroke-width="2"/><path d="M30,-38 L36,4" fill="none" stroke-width=".9"/>`},'bob')+`<rect x="-9" y="-5" width="16" height="5" rx="1.5" fill="#a8703f"/><path d="M-6,0 v4 M4,0 v4" fill="none" stroke-width="1.6"/>`}
+function liftSVG(dx,dy){let g=`<path d="M0,-58 L${dx},${dy-58}" fill="none" stroke-width="1.6"/>`;
+ [0,.5,1].forEach(t=>{const x=f(dx*t),y=f(dy*t);g+=`<path d="M${x},${y} V${f(y-58)} M${f(x-8)},${f(y-58)} H${f(+x+8)}" fill="none" stroke="#6a7488" stroke-width="4"/>`});
+ [.18,.36,.66,.84].forEach(t=>{const x=dx*t,y=dy*t-58;g+=`<g transform="translate(${f(x)},${f(y)})"><path d="M0,0 V16" fill="none" stroke-width="1.4"/><path d="M-9,26 H9 M-9,16 V26" fill="none" stroke="#5a5f64" stroke-width="2.4"/>`+(r()<.7?`<g transform="translate(0,26) scale(.55)">${kid({pose:'sit',hat:0})}</g>`:'')+`</g>`});
+ return g}
+function buildGround3(){const NS_=`stroke="none"`;let s='';
+ s+=`<rect x="0" y="-400" width="2200" height="2800" fill="#f7f5ef" ${NS_}/><rect x="0" y="-400" width="2200" height="880" fill="#e6eef0" ${NS_}/>`;
+ const peak=(x,y,w,h,c)=>`<path d="M${x-w},${y} L${f(x-w*.35)},${f(y-h*.7)} L${x},${y-h} L${f(x+w*.4)},${f(y-h*.62)} L${x+w},${y}Z" fill="${c}"/><path d="M${x},${y-h} L${f(x+w*.4)},${f(y-h*.62)} L${x+w},${y} L${f(x+w*.15)},${y}Z" fill="#b8c7ce" ${NS_} opacity=".75"/><path d="M${f(x-w*.35)},${f(y-h*.7)} L${x},${y-h} L${f(x+w*.4)},${f(y-h*.62)} L${f(x+w*.22)},${f(y-h*.52)} L${f(x+w*.06)},${f(y-h*.64)} L${f(x-w*.12)},${f(y-h*.5)} L${f(x-w*.24)},${f(y-h*.6)}Z" fill="${SNOW}"/>`;
+ [[300,440,260,300],[1000,440,300,370],[1700,440,280,320]].forEach(([x,y,w,h])=>s+=`<g opacity=".55">${peak(x,y,w,h,'#d3dde1')}</g>`);
+ [[620,450,300,390],[1330,450,320,430],[1950,450,260,330],[60,450,240,300]].forEach(([x,y,w,h])=>s+=peak(x,y,w,h,'#dfe7ea'));
+ [[700,120,1],[1200,70,.8],[1550,160,1],[900,240,.7],[420,190,.8]].forEach(([x,y,k])=>s+=T(x,y,k,swirl()));
+ s+=`<path d="M0,480 Q300,438 600,462 Q900,432 1200,458 Q1500,436 1800,460 Q2000,448 2200,462 V2400 H0Z" fill="#f7f5ef"/>`;
+ // groomed slope + ski tracks
+ s+=`<path d="M520,476 Q800,452 1100,470 Q1400,452 1590,474 L1600,770 Q1100,790 520,770Z" fill="#fbfaf6" ${NS_}/>`;
+ let tr='';for(let i=0;i<9;i++){const x=sr(560,1540);tr+=`M${f(x)},480 C${f(x+sr(-80,80))},560 ${f(x+sr(-90,90))},650 ${f(x+sr(-60,60))},760 `}s+=`<path d="${tr}" fill="none" stroke="#d3dde2" stroke-width="2.2" stroke-dasharray="14 6"/>`;
+ let dr='';for(let i=0;i<70;i++){const x=sr(380,1780),y=sr(500,1760);dr+=`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(sr(30,80))}" ry="${f(sr(8,16))}" fill="#e8eef0" ${NS_}/>`}s+=dr;
+ const pth=(d,w,c='#e6dcc8')=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w+5}"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}"/>`;
+ s+=pth('M300,800 C600,780 900,812 1020,800 S1400,788 1800,806',44)+pth('M1020,800 C1032,950 1004,1100 1026,1270 S1062,1500 1040,1820',40)+pth('M770,800 C750,700 790,620 770,470',20,'#efe8da')+pth('M520,1185 C700,1175 860,1192 1010,1182',26)+pth('M1026,1300 C1100,1320 1200,1380 1300,1420',26);
+ // inn street ground + station plaza
+ s+=`<ellipse cx="1350" cy="1520" rx="240" ry="160" fill="url(#cob)" stroke-width="1.8"/>`;
+ // onsen deck + pools
+ s+=`<rect x="1062" y="866" width="516" height="358" rx="22" fill="url(#plank)" stroke-width="2.2"/>`;
+ POOLS3.forEach(([cx,cy,rx,ry])=>{let rk='';for(let k=0;k<16;k++){const a=k/16*Math.PI*2;rk+=`<ellipse cx="${f(cx+Math.cos(a)*(rx+10))}" cy="${f(cy+Math.sin(a)*(ry+7))}" rx="${f(sr(9,14))}" ry="${f(sr(6,9))}" fill="${pk(['#b0a996','#9d9684','#c6bfae'])}" stroke-width="1.6"/>`}
+  s+=`<ellipse cx="${cx}" cy="${cy}" rx="${rx+12}" ry="${ry+9}" fill="#9d9684"/>`+rk+`<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#9fd3cf" stroke-width="2.2"/><ellipse cx="${cx-rx*.2}" cy="${cy-ry*.2}" rx="${f(rx*.6)}" ry="${f(ry*.45)}" fill="#bfe3df" ${NS_}/><path d="M${cx-40},${cy+8} q8,-4 16,0 q8,4 16,0 M${cx+10},${cy-10} q8,-4 16,0 q8,4 16,0" fill="none" stroke="#e6f4f2" stroke-width="1.6"/>`;
+  for(let k=0;k<5;k++){const a=sr(0,Math.PI*2);s+=`<path d="M${f(cx+Math.cos(a)*(rx+12)-8)},${f(cy+Math.sin(a)*(ry+9)-6)} q8,-6 16,0" fill="none" stroke="${SNOW}" stroke-width="4"/>`}});
+ // frozen lake
+ const L=LAKE3;s+=`<ellipse cx="${L.cx}" cy="${L.cy}" rx="${L.rx+20}" ry="${L.ry+14}" fill="#eef3f3" stroke-width="1.6"/><ellipse cx="${L.cx}" cy="${L.cy}" rx="${L.rx}" ry="${L.ry}" fill="#cfe3e8" stroke-width="2.4"/><ellipse cx="${L.cx-40}" cy="${L.cy-30}" rx="${L.rx*.65}" ry="${L.ry*.5}" fill="#e0eef1" ${NS_}/>`;
+ s+=`<path d="M620,1450 l40,20 l20,-14 l34,22 M860,1500 l30,-20 l26,16 M700,1560 l26,10 l14,-18" fill="none" stroke="#9fbcc6" stroke-width="1.4"/>`;
+ let sk='';for(let i=0;i<6;i++){const cx=L.cx+sr(-120,120),cy=L.cy+sr(-50,50),rx=sr(50,110),ry=sr(18,40);sk+=`M${f(cx-rx)},${f(cy)} a${f(rx)},${f(ry)} 0 1 1 ${f(rx*1.6)},${f(ry*.8)} `}s+=`<path d="${sk}" fill="none" stroke="#f6fbfc" stroke-width="1.6"/>`;
+ HOLES.forEach(([x,y])=>s+=`<ellipse cx="${x}" cy="${y}" rx="30" ry="13" fill="#f4f8f8" stroke-width="1.4"/><ellipse cx="${x}" cy="${y}" rx="26" ry="11" fill="#4f7f90" stroke-width="2"/><ellipse cx="${x-4}" cy="${y+2}" rx="16" ry="5" fill="#6f9fae" ${NS_}/>`);
+ // cable
+ s+=`<path d="M1472,1268 L1952,2150 M1484,1266 L1964,2148" fill="none" stroke-width="2"/>`;
+ // little tufts / sparkles
+ let tf='';for(let i=0;i<500;i++){const x=sr(400,1760),y=sr(500,1760);if(isWater3(x,y)||((x-L.cx)/L.rx)**2+((y-L.cy)/L.ry)**2<1.05||(x>1062&&x<1578&&y>866&&y<1224))continue;tf+=r()<.3?`M${f(x)},${f(y)} l-3,-6 M${f(x)},${f(y)} l3,-6 `:`M${f(x-6)},${f(y)} q6,-5 12,0 `}
+ s+=`<path d="${tf}" fill="none" stroke="#a9b8bd" stroke-width="1.3"/>`;
+ return s}
+function buildStructures3(){
+ add(1440,1400,240,150,'house',cableStation(),{sh:.85});
+ add(1650,1599,50,50,'cabin',cabinSVG('#c4473c',true),{mark:false});
+ add(1765,1810,50,50,'cabin',cabinSVG('#e0b44a',false),{mark:false,s:.9});
+ // lodges
+ for(const [yy,x0] of [[935,545],[1125,560]]){let x=x0;while(x<990){const w=sr(95,125);if(x+w>1000)break;add(x+w/2,yy,w+16,w*1.3,'house',lodge(w,sr(48,60)),{sh:.9});x+=w+sr(22,40)}}
+ [[600,950],[880,948],[720,1140]].forEach(([x,y])=>add(x,y-110,30,30,'steam',steamPuff(),{mark:false}));
+ // onsen
+ for(let x=1092;x<1560;x+=54)add(x,862,54,42,'bfence',bfence());
+ add(1508,1222,110,110,'house',lodge(84,46,{noren:true,wall:'#efe4cc',roof:'#6a7488'}),{sh:.9});
+ add(1080,880,30,50,'toro',toro());add(1568,1060,30,50,'toro',toro());
+ POOLS3.forEach(([cx,cy,rx,ry],i)=>{const n=i===2?3:2;for(let k=0;k<n;k++){for(let t=0;t<40;t++){const x=cx+sr(-rx*.6,rx*.6),y=cy+sr(-ry*.3,ry*.5);if(canPlace(x,y,30,24,true,.6)){add(x,y,30,24,'bather',bather(),{fl:r()<.5});break}}}
+  for(let k=0;k<4;k++)add(cx+sr(-rx*.7,rx*.7),cy+sr(-ry*.6,0),40,30,'steam',steamPuff(),{mark:false,s:sr(1,1.6)});});
+ add(1450,958,28,20,'monkeyW',monkeyW(),{mark:false});
+ add(1250,1100,24,30,'monkeyR',monkey());add(1092,1190,24,30,'monkeyR',monkey(),{fl:true});
+ add(1046,842,50,50,'sign',signpost('溫泉'));
+ // slope: chairlift, pines, snowmen
+ add(600,770,40,70,'lift',liftSVG(360,-300),{mark:false});
+ [[600,770],[780,620],[960,470]].forEach(([x,y])=>mark(x,y,20,60));
+ [[530,520],[555,640],[1570,520],[1560,660],[1500,740],[545,740],[1210,500],[1260,560]].forEach(([x,y])=>add(x,y,50,98,'pineS',pineS()));
+ add(1100,640,40,62,'snowmanBig',snowmanBig());add(1380,700,40,62,'snowmanBig',snowmanBig());
+ add(800,780,50,50,'sign',signpost('滑雪場'));
+ // lake: ice fishers + tent
+ HOLES.forEach(([x,y],i)=>{if(i%3===0)add(x-36,y+8,30,50,'fisher',iceFisher())});
+ add(1010,1385,70,56,'tent',tent('#d98c46'));
+ for(let k=0;k<12;k++){const L=LAKE3,a=sr(0,Math.PI*2),q=Math.sqrt(r())*.82,x=L.cx+Math.cos(a)*L.rx*q,y=L.cy+Math.sin(a)*L.ry*q+20,kind=r()<.25?'skatePair':'skate',K=KIND[kind];
+  if(canPlace(x,y,K.w,K.h,false,.6))add(x,y,K.w,K.h,kind,K.fn(),{fl:r()<.5,sh:.6})}
+ // station
+ add(1180,1450,120,90,'stall',stall('cocoa'));add(1250,1640,120,90,'stall',stall('knit'));add(1470,1660,120,90,'stall',stall('cocoa'));
+ [[1160,1472],[1205,1474],[1232,1662],[1455,1682]].forEach(([x,y])=>add(x,y,28,58,'walker3',act(0,0,1,{view:'back',pose:pk(['reach','stand']),hat:pk([0,4,-1])},true)));
+ add(1110,1320,50,50,'sign',signpost('纜車'));
+ add(1560,1500,40,62,'snowmanBig',snowmanBig());
+ [[1585,1300],[1590,1430],[520,880],[515,1060],[530,1280],[1060,1660],[520,1680]].forEach(([x,y])=>add(x,y,50,98,'pineS',pineS()));
+}
 /* ================= scene assembly ================= */
 let groundSvg='';
 const POOL={
@@ -861,6 +1018,30 @@ Object.assign(KIND,{
  peekBarrel:{w:28,h:40,fn:()=>wrapAn('hop',peekHead(0,-24,.58,true))+`<path d="M-11,0 Q-14,-13 -11,-26 L11,-26 Q14,-13 11,0Z" fill="#a8703f"/><path d="M-13,-8 H13 M-13,-18 H13" fill="none"/><path d="M4,-25 Q10,-13 6,-1" fill="none" stroke-width=".9"/>`},
  peekCrate:{w:28,h:38,fn:()=>wrapAn('bob',peekHead(sr(-4,4),-20,.55,false))+crate()}
 });
+
+Object.assign(KIND,{
+ pineS:{w:50,h:98,fn:pineS},rockS:{w:34,h:22,fn:rockS},snowMound:{w:36,h:14,fn:snowMound},woodpile:{w:46,h:28,fn:woodpile},toro:{w:30,h:50,fn:toro},
+ tubStack:{w:44,h:40,fn:tubStack},bfence:{w:58,h:42,fn:bfence},snowmanBig:{w:40,h:62,fn:snowmanBig},
+ monkeyR:{w:24,h:30,fn:monkey},monkeyW:{w:28,h:20,fn:monkeyW,water:true},bather:{w:30,h:24,fn:bather,water:true},
+ scarfBlue:{w:28,h:30,fn:()=>T(0,-14,.95,DECOY.scarfBlue)},mittenPlain:{w:26,h:28,fn:()=>T(0,-13,.95,DECOY.mittenPlain)},mittenGreen:{w:26,h:28,fn:()=>T(0,-13,.95,DECOY.mittenGreen)},
+ coffee:{w:28,h:24,fn:()=>T(0,-12,.95,DECOY.coffee)},tubPlain:{w:26,h:22,fn:()=>T(0,-11,.95,DECOY.tubPlain)},skisBlue:{w:22,h:34,fn:()=>T(0,-16,.95,DECOY.skisBlue)},
+ beanieTeal:{w:30,h:26,fn:()=>T(0,-11,.95,DECOY.beanieTeal)},beanieRed:{w:30,h:26,fn:()=>T(0,-11,.95,DECOY.beanieRed)},snowmanPlain:{w:30,h:32,fn:()=>T(0,-15,.95,DECOY.snowmanPlain)},
+ sled:{w:38,h:14,fn:()=>T(0,-5,1,DECOY.sled)},acorn:{w:20,h:24,fn:()=>T(0,-11,.9,DECOY.acorn)},
+ walker3:{w:30,h:62,fn:()=>{const v=r()<.12?'front':(r()<.62?'side':'back'),p=v==='front'?'stand':pk(['walk','stand','walk','reach','stand']);return act(0,0,r()<.5?1:-1,{view:v,pose:p,hat:pk([0,0,0,3,4,-1])},true)}},
+ skier:{w:50,h:62,fn:()=>`<path d="M-32,-4 h-12 M-30,-14 h-9" fill="none" stroke="#b7c5cc" stroke-width="2"/>`+act(0,0,1,{pose:'run',hat:0,extra:skiBoard(pk(['#5a86b0','#e0b44a','#6f9a4a','#9a6fa8']))},'bob')},
+ sledKid:{w:56,h:52,fn:()=>`<path d="M-36,-4 h-12 M-34,-12 h-8" fill="none" stroke="#b7c5cc" stroke-width="2"/>`+sledBig()+act(-2,-10,1,{pose:'sit',hat:0,mood:1,s:.9},'bob')},
+ buildSnowman:{w:96,h:62,fn:()=>act(-30,0,1,{pose:'low',hat:0},'bob')+`<circle cx="-6" cy="-9" r="10" fill="#fbf7ef"/>`+act(32,0,-1,{pose:'reach',hat:pk([0,4])},'bob')+`<circle cx="14" cy="-7" r="7" fill="#fbf7ef"/>`},
+ snowballFight:{w:130,h:70,fn:()=>`<path d="M-62,0 Q-62,-14 -48,-14 Q-34,-14 -34,0Z" fill="${SNOW}"/>`+act(-40,0,1,{pose:'up',hat:0},'hop')+act(44,0,-1,{pose:'reach',hat:0,mood:1},'bob')+`<path d="M-30,-42 Q4,-80 30,-34" fill="none" stroke-dasharray="3 4" stroke-width="1.2"/>`+wrapAn('float',`<circle cx="6" cy="-62" r="5" fill="#fbf7ef"/>`,true)},
+ skate:{w:44,h:60,fn:()=>`<path d="M-30,2 q10,-6 22,0 M-34,8 q12,-5 26,0" fill="none" stroke="#fbf9f3" stroke-width="2"/>`+act(0,0,1,{pose:'run',hat:pk([0,0,4])},'sway')},
+ skatePair:{w:66,h:62,fn:()=>`<path d="M-40,4 q16,-8 34,0" fill="none" stroke="#fbf9f3" stroke-width="2"/>`+act(-11,0,1,{view:'back',pose:'walk',hat:0},'sway')+act(11,0,1,{view:'back',pose:'walk',hat:0},'sway')+`<circle cx="0" cy="-8" r="3.2" fill="${pk(SKIN)}" stroke-width="1.4"/>`},
+ cocoaChat:{w:84,h:86,fn:()=>act(-16,0,1,{pose:'hold',hat:pk([0,-1]),extra:`<g transform="translate(15,-20) scale(.55)">${mugShape(false)}</g>`},'bob')+act(16,0,-1,{pose:'hold',hat:pk([0,4]),extra:`<g transform="translate(15,-20) scale(.55)">${mugShape(false)}</g>`},'bob')+wrapAn('float',steamPuff().replace('opacity=".8"','opacity=".5" transform="translate(0,-50) scale(.5)"'),true)},
+ shovel:{w:70,h:62,fn:()=>act(-10,0,1,{pose:'low',hat:0,extra:`<path d="M11,-12 L24,-2" fill="none" stroke="#7a5235" stroke-width="2.6"/><path d="M21,-5 L31,-1 L27,5 L18,1Z" fill="#9aa0a4"/>`},'sway')+`<path d="M22,0 Q30,-12 42,-8 Q50,-6 50,0Z" fill="${SNOW}"/>`}
+});
+POOL.slope=[['pineS',3.2],['rockS',.8],['snowMound',1.6],['walker3',.9],['snowmanBig',.6],['skisBlue',.15],['sled',.25],['acorn',.3],['beanieTeal',.3],['beanieRed',.2],['snowmanPlain',.5],['mittenGreen',.25],['scarfBlue',.25],['dog',.2]];
+POOL.inn=[['walker3',2.6],['snowMound',1],['pineS',.5],['barrel',.8],['crate',.6],['woodpile',.8],['toro',.6],['lamp',.4],['tubPlain',.4],['bucket',.3],['coffee',.35],['scarfBlue',.3],['mittenPlain',.3],['mittenGreen',.2],['beanieRed',.3],['beanieTeal',.2],['acorn',.3],['cat',.5],['dog',.3],['peekBarrel',.3],['peekCrate',.25],['crateStack',.3],['keyGrey',.25],['snowmanPlain',.3]];
+POOL.onsen=[['tubStack',.8],['tubPlain',1.2],['toro',.5],['rockS',1],['walker3',.8],['monkeyR',.7],['bucket',.3],['coffee',.4],['scarfBlue',.2],['keyGrey',.2]];
+POOL.lake=[['snowMound',.6],['walker3',.5],['acorn',.3],['mittenGreen',.3],['mittenPlain',.25],['beanieTeal',.3],['snowmanPlain',.4],['skisBlue',.3],['sled',.4],['rockS',.4],['pineS',.5],['scarfBlue',.25]];
+POOL.station=[['walker3',3],['crate',.6],['barrel',.6],['crateStack',.3],['lamp',.4],['bench',.3],['peekBarrel',.3],['snowMound',.6],['coffee',.45],['tubPlain',.2],['scarfBlue',.3],['mittenPlain',.3],['beanieRed',.3],['beanieTeal',.2],['skisBlue',.3],['sled',.3],['cat',.4],['dog',.3],['keyGrey',.2],['snowmanPlain',.3],['pineS',.3]];
 function scatter(regKey,pool,tries,cap,water){
  const g=REG[{harborW:'harbor',water:'river',pondW:'pond'}[regKey]||regKey];
  const tot=pool.reduce((a,b)=>a+b[1],0);let n=0;
@@ -874,8 +1055,8 @@ function scatter(regKey,pool,tries,cap,water){
  }
 }
 function buildScene(sc){
- groundSvg=buildGround(sc);
- buildStructures(sc);
+ groundSvg=sc===3?buildGround3():buildGround(sc);
+ buildStructures(sc);if(sc===3)buildStructures3();
 const VPLAN={
   top:{kiteFly:1,flowerWatch:1,painting:1,stretch:1},
   farm:{petDog:1,feedChickens:3,shepherd:1,carryBox:2,watering:3,sweep:1,dogWalk:1,chat:2,kiteFly:1,reading:1,petCat:1,flowerWatch:1,stretch:1},
@@ -884,6 +1065,11 @@ const VPLAN={
   village:{petDog:2,dogWalk:4,chat:5,handInHand:3,carryBox:3,sweep:3,watering:3,laundry:2,petCat:3,feedChickens:2,throwCatch:3,chase:2,jumpRope:2,violin:1,reading:2,stretch:1},
   banks:{flowerWatch:3,kiteFly:2,sleeping:2,reading:2,throwCatch:2,painting:1,chat:2,dogWalk:1},
   forest:{mushroomPick:4,flowerWatch:3,chase:2,flute:2,sleeping:2,painting:1,chat:2,petCat:1,feedChickens:1},
+  slope:{skier:6,sledKid:3,buildSnowman:2,snowballFight:2,dogWalk:1},
+  inn:{chat:3,cocoaChat:2,shovel:3,dogWalk:2,handInHand:2,carryBox:2,petCat:2},
+  onsen:{cocoaChat:1},
+  lake:{snowballFight:1},
+  station:{chat:3,cocoaChat:3,handInHand:2,carryBox:2,dogWalk:2,petDog:1,shovel:1,throwCatch:1},
   plaza:{petDog:2,chat:6,handInHand:3,benchPair:3,violin:2,flute:2,jumpRope:2,seesaw:2,throwCatch:2,dogWalk:3,sweep:2,carryBox:3,petCat:2,feedChickens:2,chase:2,stretch:1}};
  for(const [reg,plan] of Object.entries(VPLAN)){if(!SCREG[sc].includes(reg))continue;const g=REG[reg];
   const list=[];for(const [k,n] of Object.entries(plan))for(let i=0;i<n;i++)list.push(k);
@@ -899,6 +1085,12 @@ const VPLAN={
  scatter('forest',POOL.forest,10000,420);
  scatter('plaza',POOL.plaza,10000,360);
  scatter('harborW',POOL.harborW,500,16);
+ }else if(sc===3){
+ scatter('slope',POOL.slope,6000,170);
+ scatter('inn',POOL.inn,6000,170);
+ scatter('onsen',POOL.onsen,2500,45);
+ scatter('lake',POOL.lake,2500,60);
+ scatter('station',POOL.station,5000,150);
  }else{
  scatter('farm',POOL.farm,9000,340);
  scatter('farmS',POOL.farmS,7000,240);
@@ -909,7 +1101,7 @@ const VPLAN={
 
 /* ================= items ================= */
 let items=[];
-const OCCK=new Set(['fruitTree','cow','bush','barrel','crate','rock','walker','gnome','hay','pine','round','pot']);
+const OCCK=new Set(['pineS','woodpile','tubStack','snowmanBig','toro','rockS','fruitTree','cow','bush','barrel','crate','rock','walker','gnome','hay','pine','round','pot']);
 function regionOf(x,y){for(const [k,g] of Object.entries(REG))if(x>=g.x&&x<=g.x+g.w&&y>=g.y&&y<=g.y+g.h)return k;return null}
 function sampleIn(reg,t){const g=REG[reg];
  for(let i=0;i<60;i++){const x=rnd(g.x+10,g.x+g.w-10),y=rnd(g.y+10,g.y+g.h-10);
@@ -1021,11 +1213,13 @@ function updateCounts(bump){const tot=TYPES.length*4,got=tot-leftOf();$('#foundN
 let prog={unlocked:1};try{const pp=JSON.parse(localStorage.getItem('townhunt-prog')||'{}');if(pp.unlocked)prog.unlocked=pp.unlocked}catch(_){}
 const saveProg=()=>{try{localStorage.setItem('townhunt-prog',JSON.stringify(prog))}catch(_){}};
 const unlockedW=()=>prog.unlocked>=2?W:1800;
+const NEED_STARS=2;
 const LEVELS=[null,{n:1,title:'第 1 關．奇幻小鎮',desc:'城堡山腳下的小鎮藏了 12 種東西，<b>每種各 4 個</b>，共 48 個。',desc2:'城堡山腳下的小鎮藏了 12 種東西，每種各 4 個。<b>農莊的雞蛋和蘋果也混進小鎮了！</b>',types:TYPES1,c:[900,760]},
- {n:2,title:'第 2 關．東方農莊',desc:'乾草車載你來到農莊市集：6 種老朋友加上 <b>6 種農莊新東西</b>。',types:TYPES2,c:[2250,880]}];
-let level=Math.min(prog.unlocked,2);
+ {n:2,title:'第 2 關．東方農莊',desc:'乾草車載你來到農莊市集：6 種老朋友加上 <b>6 種農莊新東西</b>。',types:TYPES2,c:[2250,880]},
+ {n:3,title:'第 3 關．雪山溫泉村',desc:'纜車載你上山：4 種老朋友加上 <b>8 種雪山新東西</b>。',types:TYPES3,c:[1050,1000]}];
+let level=Math.min(prog.unlocked,3);
 function setLevel(n){level=n;TYPES=typesFor(n);renderStart();renderTray()}
-function renderStart(){const L=LEVELS[level];$('#startTitle').textContent=L.title;$('#startDesc').innerHTML=(level===1&&prog.unlocked>=2&&L.desc2)?'農莊的雞蛋和蘋果也混進小鎮了！':'';
+function renderStart(){const L=LEVELS[level];$('#startTitle').textContent=L.title;$('#startDesc').innerHTML=borrowed.length?`這次<b>${borrowed.map(t=>t.short).join('、')}</b>也跑來這裡了！`:'';
  $('#startGrid').innerHTML=TYPES.map(t=>`<div><span class="t">${icon(t.id)}</span>${t.short}</div>`).join('');
  let best=null;try{best=parseFloat(localStorage.getItem('townhunt-best-L'+level))}catch(_){}$('#startBest').textContent=best?`這一關最佳紀錄 ${Math.floor(best/60)}:${String(Math.floor(best%60)).padStart(2,'0')}`:''}
 /* ---- exploration fog ---- */
@@ -1080,11 +1274,12 @@ $('#hintBtn').onclick=()=>{if(!st.running||hintLock||(!testMode&&st.hintsLeft<=0
  setTimeout(()=>{hintLock=false;setHintUI()},testMode?900:2600)};
 function curtain(fn,msg){const c=$('#curtain');c.querySelector('span').textContent=msg||'把東西重新藏好⋯';c.classList.add('on');setTimeout(()=>{fn();setTimeout(()=>c.classList.remove('on'),380)},520)}
 $('#restartBtn').onclick=()=>{const sp=$('#restartBtn span');if(st.running&&!restartArm){restartArm=true;sp.textContent='確定重新開始？';setTimeout(()=>{restartArm=false;sp.textContent='重新開始'},2500);return}
- restartArm=false;sp.textContent='重新開始';closeMenu();$('#winOv').classList.add('hide');curtain(()=>{newGame();setTimeout(()=>toast('新的一局，東西都換位置了！'),400)})};
-const TARGET={1:360,2:330};
+ restartArm=false;sp.textContent='重新開始';closeMenu();$('#winOv').classList.add('hide');curtain(()=>{setLevel(level);newGame();setTimeout(()=>toast('新的一局，東西都換位置了！'),400)})};
+const TARGET={1:360,2:330,3:330};
 const starSvg=(on,sz)=>`<svg width="${sz}" height="${sz}" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4l6 12.6 13.8 1.8-10.1 9.6 2.6 13.7L24 35.2l-12.3 6.5 2.6-13.7L4.2 18.4 18 16.6z" fill="${on?'#f5c842':'#efe6d2'}" stroke="#2b2420" stroke-width="3" stroke-linejoin="round"/></svg>`;
 const farmPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#f6efe0"/><path d="M0,52 Q30,38 60,48 Q90,36 120,46 V84 H0Z" fill="#a3ad66"/><rect y="60" width="120" height="24" fill="#d9c06a"/><path d="M0,60 H120" stroke="#2b2420" stroke-width="1.6"/><g transform="translate(44,58)"><path d="M-20,0 V-20 L-12,-30 L0,-35 L12,-30 L20,-20 V0Z" fill="#b14d27" stroke="#2b2420" stroke-width="2"/><path d="M-7,0 V-15 H7 V0 M-7,-15 L7,0 M7,-15 L-7,0" stroke="#fffaf0" stroke-width="1.6" fill="#7a3e2a"/></g><g transform="translate(78,58)"><path d="M-7,0 V-34 Q0,-42 7,-34 V0Z" fill="#c6ccc2" stroke="#2b2420" stroke-width="2"/></g><g transform="translate(98,58)"><path d="M-6,0 L-4,-26 L4,-26 L6,0Z" fill="#e2dccb" stroke="#2b2420" stroke-width="1.6"/><path d="M0,-28 l-12,-9 M0,-28 l12,-9 M0,-28 l-9,12 M0,-28 l9,12" stroke="#2b2420" stroke-width="2.4"/></g></svg>`;
 const mistPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#f1e2bf"/><path d="M0,60 L22,34 L38,50 L58,22 L80,46 L98,30 L120,52 V84 H0Z" fill="#b3b8b2" stroke="#2b2420" stroke-width="1.5"/><path d="M52,30 L58,22 L64,30 L61,28 L58,32 L55,28Z" fill="#fbf7ef"/><path d="M0,66 Q30,58 60,66 T120,62 V84 H0Z" fill="#c6cb8c"/><path d="M14,80 Q40,70 62,72 Q84,74 100,62" fill="none" stroke="#a8461f" stroke-width="2.2" stroke-dasharray="4 4" stroke-linecap="round"/><path d="M100,62 l3,-2" stroke="#a8461f" stroke-width="2.2" opacity=".4" stroke-linecap="round"/></svg>`;
+const snowPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#e6eef0"/><g stroke="#2b2420" stroke-width="1.5" stroke-linejoin="round"><path d="M0,56 L26,22 L44,40 L66,12 L90,38 L120,24 V84 H0Z" fill="#dfe7ea"/><path d="M19,31 L26,22 L33,31 L29,29 L26,33 L22,29Z M58,23 L66,12 L74,23 L70,21 L66,25 L62,21Z" fill="#fbf9f3"/><path d="M0,62 Q40,52 80,60 T120,58 V84 H0Z" fill="#f7f5ef"/><path d="M10,84 L112,6" fill="none" stroke-width="1.2"/><g transform="translate(70,38)"><path d="M0,0 V6" fill="none"/><path d="M-8,6 H8 L9,18 Q0,21 -9,18Z" fill="#c4473c"/><rect x="-6" y="8" width="5" height="5" fill="#d6ecf0" stroke-width="1"/><rect x="1" y="8" width="5" height="5" fill="#d6ecf0" stroke-width="1"/></g><g transform="translate(30,72)"><rect x="-12" y="-14" width="24" height="14" fill="#c99a6a"/><path d="M-16,-14 L0,-26 L16,-14Z" fill="#fbf9f3"/></g><ellipse cx="88" cy="72" rx="16" ry="6" fill="#9fd3cf"/></g><g fill="#fff" opacity=".85"><circle cx="84" cy="62" r="5"/><circle cx="92" cy="58" r="6"/></g></svg>`;
 function win(){st.running=false;clearInterval(timer);const total=elapsed();$('#time').textContent=fmt(total);
  const BK='townhunt-best-L'+level;let best=null;try{best=parseFloat(localStorage.getItem(BK))}catch(_){}
  const isBest=!best||total<best;if(isBest){best=total;try{localStorage.setItem(BK,String(total))}catch(_){}}
@@ -1095,15 +1290,18 @@ function win(){st.running=false;clearInterval(timer);const total=elapsed();$('#t
  $('#rTime').textContent=fmt(total);$('#rHint').textContent=st.hintsUsed||0;$('#rMiss').textContent=st.misses;
  $('#winTag').textContent=isBest?'這一關的新紀錄':`最佳紀錄 ${fmt(best)}`;
  const nx=$('#winNext'),nb=$('#nextBtn');
- if(level===1){nx.innerHTML=`<div class="pv">${farmPreview()}</div><div><small>下一站</small><b>東方農莊</b><small>${prog.unlocked>=2?'乾草車隨時可以出發':'乾草車已經在路口等你了'}</small></div>`;nb.innerHTML='搭乾草車出發'+ICO.arrow;nb.dataset.act='ride'}
+ const nl=level+1,hasNext=!!LEVELS[nl],had=prog.unlocked>=nl,gotS=starsOf(level);
+ if(hasNext&&!had&&gotS>=NEED_STARS){prog.unlocked=nl;saveProg()}
+ if(hasNext&&prog.unlocked>=nl){const cart=nl===2;nx.innerHTML=`<div class="pv">${cart?farmPreview():snowPreview()}</div><div><small>下一站</small><b>${MAPNODES.find(m=>m.n===nl).name}</b><small>${cart?(had?'乾草車隨時可以出發':'乾草車已經在路口等你了'):(had?'纜車隨時可以上山':'纜車已經在山腳等你了')}</small></div>`;nb.innerHTML=(cart?'搭乾草車出發':'搭纜車上山')+ICO.arrow;nb.dataset.act='ride'}
+ else if(hasNext){nx.innerHTML=`<div class="pv">${mistPreview()}</div><div><small>下一站</small><b>還差一點點</b><small>這一關拿到 ${NEED_STARS} 顆星以上，新的路才會出現（這次 ${ns} 顆）</small></div>`;nb.innerHTML='再挑戰一次'+ICO.arrow;nb.dataset.act='again'}
  else{nx.innerHTML=`<div class="pv">${mistPreview()}</div><div><small>下一站</small><b>前面的路還沒畫好⋯</b><small>新的地方正在製作中，敬請期待</small></div>`;nb.innerHTML=ICO.map+'打開冒險地圖';nb.dataset.act='map'}
  setTimeout(()=>{sfx.win();$('#winOv').classList.remove('hide')},900)}
-$('#againBtn').onclick=()=>{$('#winOv').classList.add('hide');curtain(()=>newGame())};
+$('#againBtn').onclick=()=>{$('#winOv').classList.add('hide');curtain(()=>{setLevel(level);newGame()})};
 $('#startBtn').onclick=()=>{ac();curtain(()=>{loadScene(level);$('#startOv').classList.add('hide');newGame()},'把東西藏好⋯')};
 let tCount=0,tTimer;
 $('#gameTitle').onclick=()=>{tCount++;clearTimeout(tTimer);tTimer=setTimeout(()=>tCount=0,2500);if(tCount>=5){tCount=0;testMode=!testMode;try{localStorage.setItem('townhunt-test',testMode?'1':'0')}catch(_){}applyTestUI();toast(testMode?'🧪 測試模式：開啟':'測試模式：關閉')}};
 $('#winBtn').onclick=()=>{if(!st.running)return;items.forEach(it=>it.found=true);updateCounts();win()};
-$('#resetBtn').onclick=()=>{prog={unlocked:1};saveProg();try{localStorage.removeItem('townhunt-best-L1');localStorage.removeItem('townhunt-best-L2')}catch(_){}st.running=false;clearInterval(timer);setLevel(1);toast('進度已重置，只開放第 1 關');return;
+$('#resetBtn').onclick=()=>{prog={unlocked:1};saveProg();try{[1,2,3,4,5].forEach(n=>{localStorage.removeItem('townhunt-best-L'+n);localStorage.removeItem('townhunt-stars-L'+n)})}catch(_){}st.running=false;clearInterval(timer);setLevel(1);toast('進度已重置，只開放第 1 關');return;
  items=[];itemsL.innerHTML='';const lw=document.getElementById('lockWall');lw.classList.remove('gone2');buildFog();setLevel(1);measure();const c=LEVELS[1].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base};clampV();apply();toast('進度已重置，只開放第 1 關')};
 const closeMenu=()=>$('#menu').classList.add('hide');
 $('#menuBtn').onclick=e=>{e.stopPropagation();$('#menu').classList.toggle('hide')};
@@ -1113,8 +1311,10 @@ $('#startMap').onclick=()=>{ac();openMap()};
 $('#winMap').onclick=()=>{$('#winOv').classList.add('hide');openMap()};
 $('#mapClose').onclick=()=>$('#mapOv').classList.add('hide');
 $('#trayToggle').onclick=()=>{const t=$('#tray'),c=t.classList.toggle('collapsed');$('#trayToggle').innerHTML=(c?'展開'+ICO.up:'收合'+ICO.down);$('#trayToggle').setAttribute('aria-label',c?'展開清單':'收合清單');clampV();apply()};
-$('#nextBtn').onclick=()=>{$('#winOv').classList.add('hide');if($('#nextBtn').dataset.act==='map'){openMap();return}if(prog.unlocked<2){prog.unlocked=2;saveProg()}
- ride(()=>{loadScene(2);setLevel(2);newGame()},()=>toast(`${LEVELS[2].title}，開始！`,2200))};
+$('#nextBtn').onclick=()=>{$('#winOv').classList.add('hide');const a=$('#nextBtn').dataset.act;if(a==='map'){openMap();return}
+ if(a==='again'){curtain(()=>{setLevel(level);newGame()});return}
+ const n=level+1;if(!LEVELS[n]||prog.unlocked<n)return;
+ ride(()=>{loadScene(n);setLevel(n);newGame()},()=>toast(`${LEVELS[n].title}，開始！`,2200),n===3?'cable':'cart')};
 
 function buildFog(sc){const SC=SCENES[sc],X0=SC.x0,X1=SC.x1;
  const puff=(x,y,k,d)=>`<g class="drift" style="--d:${d}s;animation-delay:-${f(Math.random()*d)}s"><g transform="translate(${f(x)},${f(y)}) scale(${f(k)})" fill="#fbf7ef" opacity=".92"><circle cx="-60" cy="0" r="40"/><circle cx="-10" cy="-26" r="54"/><circle cx="50" cy="-8" r="44"/><circle cx="96" cy="8" r="30"/><rect x="-100" y="0" width="226" height="38" rx="19"/></g></g>`;
@@ -1127,18 +1327,26 @@ function buildFog(sc){const SC=SCENES[sc],X0=SC.x0,X1=SC.x1;
  document.getElementById('fogG').innerHTML=g;document.getElementById('lockWall').innerHTML='';
 }
 /* ================= scenes, world map, hay-cart ride ================= */
-const SCENES={1:{x0:0,x1:1800,c:[900,760]},2:{x0:1760,x1:2800,c:[2250,880]}};
-const SCREG={1:['top','meadow','village','banks','forest','plaza'],2:['farm','farmS']};
+const SCENES={1:{x0:0,x1:1800,c:[900,760]},2:{x0:1760,x1:2800,c:[2250,880]},3:{x0:500,x1:1600,c:[1050,1000]}};
+const SCREG={1:['top','meadow','village','banks','forest','plaza'],2:['farm','farmS'],3:['slope','inn','onsen','lake','station']};
 let scene=0;
-function loadScene(n){if(scene===n)return;scene=n;sprites.length=0;occ.fill(0);rng=mulberry32(77+n*101);
+function loadScene(n){if(scene===n)return;scene=n;SCN=n;sprites.length=0;occ.fill(0);
+ for(let j=0;j<GR;j++)for(let i=0;i<GC;i++)wat[j*GC+i]=isWater(i*CELL+CELL/2,j*CELL+CELL/2)?1:0;rng=mulberry32(77+n*101);
  items=[];itemsL.innerHTML='';
  $('#bg').innerHTML=buildScene(n);
  spEls=[...document.querySelectorAll('#bg .sp')].map(el=>({el,x:+el.dataset.x,y:+el.dataset.y,on:false}));
  buildFog(n)}
-function typesFor(n){if(n===2)return TYPES2;
- if(prog.unlocked>=2){const egg={...TYPES2.find(t=>t.id==='egg'),regions:['meadow','village','meadow','banks']},apple={...TYPES2.find(t=>t.id==='apple'),regions:['village','plaza','village','meadow']};
-  return TYPES1.map(t=>t.id==='potion'?egg:t.id==='snail'?apple:t)}
- return TYPES1}
+/* 後面關卡的主題物件，每局隨機借幾種放進前面已玩過的關卡 */
+const BORROW={2:[['egg',{1:['meadow','village','meadow','banks']}],['apple',{1:['village','plaza','village','meadow']}],['corn',{1:['meadow','village','plaza','meadow']}],['sunflower',{1:['meadow','banks','top','meadow']}]],
+ 3:[['scarf',{1:['village','plaza','top','banks'],2:['farmS','farm','farmS','farm']}],['mitten',{1:['plaza','village','banks','top'],2:['farm','farmS','farm','farmS']}],['cocoa',{1:['plaza','village','plaza','banks'],2:['farmS','farmS','farm','farmS']}],
+  ['pinecone',{1:['forest','forest','banks','top'],2:['farm','farm','farmS','farm']}],['beanie',{1:['village','plaza','top','meadow'],2:['farmS','farm','farmS','farm']}]]};
+let borrowed=[];
+function typesFor(n){const own=n===1?TYPES1:n===2?TYPES2:TYPES3,all=[...TYPES1,...TYPES2,...TYPES3];borrowed=[];
+ const cands=[];for(let m=n+1;m<=prog.unlocked;m++)(BORROW[m]||[]).forEach(([id,map])=>{if(map[n])cands.push({...all.find(t=>t.id===id),regions:map[n]})});
+ if(!cands.length)return own;
+ borrowed=shuffle(cands).slice(0,Math.min(cands.length,prog.unlocked-n>=2?3:2));
+ const slots=shuffle(own.map((t,i)=>i).filter(i=>own[i].id!=='fish')).slice(0,borrowed.length),out=own.slice();
+ slots.forEach((i,k)=>out[i]=borrowed[k]);return out}
 const MAPNODES=[
  {n:1,x:120,y:170,ic:'🏰',name:'奇幻小鎮'},{n:2,x:255,y:160,ic:'🌾',name:'東方農莊'},
  {n:3,x:235,y:62,ic:'♨️',name:'雪山溫泉村'},{n:4,x:62,y:92,ic:'🗿',name:'森林古代遺跡'},{n:5,x:270,y:262,ic:'🏝️',name:'海島港口'}];
@@ -1178,6 +1386,15 @@ function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,
  const on=U>=2;
  // path town -> farm
  if(on)g+=`<path d="M132,222 Q160,214 172,216 Q200,220 222,222" fill="none" stroke="#2b2420" stroke-width="8" stroke-linecap="round"/><path d="M132,222 Q160,214 172,216 Q200,220 222,222" fill="none" stroke="#ead7a6" stroke-width="5.5" stroke-linecap="round"/><path d="M132,222 Q160,214 172,216 Q200,220 222,222" fill="none" stroke="#a8461f" stroke-width="1.8" stroke-dasharray="4 5" stroke-linecap="round"/>`+P('M152,210 h14 v10 h-14Z','#c99a5b',1.4)+`<path d="M155,210 v10 M159,210 v10 M163,210 v10" stroke="${ink}" stroke-width=".9"/>`;
+ // cable car farm -> snow village
+ if(U>=3){g+=`<path d="M288,206 L246,84" fill="none" stroke="${ink}" stroke-width="1.6"/><path d="M293,204 L251,82" fill="none" stroke="${ink}" stroke-width="1.1" opacity=".6"/>`;
+  [[279,180],[262,130]].forEach(([x,y])=>g+=`<path d="M${x},${y} v14 M${x-4},${y} h8" stroke="#6a7488" stroke-width="2.4" fill="none"/>`);
+  g+=`<g transform="translate(271,153)"><path d="M0,0 v4" stroke="${ink}" stroke-width="1"/>`+P('M-6,4 H6 L7,13 Q0,15 -7,13Z','#c4473c',1.3)+`<rect x="-4" y="6" width="3" height="3" fill="#d6ecf0"/><rect x="1" y="6" width="3" height="3" fill="#d6ecf0"/></g>`;
+  let sv=`<g class="mnode" data-n="3"><circle cx="236" cy="78" r="38" fill="transparent"/><ellipse cx="236" cy="84" rx="38" ry="12" fill="#f7f5ef" stroke="${ink}" stroke-width="1.4"/>`;
+  sv+=`<ellipse cx="252" cy="86" rx="9" ry="3.5" fill="#9fd3cf" stroke="${ink}" stroke-width="1.1"/><g fill="#fff" opacity=".9"><circle cx="249" cy="79" r="3.5"/><circle cx="255" cy="76" r="4"/></g>`;
+  [[218,84,'#7f5a40'],[230,80,'#a85640'],[240,88,'#6a7488']].forEach(([x,y,c])=>sv+=P(`M${x-6},${y} V${y-7} H${x+6} V${y}Z`,'#e6d3b0',1.2)+P(`M${x-8},${y-7} L${x},${y-14} L${x+8},${y-7}Z`,c,1.2)+`<path d="M${x-6},${y-9} L${x},${y-13} L${x+6},${y-9}" fill="none" stroke="#fbf9f3" stroke-width="2"/>`);
+  sv+=`<g transform="translate(236,108)"><rect x="-38" y="-11" width="76" height="20" rx="10" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4.5" text-anchor="middle" font-size="12" fill="${ink}" font-family="${FN}">雪山溫泉村</text></g></g>`;
+  g+=sv}
  // ---- town ----
  const house=(x,y,c)=>P(`M${x-7},${y} V${y-8} H${x+7} V${y}Z`,'#f3e8cf',1.3)+P(`M${x-9},${y-8} L${x},${y-16} L${x+9},${y-8}Z`,c,1.3)+`<rect x="${x-2}" y="${y-5}" width="4" height="5" fill="${ink}"/>`;
  let t=`<g class="mnode" data-n="1"><circle cx="100" cy="206" r="46" fill="transparent"/>`;
@@ -1220,11 +1437,11 @@ function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,
  // compass
  g+=`<g transform="translate(58,368)"><circle r="20" fill="#f1e2bf" stroke="${ink}" stroke-width="2"/><circle r="15" fill="none" stroke="#c9b48a" stroke-width="1"/><path d="M0,-17 L5,0 L0,17 L-5,0Z" fill="#a8461f" stroke="${ink}" stroke-width="1.4"/><path d="M-17,0 L0,-4 L17,0 L0,4Z" fill="#e8dcc0" stroke="${ink}" stroke-width="1.1"/><text x="0" y="-24" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">北</text></g>`;
  // here pin
- const here={1:[100,150],2:[250,160]}[level]||[100,150];
+ const here={1:[100,150],2:[250,160],3:[276,66]}[level]||[100,150];
  g+=`<g transform="translate(${here[0]},${here[1]})"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="1.6s" repeatCount="indefinite"/>`+P('M0,14 C-10,2 -11,-4 -11,-8 A11,11 0 1 1 11,-8 C11,-4 10,2 0,14Z','#f5c842',2)+`<circle cy="-8" r="4" fill="${ink}"/></g></g>`;
  g+='</svg>';
  $('#mapSvg').innerHTML=g;
- $('#mapSub').textContent=U>1?`已走過 ${U} 個地方，下一段路要過關才會出現`:'完成這一關，地圖上就會出現新的路';
+ $('#mapSub').textContent=U>1?`已走過 ${U} 個地方，下一段路要拿到 ${NEED_STARS} 顆星才會出現`:`這一關拿到 ${NEED_STARS} 顆星，地圖上就會出現新的路`;
  let cards='';for(let n=1;n<=U;n++){if(!SCENES[n])continue;const m=MAPNODES.find(x=>x.n===n),b=bestOf(n),st_=starsOf(n);
   cards+=`<button class="lcard" data-n="${n}"><span class="top"><span>${m.name}</span>${n===level?'<span class="tag">你在這裡</span>':''}</span><span class="stars">${[0,1,2].map(k=>starSvg(k<st_,18)).join('')}</span><small>${b?'最佳 '+fmt(b):'還沒完成'}</small></button>`}
  $('#mapCards').innerHTML=cards;
@@ -1264,8 +1481,20 @@ function rideSVG(){
  s+=loop(`<rect x="0" y="528" width="400" height="80" fill="#a3ad66" stroke="none"/><path d="M0,528 H400" fill="none" stroke-width="2"/>`+[20,70,120,190,240,300,360].map(x=>`<path d="M${x},560 l-4,-12 M${x},560 l0,-15 M${x},560 l4,-12" fill="none" stroke="#56603a" stroke-width="2"/>`).join('')+[95,215,330].map(x=>`<circle cx="${x}" cy="575" r="4" fill="${pk(['#e3a89e','#f1ead8','#d4ac52'])}" stroke-width="1.2"/>`).join(''),.9);
  return s+`</g></svg>`;
 }
-function ride(mid,done){const el=$('#ride');el.innerHTML=rideSVG()+'<span>乾草車出發，前往東方農莊⋯</span>';el.classList.add('on');
- let clop=0;const ci=setInterval(()=>{tone(clop++%2?520:420,.06,'triangle',.06)},230);
+function cableRideSVG(){
+ const loop=(inner,dur)=>`<g class="rl" style="--d:${dur}s"><g>${inner}</g><g transform="translate(399,0)">${inner}</g></g>`;
+ const tree=(x,y,k)=>`<g transform="translate(${x},${y}) scale(${k})">${pineS()}</g>`;
+ let s=`<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">`;
+ s+=`<rect width="400" height="600" fill="#e6eef0" stroke="none"/><circle cx="70" cy="100" r="30" fill="#f5d27a" stroke="none"/>`;
+ s+=loop(T(90,150,.9,swirl())+T(300,80,.7,swirl()),40);
+ s+=loop(`<path d="M0,330 L0,250 L60,160 L110,220 L170,110 L240,210 L300,140 L360,230 L400,250 L400,330Z" fill="#dfe7ea"/><path d="M48,178 L60,160 L72,178 L66,174 L60,180 L54,174Z M156,134 L170,110 L184,134 L176,128 L170,138 L164,128Z M288,160 L300,140 L312,160 L306,156 L300,164 L294,156Z" fill="#fbf9f3" stroke-width="1.4"/>`,30);
+ s+=loop(`<path d="M0,600 L0,380 Q100,340 200,372 Q300,334 400,380 L400,600Z" fill="#f7f5ef"/>`+[[30,400,.5],[120,382,.45],[230,392,.5],[330,388,.45],[80,470,.6],[190,500,.65],[300,470,.6]].map(([x,y,k])=>tree(x,y,k)).join(''),14);
+ s+=loop([[20,600,1],[150,610,1.1],[270,596,.95],[370,612,1.05]].map(([x,y,k])=>tree(x,y,k)).join(''),5);
+ s+=`<path d="M-20,470 L420,170" fill="none" stroke-width="2.4"/><path d="M-20,484 L420,184" fill="none" stroke-width="1.4" opacity=".6"/>`;
+ s+=`<g transform="translate(200,320) scale(2.3)" stroke-width="1">${cabinSVG('#c4473c',true)}</g>`;
+ return s+`</g></svg>`}
+function ride(mid,done,kind){const cab=kind==='cable',el=$('#ride');el.innerHTML=(cab?cableRideSVG():rideSVG())+`<span>${cab?'搭纜車上山，前往雪山溫泉村⋯':'乾草車出發，前往東方農莊⋯'}</span>`;el.classList.add('on');
+ let clop=0;const ci=setInterval(()=>{cab?tone(clop++%3?300:360,.09,'sine',.05):tone(clop++%2?520:420,.06,'triangle',.06)},cab?420:230);
  setTimeout(()=>{try{mid()}catch(e){console.error(e)}},1100);
  setTimeout(()=>{clearInterval(ci);el.classList.remove('on');setTimeout(()=>{el.innerHTML='';done&&done()},520)},4300)}
 
