@@ -1209,14 +1209,45 @@ const ermineSVG=()=>{const mound=`<path d="M-28,0 Q-30,-16 -13,-21 Q0,-27 13,-21
   `<circle cx="-4" cy="-47" r="1.9" fill="${OL}" stroke="none"/><circle cx="4" cy="-47" r="1.9" fill="${OL}" stroke="none"/><ellipse cx="0" cy="-42.5" rx="1.8" ry="1.3" fill="${OL}" stroke="none"/><path d="M-6,-42 l-6,-1 M-6,-41 l-6,2 M6,-42 l6,-1 M6,-41 l6,2" fill="none" stroke-width=".8"/></g>`+
   `<path d="M-26,-1 Q-14,-8 0,-6 Q14,-8 26,-1" fill="${ermW}" stroke-width="2"/></g>`;
  return `<ellipse cx="3" cy="2" rx="30" ry="5" fill="#000" opacity=".08" stroke="none"/>`+mound+down+up};
-function placeErmine(){ERM=null;const regs=['lake','slope','station','inn'];
- for(let t=0;t<600&&!ERM;t++){const g=REG[regs[t%4]],x=sr(g.x+60,g.x+g.w-60),y=sr(g.y+60,g.y+g.h-20);if(isWater(x,y)||!canPlace(x,y,64,44,false,.8))continue;add(x,y,64,44,'ermine',ermineSVG(),{sh:.8});ERM={x,y}}}
+function placeErmine(){ERM=null;/* 只放在雪山腳下樹林旁的雪堆，縮小到 0.68 倍，比較難找 */
+ const g=REG.slope,pines=sprites.filter(o=>o.kind==='pineS'&&o.y>g.y-40&&o.y<g.y+g.h+80&&o.x>g.x+110&&o.x<g.x+g.w-110),R_=Math.random;
+ for(let t=0;t<600&&!ERM;t++){let x,y;if(pines.length&&t<500){const p=pines[Math.floor(R_()*pines.length)],sd=R_()<.5?-1:1;x=p.x+sd*(26+R_()*22);y=p.y+4+R_()*22}else{x=sr(g.x+60,g.x+g.w-60);y=sr(g.y+60,g.y+g.h-20)}
+  if(isWater(x,y)||!canPlace(x,y,44,30,false,.8))continue;add(x,y,64,44,'ermine',ermineSVG(),{sh:.8,s:.68});ERM={x,y}}}
 let ermBusy=false;
-TAPHOOKS[3]=(x,y)=>{if(!ERM||Math.abs(x-ERM.x)>34||y>ERM.y+8||y<ERM.y-70)return false;if(ermBusy)return true;
+TAPHOOKS[3]=(x,y)=>{if(!ERM||Math.abs(x-ERM.x)>26||y>ERM.y+8||y<ERM.y-50)return false;if(ermBusy)return true;
  const up=document.getElementById('ermUp'),dn=document.getElementById('ermDown');if(!up||!dn)return false;ermBusy=true;
  dn.style.display='none';up.style.display='';up.classList.remove('cpop');void up.getBBox();up.classList.add('cpop');
  try{tone(880,.06,'triangle',.04);setTimeout(()=>tone(1170,.08,'triangle',.035),90)}catch(_){}
  setTimeout(()=>{up.style.display='none';dn.style.display='';ermBusy=false},1700);return true};
+/* ===== 場地外的佈景：地形鏡像接出去＋當地樹木（不能點、沒有人物物件） ===== */
+const SKYC={1:'#f6efe0',2:'#f6efe0',3:'#e6eef0',4:'#e3e8d8',5:'#dcecef'},SKYY={1:350,2:350,3:710,4:540,5:150};
+const EDGEDECO={1:[['pine',3],['round',2],['bush',2],['rock',.6]],2:[['round',3],['bush',2],['pine',1],['rock',.6]],3:[['pineS',4],['snowMound',2],['rockS',.8]],4:[['round',3],['bush',2.4],['fern',2.6],['pine',1],['rock',.6]],5:[['palm',2],['bush',.6]]};
+const EDGEM={1:'L',2:'R',3:'LRB',4:'LRB',5:''},EDGED={1:'LB',2:'RB',3:'LRB',4:'LRB',5:'LRB'};/* EDGEM：哪幾邊把地形鏡像接出去；EDGED：哪幾邊種佈景（第 1、2 關的海和農地、第 5 關的海本來就畫到場地外） */
+/* 左邊有瀑布山崖的關卡：只鏡像天空（和海），中間鋪樹林底色＋山崖收成圓弧，不重複瀑布 */
+const EDGEMY={1:{L:[[-400,352],[1684,2400]]},4:{L:[[-400,676],[1110,3200]]}},EDGEFILL={1:{L:[352,1684,'#535b37',[566,844,'#7d6044','#6a5038']]},4:{L:[676,1110,'#5f6b3a',[734,1106,'#9d9684','#86806f']]}},
+ EDGELAND={1:(x,y)=>x<0?(y>352&&y<1684):undefined,4:(x,y)=>x<500?(y>690&&y<1110?true:undefined):undefined};
+function edgeInfo(sc){const SC=SCENES[sc],X0=SC.x0,X1=SC.x1,Y1=SC.y1||H,m=SC.y1?220:300,e=EDGEM[sc]??'LRB',d=EDGED[sc]??'LRB';return{X0,X1,Y1,m,mL:e.includes('L'),mR:e.includes('R'),mB:e.includes('B'),dL:d.includes('L'),dR:d.includes('R'),dB:d.includes('B')}}
+function edgeBack(sc){const {X0,X1,Y1,m,mL,mR,mB}=edgeInfo(sc),id=n=>`ec${sc}${n}`;let d='<defs>',g='';
+ const clip=(n,x,y,w,h)=>{const ys=(EDGEMY[sc]||{})[n];d+=`<clipPath id="${id(n)}">`+(ys?ys.map(([a,b])=>`<rect x="${x}" y="${Math.max(a,y)}" width="${w}" height="${Math.min(b,y+h)-Math.max(a,y)}"/>`).join(''):`<rect x="${x}" y="${y}" width="${w}" height="${h}"/>`)+`</clipPath>`},
+  mir=(n,mx)=>{g+=`<g clip-path="url(#${id(n)})"><g transform="matrix(${mx})"><use href="#gnd"/></g></g>`};
+ const sh=mB?Y1:Y1+m;
+ if(mL){clip('L',X0-m,0,m+1,sh);mir('L',`-1,0,0,1,${2*X0},0`)}
+ if(mR){clip('R',X1-1,0,m+1,sh);mir('R',`-1,0,0,1,${2*X1},0`)}
+ if(mB){const bx0=mL?X0:X0-m,bx1=mR?X1:X1+m;clip('B',bx0,Y1-1,bx1-bx0,m+1);mir('B',`1,0,0,-1,0,${2*Y1}`)}
+ if(mB&&mL){clip('BL',X0-m,Y1-1,m+1,m+1);mir('BL',`-1,0,0,-1,${2*X0},${2*Y1}`)}
+ if(mB&&mR){clip('BR',X1-1,Y1-1,m+1,m+1);mir('BR',`-1,0,0,-1,${2*X1},${2*Y1}`)}
+ const EF=(EDGEFILL[sc]||{}).L;if(EF&&mL){const[a,b,c,[c0,c1,cc,cl]]=EF,mid=(c0+c1)/2,hh=(c1-c0)/2;
+  g+=`<path d="M${X0-m},${a} H${X0+1} V${b} H${X0-m}Z" fill="${c}" stroke="none"/>`;
+  g+=`<path d="M${X0+1},${c0} C${X0-46},${c0+6} ${X0-74},${mid-hh*.48} ${X0-70},${mid} C${X0-66},${mid+hh*.55} ${X0-40},${c1-6} ${X0+1},${c1}Z" fill="${cc}" stroke="${OL}" stroke-width="2.2"/><path d="M${X0-20},${mid-hh*.45} q-14,30 -8,70 M${X0-38},${mid} q-6,40 6,80" fill="none" stroke="${cl}" stroke-width="2"/>`}
+ return d+'</defs>'+`<rect x="${X0-m}" y="${-m}" width="${X1-X0+2*m}" height="${m}" fill="${SKYC[sc]||'#f6efe0'}" stroke="none"/>`+g}
+function edgeDeco(sc){const {X0,X1,Y1,mL,mR,mB,dL,dR,dB}=edgeInfo(sc),R=mulberry32(900+sc),pool=(EDGEDECO[sc]||EDGEDECO[1]).filter(([k])=>KIND[k]),tot=pool.reduce((a,b)=>a+b[1],0);if(!tot)return'';
+ const pick=()=>{let q=R()*tot;for(const[k,w]of pool)if((q-=w)<0)return k;return pool[0][0]},src=(x,y)=>[x<X0&&mL?2*X0-x:x>X1&&mR?2*X1-x:x,y>Y1&&mB?2*Y1-y:y],pts=[],LH_=EDGELAND[sc];
+ const tryP=(x,y)=>{if(R()>.6)return;const lh=LH_&&LH_(x,y);if(lh===false)return;if(lh===true){pts.push([x,y]);return}const[sx,sy]=src(x,y);if(sy<(SKYY[sc]||0)+30)return;for(const[dx,dy]of[[0,0],[-18,0],[18,0],[0,-10]])if(isWater(sx+dx,sy+dy))return;pts.push([x,y])};
+ if(dL)for(let y=0;y<Y1+(dB?160:-20);y+=44)for(let x=X0-170;x<X0-8;x+=52)tryP(x+R()*30,y+R()*30);
+ if(dR)for(let y=0;y<Y1+(dB?160:-20);y+=44)for(let x=X1+8;x<X1+170;x+=52)tryP(x+R()*30,y+R()*30);
+ if(dB)for(let y=Y1+14;y<Y1+170;y+=44)for(let x=dL?X0:X0-150;x<(dR?X1:X1+150);x+=52)tryP(x+R()*30,y+R()*30);
+ pts.sort((a,b)=>a[1]-b[1]);
+ return `<g class="edgeDeco" stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">`+pts.map(([x,y])=>{const k=pick();let inner=KIND[k].fn();if(HEAVY.has(k))inner=`<g stroke-width="2.7">${inner}</g>`;return T(x,y,.9+R()*.25,inner,R()<.5)}).join('')+'</g>'}
 function buildScene(sc){
  const IMP=SCENE_IMPL[sc];
  groundSvg=IMP?IMP.ground():sc===3?buildGround3():buildGround(sc);
@@ -1264,7 +1295,7 @@ const VPLAN={
  scatter('farmS',POOL.farmS,7000,240);
  scatter('pondW',POOL.pondW,600,14);}
  sprites.sort((a,b)=>a.y-b.y);
- return `<g stroke="${OL}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">${groundSvg}</g>`+`<g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${sprites.map(s=>s.svg).join('')}</g>`;
+ return `<g id="gnd" stroke="${OL}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">${groundSvg}</g>`+edgeBack(sc)+edgeDeco(sc)+`<g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${sprites.map(s=>s.svg).join('')}</g>`;
 }
 
 /* ================= items ================= */
@@ -1610,13 +1641,17 @@ $('#nextBtn').onclick=()=>{$('#winOv').classList.add('hide');const a=$('#nextBtn
  const n=level+1;if(!LEVELS[n]||prog.unlocked<n)return;
  rodeAdd(n);ensureLevel(n,()=>ride(()=>{loadScene(n);setLevel(n);newGame()},()=>toast(`${LEVELS[n].title}，開始！`,2200),(NEXTINFO[n]&&NEXTINFO[n].ride)||(n===3?'cable':'cart')))};
 
+let FOGV=1;/* 雲：0 舊版、1 變薄（使用者選 B）、2 中間 */
 function buildFog(sc){const SC=SCENES[sc],X0=SC.x0,X1=SC.x1,Y1=SC.y1||H;
- const puff=(x,y,k,d)=>`<g class="drift" style="--d:${d}s;animation-delay:-${f(Math.random()*d)}s"><g transform="translate(${f(x)},${f(y)}) scale(${f(k)})" fill="#fbf7ef" opacity=".92"><circle cx="-60" cy="0" r="40"/><circle cx="-10" cy="-26" r="54"/><circle cx="50" cy="-8" r="44"/><circle cx="96" cy="8" r="30"/><rect x="-100" y="0" width="226" height="38" rx="19"/></g></g>`;
- let g=`<path d="M-6000,-4000 H8800 V5800 H-6000Z M${X0-295},-295 V${Y1+295} H${X1+295} V-295Z" fill="#f4ede0" fill-rule="evenodd"/><rect x="${X0-300}" y="-300" width="440" height="${Y1+600}" fill="url(#gL)"/><rect x="${X1-140}" y="-300" width="440" height="${Y1+600}" fill="url(#gR)"/><rect x="${X0-300}" y="-300" width="${X1-X0+600}" height="440" fill="url(#gT)"/><rect x="${X0-300}" y="${Y1-140}" width="${X1-X0+600}" height="440" fill="url(#gB)"/>`;
+ const LT=(window.FOGV??FOGV)===1;
+ const puff=(x,y,k,d)=>`<g class="drift" style="--d:${d}s;animation-delay:-${f(Math.random()*d)}s"><g transform="translate(${f(x)},${f(y)}) scale(${f(k)})" fill="#fbf7ef" opacity="${LT?.82:.92}"><circle cx="-60" cy="0" r="40"/><circle cx="-10" cy="-26" r="54"/><circle cx="50" cy="-8" r="44"/><circle cx="96" cy="8" r="30"/><rect x="-100" y="0" width="226" height="38" rx="19"/></g></g>`;
+ const FV=[[[0,1],[.38,.93],[1,0]],[[0,.92],[.36,.5],[.6,.12],[.7,0]],[[0,1],[.36,.78],[.55,.35],[.72,0]]][window.FOGV??FOGV],
+  gd=(n,x1,x2,y1,y2)=>`<linearGradient id="${n}" x1="${x1}" x2="${x2}" y1="${y1}" y2="${y2}">${FV.map(([o,a])=>`<stop offset="${o}" stop-color="#f4ede0" stop-opacity="${a}"/>`).join('')}</linearGradient>`;
+ let g=`<defs>${gd('fL',0,1,0,0)+gd('fR',1,0,0,0)+gd('fT',0,0,0,1)+gd('fB',0,0,1,0)}</defs><path d="M-6000,-4000 H8800 V5800 H-6000Z M${X0-295},-295 V${Y1+295} H${X1+295} V-295Z" fill="#f4ede0" fill-rule="evenodd"/><rect x="${X0-300}" y="-300" width="440" height="${Y1+600}" fill="url(#fL)"/><rect x="${X1-140}" y="-300" width="440" height="${Y1+600}" fill="url(#fR)"/><rect x="${X0-300}" y="-300" width="${X1-X0+600}" height="440" fill="url(#fT)"/><rect x="${X0-300}" y="${Y1-140}" width="${X1-X0+600}" height="440" fill="url(#fB)"/>`;
  const R=mulberry32(5+sc),rr=(a,b)=>a+R()*(b-a);
- for(let x=X0-200;x<X1+200;x+=rr(160,240))g+=puff(x,rr(-120,40),rr(.9,1.4),rr(18,30));
- for(let x=X0-200;x<X1+200;x+=rr(170,260))g+=puff(x,rr(Y1,Y1+100),rr(.9,1.4),rr(18,30));
- for(let y=100;y<Y1-100;y+=rr(170,250))g+=puff(X0+rr(-180,-40),y,rr(.9,1.3),rr(18,30))+puff(X1+rr(40,180),y,rr(.9,1.3),rr(18,30));
+ for(let x=X0-200;x<X1+200;x+=rr(160,240))g+=puff(x,LT?rr(-190,-80):rr(-120,40),rr(.9,1.4),rr(18,30));
+ for(let x=X0-200;x<X1+200;x+=rr(170,260))g+=puff(x,LT?rr(Y1+90,Y1+170):rr(Y1,Y1+100),rr(.9,1.4),rr(18,30));
+ for(let y=100;y<Y1-100;y+=rr(170,250))g+=puff(X0+(LT?rr(-230,-130):rr(-180,-40)),y,rr(.9,1.3),rr(18,30))+puff(X1+(LT?rr(130,230):rr(40,180)),y,rr(.9,1.3),rr(18,30));
  [[X0-80,-60],[X1+80,-60],[X0-80,Y1+80],[X1+80,Y1+80]].forEach(([x,y])=>g+=puff(x,y,1.8,26));
  document.getElementById('fogG').innerHTML=g;document.getElementById('lockWall').innerHTML='';
 }
@@ -1847,7 +1882,7 @@ function ensureLevel(n,cb,fail){const L=LEVELS[n];if(!L||!L.file||L.types||loade
 function ensureUpTo(m,cb){const need=[];for(let n=1;n<=m;n++)if(LEVELS[n]&&LEVELS[n].file)need.push(n);
  const next=()=>need.length?ensureLevel(need.shift(),next,next):cb();next()}
 /* 給 level4.js 等檔案使用的工具與資料 */
-window.TH={T,f,r,sr,pk,ri,rnd,shuffle,limb,shade,wob,OL,SNOW,SKIN,HAIR,SHIRT,PANTS,HATS,kid,chibi,act,wrapAn,heart,bubble,noteM,peekHead,faceHead,headOnly,
+window.TH={EDGELAND,T,f,r,sr,pk,ri,rnd,shuffle,limb,shade,wob,OL,SNOW,SKIN,HAIR,SHIRT,PANTS,HATS,kid,chibi,act,wrapAn,heart,bubble,noteM,peekHead,faceHead,headOnly,
  cat,frog,owl,sheep,chicken,anyDog,dog,swan,pine,roundTree,bush,rock,barrel,crate,pot,lamp,bench,sign,fence,reeds,lily,well,tent,campfire,swirl,signpost,stall,
  add,mark,canPlace,scatter,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,HEAVY,ANIM,ALWAYS,DUR,
  SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,TAPHOOKS,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,pickView,walkPose,DENS,dbg:{clover:()=>clovers,step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG,horseCart,rideSVG};
