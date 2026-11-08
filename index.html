@@ -240,7 +240,7 @@ const W=2800,H=1800,EX=140,NS='http://www.w3.org/2000/svg',OL='#2b2420',CELL=16;
 const $=s=>document.querySelector(s);
 const f=n=>Math.round(n*10)/10;
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-let rng=mulberry32(77),SCN=0;
+let rng=mulberry32(77),SCN=0;const ROADS=[];/* 這一關畫過的路（d、寬度），佈景不要種在路上 */
 /* 拆檔關卡的掛勾：level4.js 等檔案載入後會把自己的內容註冊到這裡 */
 const VPLANX={},SCENE_IMPL={},WATERFN={},RIDES={},MAPHOOKS=[],NEXTINFO={},HERE={},TAPHOOKS={};
 const r=()=>rng(),sr=(a,b)=>a+r()*(b-a),ri=(a,b)=>Math.floor(sr(a,b+1)),pk=a=>a[Math.floor(r()*a.length)];
@@ -667,7 +667,7 @@ function buildGround(sc){const SC=SCENES[sc];
  [[250,690,13],[60,650,14],[30,790,12]].forEach(([x,y,R])=>s+=`<path d="M${x-R},${y} Q${x-R},${y-R*1.6} ${x},${y-R*1.7} Q${x+R},${y-R*1.6} ${x+R},${y}Z" fill="${DK}"/>`);
  s+=`<rect x="108" y="590" width="84" height="215" fill="#cfe6e0" ${NS_}/><path d="M120,598 V800 M138,594 V805 M158,598 V802 M178,594 V800" fill="none" stroke="#fbf6ea" stroke-width="3"/><path d="M108,590 V805 M192,590 V805" fill="none" stroke-width="2.4"/>`;
  // paths
- const pth=(d,w,c='#e2c896')=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w+5}"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}"/>`;
+ const pth0=(d,w,c='#e2c896')=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w+5}"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}"/>`;;const pth=(d,w,c)=>{ROADS.push([d,w]);return pth0(d,w,c)};
  s+=pth('M900,1000 C910,1080 1000,1090 1000,1170',44)+pth('M1000,1300 C1000,1360 1040,1380 1035,1440',44)+pth('M985,1330 C820,1370 640,1330 470,1450 S240,1640 180,1760',40)+pth('M600,860 C500,840 420,900 330,880',30);
  s+=pth('M1500,790 C1600,770 1700,820 1850,830 S2100,820 2250,850 S2550,830 3250,860',36)+pth('M2250,850 C2260,1000 2200,1150 2230,1250 S2320,1500 2360,1660',32)+pth('M2050,830 C2040,780 2000,760 1990,740',24)+pth('M2650,850 C2660,700 2620,640 2650,560 C2680,470 2620,420 2660,340',22,'#d9c9a6');
  s+=`<path d="M860,540 L940,540 L950,1005 L850,1005Z" fill="url(#stp)" ${NS_}/><path d="M860,540 L850,1005 M940,540 L950,1005" fill="none" stroke-width="2.4"/>`;
@@ -1046,7 +1046,7 @@ function buildGround3(){const NS_=`stroke="none"`;let s='';
  s+=`<path d="${zp('M520,476 Q800,452 1100,470 Q1400,452 1590,474 L1600,770 Q1100,790 520,770Z')}" fill="#fbfaf6" ${NS_}/>`;
  let tr='';for(let i=0;i<12;i++){const x=sr(zx(560),zx(1540));tr+=`M${f(x)},${zy(480)} C${f(x+sr(-100,100))},${zy(560)} ${f(x+sr(-110,110))},${zy(650)} ${f(x+sr(-75,75))},${zy(760)} `}s+=`<path d="${tr}" fill="none" stroke="#d3dde2" stroke-width="2.2" stroke-dasharray="14 6"/>`;
  let dr='';for(let i=0;i<170;i++){const x=sr(380,zx(1600)+40),y=sr(zy(500),zy(1770));dr+=`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(sr(30,80))}" ry="${f(sr(8,16))}" fill="#e8eef0" ${NS_}/>`}s+=dr;
- const pth=(d,w,c='#e6dcc8')=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w+5}"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}"/>`;
+ const pth0=(d,w,c='#e6dcc8')=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w+5}"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}"/>`;;const pth=(d,w,c)=>{ROADS.push([d,w]);return pth0(d,w,c)};
  s+=pth(zp('M300,800 C600,780 900,812 1020,800 S1400,788 1800,806'),44)+pth(zp('M1020,800 C1032,950 1004,1100 1026,1270 S1062,1500 1040,1820'),40)+pth(zp('M770,800 C750,700 790,620 770,470'),20,'#efe8da')+pth(zp('M520,1185 C700,1175 860,1192 1010,1182'),26)+pth(zp('M1026,1300 C1100,1320 1200,1380 1300,1420'),26);
  // station plaza
  s+=`<ellipse cx="${zx(1350)}" cy="${zy(1520)}" rx="${240*Z3}" ry="${160*Z3}" fill="url(#cob)" stroke-width="1.8"/>`;
@@ -1219,13 +1219,26 @@ TAPHOOKS[3]=(x,y)=>{if(!ERM||Math.abs(x-ERM.x)>26||y>ERM.y+8||y<ERM.y-50)return 
  dn.style.display='none';up.style.display='';up.classList.remove('cpop');void up.getBBox();up.classList.add('cpop');
  try{tone(880,.06,'triangle',.04);setTimeout(()=>tone(1170,.08,'triangle',.035),90)}catch(_){}
  setTimeout(()=>{up.style.display='none';dn.style.display='';ermBusy=false},1700);return true};
+function roadTester(){if(!ROADS.length)return{test:()=>false,done:()=>{}};const sv=document.createElementNS(NS,'svg');sv.setAttribute('style','position:absolute;left:0;top:0;width:1px;height:1px;visibility:hidden;pointer-events:none');document.body.appendChild(sv);
+ const k=SCN===4?1.25:1,ps=ROADS.map(([d,w])=>{const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','#000');p.setAttribute('stroke-width',w+40);sv.appendChild(p);return p}),pt=sv.createSVGPoint();
+ return{test:(x,y)=>{pt.x=SCN===4?500+(x-500)/k:x;pt.y=y/k;try{return ps.some(p=>p.isPointInStroke(pt))}catch(_){return false}},done:()=>sv.remove()}}
+/* 場地內靠邊界的一圈：佈景越靠邊越稀疏，避免「很密 → 突然全空」 */
+const FRINGE={1:[['pine',1.4],['round',1.4],['bush',2.2],['rock',1],['grassClump',2.4],['pebbles',1],['walker',.5]],2:[['round',1.8],['bush',2.2],['hay',.7],['grassClump',2.4],['rock',.8],['pebbles',.8],['walker',.4]],
+ 3:[['pineS',2.6],['snowMound',2.4],['rockS',1],['woodpile',.3],['walker3',.5]],4:[['round',1.6],['bush',2.4],['fern',3],['rock',1],['rubble',.8],['grassClump',1.4],['walker4',.4],['pine',.5]]};
+const FRINGEX={1:[[0,540,460,880]],4:[[0,660,1160,1140]]};/* 不放的區塊：山崖瀑布 */
+function fringe(sc){const pool=(FRINGE[sc]||[]).filter(([k])=>KIND[k]);if(!pool.length)return;const {X0,X1,Y1,dL,dR,dB}=edgeInfo(sc),D=300,tot=pool.reduce((a,b)=>a+b[1],0),RT=roadTester(),EX_=FRINGEX[sc]||[];
+ const pick=()=>{let q=r()*tot;for(const[k,w]of pool)if((q-=w)<0)return k;return pool[0][0]},dist=(x,y)=>Math.min(dL?x-X0:1e9,dR?X1-x:1e9,dB?Y1-y:1e9);
+ for(let y=(SKYY[sc]||0)+40;y<Y1-6;y+=38)for(let x=X0+8;x<X1-8;x+=42){const jx=x+sr(-14,14),jy=y+sr(-12,12),d=dist(jx,jy);if(d>D||d<6)continue;if(r()>.22+.42*(d/D))continue;
+  if(EX_.some(([a,b,c,e])=>jx>a&&jx<c&&jy>b&&jy<e))continue;const k=pick(),K_=KIND[k];if(!canPlace(jx,jy,K_.w*.8,K_.h*.5,false,.7))continue;if(RT.test(jx,jy))continue;
+  add(jx,jy,K_.w,K_.h,k,K_.fn(),{sh:.6,fl:r()<.5})}
+ RT.done()}
 /* ===== 場地外的佈景：地形鏡像接出去＋當地樹木（不能點、沒有人物物件） ===== */
 const SKYC={1:'#f6efe0',2:'#f6efe0',3:'#e6eef0',4:'#e3e8d8',5:'#dcecef'},SKYY={1:350,2:350,3:710,4:540,5:150};
 const EDGEDECO={1:[['pine',3],['round',2],['bush',2],['rock',.6]],2:[['round',3],['bush',2],['pine',1],['rock',.6]],3:[['pineS',4],['snowMound',2],['rockS',.8]],4:[['round',3],['bush',2.4],['fern',2.6],['pine',1],['rock',.6]],5:[['palm',2],['bush',.6]]};
 const EDGEM={1:'L',2:'R',3:'LRB',4:'LRB',5:''},EDGED={1:'LB',2:'RB',3:'LRB',4:'LRB',5:'LRB'};/* EDGEM：哪幾邊把地形鏡像接出去；EDGED：哪幾邊種佈景（第 1、2 關的海和農地、第 5 關的海本來就畫到場地外） */
 /* 左邊有瀑布山崖的關卡：只鏡像天空（和海），中間鋪樹林底色＋山崖收成圓弧，不重複瀑布 */
-const EDGEMY={1:{L:[[-400,352],[1684,2400]]},4:{L:[[-400,676],[1110,3200]]}},EDGEFILL={1:{L:[352,1684,'#535b37',[566,844,'#7d6044','#6a5038']]},4:{L:[676,1110,'#5f6b3a',[734,1106,'#9d9684','#86806f']]}},
- EDGELAND={1:(x,y)=>x<0?(y>352&&y<1684):undefined,4:(x,y)=>x<500?(y>690&&y<1110?true:undefined):undefined};
+const EDGEMY={1:{L:[[-400,352],[1684,2400]]},4:{L:[[-400,676],[1110,3200]]}},EDGEFILL={1:{L:[352,1684,'#535b37',[566,844,'#7d6044','#6a5038']]},4:{L:'wall'}},
+ EDGELAND={1:(x,y)=>x<0?(y>352&&y<1684):undefined,4:(x,y)=>x<500?(y>600&&y<1150?false:undefined):undefined};
 function edgeInfo(sc){const SC=SCENES[sc],X0=SC.x0,X1=SC.x1,Y1=SC.y1||H,m=SC.y1?220:300,e=EDGEM[sc]??'LRB',d=EDGED[sc]??'LRB';return{X0,X1,Y1,m,mL:e.includes('L'),mR:e.includes('R'),mB:e.includes('B'),dL:d.includes('L'),dR:d.includes('R'),dB:d.includes('B')}}
 function edgeBack(sc){const {X0,X1,Y1,m,mL,mR,mB}=edgeInfo(sc),id=n=>`ec${sc}${n}`;let d='<defs>',g='';
  const clip=(n,x,y,w,h)=>{const ys=(EDGEMY[sc]||{})[n];d+=`<clipPath id="${id(n)}">`+(ys?ys.map(([a,b])=>`<rect x="${x}" y="${Math.max(a,y)}" width="${w}" height="${Math.min(b,y+h)-Math.max(a,y)}"/>`).join(''):`<rect x="${x}" y="${y}" width="${w}" height="${h}"/>`)+`</clipPath>`},
@@ -1236,22 +1249,36 @@ function edgeBack(sc){const {X0,X1,Y1,m,mL,mR,mB}=edgeInfo(sc),id=n=>`ec${sc}${n
  if(mB){const bx0=mL?X0:X0-m,bx1=mR?X1:X1+m;clip('B',bx0,Y1-1,bx1-bx0,m+1);mir('B',`1,0,0,-1,0,${2*Y1}`)}
  if(mB&&mL){clip('BL',X0-m,Y1-1,m+1,m+1);mir('BL',`-1,0,0,-1,${2*X0},${2*Y1}`)}
  if(mB&&mR){clip('BR',X1-1,Y1-1,m+1,m+1);mir('BR',`-1,0,0,-1,${2*X1},${2*Y1}`)}
- const EF=(EDGEFILL[sc]||{}).L;if(EF&&mL){const[a,b,c,[c0,c1,cc,cl]]=EF,mid=(c0+c1)/2,hh=(c1-c0)/2;
+ const EF=(EDGEFILL[sc]||{}).L;
+ if(EF==='wall'&&mL){/* 第 4 關：瀑布山壁和洞穴的岩壁直接往左延伸，不種樹 */
+  const xa=X0-m,xb=X0+2,R=mulberry32(41);let top=`M${xa},700`,bot='';
+  g+=`<path d="M${xa},674 H${xb} V704 H${xa}Z" fill="#5f6b3a" stroke="none"/>`;
+  let wb=`M${xa},700 H${xb} V1112`;for(let x=xb;x>=xa;x-=24)wb+=` Q${f(x-12)},${f(1100+R()*10)} ${x-24},${f(1106+R()*6)}`;
+  g+=`<path d="${wb}Z" fill="#9d9684" stroke="none"/><path d="${wb.slice(wb.indexOf('V1112')+5).replace(/^ Q/,'M'+xb+',1112 Q')}" fill="none" stroke="${OL}" stroke-width="2.4"/>`;
+  g+=`<path d="M${xa},800 Q${X0-120},786 ${xb},798 M${xa},925 Q${X0-110},912 ${xb},922 M${xa},1028 Q${X0-130},1016 ${xb},1026" fill="none" stroke="#7f786a" stroke-width="1.6"/>`;
+  [[X0-60,872,56,24],[X0-170,760,50,22],[X0-150,990,54,24],[X0-40,1060,44,18]].forEach(([x,y,w,h])=>g+=`<path d="M${x-w/2},${y} Q${x-w/2},${y-h} ${x},${y-h} Q${x+w/2},${y-h} ${x+w/2},${y} Z" fill="#a89b84" stroke="#7f786a" stroke-width="1.6"/>`);
+  for(let x=xa;x<xb;x+=30)top+=` Q${x+15},${f(684+R()*8)} ${x+30},${f(690+R()*6)}`;
+  for(let x=xb;x>=xa;x-=26)bot+=` L${x},${f(712+R()*16)} L${x-13},${f(706+R()*8)}`;
+  g+=`<path d="${top} L${xb},700${bot}Z" fill="#7f9d48" stroke-width="2"/>`;
+  for(let x=xa+14;x<xb-6;x+=R()*40+26){const n=3+Math.floor(R()*6);let v=`M${f(x)},714`;for(let k=0;k<n;k++)v+=` q${k%2?5:-5},8 0,16`;g+=`<path d="${v}" fill="none" stroke="#56703f" stroke-width="2"/>`}
+ }
+ if(EF&&EF!=='wall'&&mL){const[a,b,c,[c0,c1,cc,cl]]=EF,mid=(c0+c1)/2,hh=(c1-c0)/2;
   g+=`<path d="M${X0-m},${a} H${X0+1} V${b} H${X0-m}Z" fill="${c}" stroke="none"/>`;
   g+=`<path d="M${X0+1},${c0} C${X0-46},${c0+6} ${X0-74},${mid-hh*.48} ${X0-70},${mid} C${X0-66},${mid+hh*.55} ${X0-40},${c1-6} ${X0+1},${c1}Z" fill="${cc}" stroke="${OL}" stroke-width="2.2"/><path d="M${X0-20},${mid-hh*.45} q-14,30 -8,70 M${X0-38},${mid} q-6,40 6,80" fill="none" stroke="${cl}" stroke-width="2"/>`}
  return d+'</defs>'+`<rect x="${X0-m}" y="${-m}" width="${X1-X0+2*m}" height="${m}" fill="${SKYC[sc]||'#f6efe0'}" stroke="none"/>`+g}
 function edgeDeco(sc){const {X0,X1,Y1,mL,mR,mB,dL,dR,dB}=edgeInfo(sc),R=mulberry32(900+sc),pool=(EDGEDECO[sc]||EDGEDECO[1]).filter(([k])=>KIND[k]),tot=pool.reduce((a,b)=>a+b[1],0);if(!tot)return'';
  const pick=()=>{let q=R()*tot;for(const[k,w]of pool)if((q-=w)<0)return k;return pool[0][0]},src=(x,y)=>[x<X0&&mL?2*X0-x:x>X1&&mR?2*X1-x:x,y>Y1&&mB?2*Y1-y:y],pts=[],LH_=EDGELAND[sc];
- const tryP=(x,y)=>{if(R()>.6)return;const lh=LH_&&LH_(x,y);if(lh===false)return;if(lh===true){pts.push([x,y]);return}const[sx,sy]=src(x,y);if(sy<(SKYY[sc]||0)+30)return;for(const[dx,dy]of[[0,0],[-18,0],[18,0],[0,-10]])if(isWater(sx+dx,sy+dy))return;pts.push([x,y])};
+ const RT=roadTester(),dOut=(x,y)=>Math.max(x<X0?X0-x:0,x>X1?x-X1:0,y>Y1?y-Y1:0),tryP=(x,y)=>{const o_=dOut(x,y);if(o_<6||R()>.46*(1-o_/200))return;const lh=LH_&&LH_(x,y);if(lh===false)return;if(lh===true){pts.push([x,y]);return}const[sx,sy]=src(x,y);if(sy<(SKYY[sc]||0)+30)return;for(const[dx,dy]of[[0,0],[-18,0],[18,0],[0,-10]])if(isWater(sx+dx,sy+dy))return;if(RT.test(sx,sy))return;pts.push([x,y])};
  if(dL)for(let y=0;y<Y1+(dB?160:-20);y+=44)for(let x=X0-170;x<X0-8;x+=52)tryP(x+R()*30,y+R()*30);
  if(dR)for(let y=0;y<Y1+(dB?160:-20);y+=44)for(let x=X1+8;x<X1+170;x+=52)tryP(x+R()*30,y+R()*30);
  if(dB)for(let y=Y1+14;y<Y1+170;y+=44)for(let x=dL?X0:X0-150;x<(dR?X1:X1+150);x+=52)tryP(x+R()*30,y+R()*30);
- pts.sort((a,b)=>a[1]-b[1]);
+ pts.sort((a,b)=>a[1]-b[1]);RT.done();
  return `<g class="edgeDeco" stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">`+pts.map(([x,y])=>{const k=pick();let inner=KIND[k].fn();if(HEAVY.has(k))inner=`<g stroke-width="2.7">${inner}</g>`;return T(x,y,.9+R()*.25,inner,R()<.5)}).join('')+'</g>'}
 function buildScene(sc){
  const IMP=SCENE_IMPL[sc];
  groundSvg=IMP?IMP.ground():sc===3?buildGround3():buildGround(sc);
  if(IMP){IMP.structures()}else{buildStructures(sc);if(sc===3){buildStructures3();placeErmine()}}
+ fringe(sc);
  placeStory(sc);
 const VPLAN={
   top:{kiteFly:1,flowerWatch:1,painting:1,stretch:1},
@@ -1662,7 +1689,7 @@ let scene=0;
 /* 每關只畫自己用到的範圍，避免手機繪圖記憶體不夠而破圖、閃爍 */
 function sizeCanvas(n){const SC=SCENES[n],m=SC.y1?220:300,x=SC.x0-m,y=-m,w=SC.x1-SC.x0+2*m,h=(SC.y1||H)+2*m;
  ['bgSvg','fgSvg','fogSvg'].forEach(id=>{const e=document.getElementById(id);e.setAttribute('viewBox',`${x} ${y} ${w} ${h}`);Object.assign(e.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'})})}
-function loadScene(n){if(scene===n)return;scene=n;SCN=n;sizeCanvas(n);sprites.length=0;occ.fill(0);
+function loadScene(n){if(scene===n)return;scene=n;SCN=n;ROADS.length=0;sizeCanvas(n);sprites.length=0;occ.fill(0);
  for(let j=0;j<GR;j++)for(let i=0;i<GC;i++)wat[j*GC+i]=isWater(i*CELL+CELL/2,j*CELL+CELL/2)?1:0;rng=mulberry32(77+n*101);
  items=[];itemsL.innerHTML='';
  $('#bg').innerHTML=buildScene(n);
@@ -1882,7 +1909,7 @@ function ensureLevel(n,cb,fail){const L=LEVELS[n];if(!L||!L.file||L.types||loade
 function ensureUpTo(m,cb){const need=[];for(let n=1;n<=m;n++)if(LEVELS[n]&&LEVELS[n].file)need.push(n);
  const next=()=>need.length?ensureLevel(need.shift(),next,next):cb();next()}
 /* 給 level4.js 等檔案使用的工具與資料 */
-window.TH={EDGELAND,T,f,r,sr,pk,ri,rnd,shuffle,limb,shade,wob,OL,SNOW,SKIN,HAIR,SHIRT,PANTS,HATS,kid,chibi,act,wrapAn,heart,bubble,noteM,peekHead,faceHead,headOnly,
+window.TH={EDGELAND,ROADS,T,f,r,sr,pk,ri,rnd,shuffle,limb,shade,wob,OL,SNOW,SKIN,HAIR,SHIRT,PANTS,HATS,kid,chibi,act,wrapAn,heart,bubble,noteM,peekHead,faceHead,headOnly,
  cat,frog,owl,sheep,chicken,anyDog,dog,swan,pine,roundTree,bush,rock,barrel,crate,pot,lamp,bench,sign,fence,reeds,lily,well,tent,campfire,swirl,signpost,stall,
  add,mark,canPlace,scatter,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,HEAVY,ANIM,ALWAYS,DUR,
  SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,TAPHOOKS,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,pickView,walkPose,DENS,dbg:{clover:()=>clovers,step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG,horseCart,rideSVG};

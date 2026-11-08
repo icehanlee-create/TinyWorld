@@ -118,7 +118,7 @@ function ground4(){const NS_='stroke="none"';let s=`<defs><pattern id="pave4" wi
  let cr='';for(let i=0;i<26;i++){const x=sr(920,1820),y=sr(1030,1450);cr+=`M${f(x)},${f(y)} l${f(sr(-14,14))},${f(sr(6,14))} l${f(sr(-8,8))},${f(sr(6,12))} `}s+=`<path d="${cr}" fill="none" stroke="#7f786a" stroke-width="1.2"/>`;
  let ms='';for(let i=0;i<40;i++){const x=sr(920,1830),y=sr(1030,1460);ms+=`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(sr(8,22))}" ry="${f(sr(4,8))}" fill="#7f9d48" opacity=".8" ${NS_}/>`}s+=ms;
  // 土路
- const pth=(d,w,c='#c9a979')=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w+5}"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}"/>`;
+ const pth0=(d,w,c='#c9a979')=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w+5}"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}"/>`;;const pth=(d,w,c)=>{H.ROADS.push([d,w]);return pth0(d,w,c)};
  s+=pth('M480,2260 C640,2120 760,1980 900,1880 S1080,1640 1160,1480',40)+pth('M1100,1560 C1200,1580 1280,1640 1340,1720 S1500,1820 1560,1860',30)+pth('M960,1820 C880,1760 800,1700 760,1600',24)+pth('M900,1220 C860,1140 820,1080 800,1010',24);
  // 挖掘坑
  s+=`<path d="M${PIT.x0-14},${PIT.y1+10} Q${PIT.x0-30},${PIT.y0+40} ${PIT.x0},${PIT.y0-10} L${PIT.x1+10},${PIT.y0-14} Q${PIT.x1+30},${PIT.y0+60} ${PIT.x1+12},${PIT.y1+12}Z" fill="#a8825c" stroke-width="2"/>`;
@@ -294,7 +294,7 @@ function structures4(){
 function scatter4(){
  scatter('falls',POOL.falls,3000,60);scatter('temple',POOL.temple4,3000,70);scatter('plaza4',POOL.plaza4,5000,110);
  scatter('grove',POOL.grove,6000,150);scatter('camp',POOL.camp,6000,150);scatter('trail',POOL.trail,4000,110);scatter('back4',POOL.back4,5000,110);scatter('all4',POOL.decor4,12000,240)}
-SCENE_IMPL[4]={ground:ground4,structures:structures4,scatter:scatter4};
+SCENE_IMPL[4]={ground:ground4,structures:()=>{structures4();mark(MX(745),MY(884),(1010-480)*K,(884-584)*K,1)},/* 直立的崖面不要長植物 */scatter:scatter4};
 
 /* ================= 過場：森林步道 ================= */
 RIDES.trail={text:'從雪山往西走，穿過叢林，前往森林古代遺跡⋯',every:330,tick:k=>tone(k%2?240:200,.05,'triangle',.05),svg:()=>{
