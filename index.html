@@ -242,7 +242,7 @@ const f=n=>Math.round(n*10)/10;
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 let rng=mulberry32(77),SCN=0;const ROADS=[];/* 這一關畫過的路（d、寬度），佈景不要種在路上 */
 /* 拆檔關卡的掛勾：level4.js 等檔案載入後會把自己的內容註冊到這裡 */
-const VPLANX={},SCENE_IMPL={},WATERFN={},RIDES={},MAPHOOKS=[],NEXTINFO={},HERE={},TAPHOOKS={};
+const VPLANX={},SCENE_IMPL={},WATERFN={},RIDES={},MAPHOOKS=[],NEXTINFO={},HERE={},TAPHOOKS={},NGHOOKS=[],MAPTOP=[];
 const r=()=>rng(),sr=(a,b)=>a+r()*(b-a),ri=(a,b)=>Math.floor(sr(a,b+1)),pk=a=>a[Math.floor(r()*a.length)];
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -1581,12 +1581,16 @@ const HINTS=3;let st={running:false,t0:0,hintsLeft:HINTS,misses:0},timer=null,hi
 const fmt=s=>{s=Math.floor(s);return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`};
 const elapsed=()=>(performance.now()-st.t0)/1000;
 function tick(){$('#time').textContent=fmt(elapsed())}
+/* 過場期間先停住計時，過場結束才從 0:00 開始（reset=false 時接著原本的時間繼續） */
+function clockHold(){clearInterval(timer);if(st.running)$('#time').textContent=fmt(elapsed())}
+function clockRun(reset){if(!st.running)return;if(reset)st.t0=performance.now();clearInterval(timer);timer=setInterval(tick,250);tick()}
 let testMode=false;try{testMode=localStorage.getItem('townhunt-test')==='1'}catch(_){}if(location.hash==='#test')testMode=true;
 function setHintUI(){const b=$('#hintBtn');$('#hintN').textContent=testMode?'∞':st.hintsLeft;b.disabled=(!testMode&&st.hintsLeft<=0)||hintLock}
 function applyTestUI(){document.querySelectorAll('.tbtn').forEach(b=>b.style.display=testMode?'':'none');$('#testBadge').style.display=testMode?'':'none';$('#winBtn').style.display=testMode?'':'none';$('#resetBtn').style.display=testMode?'':'none';setHintUI()}
 function newGame(keepView){placeItems();placeClover();renderItems();story={step:0,done:false};storyBubble('？');renderTray();updateCounts();
  st={running:true,t0:performance.now(),hintsLeft:HINTS,misses:0,clover:false,bonus:false};setHintUI();
- measure();if(!keepView){const c=LEVELS[level].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base}}clampV();apply();reveal(true);clearInterval(timer);timer=setInterval(tick,250);tick()}
+ measure();if(!keepView){const c=LEVELS[level].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base}}clampV();apply();reveal(true);clearInterval(timer);timer=setInterval(tick,250);tick();
+ NGHOOKS.forEach(h=>{try{h(scene)}catch(e){console.error(e)}})}
 function onTap(sx,sy){if(!st.running)return;const wx=(sx-view.tx)/view.s,wy=(sy-view.ty)/view.s;if(!isRevealed(wx,wy))return;let best=null,bd=1e9,near=false;
  for(const c of [clovers.story,clovers.bonus])if(c&&c.revealed&&!c.found&&Math.hypot(c.x-wx,c.y-wy)<Math.max(14,13/view.s)){foundClover(c);return}
  for(const it of items){if(!isRevealed(it.x,it.y))continue;const d=Math.hypot(it.x-wx,it.y-wy),lim=Math.max(it.r*it.sc+3,13/view.s);if(d<lim){if(it.found)near=true;else if(d<bd){best=it;bd=d}}}
@@ -1653,7 +1657,7 @@ $('#startBtn').onclick=()=>{ac();curtain(()=>{loadScene(level);$('#startOv').cla
 let tCount=0,tTimer;
 $('#gameTitle').onclick=()=>{tCount++;clearTimeout(tTimer);tTimer=setTimeout(()=>tCount=0,2500);if(tCount>=5){tCount=0;testMode=!testMode;try{localStorage.setItem('townhunt-test',testMode?'1':'0')}catch(_){}applyTestUI();toast(testMode?'🧪 測試模式：開啟':'測試模式：關閉')}};
 $('#winBtn').onclick=()=>{if(!st.running)return;items.forEach(it=>{it.found=true;colAdd(it.t.id)});st.clover=true;st.bonus=true;colClover(level);colBonus(level);if(story)story.done=true;colStory(level);updateCounts();win()};
-$('#resetBtn').onclick=()=>{prog={unlocked:1};saveProg();try{[1,2,3,4,5].forEach(n=>{localStorage.removeItem('townhunt-best-L'+n);localStorage.removeItem('townhunt-stars-L'+n)})}catch(_){}st.running=false;clearInterval(timer);setLevel(1);toast('進度已重置，只開放第 1 關');return;
+$('#resetBtn').onclick=()=>{prog={unlocked:1};saveProg();try{[1,2,3,4,5].forEach(n=>{localStorage.removeItem('townhunt-best-L'+n);localStorage.removeItem('townhunt-stars-L'+n)});localStorage.removeItem('townhunt-rapa')}catch(_){}st.running=false;clearInterval(timer);setLevel(1);toast('進度已重置，只開放第 1 關');return;
  items=[];itemsL.innerHTML='';const lw=document.getElementById('lockWall');lw.classList.remove('gone2');buildFog();setLevel(1);measure();const c=LEVELS[1].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base};clampV();apply();toast('進度已重置，只開放第 1 關')};
 const closeMenu=()=>$('#menu').classList.add('hide');
 $('#menuBtn').onclick=e=>{e.stopPropagation();$('#menu').classList.toggle('hide')};
@@ -1666,7 +1670,7 @@ $('#trayToggle').onclick=()=>{const t=$('#tray'),c=t.classList.toggle('collapsed
 $('#nextBtn').onclick=()=>{$('#winOv').classList.add('hide');const a=$('#nextBtn').dataset.act;if(a==='map'){openMap();return}
  if(a==='again'){curtain(()=>{setLevel(level);newGame()});return}
  const n=level+1;if(!LEVELS[n]||prog.unlocked<n)return;
- rodeAdd(n);ensureLevel(n,()=>ride(()=>{loadScene(n);setLevel(n);newGame()},()=>toast(`${LEVELS[n].title}，開始！`,2200),(NEXTINFO[n]&&NEXTINFO[n].ride)||(n===3?'cable':'cart')))};
+ rodeAdd(n);ensureLevel(n,()=>ride(()=>{loadScene(n);setLevel(n);newGame();clockHold();$('#time').textContent='0:00'},()=>{clockRun(true);toast(`${LEVELS[n].title}，開始！`,2200)},(NEXTINFO[n]&&NEXTINFO[n].ride)||(n===3?'cable':'cart')))};
 
 let FOGV=1;/* 雲：0 舊版、1 變薄（使用者選 B）、2 中間 */
 function buildFog(sc){const SC=SCENES[sc],X0=SC.x0,X1=SC.x1,Y1=SC.y1||H;
@@ -1689,7 +1693,7 @@ let scene=0;
 /* 每關只畫自己用到的範圍，避免手機繪圖記憶體不夠而破圖、閃爍 */
 function sizeCanvas(n){const SC=SCENES[n],m=SC.y1?220:300,x=SC.x0-m,y=-m,w=SC.x1-SC.x0+2*m,h=(SC.y1||H)+2*m;
  ['bgSvg','fgSvg','fogSvg'].forEach(id=>{const e=document.getElementById(id);e.setAttribute('viewBox',`${x} ${y} ${w} ${h}`);Object.assign(e.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'})})}
-function loadScene(n){if(scene===n)return;scene=n;SCN=n;ROADS.length=0;sizeCanvas(n);sprites.length=0;occ.fill(0);
+function loadScene(n){if(scene===n)return;scene=n;SCN=n;NGHOOKS.forEach(h=>{try{h(0)}catch(e){console.error(e)}}); /* 換場景時先清掉上一個場景的動態圖層 */ROADS.length=0;sizeCanvas(n);sprites.length=0;occ.fill(0);
  for(let j=0;j<GR;j++)for(let i=0;i<GC;i++)wat[j*GC+i]=isWater(i*CELL+CELL/2,j*CELL+CELL/2)?1:0;rng=mulberry32(77+n*101);
  items=[];itemsL.innerHTML='';
  $('#bg').innerHTML=buildScene(n);
@@ -1792,13 +1796,14 @@ function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,
   m+=`<g transform="translate(270,296)"><rect x="-32" y="-11" width="64" height="20" rx="10" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4.5" text-anchor="middle" font-size="12" fill="${ink}" font-family="${FN}">東方農莊</text></g></g>`;
   g+=m}
  // vignette
- g+=`<rect x="0" y="0" width="342" height="430" fill="url(#mapVig)"/></g>`;
+ g+=`<rect x="0" y="0" width="342" height="430" fill="url(#mapVig)" pointer-events="none"/></g>`; /* 暈影不能擋住地點的點擊 */
  g+=`<path d="M24,30 Q170,20 318,32 Q326,220 316,400 Q170,410 26,400 Q18,220 24,30Z" fill="none" stroke="#a8916a" stroke-width="1.2" stroke-dasharray="4 5"/>`;
+ g+='<g pointer-events="none">';MAPTOP.forEach(h=>{g+=h({U,P,ink,FN,f})});g+='</g>'; /* 畫在暈影上面的東西（例如秘境的光圈） */
  // compass
  g+=`<g transform="translate(58,368)"><circle r="20" fill="#f1e2bf" stroke="${ink}" stroke-width="2"/><circle r="15" fill="none" stroke="#c9b48a" stroke-width="1"/><path d="M0,-17 L5,0 L0,17 L-5,0Z" fill="#a8461f" stroke="${ink}" stroke-width="1.4"/><path d="M-17,0 L0,-4 L17,0 L0,4Z" fill="#e8dcc0" stroke="${ink}" stroke-width="1.1"/><text x="0" y="-24" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">北</text></g>`;
  // here pin
  const here={1:[127,142],2:[250,160],3:[276,66],...HERE}[level]||[100,150];
- g+=`<g transform="translate(${here[0]},${here[1]})"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="1.6s" repeatCount="indefinite"/>`+P('M0,14 C-10,2 -11,-4 -11,-8 A11,11 0 1 1 11,-8 C11,-4 10,2 0,14Z','#f5c842',2)+`<circle cy="-8" r="4" fill="${ink}"/></g></g>`;
+ g+=`<g transform="translate(${here[0]},${here[1]})" pointer-events="none"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="1.6s" repeatCount="indefinite"/>`+P('M0,14 C-10,2 -11,-4 -11,-8 A11,11 0 1 1 11,-8 C11,-4 10,2 0,14Z','#f5c842',2)+`<circle cy="-8" r="4" fill="${ink}"/></g></g>`;
  g+='</svg>';
  $('#mapSvg').innerHTML=g;
  $('#mapSub').textContent=U>1?`已走過 ${U} 個地方，下一段路要拿到 ${NEED_STARS} 顆星才會出現`:`這一關拿到 ${NEED_STARS} 顆星，地圖上就會出現新的路`;
@@ -1809,7 +1814,7 @@ function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,
 }
 function goLevel(n){if(LEVELS[n]&&LEVELS[n].file&&!LEVELS[n].types){ensureLevel(n,()=>goLevel(n));return}
  if(!rodeHas(n)&&NEXTINFO[n]){$('#mapOv').classList.add('hide');mapUnder=[];st.running=false;clearInterval(timer);['winOv','startOv'].forEach(id=>$('#'+id).classList.add('hide'));rodeAdd(n);
-  ride(()=>{loadScene(n);setLevel(n);newGame()},()=>toast(`${LEVELS[n].title}，開始！`,2200),NEXTINFO[n].ride);return}
+  ride(()=>{loadScene(n);setLevel(n);newGame();clockHold();$('#time').textContent='0:00'},()=>{clockRun(true);toast(`${LEVELS[n].title}，開始！`,2200)},NEXTINFO[n].ride);return}
  $('#mapOv').classList.add('hide');const under=mapUnder;mapUnder=[];if(n===level&&scene===n&&!st.running&&under.includes('startOv')){$('#startOv').classList.remove('hide');return}if(n===level&&scene===n&&st.running)return;st.running=false;clearInterval(timer);$('#winOv').classList.add('hide');
  if(scene!==n){curtain(()=>{loadScene(n);setLevel(n);measure();const c=LEVELS[n].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base};clampV();apply();$('#startOv').classList.remove('hide')},'前往'+MAPNODES.find(m=>m.n===n).name+'⋯')}
  else{setLevel(n);$('#startOv').classList.remove('hide')}}
@@ -1912,7 +1917,7 @@ function ensureUpTo(m,cb){const need=[];for(let n=1;n<=m;n++)if(LEVELS[n]&&LEVEL
 window.TH={EDGELAND,ROADS,T,f,r,sr,pk,ri,rnd,shuffle,limb,shade,wob,OL,SNOW,SKIN,HAIR,SHIRT,PANTS,HATS,kid,chibi,act,wrapAn,heart,bubble,noteM,peekHead,faceHead,headOnly,
  cat,frog,owl,sheep,chicken,anyDog,dog,swan,pine,roundTree,bush,rock,barrel,crate,pot,lamp,bench,sign,fence,reeds,lily,well,tent,campfire,swirl,signpost,stall,
  add,mark,canPlace,scatter,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,HEAVY,ANIM,ALWAYS,DUR,
- SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,TAPHOOKS,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,pickView,walkPose,DENS,dbg:{clover:()=>clovers,step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG,horseCart,rideSVG};
+ SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,TAPHOOKS,NGHOOKS,MAPTOP,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,pickView,walkPose,DENS,sprites,ride,toast,clockHold,clockRun,burst,floatText,sfx,items:()=>items,game:()=>st,scene:()=>scene,view:()=>view,testOn:()=>testMode,dbg:{clover:()=>clovers,step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG,horseCart,rideSVG};
 /* ================= boot ================= */
 applyTestUI();
 ensureUpTo(prog.unlocked,()=>{while(level>1&&!rodeHas(level))level--;if(LEVELS[level].file&&!LEVELS[level].types)level=Math.max(1,level-1);setLevel(level);
