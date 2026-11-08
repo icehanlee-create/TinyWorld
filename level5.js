@@ -381,7 +381,7 @@ RIDES.ferry={text:'往東南走到小鎮港口，搭小渡輪往東南方的海�
    1. 東南外海每隔一陣子淡淡浮出一排摩艾剪影（約 2 秒淡出）。
    2. 點到剪影 → 燈塔島東南的礁岩上出現擱淺帆船，船長頭上冒「！」（之後每局都在）。
    3. 點船長 → 海圖碎片被風吹走了 → 場景裡藏一塊碎片（每局隨機：海鷗叼著飛／卡在漁網堆／掉在椰子樹下；提示燈泡不會指）。
-   4. 碎片拿回去 → 帆升起 → 問「要現在出航嗎？」：現在出航＝帆船過場＋「復活島即將開放」再回到這一關；等一下＝船留著，之後點船就能出發。
+   4. 碎片拿回去 → 帆升起 → 問「要現在出航嗎？」：現在出航＝帆船過場後進入復活島秘境（level101.js）；等一下＝船留著，之後點船就能出發。
    進度存在 townhunt-rapa：{ship:1 帆船出現了, ready:1 海圖拼好（冒險地圖出現航線）, went:1 出航過一次} */
 const RAPA={ship:{x:2035,y:738},cap:{x:2021,y:700},sil:{x:2185,y:2488}};/* 船長站在船上（船舷擋住腳） */
 let RP={};try{RP=JSON.parse(localStorage.getItem('townhunt-rapa')||'{}')||{}}catch(_){RP={}}
@@ -490,7 +490,7 @@ let pausedAt=0;const pause=()=>{if(pausedAt)return;pausedAt=performance.now();H.
 const pv=()=>`<svg viewBox="0 0 220 110" width="220" height="110" style="display:block;margin:0 auto 6px"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><rect x="0" y="0" width="220" height="62" rx="10" fill="#dcecef" stroke="none"/><rect x="0" y="58" width="220" height="52" rx="10" fill="#7fd6cf" stroke="none"/><g transform="translate(176,62) scale(.5)">${moaiRow('#7b8a98')}</g><g transform="translate(78,98) scale(.62)">${sailing()}</g></g></svg>`;
 function card(html){ov.innerHTML=`<div class="pcard" style="padding:20px 18px 18px;text-align:center">${html}</div>`;ov.classList.remove('hide')}
 function askSail(){pause();card(`${pv()}<b style="font-size:21px;display:block;margin-bottom:6px">要現在出航嗎？</b><p style="margin:0 0 14px;font-size:15px;line-height:1.6">船長：帆已經升好了。<br>要跟我一起去看看那些石頭巨人嗎？</p><button class="pbtn" id="rapaGo">⛵ 現在出航</button><div class="row2" style="display:flex;margin-top:10px"><button class="sbtn" id="rapaWait">等一下</button></div>`);
- ov.querySelector('#rapaGo').onclick=()=>{ov.classList.add('hide');RP.went=1;rpSave();H.ride(()=>{},()=>{card(`${pv()}<b style="font-size:20px;display:block;margin-bottom:4px">🗿 復活島（海上秘境）</b><p style="margin:0 0 14px;font-size:15px;line-height:1.6">遠遠看到一排背對大海的石頭巨人⋯<br>這座島還在製作中，敬請期待！<br><small style="color:#7a6e60">帆船會一直停在燈塔旁的礁岩，等你下次出航。</small></p><button class="pbtn" id="rapaBack">回到海島港口</button>`);ov.querySelector('#rapaBack').onclick=()=>{ov.classList.add('hide');resume()}},'sail')};
+ ov.querySelector('#rapaGo').onclick=()=>{ov.classList.add('hide');RP.went=1;rpSave();pausedAt=0;H.goLevel(101)}; /* 出航：第一次播帆船過場，然後進入復活島（海上秘境） */
  ov.querySelector('#rapaWait').onclick=()=>{ov.classList.add('hide');resume();H.toast('船長：好，我在這裡等你。準備好了再來找我！\n（冒險地圖的海上也出現了新的航線）',4200)}}
 /* ---- 出航過場：帆船越過海浪，遠遠先看到一排摩艾剪影 ---- */
 RIDES.sail={text:'帆船出海，往東南方的海平線前進⋯',every:640,tick:k=>tone(k%2?200:160,.16,'sine',.05),svg:()=>{
@@ -506,13 +506,13 @@ RIDES.sail={text:'帆船出海，往東南方的海平線前進⋯',every:640,ti
  s+=loop(`<g transform="translate(80,200)"><path d="M-10,0 q5,-7 10,0 q5,-7 10,0" fill="none" stroke-width="2"/></g><g transform="translate(260,230)"><path d="M-8,0 q4,-6 8,0 q4,-6 8,0" fill="none" stroke-width="1.8"/></g>`,9);
  s+=loop([[40,590],[220,598],[340,585]].map(([x,y])=>`<path d="M${x},${y} q12,-8 24,0 q12,8 24,0" fill="none" stroke="#e8f6f6" stroke-width="3"/>`).join(''),1.8);
  return s+`</g></svg>`}};
-/* ---- 冒險地圖：海圖拼好之後，海島港口往東南出現虛線航線，通到淡淡光圈裡的復活島（秘境樣式，還不能點） ---- */
+/* ---- 冒險地圖：海圖拼好之後，海島港口往東南出現虛線航線，通到淡淡光圈裡的復活島（秘境樣式，點了可以前往） ---- */
 H.MAPTOP.push(({U,ink,FN})=>{if(U<5||!RP.ready)return '';
  const rt='M272,378 Q284,394 288,396';
  let m=`<path d="${rt}" fill="none" stroke="#fffaf0" stroke-width="3.4" stroke-linecap="round"/><path d="${rt}" fill="none" stroke="#6a5aa8" stroke-width="1.8" stroke-dasharray="4 4" stroke-linecap="round"/>`;
- m+=`<g transform="translate(305,394)"><circle r="18" fill="#fff6c4" opacity=".8"/><circle r="18" fill="none" stroke="#6a5aa8" stroke-width="1.4" stroke-dasharray="3 3"/><ellipse cx="0" cy="5" rx="13" ry="4.5" fill="#a9b768" stroke="${ink}" stroke-width="1.3"/>`;
+ m+=`<g class="mnode" data-n="101" pointer-events="visiblePainted" style="cursor:pointer"><circle cx="305" cy="386" r="26" fill="transparent"/><g transform="translate(305,394)"><circle r="18" fill="#fff6c4" opacity=".8"/><circle r="18" fill="none" stroke="#6a5aa8" stroke-width="1.4" stroke-dasharray="3 3"/><ellipse cx="0" cy="5" rx="13" ry="4.5" fill="#a9b768" stroke="${ink}" stroke-width="1.3"/>`;
  m+=[-6,0,6].map((x,i)=>`<path transform="translate(${x},4) scale(${i===1?.36:.3})" d="${moaiShape(34)}" fill="#8f9aa6" stroke="${ink}" stroke-width="3.6"/>`).join('')+`</g>`;
- m+=`<g transform="translate(305,370)"><rect x="-21" y="-8" width="42" height="15" rx="7.5" fill="#fffaf0" stroke="#6a5aa8" stroke-width="1.5"/><text y="3.5" text-anchor="middle" font-size="10" fill="#4a3d82" font-family="${FN}">復活島</text></g>`;
+ m+=`<g transform="translate(305,370)"><rect x="-21" y="-8" width="42" height="15" rx="7.5" fill="#fffaf0" stroke="#6a5aa8" stroke-width="1.5"/><text y="3.5" text-anchor="middle" font-size="10" fill="#4a3d82" font-family="${FN}">復活島</text></g></g>`;
  return m});
 /* 測試用 */
 H.dbg.rapa={G:()=>G,RP:()=>RP,flash:()=>{G.silUntil=0;clearTimeout(flashT);flash()},tapSil,tapCap,force:k=>{G.forceKind=k},sil:RAPA.sil,ship:RAPA.ship,cap:RAPA.cap,ask:askSail};

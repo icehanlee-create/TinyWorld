@@ -147,6 +147,12 @@ body:has(.overlay:not(.hide)) #world .an,body:has(.overlay:not(.hide)) .drift{an
 @keyframes flag{0%,100%{transform:skewY(-8deg) scaleX(1)}50%{transform:skewY(8deg) scaleX(.85)}}
 @keyframes fire{0%,100%{transform:scale(1,1)}50%{transform:scale(.92,1.18)}}
 @media (prefers-reduced-motion:reduce){.an{animation:none!important}}
+/* ---- 秘境 ---- */
+body.secret .ring,body.secret .fstat,body.secret .zpill{display:none!important}
+body.secret #tray{padding:6px 0 calc(env(safe-area-inset-bottom) + 6px)}body.secret #chips{gap:4px;padding:2px 8px;justify-content:center}
+body.secret .chip{width:42px;gap:0}body.secret .chip .ic{width:40px;height:40px;border-width:2px}body.secret .chip .ic svg{width:30px;height:30px}body.secret .chip .dots{display:none}
+body.secret .chip .ok{width:17px;height:17px;font-size:9px;right:-4px;top:-4px}
+.lcard.secret{background:#efe9fb;border-color:#4a3d82}.colsec.secret{background:#f1ecfa}
 #loading{position:absolute;inset:0;display:grid;place-items:center;font-size:15px;color:var(--muted)}
 #stage{overflow:hidden;touch-action:none;background:#f4ede0;cursor:grab}
 </style>
@@ -373,13 +379,13 @@ function kidQ(o,L,v,p){dressStart(o,L.sk,L.sh,L.pa);const front=v==='fq',legs=o.
  const s0=front?[-5,-14]:[-6,-14],s1=front?[5,-14]:[6,-14];
  const arm=(a,b)=>armLimb(`M${a[0]},${a[1]+cy} L${b[0]},${b[1]+cy}`,L.sh);
  let g='';
- if(front)g+=arm(s0,[A[0][0]-4,A[0][1]]);else g+=arm(s0,A[0])+arm(s1,A[1]);
+ if(front)g+=arm(s1,A[1]);else g+=arm(s0,A[0])+arm(s1,A[1]); /* 斜前方：遠的手（畫面右邊）先畫，藏在身體後面 */
  if(legs==='sit')g+=legLimb('M-2,-5 L7,-4 L8,0',L.pa,4);
  else if(legs==='walk'||legs==='run')g+=legLimb('M-1,-6 L-5,0',L.pa,4.2)+legLimb('M2,-6 L5,0',L.pa,4.2);
  else if(legs==='crouch')g+=legLimb('M-3,-1 L6,-4 L5,0',L.pa,4.2);
  else g+=legRect(-6,L.pa)+legRect(0.8,L.pa);
  let u=bodyD(L.sh);
- if(front)u+=armLimb(`M${s1[0]},${s1[1]} L${A[1][0]},${A[1][1]}`,L.sh);
+ if(front)u+=armLimb(`M${s0[0]},${s0[1]} L${A[0][0]-4},${A[0][1]}`,L.sh); /* 近的手（畫面左邊）畫在身體前面 */
  let h=`<circle cy="-35" r="13" fill="${L.sk}"/>`;
  if(front){h+=`<ellipse cx="-12.5" cy="-33" rx="2.2" ry="3" fill="${L.sk}"/>`+`<g transform="translate(-2,0)">${HAIRS[L.hs](L.hr)}</g>`+`<g transform="translate(3.2,0) scale(.84,1)">${face(o.eyes==='closed'?3:(o.mood??ri(0,3)))}</g>`;
   if(o.beard)h+=`<path d="M-5,-29 Q3,-12 12,-29 Q7,-26 3,-28 Q-1,-26 -5,-29Z" fill="#fbf6ea"/>`}
@@ -1478,7 +1484,7 @@ function renderItems(){
 /* ================= view ================= */
 const stage=$('#stage'),world=$('#world');
 let SW=1,SH=1,base=.6,minS=.3,maxS=2,view={s:.6,tx:0,ty:0};
-function measure(){const r_=stage.getBoundingClientRect();SW=r_.width;SH=r_.height;base=Math.min(SW,SH*.8)/640*1.2;minS=base;maxS=base*2.8} /* 開場比原本大 1.2 倍；最多只能縮回開場大小，不能拉遠看全圖 */
+function measure(){const r_=stage.getBoundingClientRect();SW=r_.width;SH=r_.height;base=Math.min(SW,SH*.8)/640*1.2;minS=base;maxS=base*2.8;{const S=SEC();if(S&&S.pano())minS=base*.28}} /* 開場比原本大 1.2 倍；最多只能縮回開場大小，不能拉遠看全圖 */
 function clampV(){view.s=Math.max(minS,Math.min(maxS,view.s));const s_=view.s,SC=SCENES[scene]||SCENES[1];
  view.tx=Math.min(-(SC.x0-EX)*s_,Math.max(SW-(SC.x1+EX)*s_,view.tx));const P=pads();view.ty=Math.min(EX*s_+P.t,Math.max(SH-((SC.y1||H)+EX)*s_-P.b,view.ty))}
 function pads(){const hd=document.getElementById('hud'),tr=document.getElementById('tray');return{t:hd?hd.offsetTop+hd.offsetHeight+6:0,b:tr?tr.offsetHeight:0}}
@@ -1501,14 +1507,14 @@ stage.addEventListener('pointerdown',e=>{if(e.target.closest('.zpill'))return;re
  pts.set(e.pointerId,loc(e));if(pts.size===1){const p=loc(e);tap={id:e.pointerId,x:p.x,y:p.y,t:performance.now(),moved:false}}else{tap=null;startPinch()}});
 function startPinch(){const[a,b]=[...pts.values()];const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2};pinch={d0:Math.hypot(a.x-b.x,a.y-b.y)||1,s0:view.s,wx:(m.x-view.tx)/view.s,wy:(m.y-view.ty)/view.s}}
 stage.addEventListener('pointermove',e=>{const p=pts.get(e.pointerId);if(!p)return;const n=loc(e),dx=n.x-p.x,dy=n.y-p.y;p.x=n.x;p.y=n.y;
- if(pts.size===1){if(tap&&!tap.moved&&Math.hypot(n.x-tap.x,n.y-tap.y)>8)tap.moved=true;if(!tap||tap.moved){view.tx+=dx;view.ty+=dy;clampV();apply()}}
- else if(pts.size>=2&&pinch){const[a,b]=[...pts.values()];const d=Math.hypot(a.x-b.x,a.y-b.y),m={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+ if(pts.size===1){if(tap&&!tap.moved&&Math.hypot(n.x-tap.x,n.y-tap.y)>8)tap.moved=true;if(!tap||tap.moved){if(CAMLOCK())return;view.tx+=dx;view.ty+=dy;clampV();apply()}}
+ else if(pts.size>=2&&pinch&&!CAMLOCK()){const[a,b]=[...pts.values()];const d=Math.hypot(a.x-b.x,a.y-b.y),m={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
   view.s=Math.max(minS,Math.min(maxS,pinch.s0*d/pinch.d0));view.tx=m.x-pinch.wx*view.s;view.ty=m.y-pinch.wy*view.s;clampV();apply()}});
 function endPtr(e){if(!pts.has(e.pointerId))return;pts.delete(e.pointerId);
  if(e.type==='pointerup'&&tap&&tap.id===e.pointerId&&!tap.moved&&performance.now()-tap.t<700)onTap(tap.x,tap.y);
  if(pts.size<2)pinch=null;tap=null}
 stage.addEventListener('pointerup',endPtr);stage.addEventListener('pointercancel',endPtr);
-stage.addEventListener('wheel',e=>{e.preventDefault();rect=stage.getBoundingClientRect();const p=loc(e);zoomAt(p.x,p.y,Math.exp(-e.deltaY*.0015))},{passive:false});
+stage.addEventListener('wheel',e=>{e.preventDefault();if(CAMLOCK())return;rect=stage.getBoundingClientRect();const p=loc(e);zoomAt(p.x,p.y,Math.exp(-e.deltaY*.0015))},{passive:false});
 $('#zin').onclick=()=>{const c=centerW();tweenTo(view.s*1.6,c.x,c.y,300)};
 $('#zout').onclick=()=>{const c=centerW();tweenTo(view.s/1.6,c.x,c.y,300)};
 $('#zfit').onclick=()=>{const c=LEVELS[level].c;tweenTo(base,c[0],c[1],500)};
@@ -1529,15 +1535,15 @@ const toastEl=$('#toast');let toastT;function toast(m,ms=1500){toastEl.textConte
 const icon=id=>`<svg viewBox="-21 -21 42 42"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${ART[id]}</g></svg>`;
 const leftOf=id=>items.filter(it=>!it.found&&(!id||it.t.id===id)).length;
 function renderTray(){$('#chips').innerHTML=TYPES.map(t=>`<button class="chip" data-t="${t.id}" aria-label="${t.name}"><span class="ic">${icon(t.id)}<span class="ok">✓</span></span><span class="dots"><i></i><i></i><i></i><i></i></span></button>`).join('');
- $('#chips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{const t=TYPES.find(x=>x.id===b.dataset.t),n=leftOf(t.id);trayTip(b,n?`${t.name}：還有 ${n} 個`:`${t.name}：全部找到了 ✓`)})}
+ $('#chips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{const t=TYPES.find(x=>x.id===b.dataset.t),n=leftOf(t.id);trayTip(b,SEC()?(n?`${t.name}：還沒找齊`:`${t.name}：找齊了 ✓`):n?`${t.name}：還有 ${n} 個`:`${t.name}：全部找到了 ✓`)})}
 /* 點下方列的物件：說明直接顯示在那個物件正上方，不跑到畫面最上面 */
 let trayTipT;function trayTip(chip,msg){const tray=$('#tray');let el=document.getElementById('trayTip');if(!el){el=document.createElement('div');el.id='trayTip';tray.appendChild(el)}
  el.textContent=msg;const tr=tray.getBoundingClientRect(),cr=chip.getBoundingClientRect(),cx=cr.left+cr.width/2-tr.left;el.style.left='0px';el.classList.add('show');
  const w=el.offsetWidth,L=Math.max(w/2+8,Math.min(tr.width-w/2-8,cx));el.style.left=L+'px';el.style.setProperty('--ax',(cx-L+w/2)+'px');
  clearTimeout(trayTipT);trayTipT=setTimeout(()=>el.classList.remove('show'),1800)}
-function updateCounts(bump){const tot=TYPES.length*4,got=tot-leftOf();$('#foundN').textContent=got;$('#foundTxt').textContent=`${got} / ${tot}`;$('#trayProg').textContent=`${got}/${tot}`;
+function updateCounts(bump){const tot=TYPES.length*PER(),got=tot-leftOf();$('#foundN').textContent=got;$('#foundTxt').textContent=`${got} / ${tot}`;$('#trayProg').textContent=`${got}/${tot}`;
  const C=2*Math.PI*18;$('#ringArc').setAttribute('stroke-dasharray',`${f(C*got/tot)} ${f(C)}`);
- TYPES.forEach(t=>{const n=leftOf(t.id),c=$(`.chip[data-t="${t.id}"]`);if(!c)return;if(n===0&&!c.classList.contains('done'))$('#chips').appendChild(c);c.classList.toggle('done',n===0);c.querySelectorAll('.dots i').forEach((d,k)=>d.classList.toggle('on',k<4-n))});
+ TYPES.forEach(t=>{const n=leftOf(t.id),c=$(`.chip[data-t="${t.id}"]`);if(!c)return;if(n===0&&!c.classList.contains('done'))$('#chips').appendChild(c);c.classList.toggle('done',n===0);c.querySelectorAll('.dots i').forEach((d,k)=>d.classList.toggle('on',k<PER()-n))});
  if(bump){const c=$(`.chip[data-t="${bump}"]`);if(c){c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump');if(!c.classList.contains('done'))c.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})}}}
 
 /* ================= game ================= */
@@ -1550,6 +1556,12 @@ const LEVELS=[null,{n:1,title:'第 1 關．奇幻小鎮',desc:'城堡山腳下�
  {n:3,title:'第 3 關．雪山溫泉村',desc:'纜車載你上山：4 種老朋友加上 <b>8 種雪山新東西</b>。',types:TYPES3,c:[1360,1562]},
  {n:4,title:'第 4 關．森林古代遺跡',desc:'沿著森林步道走進遺跡：2 種老朋友加上 <b>10 種遺跡新東西</b>。',types:null,file:'level4.js',c:[1360,1562]},
  {n:5,title:'第 5 關．海島港口',desc:'搭小渡輪來到海島：2 種老朋友加上 <b>10 種海邊新東西</b>。',types:null,file:'level5.js',c:[1300,1460]}];
+/* 秘境：不排進主線，用獨立編號；過關不解鎖下一關，過關後「回到出發地」（home） */
+LEVELS[101]={n:101,secret:true,home:5,per:3,title:'海上秘境．復活島',types:null,pre:'secret.js',file:'level101.js',c:[1380,330]};
+const SECRET_IDS=[101],SECRETS={};
+const SEC=()=>LEVELS[level]&&LEVELS[level].secret&&scene===level&&SECRETS[level]?SECRETS[level]:null;
+const CAMLOCK=()=>{const S=SEC();return !!(S&&!S.pano())};
+const PER=()=>(LEVELS[level]&&LEVELS[level].per)||4;
 /* 過場只在第一次前往時播放；記錄已看過的過場（第一次更新時，先把原本已解鎖的關卡記成看過） */
 let RODE=[];try{const v=localStorage.getItem('townhunt-rode');RODE=v?JSON.parse(v):[...Array(prog.unlocked)].map((_,i)=>i+1);if(!v)localStorage.setItem('townhunt-rode',JSON.stringify(RODE))}catch(_){}
 const rodeHas=n=>n<=1||RODE.includes(n),rodeAdd=n=>{if(!RODE.includes(n)){RODE.push(n);try{localStorage.setItem('townhunt-rode',JSON.stringify(RODE))}catch(_){}}};
@@ -1557,8 +1569,11 @@ const rodeHas=n=>n<=1||RODE.includes(n),rodeAdd=n=>{if(!RODE.includes(n)){RODE.p
 {const before=prog.unlocked;while(LEVELS[prog.unlocked+1]&&starsOf(prog.unlocked)>=NEED_STARS)prog.unlocked++;
  if(prog.unlocked>before){saveProg();setTimeout(()=>{const m=MAPNODES.find(m=>m.n===prog.unlocked);toast(`新地點開放：${m?m.name:'新地點'}，打開冒險地圖出發吧！`,3600)},1200)}}
 let level=Math.min(prog.unlocked,LEVELS.length-1);
-function setLevel(n){level=n;TYPES=typesFor(n);renderStart();renderTray()}
-function renderStart(){const L=LEVELS[level];$('#startTitle').textContent=L.title;$('#startDesc').innerHTML=borrowed.length?`這次<b>${borrowed.map(t=>t.short).join('、')}</b>也跑來這裡了！`:'';
+function setLevel(n){level=n;document.body.classList.toggle('secret',!!(LEVELS[n]&&LEVELS[n].secret));TYPES=typesFor(n);renderStart();renderTray()}
+let howOrig=null,ruleOrig=null;
+function renderStart(){const L=LEVELS[level];{const hd=document.querySelector('#startOv .shead');if(hd){hd.querySelector('b').textContent=`這一關要找的 ${TYPES.length} 樣東西`;hd.querySelector('span').textContent=`每樣 ${L.per||4} 個`}
+  const how=document.querySelector('#startOv .how'),rule=document.querySelector('#startOv .rule');if(howOrig===null){howOrig=how.innerHTML;ruleOrig=rule.innerHTML}
+  const SX=L.secret&&SECRETS[level];how.innerHTML=SX&&SX.how?SX.how:howOrig;rule.innerHTML=SX&&SX.rule?SX.rule:ruleOrig;$('#startBtn').textContent=SX?'開始探險':'開始尋找'}$('#startTitle').textContent=L.title;$('#startDesc').innerHTML=borrowed.length?`這次<b>${borrowed.map(t=>t.short).join('、')}</b>也跑來這裡了！`:'';
  $('#startGrid').innerHTML=TYPES.map(t=>`<div><span class="t">${icon(t.id)}</span>${t.short}</div>`).join('');
  let best=null;try{best=parseFloat(localStorage.getItem('townhunt-best-L'+level))}catch(_){}$('#startBest').textContent=best?`這一關最佳紀錄 ${Math.floor(best/60)}:${String(Math.floor(best%60)).padStart(2,'0')}`:''}
 /* ---- exploration fog ---- */
@@ -1587,11 +1602,13 @@ function clockRun(reset){if(!st.running)return;if(reset)st.t0=performance.now();
 let testMode=false;try{testMode=localStorage.getItem('townhunt-test')==='1'}catch(_){}if(location.hash==='#test')testMode=true;
 function setHintUI(){const b=$('#hintBtn');$('#hintN').textContent=testMode?'∞':st.hintsLeft;b.disabled=(!testMode&&st.hintsLeft<=0)||hintLock}
 function applyTestUI(){document.querySelectorAll('.tbtn').forEach(b=>b.style.display=testMode?'':'none');$('#testBadge').style.display=testMode?'':'none';$('#winBtn').style.display=testMode?'':'none';$('#resetBtn').style.display=testMode?'':'none';setHintUI()}
-function newGame(keepView){placeItems();placeClover();renderItems();story={step:0,done:false};storyBubble('？');renderTray();updateCounts();
+function newGame(keepView){const S=SEC();
+ if(S){items=S.items();clovers={story:null,bonus:null};itemsL.innerHTML='';marks.innerHTML='';fx.innerHTML=''}else{placeItems();placeClover();renderItems()}
+ story={step:0,done:false};storyBubble('？');renderTray();updateCounts();
  st={running:true,t0:performance.now(),hintsLeft:HINTS,misses:0,clover:false,bonus:false};setHintUI();
- measure();if(!keepView){const c=LEVELS[level].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base}}clampV();apply();reveal(true);clearInterval(timer);timer=setInterval(tick,250);tick();
+ measure();if(S)S.start();else if(!keepView){const c=LEVELS[level].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base}}clampV();apply();reveal(true);clearInterval(timer);timer=setInterval(tick,250);tick();
  NGHOOKS.forEach(h=>{try{h(scene)}catch(e){console.error(e)}})}
-function onTap(sx,sy){if(!st.running)return;const wx=(sx-view.tx)/view.s,wy=(sy-view.ty)/view.s;if(!isRevealed(wx,wy))return;let best=null,bd=1e9,near=false;
+function onTap(sx,sy){if(!st.running)return;const wx=(sx-view.tx)/view.s,wy=(sy-view.ty)/view.s;{const S=SEC();if(S){S.tap(wx,wy);return}}if(!isRevealed(wx,wy))return;let best=null,bd=1e9,near=false;
  for(const c of [clovers.story,clovers.bonus])if(c&&c.revealed&&!c.found&&Math.hypot(c.x-wx,c.y-wy)<Math.max(14,13/view.s)){foundClover(c);return}
  for(const it of items){if(!isRevealed(it.x,it.y))continue;const d=Math.hypot(it.x-wx,it.y-wy),lim=Math.max(it.r*it.sc+3,13/view.s);if(d<lim){if(it.found)near=true;else if(d<bd){best=it;bd=d}}}
  if(best)found(best);else if(!near)miss(wx,wy)}
@@ -1615,6 +1632,8 @@ function burst(x,y){const g=svgEl('g',{},fx),ps=[];for(let i=0;i<12;i++)ps.push(
 function floatText(x,y,txt){const fs=Math.min(36,15/view.s);const t=svgEl('text',{x,y,'text-anchor':'middle','font-size':fs,'font-weight':800,fill:OL,stroke:'#fff','stroke-width':fs*.28,'paint-order':'stroke','font-family':'PingFang TC, Noto Sans TC, sans-serif'},fx);t.textContent=txt;
  anim(1200,k=>{t.setAttribute('y',y-k*fs*1.4);t.setAttribute('opacity',k<.6?1:1-(k-.6)/.4)},()=>t.remove())}
 $('#hintBtn').onclick=()=>{if(!st.running||hintLock||(!testMode&&st.hintsLeft<=0))return;const rest=items.filter(it=>!it.found);if(!rest.length)return;
+ {const S=SEC();if(S){if(!S.hint())return;st.hintsUsed=(st.hintsUsed||0)+1;if(!testMode)st.hintsLeft--;hintLock=true;setHintUI();sfx.hint();
+  toast(testMode?'提示：跟著頭上的箭頭走':st.hintsLeft?`提示：跟著頭上的箭頭走（剩 ${st.hintsLeft} 次）`:'提示：跟著頭上的箭頭走（提示用完了）',2600);setTimeout(()=>{hintLock=false;setHintUI()},testMode?900:2600);return}}
  const it=rest[Math.floor(Math.random()*rest.length)];revealAround(it.x,it.y,1);st.hintsUsed=(st.hintsUsed||0)+1;if(!testMode)st.hintsLeft--;hintLock=true;setHintUI();sfx.hint();
  toast(testMode?`提示：「${it.t.name}」就在這個畫面裡`:st.hintsLeft?`提示：「${it.t.name}」就在這個畫面裡（剩 ${st.hintsLeft} 次）`:`提示：「${it.t.name}」就在這個畫面裡（提示用完了）`,2600);
  const P=pads(),av=SH-P.t-P.b,s2=Math.max(view.s,base*1.3),sx=SW*(1/6+Math.random()*2/3),sy=P.t+av*(1/6+Math.random()*2/3);
@@ -1640,11 +1659,13 @@ function win(){st.running=false;clearInterval(timer);const total=elapsed();$('#t
  const crit=[['全部找到',true],['提示 1 次內',(st.hintsUsed||0)<=1],['故事幸運草',!!st.clover]],ns=crit.filter(c=>c[1]).length;
  if(st.bonus)crit.push(['隱藏幸運草',true]);
  try{const SK='townhunt-stars-L'+level,old=+localStorage.getItem(SK)||0;if(ns>old)localStorage.setItem(SK,String(ns))}catch(_){}
- $('#winTitle').textContent=`第 ${level} 關完成！`;
+ $('#winTitle').textContent=LEVELS[level].secret?`${(MAPNODES.find(m=>m.n===level)||{}).name||'秘境'}完成！`:`第 ${level} 關完成！`;
  $('#winStars').classList.toggle('four',crit.length>3);$('#winStars').innerHTML=crit.map(([c,ok],k)=>`<div class="${k===1?'mid':''}" style="animation-delay:${.9+k*.28}s">${starSvg(ok,k===1?58:46,k===3?'#7fc45a':0)}<span style="color:${ok?'var(--ink)':'var(--muted)'}">${c}</span></div>`).join('');
  $('#rTime').textContent=fmt(total);$('#rHint').textContent=st.hintsUsed||0;
  $('#winTag').textContent=isBest?'這一關的新紀錄':`最佳紀錄 ${fmt(best)}`;
  const nx=$('#winNext'),nb=$('#nextBtn');
+ if(LEVELS[level].secret){const hm=LEVELS[level].home,I=NEXTINFO[hm];nx.innerHTML=`<div class="pv">${I&&I.pv?I.pv():mistPreview()}</div><div><small>回到出發地</small><b>${MAPNODES.find(m=>m.n===hm).name}</b><small>${(SECRETS[level]&&SECRETS[level].homeNote)||'隨時可以再回來'}</small></div>`;
+  nb.innerHTML=((SECRETS[level]&&SECRETS[level].homeBtn)||'回到出發地')+ICO.arrow;nb.dataset.act='home';$('#winMap').style.display='';$('#againBtn').style.display='';setTimeout(()=>{sfx.win();$('#winOv').classList.remove('hide')},900);return}
  const nl=level+1,hasNext=!!LEVELS[nl],had=prog.unlocked>=nl,gotS=starsOf(level);
  if(hasNext&&!had&&gotS>=NEED_STARS){prog.unlocked=nl;saveProg()}
  if(hasNext&&prog.unlocked>=nl){const I=NEXTINFO[nl];nx.innerHTML=`<div class="pv">${I.pv()}</div><div><small>下一站</small><b>${MAPNODES.find(m=>m.n===nl).name}</b><small>${had?I.had:I.fresh}</small></div>`;nb.innerHTML=I.btn+ICO.arrow;nb.dataset.act='ride';if(LEVELS[nl].file)ensureLevel(nl,()=>{})}
@@ -1656,8 +1677,9 @@ $('#againBtn').onclick=()=>{$('#winOv').classList.add('hide');curtain(()=>{setLe
 $('#startBtn').onclick=()=>{ac();curtain(()=>{loadScene(level);$('#startOv').classList.add('hide');newGame()},'把東西藏好⋯')};
 let tCount=0,tTimer;
 $('#gameTitle').onclick=()=>{tCount++;clearTimeout(tTimer);tTimer=setTimeout(()=>tCount=0,2500);if(tCount>=5){tCount=0;testMode=!testMode;try{localStorage.setItem('townhunt-test',testMode?'1':'0')}catch(_){}applyTestUI();toast(testMode?'🧪 測試模式：開啟':'測試模式：關閉')}};
-$('#winBtn').onclick=()=>{if(!st.running)return;items.forEach(it=>{it.found=true;colAdd(it.t.id)});st.clover=true;st.bonus=true;colClover(level);colBonus(level);if(story)story.done=true;colStory(level);updateCounts();win()};
-$('#resetBtn').onclick=()=>{prog={unlocked:1};saveProg();try{[1,2,3,4,5].forEach(n=>{localStorage.removeItem('townhunt-best-L'+n);localStorage.removeItem('townhunt-stars-L'+n)});localStorage.removeItem('townhunt-rapa')}catch(_){}st.running=false;clearInterval(timer);setLevel(1);toast('進度已重置，只開放第 1 關');return;
+/* 測試用直接過關：只算星星，不寫進收集冊（收集冊只記真的找到的東西） */
+$('#winBtn').onclick=()=>{if(!st.running)return;items.forEach(it=>{it.found=true});st.clover=true;st.bonus=true;if(story)story.done=true;updateCounts();win()};
+$('#resetBtn').onclick=()=>{prog={unlocked:1};saveProg();try{[1,2,3,4,5,...SECRET_IDS].forEach(n=>{localStorage.removeItem('townhunt-best-L'+n);localStorage.removeItem('townhunt-stars-L'+n)});localStorage.removeItem('townhunt-rapa');localStorage.removeItem('townhunt-col')}catch(_){}COL={i:{},c:{},s:{},b:{}};st.running=false;clearInterval(timer);setLevel(1);toast('進度已重置：只開放第 1 關，收集冊也清空了',2600);return;
  items=[];itemsL.innerHTML='';const lw=document.getElementById('lockWall');lw.classList.remove('gone2');buildFog();setLevel(1);measure();const c=LEVELS[1].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base};clampV();apply();toast('進度已重置，只開放第 1 關')};
 const closeMenu=()=>$('#menu').classList.add('hide');
 $('#menuBtn').onclick=e=>{e.stopPropagation();$('#menu').classList.toggle('hide')};
@@ -1668,6 +1690,7 @@ $('#winMap').onclick=()=>{$('#winOv').classList.add('hide');openMap()};
 $('#mapClose').onclick=()=>{$('#mapOv').classList.add('hide');mapUnder.forEach(id=>$('#'+id).classList.remove('hide'));mapUnder=[]};
 $('#trayToggle').onclick=()=>{const t=$('#tray'),c=t.classList.toggle('collapsed');$('#trayToggle').innerHTML=(c?'展開'+ICO.up:'收合'+ICO.down);$('#trayToggle').setAttribute('aria-label',c?'展開清單':'收合清單');clampV();apply()};
 $('#nextBtn').onclick=()=>{$('#winOv').classList.add('hide');const a=$('#nextBtn').dataset.act;if(a==='map'){openMap();return}
+ if(a==='home'){goLevel(LEVELS[level].home);return}
  if(a==='again'){curtain(()=>{setLevel(level);newGame()});return}
  const n=level+1;if(!LEVELS[n]||prog.unlocked<n)return;
  rodeAdd(n);ensureLevel(n,()=>ride(()=>{loadScene(n);setLevel(n);newGame();clockHold();$('#time').textContent='0:00'},()=>{clockRun(true);toast(`${LEVELS[n].title}，開始！`,2200)},(NEXTINFO[n]&&NEXTINFO[n].ride)||(n===3?'cable':'cart')))};
@@ -1809,6 +1832,8 @@ function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,
  $('#mapSub').textContent=U>1?`已走過 ${U} 個地方，下一段路要拿到 ${NEED_STARS} 顆星才會出現`:`這一關拿到 ${NEED_STARS} 顆星，地圖上就會出現新的路`;
  let cards='';for(let n=1;n<=U;n++){if(!SCENES[n])continue;const m=MAPNODES.find(x=>x.n===n),b=bestOf(n),st_=starsOf(n);
   cards+=`<button class="lcard${n===level?' here':''}" data-n="${n}" aria-label="${m.name}${n===level?'（你在這裡）':''}">${n===level?'<span class="here-tag">你在這裡</span>':''}<span class="nm">${m.name}</span><span class="stars">${[0,1,2].map(k=>starSvg(k<st_,16)).join('')}${COL.b&&COL.b[n]?starSvg(true,16,'#7fc45a'):''}</span><small>${b?'最佳 '+fmt(b):'還沒完成'}</small></button>`}
+ for(const n of SECRET_IDS){if(!rodeHas(n))continue;const m=MAPNODES.find(x=>x.n===n);if(!m)continue;const b=bestOf(n),st_=starsOf(n);
+  cards+=`<button class="lcard secret${n===level?' here':''}" data-n="${n}" aria-label="${m.name}${n===level?'（你在這裡）':''}">${n===level?'<span class="here-tag">你在這裡</span>':''}<span class="nm">${m.ic||''} ${m.name}</span><span class="stars">${[0,1,2].map(k=>starSvg(k<st_,16)).join('')}${COL.b&&COL.b[n]?starSvg(true,16,'#7fc45a'):''}</span><small>${b?'最佳 '+fmt(b):'秘境'}</small></button>`}
  $('#mapCards').innerHTML=cards;
  document.querySelectorAll('#mapSvg .mnode,#mapCards .lcard').forEach(el=>el.onclick=()=>goLevel(+el.dataset.n));
 }
@@ -1883,7 +1908,7 @@ function colStory(n){if(!COL.s[n]){COL.s[n]=1;saveCol()}}
  const mb=document.createElement('button');mb.id='colBtn';mb.innerHTML=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/><path d="M9 8h6"/></svg><span>收集冊</span>`;
  const mapB=document.getElementById('mapBtn');mapB.parentNode.insertBefore(mb,mapB.nextSibling);
  /* 測試模式專用：快速找到提問的人、目標物、幸運草 */
- [['tBonus','🧪 找隱藏幸運草'],['tClover','🧪 找故事幸運草'],['tHelper','🧪 找幫手'],['tTarget','🧪 找走失的目標'],['tGiver','🧪 找提問的人']].forEach(([id,t])=>{const b=document.createElement('button');b.id=id;b.className='tbtn';b.style.display='none';b.innerHTML=`<span>${t}</span>`;mb.parentNode.insertBefore(b,mb.nextSibling.nextSibling)})})();
+ [['tPano','🧪 全景（秘境：看整張、檢查破圖）'],['tBonus','🧪 找隱藏幸運草'],['tClover','🧪 找故事幸運草'],['tHelper','🧪 找幫手'],['tTarget','🧪 找走失的目標'],['tGiver','🧪 找提問的人']].forEach(([id,t])=>{const b=document.createElement('button');b.id=id;b.className='tbtn';b.style.display='none';b.innerHTML=`<span>${t}</span>`;mb.parentNode.insertBefore(b,mb.nextSibling.nextSibling)})})();
 function testGo(p,label){closeMenu();if(!p){toast('這一關沒有'+label,1600);return}const s2=Math.max(view.s,base*1.5);tweenTo(s2,p[0],p[1],600);
  setTimeout(()=>{const g=svgEl('g',{},fx),c=svgEl('circle',{cx:p[0],cy:p[1],r:10,fill:'none',stroke:'#d8413a','stroke-width':4},g);anim(1600,k=>{c.setAttribute('r',10+30*(k*3%1));g.setAttribute('opacity',1-k*.7)},()=>g.remove())},620);toast('🧪 '+label,1400)}
 document.getElementById('tGiver').onclick=()=>{const g=storySp.giver;testGo(g&&[g.x,g.y-30],'提問的人')};
@@ -1891,6 +1916,7 @@ document.getElementById('tHelper').onclick=()=>{const t=storySp.helper;testGo(t&
 document.getElementById('tTarget').onclick=()=>{const t=storySp.target;testGo(t&&[t.x,t.y-t.h*.4],'走失的目標')};
 const cloverGo=(c,nm)=>{if(!c){testGo(null,nm);return}if(c.found){toast(nm+'已經找到了',1400);return}const h=c.host;
  testGo(c.revealed?[c.x,c.y]:[h.x,h.y-h.h*.4],c.revealed?nm:nm+'藏在這個東西後面'+(c.kind==='story'&&!(story&&story.done)?'（要先完成小故事才點得出來）':'（點它）'))};
+document.getElementById('tPano').onclick=()=>{closeMenu();const S=SEC();if(!S){toast('全景只在秘境裡使用',1600);return}S.pano(!S.pano())};
 document.getElementById('tClover').onclick=()=>cloverGo(clovers.story,'故事幸運草');
 document.getElementById('tBonus').onclick=()=>cloverGo(clovers.bonus,'隱藏幸運草');
 let colUnder=[];
@@ -1899,6 +1925,9 @@ function openCol(){const U=prog.unlocked;let html='',got=0,tot=0;const seen=new 
   const fresh=L.types.filter(t=>!seen.has(t.id));fresh.forEach(t=>seen.add(t.id));
   const cells=fresh.map(t=>{const ok=!!COL.i[t.id];tot++;if(ok)got++;return `<div class="${ok?'':'no'}"><span class="ic">${icon(t.id)}</span><span>${ok?t.short:'？'}</span></div>`}).join('');
   html+=`<section class="colsec"><h4><span>${m?m.name:'第 '+n+' 關'}</span><span class="clv4 ${COL.c[n]?'':'no'}">🍀 ${COL.c[n]?'已找到':'還沒找到'}</span>${COL.b[n]?'<span class="clv4">✨ 隱藏幸運草</span>':''}</h4><div class="colgrid">${cells}</div>${STORIES[n]?`<div class="storyrow ${COL.s[n]?'':'no'}">📖 小故事：${COL.s[n]?STORIES[n].title+' ✓':'還沒完成'}</div>`:''}</section>`}
+ for(const n of SECRET_IDS){if(!rodeHas(n))continue;const L=LEVELS[n];if(!L.types){ensureLevel(n,openCol);return}const m=MAPNODES.find(x=>x.n===n);
+  const cells=L.types.map(t=>{const ok=!!COL.i[t.id];tot++;if(ok)got++;return `<div class="${ok?'':'no'}"><span class="ic">${icon(t.id)}</span><span>${ok?t.short:'？'}</span></div>`}).join('');
+  html+=`<section class="colsec secret"><h4><span>🗝️ 秘境．${m?m.name:n}</span><span class="clv4 ${COL.c[n]?'':'no'}">🍀 ${COL.c[n]?'已找到':'還沒找到'}</span>${COL.b[n]?'<span class="clv4">✨ 隱藏幸運草</span>':''}</h4><div class="colgrid">${cells}</div>${STORIES[n]?`<div class="storyrow ${COL.s[n]?'':'no'}">📖 小故事：${COL.s[n]?STORIES[n].title+' ✓':'還沒完成'}</div>`:''}</section>`}
  $('#colBody').innerHTML=html;$('#colSub').textContent=`已收集 ${got} / ${tot} 種東西（每種只記一次）`;
  colUnder=['startOv','winOv'].filter(id=>!$('#'+id).classList.contains('hide'));colUnder.forEach(id=>$('#'+id).classList.add('hide'));$('#colOv').classList.remove('hide')}
 document.getElementById('colBtn').onclick=()=>{closeMenu&&closeMenu();openCol()};
@@ -1906,6 +1935,9 @@ document.getElementById('colClose').onclick=()=>{$('#colOv').classList.add('hide
 /* ================= 拆檔關卡載入 ================= */
 const loadedLv={};
 function ensureLevel(n,cb,fail){const L=LEVELS[n];if(!L||!L.file||L.types||loadedLv[n]==='ok'){cb();return}
+ if(L.pre&&loadedLv['pre:'+L.pre]!=='ok'){const k='pre:'+L.pre;if(loadedLv[k]&&loadedLv[k].push){loadedLv[k].push(()=>ensureLevel(n,cb,fail));return}
+  loadedLv[k]=[()=>ensureLevel(n,cb,fail)];const ps=document.createElement('script');ps.src=L.pre;ps.onload=()=>{const q=loadedLv[k];loadedLv[k]='ok';q.forEach(c=>c())};
+  ps.onerror=()=>{loadedLv[k]=null;ps.remove();setTimeout(()=>toast(`找不到 ${L.pre}，請確認它和 index.html 放在同一個資料夾`,4200),1500);fail&&fail()};document.head.appendChild(ps);return}
  if(loadedLv[n]&&loadedLv[n].push){loadedLv[n].push([cb,fail]);return}
  loadedLv[n]=[[cb,fail]];const sc=document.createElement('script');sc.src=L.file;
  sc.onload=()=>{const q=loadedLv[n];loadedLv[n]='ok';q.forEach(([c])=>c())};
@@ -1917,7 +1949,8 @@ function ensureUpTo(m,cb){const need=[];for(let n=1;n<=m;n++)if(LEVELS[n]&&LEVEL
 window.TH={EDGELAND,ROADS,T,f,r,sr,pk,ri,rnd,shuffle,limb,shade,wob,OL,SNOW,SKIN,HAIR,SHIRT,PANTS,HATS,kid,chibi,act,wrapAn,heart,bubble,noteM,peekHead,faceHead,headOnly,
  cat,frog,owl,sheep,chicken,anyDog,dog,swan,pine,roundTree,bush,rock,barrel,crate,pot,lamp,bench,sign,fence,reeds,lily,well,tent,campfire,swirl,signpost,stall,
  add,mark,canPlace,scatter,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,HEAVY,ANIM,ALWAYS,DUR,
- SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,TAPHOOKS,NGHOOKS,MAPTOP,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,pickView,walkPose,DENS,sprites,ride,toast,clockHold,clockRun,burst,floatText,sfx,items:()=>items,game:()=>st,scene:()=>scene,view:()=>view,testOn:()=>testMode,dbg:{clover:()=>clovers,step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG,horseCart,rideSVG};
+ SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,TAPHOOKS,NGHOOKS,MAPTOP,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,SECRETS,STORIES,SEQ,SKYC,SKYY,EDGEM,EDGED,EDGEDECO,FRINGE,icon,starSvg,
+ colAdd,colClover,colBonus,colStory,updateCounts,win:()=>win(),goLevel:n=>goLevel(n),level:()=>level,rodeHas,pads:()=>pads(),scr:()=>({w:SW,h:SH,base}),apply:()=>apply(),clampV:()=>clampV(),rezoom:()=>{measure();clampV();apply()},updAnim:()=>updateAnim(),tweenTo:(s,x,y,d,cb)=>tweenTo(s,x,y,d,cb),curtain,pickView,walkPose,DENS,sprites,ride,toast,clockHold,clockRun,burst,floatText,sfx,items:()=>items,game:()=>st,scene:()=>scene,view:()=>view,testOn:()=>testMode,dbg:{clover:()=>clovers,step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG,horseCart,rideSVG};
 /* ================= boot ================= */
 applyTestUI();
 ensureUpTo(prog.unlocked,()=>{while(level>1&&!rodeHas(level))level--;if(LEVELS[level].file&&!LEVELS[level].types)level=Math.max(1,level-1);setLevel(level);
