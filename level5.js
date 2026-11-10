@@ -277,15 +277,19 @@ Object.assign(KIND,{
  yarnBall:{w:26,h:26,fn:()=>T(0,-12,.9,DECOY.yarnBall)},chefHat:{w:28,h:28,fn:()=>T(0,-12,.95,DECOY.chefHat)},lemon:{w:28,h:22,fn:()=>T(0,-10,.9,DECOY.lemon)},paperRoll:{w:32,h:24,fn:()=>T(0,-12,.95,DECOY.paperRoll)},
  walker5:{w:30,h:62,fn:()=>{const v=pickView(),p=walkPose(v);return act(0,0,r()<.5?1:-1,bp({view:v,pose:p}),true)}},
  surfer:{w:34,h:66,fn:()=>act(0,0,r()<.5?1:-1,bp({view:pk(['side','fq','bq']),pose:'walk',extra:surf(pk(['#f5c842','#3f8f8a','#e86a6a']))}),true)},
- sunbathe:{w:70,h:26,fn:()=>{const t=pk(['#f5c842','#3f8f8a','#f0a8c8','#e86a6a','#5a86b0']),sk=pk(H.SKIN),hr=pk(H.HAIR),sw=pk(['#d8413a','#3b5a8a','#f5c842','#3f8f8a','#e86a9a']);
-  /* 躺在毛巾上做日光浴：從斜上方看，平躺的人（頭、泳衣、手腳、太陽眼鏡），不用直立人物旋轉 */
-  return `<path d="M-34,-2 L28,-2 L34,-16 L-28,-16Z" fill="${t}"/><path d="M-30,-6 L30,-6 M-29,-11 L32,-11" fill="none" stroke="#fbf6ea" stroke-width="2" opacity=".85"/><path d="M-34,-2 L28,-2 L34,-16 L-28,-16Z" fill="none" stroke-width="1.6"/>`+
-  `<path d="M-26,-10 L-12,-9 M-26,-6 L-12,-7" fill="none" stroke="${OL}" stroke-width="5.4"/><path d="M-26,-10 L-12,-9 M-26,-6 L-12,-7" fill="none" stroke="${sk}" stroke-width="3.4"/>`+
-  `<ellipse cx="-2" cy="-8.5" rx="12" ry="5.2" fill="${sk}"/><path d="M-8,-12.8 Q-2,-14 3,-13 L3,-4 Q-2,-3 -8,-4.2Z" fill="${sw}" stroke-width="1.4"/>`+
-  `<path d="M2,-12 Q8,-15 12,-12 M2,-5 Q8,-2 12,-5" fill="none" stroke="${OL}" stroke-width="4.6"/><path d="M2,-12 Q8,-15 12,-12 M2,-5 Q8,-2 12,-5" fill="none" stroke="${sk}" stroke-width="2.8"/>`+
-  `<circle cx="17" cy="-8.5" r="7" fill="${sk}"/><path d="M19,-15.2 Q26,-13 24,-5 Q22,-3 19,-2 Q23,-8.5 19,-15.2Z" fill="${hr}" stroke-width="1.3"/><path d="M13,-11 h3 M13,-6 h3 M16,-11 v5" fill="none" stroke="${OL}" stroke-width="2.4"/><path d="M11,-8.5 q-1,1.5 0,2" fill="none" stroke-width="1"/>`+
-  (r()<.5?`<ellipse cx="-34" cy="-21" rx="9" ry="3" fill="#e8c46a" stroke-width="1.3"/><path d="M-39,-21 Q-39,-27 -34,-27 Q-29,-27 -29,-21Z" fill="#e8c46a" stroke-width="1.3"/><path d="M-39,-22.5 h10" fill="none" stroke="#c4572f" stroke-width="1.6"/>`:'')+
-  (r()<.4?`<rect x="30" y="-20" width="7" height="10" rx="1.5" fill="${pk(['#e86a6a','#f5c842'])}" stroke-width="1.2"/>`:'')}},
+ sunbathe:{w:90,h:90,fn:()=>{
+  /* 做日光浴（2026-11-10 使用者從 A～D 選 A＋D，每個人隨機一種）：A 坐在躺椅上（側面，陽傘、飲料）／D 坐在毛巾上看海（背影，陽傘、小冰桶） */
+  const parasol=(c1,c2,x=0)=>`<path d="M${x},0 L${x+6},-62" fill="none" stroke="#7a5235" stroke-width="2.4"/><path d="M${x-26},-54 Q${x+6},-84 ${x+38},-60 Q${x+6},-66 ${x-26},-54Z" fill="${c1}"/><path d="M${x-10},-60 Q${x+6},-80 ${x+6},-75 M${x+22},-60 Q${x+6},-80 ${x+6},-75" fill="none" stroke="${c2}" stroke-width="5"/><path d="M${x-26},-54 Q${x+6},-84 ${x+38},-60 Q${x+6},-66 ${x-26},-54Z" fill="none" stroke-width="1.6"/>`;
+  const towel=(t,x0,x1,y0,h)=>`<path d="M${x0},${y0} L${x1-6},${y0} L${x1},${y0-h} L${x0+6},${y0-h}Z" fill="${t}"/><path d="M${x0+3},${y0-3} L${x1-4},${y0-3} M${x0+5},${y0-7} L${x1-2},${y0-7}" fill="none" stroke="#fbf6ea" stroke-width="1.8" opacity=".85"/>`;
+  const who=()=>({hat:pk([1,4,-1]),top:'bare',bottom:'trunks',skin:pk(SKIN),pants:pk(['#d8413a','#3b5a8a','#f5c842','#3f8f8a'])});
+  if(r()<.5){const c=pk(['#3f8f8a','#e86a6a','#5a86b0','#f5c842']);
+   let s=`<ellipse cx="0" cy="2" rx="40" ry="5" fill="#000" opacity=".12" stroke="none"/>`+parasol(pk(['#f0a8c8','#5a86b0','#f5c842']),'#fbf6ea',-30);
+   s+=`<path d="M-24,0 L-20,-10 M20,0 L18,-10 M-30,-10 L-38,-34" fill="none" stroke="#c99a5b" stroke-width="2.6"/><path d="M-30,-12 L26,-12 L26,-8 L-30,-8Z" fill="${c}"/><path d="M-30,-12 L-38,-34 L-34,-35 L-26,-12Z" fill="${c}"/><path d="M-14,-12 v4 M2,-12 v4" fill="none" stroke="#fbf6ea" stroke-width="2"/>`;
+   s+=act(-6,-8,1,{view:'side',pose:'sit',...who()});
+   return s+`<path d="M27,0 l-1,-9 h8 l-1,9Z" fill="#f5a04a" stroke-width="1.2"/><path d="M31,-9 l3,-5" fill="none" stroke="#e86a9a" stroke-width="1.4"/>`}
+  let s=parasol(pk(['#e86a6a','#3f8f8a','#f5c842']),'#fbf6ea',18)+towel(pk(['#f5c842','#3f8f8a','#f0a8c8','#e86a6a','#5a86b0']),-30,30,0,9);
+  s+=act(-2,-3,1,{view:'back',pose:'sit',...who(),top:pk(['bare','tee'])});
+  return s+`<rect x="22" y="-10" width="12" height="9" rx="2" fill="#5a86b0" stroke-width="1.3"/><path d="M22,-7 h12" fill="none" stroke="#fbf6ea" stroke-width="1.6"/>`}},
  sandPlay:{w:60,h:50,fn:()=>act(-14,0,1,bp({pose:'crouch',hat:-1,top:'bare',bottom:'trunks',skin:pk([H.SKIN[2],H.SKIN[3],H.SKIN[4]]),pants:pk(['#d8413a','#3f8f8a','#f5c842','#5a86b0'])}),'bob')+T(16,0,.8,sandcastle())+`<path d="M-2,-4 h8 l-1,6 h-6Z" fill="${pk(['#d8413a','#5a86b0','#f5c842'])}" stroke-width="1.2"/>`},
  shellPick:{w:40,h:46,fn:()=>act(0,0,r()<.5?1:-1,bp({pose:'crouch'}),'bob')+`<path d="M12,-4 Q14,-10 18,-10 Q22,-10 22,-4Z" fill="#f2c6cf" stroke-width="1.1"/>`},
  netMend:{w:76,h:56,fn:()=>act(-18,0,1,fisher({pose:'sit'}),'bob')+T(20,0,.9,netPile())},

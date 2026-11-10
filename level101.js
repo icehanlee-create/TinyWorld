@@ -364,61 +364,67 @@ const freeClock=()=>{const g=H.game();if(clkPaused&&g.running){g.t0+=performance
 let sunSeen=false,sunBusy=false;
 H.NGHOOKS.push(sc=>{sunSeen=false;sunBusy=false;clkPaused=0;['sunShadow','sunTint','sunGlow','sunSkip','sunPano'].forEach(id=>{const e=document.getElementById(id);if(e)e.remove()})});
 const SUNP={x:1880,y:1060};/* B 鏡頭中心 */
-function sunPanoSVG(){const W=900,Hh=844,hz=470,base=610,sx=450;
- let s=`<svg id="sunPanoSvg" viewBox="0 0 ${W} ${Hh}" height="100%" preserveAspectRatio="xMinYMid meet" style="display:block;height:100%;width:auto"><defs>
- <linearGradient id="spSky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3f4a8a"/><stop offset=".45" stop-color="#c9708a"/><stop offset=".8" stop-color="#f3a46a"/><stop offset="1" stop-color="#fcdc94"/></linearGradient>
- <linearGradient id="spSea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f1b47c"/><stop offset="1" stop-color="#7a6a8e"/></linearGradient>
- <radialGradient id="spGlow"><stop offset="0" stop-color="#fff4c0"/><stop offset=".35" stop-color="#ffd890" stop-opacity=".7"/><stop offset="1" stop-color="#ffd890" stop-opacity="0"/></radialGradient>
- <linearGradient id="spGr" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d0a070"/><stop offset="1" stop-color="#8e9a5e"/></linearGradient>
- <linearGradient id="spSh" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2a1e30" stop-opacity=".92"/><stop offset="1" stop-color="#2a1e30" stop-opacity=".45"/></linearGradient>
- <clipPath id="spAbove"><rect width="${W}" height="${hz}"/></clipPath></defs>`;
- s+=`<rect width="${W}" height="${hz}" fill="url(#spSky)"/>`;
- s+=`<path d="M40,130 q30,-14 60,0 q24,-10 44,0Z M330,90 q26,-12 52,0 q20,-9 38,0Z M600,170 q30,-14 60,0 q24,-10 44,0Z M780,110 q20,-9 40,0 q16,-7 30,0Z M170,240 q20,-9 40,0 q16,-7 30,0Z" fill="#f5b8a8" opacity=".75"/>`;
- s+=`<circle cx="${sx}" cy="${hz-40}" r="320" fill="url(#spGlow)"/><g clip-path="url(#spAbove)"><g id="spSun"><circle cx="${sx}" cy="${hz-72}" r="46" fill="#fff3b4"/></g></g>`;
- s+=`<rect y="${hz}" width="${W}" height="${base-hz}" fill="url(#spSea)"/>`;
- for(let i=0;i<8;i++)s+=`<path d="M${sx-30-i*12},${hz+8+i*16} H${sx+30+i*12}" stroke="#fff3b4" stroke-width="3" opacity="${f(.85-i*.1)}"/>`;
- s+=`<rect y="${base-30}" width="${W}" height="${Hh-base+30}" fill="url(#spGr)"/>`;
+/* A 全螢幕大圖：拆成 5 張圖片（天空、太陽、海和地面、影子、摩艾），只移動、縮放這幾張圖片（手機上最順）。
+   2026-11-10 iPhone 回報：整張 SVG 用動畫移動會卡、而且 Safari 會畫出大塊深色方塊，所以改成這樣。 */
+const SPW=900,SPH=844,SPHZ=470,SPBASE=610,SPSX=450;
+const spLayers=()=>{const W=SPW,Hh=SPH,hz=SPHZ,base=SPBASE,sx=SPSX,svg=(defs,body)=>`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${Hh}" width="${W}" height="${Hh}"><defs>${defs}</defs>${body}</svg>`;
+ const sky=svg(`<linearGradient id="a" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3f4a8a"/><stop offset=".45" stop-color="#c9708a"/><stop offset=".8" stop-color="#f3a46a"/><stop offset="1" stop-color="#fcdc94"/></linearGradient><radialGradient id="g"><stop offset="0" stop-color="#fff4c0"/><stop offset=".35" stop-color="#ffd890" stop-opacity=".7"/><stop offset="1" stop-color="#ffd890" stop-opacity="0"/></radialGradient>`,
+  `<rect width="${W}" height="${hz+4}" fill="url(#a)"/><circle cx="${sx}" cy="${hz-40}" r="320" fill="url(#g)"/><path d="M40,130 q30,-14 60,0 q24,-10 44,0Z M330,90 q26,-12 52,0 q20,-9 38,0Z M600,170 q30,-14 60,0 q24,-10 44,0Z M780,110 q20,-9 40,0 q16,-7 30,0Z M170,240 q20,-9 40,0 q16,-7 30,0Z" fill="#f5b8a8" opacity=".75"/>`);
+ const sun=svg('',`<circle cx="${sx}" cy="${hz-72}" r="46" fill="#fff3b4"/>`);
+ let refl='';for(let i=0;i<8;i++)refl+=`<path d="M${sx-30-i*12},${hz+8+i*16} H${sx+30+i*12}" stroke="#fff3b4" stroke-width="3" opacity="${f(.85-i*.1)}"/>`;
+ const sea=svg(`<linearGradient id="b" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f1b47c"/><stop offset="1" stop-color="#7a6a8e"/></linearGradient><linearGradient id="c" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d0a070"/><stop offset="1" stop-color="#8e9a5e"/></linearGradient>`,
+  `<rect y="${hz}" width="${W}" height="${base-hz}" fill="url(#b)"/>${refl}<rect y="${base-30}" width="${W}" height="${Hh-base+30}" fill="url(#c)"/>`);
  const hs=[112,124,118,130,121,127,134,140,129,122,131,119,126,116,110],xs=hs.map((_,i)=>48+i*57);
- /* 影子：從腳下朝看的人越拉越長、越寬（太陽在正後方，所以影子向外散開） */
- let sh='';xs.forEach((x,i)=>{const w=hs[i]*.24,L=Hh-base+40,off=(x-sx)*.7;sh+=`<path d="M${f(x-w*.9)},${base} L${f(x+w*.9)},${base} L${f(x+w*2+off)},${base+L} L${f(x-w*2+off)},${base+L}Z" fill="url(#spSh)"/>`});
- s+=`<g id="spShadow">${sh}</g>`;
- s+=`<rect x="10" y="${base-26}" width="${W-20}" height="30" rx="3" fill="#2a2234"/><path d="M10,${base-26} H${W-10}" stroke="#f3a46a" stroke-width="2" opacity=".7"/>`;
- xs.forEach((x,i)=>{const h=hs[i];s+=`<path transform="translate(${x},${base-24})" d="${moaiSil(h)}" fill="#2a2234" stroke="#f6b070" stroke-width="2.2" stroke-opacity=".7"/>`;
-  if(i===7)s+=`<rect x="${f(x-h*.2)}" y="${f(base-24-h-h*.15)}" width="${f(h*.4)}" height="${f(h*.15)}" rx="6" fill="#3a2a2e" stroke="#f6b070" stroke-width="2" stroke-opacity=".7"/>`});
- return s+`</svg>`}
+ let sh='';xs.forEach((x,i)=>{const w=hs[i]*.24,L=Hh-base+40,off=(x-sx)*.7;sh+=`<path d="M${f(x-w*.9)},${base} L${f(x+w*.9)},${base} L${f(x+w*2+off)},${base+L} L${f(x-w*2+off)},${base+L}Z" fill="url(#d)"/>`});
+ const shd=svg(`<linearGradient id="d" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2a1e30" stop-opacity=".92"/><stop offset="1" stop-color="#2a1e30" stop-opacity=".45"/></linearGradient>`,sh);
+ let mo=`<rect x="10" y="${base-26}" width="${W-20}" height="30" rx="3" fill="#2a2234"/><path d="M10,${base-26} H${W-10}" stroke="#f3a46a" stroke-width="2" opacity=".7"/>`;
+ xs.forEach((x,i)=>{const h=hs[i];mo+=`<path transform="translate(${x},${base-24})" d="${moaiSil(h)}" fill="#2a2234" stroke="#f6b070" stroke-width="2.2" stroke-opacity=".7" stroke-linejoin="round"/>`;
+  if(i===7)mo+=`<rect x="${f(x-h*.2)}" y="${f(base-24-h-h*.15)}" width="${f(h*.4)}" height="${f(h*.15)}" rx="6" fill="#3a2a2e" stroke="#f6b070" stroke-width="2" stroke-opacity=".7"/>`});
+ const moai=svg('',mo);
+ const url=x=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(x);
+ return {sky:url(sky),sun:url(sun),sea:url(sea),shd:url(shd),moai:url(moai)}};
+let SPL=null;/* 第一次用到才做，之後重用 */
 function playSunrise(E){if(sunBusy)return;sunBusy=true;sunSeen=true;holdClock();E.cineStart();
  const st=document.getElementById('stage'),sc=H.scr(),NS='http://www.w3.org/2000/svg';
- /* B：地上的影子（畫在地面上、所有東西下面） */
+ if(!SPL)SPL=spLayers();[SPL.sky,SPL.sun,SPL.sea,SPL.shd,SPL.moai].forEach(u=>{const im=new Image();im.src=u});/* 先讓手機解碼，A 出現時不會閃 */
+ /* B：地上的影子畫在物件那一層（fgSvg，比整張地圖小很多，拉長時重畫比較輕） */
  const g=document.createElementNS(NS,'g');g.id='sunShadow';let sh='';
  for(let i=0;i<15;i++){const k=i/14,x=lerp(TONG[0][0],TONG[1][0],k),y=lerp(TONG[0][1],TONG[1][1],k)-14;
-  sh+=`<g transform="translate(${f(x)},${f(y)})"><g class="sunSh" transform="scale(0,1)"><path d="M0,-15 L-430,-26 Q-462,0 -430,26 L0,15Z" fill="#2a2038" opacity=".5"/></g></g>`}
- g.innerHTML=sh;const gnd=document.getElementById('gnd');if(gnd)gnd.after(g);else document.getElementById('bg').prepend(g);
- const tint=document.createElement('div');tint.id='sunTint';tint.style.cssText='position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1.4s;mix-blend-mode:multiply;background:linear-gradient(270deg,rgba(255,180,100,.6),rgba(240,130,110,.32) 55%,rgba(80,70,140,.26))';
+  sh+=`<g transform="translate(${f(x)},${f(y)})"><g class="sunSh" transform="scale(0,1)"><path d="M0,-15 L-430,-26 Q-462,0 -430,26 L0,15Z" fill="#2a2038" opacity=".42" stroke="none"/></g></g>`}
+ g.innerHTML=sh;const il=document.getElementById('itemsL');il.parentNode.insertBefore(g,il);
+ /* 晨光：一般半透明漸層（不用顏色疊加，iPhone 會切成方塊） */
+ const tint=document.createElement('div');tint.id='sunTint';tint.style.cssText='position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1.4s;background:linear-gradient(270deg,rgba(255,170,90,.42),rgba(240,120,110,.22) 55%,rgba(70,60,130,.24))';
  const glow=document.createElement('div');glow.id='sunGlow';glow.style.cssText='position:absolute;right:-140px;top:24%;width:320px;height:320px;border-radius:50%;pointer-events:none;opacity:0;transition:opacity 2.4s;background:radial-gradient(circle,rgba(255,244,190,1) 0 18%,rgba(255,220,140,.6) 35%,rgba(255,220,140,0) 70%)';
  const skip=document.createElement('div');skip.id='sunSkip';skip.style.cssText='position:absolute;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center;padding-bottom:22%;color:#fff8e6;text-shadow:0 2px 8px rgba(0,0,0,.7);font-size:17px;letter-spacing:2px;opacity:0;transition:opacity 1.2s';
  skip.textContent='清晨的東加里奇⋯';
  st.append(tint,glow,skip);requestAnimationFrame(()=>{tint.style.opacity=1;glow.style.opacity=1;skip.style.opacity=1});
  try{[262,330,392].forEach((q,i)=>H.tone(q,1.2,'sine',.05,i*.5))}catch(_){}
  H.tweenTo(sc.base*.62,SUNP.x,SUNP.y,1500);
- const t0=performance.now();let raf=0,done=false;
- const grow=now=>{const k=Math.min(1,Math.max(0,(now-t0-900)/3400)),e=1-(1-k)**3;g.querySelectorAll('.sunSh').forEach(el=>el.setAttribute('transform',`scale(${f(e)},1)`));if(k<1&&!done)raf=requestAnimationFrame(grow)};raf=requestAnimationFrame(grow);
- const toA=()=>{if(done)return;done=true;cancelAnimationFrame(raf);g.querySelectorAll('.sunSh').forEach(el=>el.setAttribute('transform','scale(1,1)'));skip.remove();showPano(E)};
+ /* 影子等鏡頭拉遠完（1.6 秒）才開始長，兩件事不同時做，手機比較不卡；約 30 格／秒更新 */
+ const els=[...g.querySelectorAll('.sunSh')],t0=performance.now();let raf=0,done=false,lastT=0;
+ const grow=now=>{if(done)return;raf=requestAnimationFrame(grow);if(now-lastT<32)return;lastT=now;const k=Math.min(1,Math.max(0,(now-t0-1600)/3000)),e=1-(1-k)**3;const v=`scale(${f(e)},1)`;els.forEach(el=>el.setAttribute('transform',v))};raf=requestAnimationFrame(grow);
+ const toA=()=>{if(done)return;done=true;cancelAnimationFrame(raf);els.forEach(el=>el.setAttribute('transform','scale(1,1)'));skip.remove();showPano(E)};
  skip.onclick=toA;setTimeout(toA,5600)}
 function showPano(E){const ov=document.createElement('div');ov.id='sunPano';ov.className='overlay';
  ov.style.cssText='position:fixed;inset:0;z-index:60;padding:0;margin:0;display:block;background:#2a2234;overflow:hidden;opacity:0;transition:opacity .9s';
  document.body.appendChild(ov);
- /* 手機 Safari 的 SVG「height:100%、width:auto」常常算成寬度 0（整張圖看不見），所以先量畫面，直接給像素寬高 */
- const vh=ov.clientHeight||window.innerHeight,vw0=ov.clientWidth||window.innerWidth,k=Math.max(vh/844,vw0/900),pw=Math.round(900*k),ph=Math.round(844*k);
- ov.innerHTML=`<div id="spPan" style="position:absolute;left:0;top:${Math.round((vh-ph)/2)}px;width:${pw}px;height:${ph}px">${sunPanoSVG().replace('height="100%" preserveAspectRatio="xMinYMid meet" style="display:block;height:100%;width:auto"',`width="${pw}" height="${ph}" style="display:block"`)}</div>`+
+ /* 先量畫面再給像素寬高（手機 Safari 不會算錯） */
+ const vh=ov.clientHeight||window.innerHeight,vw=ov.clientWidth||window.innerWidth,k=Math.max(vh/SPH,vw/SPW),pw=Math.round(SPW*k),ph=Math.round(SPH*k);
+ const L=SPL||(SPL=spLayers()),img=(id,u,extra='')=>`<img id="${id}" src="${u}" alt="" draggable="false" style="position:absolute;left:0;top:0;width:${pw}px;height:${ph}px;will-change:transform;${extra}">`;
+ ov.innerHTML=`<div id="spPan" style="position:absolute;left:0;top:${Math.round((vh-ph)/2)}px;width:${pw}px;height:${ph}px;will-change:transform">`+
+  img('spSky',L.sky)+img('spSun',L.sun,'transform:translateY(130px)')+img('spSea',L.sea)+img('spShd',L.shd,`transform-origin:50% ${f(SPBASE/SPH*100)}%;transform:scaleY(.15);opacity:.4`)+img('spMoai',L.moai)+`</div>`+
   `<div id="spCap" style="position:absolute;left:0;right:0;bottom:12%;text-align:center;color:#fff8e6;text-shadow:0 2px 10px rgba(0,0,0,.7);opacity:0;transition:opacity 1.4s"><b style="display:block;font-size:26px;letter-spacing:5px;margin-bottom:8px">東加里奇的日出</b><span style="font-size:15px;line-height:1.7">太陽從巨人們背後的海上升起，<br>長長的影子一路拉到你的腳邊⋯</span></div>`+
   `<div id="spTap" style="position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 4%);text-align:center;color:#fff8e6;font-size:13px;opacity:0;transition:opacity 1s">點一下畫面，繼續探索</div>`;
- const pan=ov.querySelector('#spPan'),sun=ov.querySelector('#spSun'),shd=ov.querySelector('#spShadow');
- requestAnimationFrame(()=>{ov.style.opacity=1;const w=pw,vw=vw0;
-  try{pan.animate([{transform:'translateX(0)'},{transform:`translateX(${Math.min(0,vw-w)}px)`}],{duration:11000,easing:'ease-in-out',fill:'forwards'});
-   sun.animate([{transform:'translateY(130px)'},{transform:'translateY(0)'}],{duration:6000,easing:'ease-out',fill:'forwards'});
-   shd.style.transformBox='fill-box';shd.style.transformOrigin='50% 0';shd.animate([{transform:'scaleY(.15)',opacity:.4},{transform:'scaleY(1)',opacity:1}],{duration:5600,easing:'ease-out',fill:'forwards'})}catch(_){}});
- setTimeout(()=>{const c=ov.querySelector('#spCap');if(c)c.style.opacity=1},1800);
- setTimeout(()=>{const t=ov.querySelector('#spTap');if(t)t.style.opacity=.8},3600);
+ const pan=ov.querySelector('#spPan'),sun=ov.querySelector('#spSun'),shd=ov.querySelector('#spShd');
+ /* 圖片都解碼好才開始動畫，免得一邊載入一邊動 */
+ const imgs=[...ov.querySelectorAll('img')],ready=Promise.all(imgs.map(im=>im.decode?im.decode().catch(()=>{}):Promise.resolve()));
+ ready.then(()=>requestAnimationFrame(()=>{ov.style.opacity=1;
+  const go=(el,kf,o)=>{try{el.animate(kf,{fill:'forwards',...o})}catch(_){el.style.transform=kf[kf.length-1].transform;if(kf[kf.length-1].opacity!=null)el.style.opacity=kf[kf.length-1].opacity}};
+  go(pan,[{transform:'translate3d(0,0,0)'},{transform:`translate3d(${Math.min(0,vw-pw)}px,0,0)`}],{duration:11000,easing:'ease-in-out'});
+  go(sun,[{transform:'translate3d(0,130px,0)'},{transform:'translate3d(0,0,0)'}],{duration:6000,easing:'ease-out'});
+  go(shd,[{transform:'scaleY(.15)',opacity:.4},{transform:'scaleY(1)',opacity:1}],{duration:5600,easing:'ease-out'});
+  setTimeout(()=>{const c=ov.querySelector('#spCap');if(c)c.style.opacity=1},1800);
+  setTimeout(()=>{const t=ov.querySelector('#spTap');if(t)t.style.opacity=.8},3600)}));
  try{[392,494,587,784].forEach((q,i)=>H.tone(q,.6,'sine',.06,.4+i*.26))}catch(_){}
  const t0=performance.now();
  ov.onclick=()=>{if(performance.now()-t0<1200)return;ov.onclick=null;ov.style.opacity=0;
