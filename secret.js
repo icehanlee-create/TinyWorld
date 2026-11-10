@@ -11,13 +11,13 @@ const H=window.TH;if(!H||H.SECRET)return;
 const {T,f,OL,SECRETS,STORIES,SEQ,ART}=H;
 const NSv='http://www.w3.org/2000/svg';
 const $=s=>document.querySelector(s);
-const REACH=105;           /* 走到多近才拿得到（世界座標，約一個半角色高） */
+const REACH=140;           /* 走到多近才拿得到（世界座標，約兩個角色高；2026-11-10 從 105 放寬） */
 const ZOOM=1.5;            /* 秘境鏡頭：開場大小的 1.5 倍，固定不變 */
 
 /* ---------- 共用樣式：搖桿、特寫卡 ---------- */
 const css=document.createElement('style');css.textContent=`
 #joy{position:absolute;left:14px;bottom:120px;width:136px;height:136px;z-index:7;touch-action:none;display:none}
-body.secret #joy{display:block}body.secret.pano #joy,body:has(.overlay:not(.hide)) #joy,body:has(#ride.on) #joy,body:has(#curtain.on) #joy{visibility:hidden}
+body.secret #joy{display:block}body.secret.pano #joy,body.secret.cine #joy,body:has(.overlay:not(.hide)) #joy,body:has(#ride.on) #joy,body:has(#curtain.on) #joy{visibility:hidden}
 #joy .jb{position:absolute;left:14px;top:14px;width:108px;height:108px;border-radius:50%;background:rgba(255,250,240,.55);border:2.5px solid rgba(43,36,32,.55);box-shadow:inset 0 0 0 10px rgba(255,250,240,.35)}
 #joy .jk{position:absolute;left:43px;top:43px;width:50px;height:50px;border-radius:50%;background:#fffaf0;border:2.5px solid #2b2420;box-shadow:0 3px 0 #2b2420;transition:transform .12s}
 #joy.on .jk{transition:none}
@@ -59,7 +59,7 @@ const dirOf=(x,y)=>((Math.round(Math.atan2(y,x)/(Math.PI/4))%8)+8)%8;
 
 function make(C){
  const E={C,how:C.how,rule:C.rule,homeBtn:C.homeBtn,homeNote:C.homeNote};SECRETS[C.n]=E;
- let on=false,raf=0,last=0,pano=false,card=null,cut=0,pausedAt=0,tipShown=false;
+ let on=false,raf=0,last=0,pano=false,card=null,cut=0,pausedAt=0,tipShown=false,cine=0;
  const P={x:C.start.x,y:C.start.y,dir:2,walk:false,ph:0,frame:-1,view:''};
  let all=[],real=[],FL=[],ent={},story=null,clv={story:null,bonus:null},arrowUntil=0,arrowT=null,occT=0,occKey='',farT=0;
  const LIDS=['secW','secF','secI','secD','secO','secS','secA'],L=()=>['secF','secI','secD','secO','secA'].map(id=>document.getElementById(id));
@@ -100,7 +100,7 @@ function make(C){
 
  /* ---- 畫 ---- */
  const shadow=r=>`<ellipse cx="2" cy="${f(r*.75)}" rx="${f(r*.9)}" ry="3" fill="#000" opacity=".18" stroke="none"/>`;
- function drawItems(){const [,lI]=L();lI.innerHTML=all.map((o,i)=>o.found||o.hidden||o.held?'':`<g class="sitem" data-k="${i}" transform="translate(${f(o.x)},${f(o.y)}) rotate(${f(o.rot)}) scale(${f(o.fl?-o.sc:o.sc)},${f(o.sc)})">${shadow(o.r)}${ART[o.id]||C.decoyArt[o.id]}</g>`).join('')
+ function drawItems(){const [,lI]=L();lI.innerHTML=all.map((o,i)=>o.found||o.hidden||o.held?'':`<g class="sitem" data-k="${i}" transform="translate(${f(o.x)},${f(o.y)}) rotate(${f(o.rot)}) scale(${f(o.fl?-o.sc:o.sc)},${f(o.sc)})">${o.jig?'<g class="jig">':''}${shadow(o.r)}${ART[o.id]||C.decoyArt[o.id]}${o.jig?'</g>':''}</g>`).join('')
   +[clv.story,clv.bonus].map(c=>c&&c.revealed&&!c.found?`<g class="cpop" transform="translate(${f(c.host.x)},${f(c.host.y-6)})">${C.clover}</g>`:'').join('')}
  function drawFlips(){const [lF]=L();lF.innerHTML=FL.filter(h=>h.open).map(h=>T(h.x,h.y,1,h.openArt||(h.openArt=C.openArt(h)),h.sp.fl)).join('')}
  function sparks(){const [,,,,lA]=L();let s='';
@@ -150,7 +150,7 @@ function make(C){
    place(m)}}
  E.resetMovers=()=>{for(const m of MV){m.x=m.x0;m.y=m.y0;m.t=0;m.st=undefined;m.stT=undefined;m.spF=undefined}};
  /* ---- 主迴圈 ---- */
- const busy=()=>!H.game().running||!!document.querySelector('.overlay:not(.hide)')||document.getElementById('ride').classList.contains('on')||document.getElementById('curtain').classList.contains('on')||!!card||cut>0;
+ const busy=()=>!H.game().running||!!document.querySelector('.overlay:not(.hide)')||document.getElementById('ride').classList.contains('on')||document.getElementById('curtain').classList.contains('on')||!!card||cut>0||cine>0;
  function loop(t){raf=requestAnimationFrame(loop);const dt=Math.min(.05,(t-(last||t))/1000);last=t;if(!on)return;
   let vx=JV.x,vy=JV.y;const kv=keyVec();if(kv){vx=kv.x;vy=kv.y}const m=Math.hypot(vx,vy);
   if(busy()||pano||m<.15){P.walk=false}else{
@@ -159,7 +159,8 @@ function make(C){
    P.dir=dirOf(ux,uy);P.walk=true;P.ph+=dt}
   for(const e of Object.values(ent))if(e.tick)e.tick(dt,P);
   moveMovers(dt);
-  drawDyn();if(!pano)cam(false);
+  if(C.tick&&!busy())C.tick(dt,P,E);
+  drawDyn();if(!pano&&!cine)cam(false);
   if(t-occT>90||(P.walk&&occKey)){occT=t;occlude()}
   if(t-(P.animT||0)>400){P.animT=t;H.updAnim()}
   if(arrowUntil)arrow(t)}
@@ -169,7 +170,7 @@ function make(C){
   if(!g){g=document.createElementNS(NSv,'g');g.id='secArr';lA.appendChild(g);g.innerHTML=`<g class="secHi"><circle r="17" fill="#fffaf0" stroke-width="2.2"/><path d="M-9,-4 H3 V-10 L12,0 L3,10 V4 H-9Z" fill="#f5c842" stroke-width="2"/></g>`}
   const a=Math.atan2(best.y-P.y,best.x-P.x)*180/Math.PI;g.setAttribute('transform',`translate(${f(P.x)},${f(P.y-100)}) rotate(${f(a)})`);
   if(bd<REACH*.8&&!g.dataset.near){g.dataset.near=1;arrowUntil=Math.min(arrowUntil,t+1200)}}
- E.hint=()=>{if(!real.some(o=>!o.found))return false;arrowUntil=performance.now()+9000;const g=document.getElementById('secArr');if(g)g.remove();return true};
+ E.hint=()=>{const left=real.filter(o=>!o.found).length;if(!left)return false;arrowUntil=performance.now()+(left<=3?15000:9000);/* 剩 3 個以下箭頭顯示 15 秒 */const g=document.getElementById('secArr');if(g)g.remove();return true};
 
  E.start=()=>{layers();on=true;placeJoy();E.resetMovers();drawMovers();drawFlips();drawItems();sparks();drawDyn();occKey='';cam(true);
   if(!tipShown){tipShown=true;let seen=false;try{seen=!!localStorage.getItem('townhunt-secret-tip')}catch(_){}if(!seen&&!joy.querySelector('.jt'))joy.insertAdjacentHTML('beforeend','<div class="jt">按住拖曳，走路</div>')}
@@ -182,6 +183,11 @@ function make(C){
   if(quiet)return;if(pano){const SC=H.SCENES[C.n],sc=H.scr();H.tweenTo(sc.base*.28,(SC.x0+SC.x1)/2,(SC.y1)/2,500);H.toast('🧪 全景：可以拖曳、縮放看整張秘境\n再按一次「全景」回到角色',3200)}
   else{cam(true);H.toast('回到角色',1200)}}
  E.pano=v=>{if(v===undefined)return pano;setPano(v)};
+ /* 演出用鏡頭（2026-11-10）：E.cineStart() 之後鏡頭不跟角色、可以拉遠到 base*.28、角色不能走；
+    E.cineEnd(done) 慢慢回到角色。日出、瞭望點用 */
+ E.cine=()=>cine>0;
+ E.cineStart=()=>{cine++;document.body.classList.add('cine');JV.x=0;JV.y=0;P.walk=false;H.rezoom()};
+ E.cineEnd=(done)=>{const sc=H.scr(),Pd=H.pads();H.tweenTo(sc.base*ZOOM,P.x,P.y-40,700,()=>{cine=Math.max(0,cine-1);if(!cine)document.body.classList.remove('cine');H.rezoom();cam(true);if(done)done()})};
 
  /* ---- 點擊 ---- */
  const near=(x,y)=>Math.hypot(x-P.x,y-P.y)<=REACH;
@@ -191,7 +197,7 @@ function make(C){
   for(const c of [clv.story,clv.bonus]){if(c&&c.revealed&&!c.found&&Math.hypot(wx-c.host.x,wy-(c.host.y-6))<16+tol){if(!near(c.host.x,c.host.y))return tooFar();gotClover(c);return}}
   /* 3. 物件（含干擾物） */
   let best=null,bd=1e9;for(const o of all){if(o.found||o.hidden||o.held)continue;const d=Math.hypot(o.x-wx,o.y-(wy+2));if(d<o.r*o.sc+6+tol&&d<bd){best=o;bd=d}}
-  if(best){if(!near(best.x,best.y))return tooFar();openCard(best);return}
+  if(best){if(!near(best.x,best.y))return tooFar();if(C.quick&&C.quick.has(best.id)){quickTake(best);return}openCard(best);return}
   /* 3.5 故事人物（看得到就能點；物件優先，免得藏在人旁邊的東西點不到） */
   for(const [id,e] of Object.entries(ent)){if(e.gone||!e.role)continue;if(Math.abs(wx-e.x)<e.w*.6+tol&&wy<=e.y+8+tol&&wy>=e.y-e.h-10-tol){roleTap(e.role);return}}
   /* 4. 可以翻開的東西 */
@@ -201,7 +207,7 @@ function make(C){
   if(C.tapScene&&C.tapScene(wx,wy,E))return;
   ripple(wx,wy)};
  function ripple(x,y){const fx=document.getElementById('fx'),g=document.createElementNS(NSv,'circle');g.setAttribute('cx',x);g.setAttribute('cy',y);g.setAttribute('fill','none');g.setAttribute('stroke','#7a6e60');g.setAttribute('stroke-width',2/H.view().s);fx.appendChild(g);
-  const t0=performance.now();const st=t=>{const k=(t-t0)/400;if(k>=1){g.remove();return}g.setAttribute('r',(4+12*k)/H.view().s);g.setAttribute('opacity',1-k);requestAnimationFrame(st)};requestAnimationFrame(st)}
+  const t0=performance.now();const st=t=>{const k=Math.max(0,(t-t0)/400);if(k>=1){g.remove();return}g.setAttribute('r',(4+12*k)/H.view().s);g.setAttribute('opacity',1-k);requestAnimationFrame(st)};requestAnimationFrame(st)}
 
  /* ---- 翻開 ---- */
  function flip(h){const c=h.clover,canC=c&&!c.revealed&&!c.found&&(c.kind==='bonus'||story.done);
@@ -220,6 +226,10 @@ function make(C){
  function pause(){if(pausedAt)return;pausedAt=performance.now();H.clockHold()}
  function resume(){const g=H.game();if(pausedAt&&g.running)g.t0+=performance.now()-pausedAt;pausedAt=0;if(g.running)H.clockRun(false)}
  E.pause=pause;E.resume=resume;
+ /* 免檢查的物件（C.quick，2026-11-10 使用者選 A+D）：外觀一眼就分得出來的，點了直接收；干擾物只抖一下說不是 */
+ function quickTake(o){if(!o.decoy){try{H.tone(520,.08,'triangle',.08)}catch(_){}found(o);return}
+  const I=C.inspect[o.id]||{};o.jig=performance.now();drawItems();setTimeout(()=>{o.jig=0;drawItems()},420);
+  try{H.tone(260,.16,'sine',.08)}catch(_){}const t=performance.now();if(t-farT>900){farT=t;H.toast(`這是${I.name||'別的東西'}，不是要找的東西`,1800)}}
  function openCard(o){const I=C.inspect[o.id];card=o;o.held=true;drawItems();pause();try{H.tone(520,.08,'triangle',.08)}catch(_){}
   const name=o.decoy?I.name:o.t.name;
   ov.innerHTML=`<div class="pcard"><b class="ttl">${I.pick||'拿起來看看'}</b><p class="sub">${I.hintQ||'是要找的東西嗎？'}</p><div class="box"><svg viewBox="-50 -50 100 100"><g id="scStage" stroke="${OL}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><g id="scBg"></g><g id="scItem"><g id="scIn" transform="scale(2.5)">${I.front}</g></g><g id="scFx"></g></g></svg></div>
@@ -235,7 +245,7 @@ function make(C){
  /* 檢查的小動作：turn 轉過來看背面、flip 翻面／翻過來看底部、spin 轉一圈、mag 放大鏡、light 對著光 */
  function doInspect(I,done){const it=$('#scItem'),inn=$('#scIn'),fxg=$('#scFx'),bg=$('#scBg');const t0=performance.now();
   const swap=()=>{inn.innerHTML=I.after};
-  const run=(D,fn,end)=>{const st=t=>{const k=Math.min(1,(t-t0)/D);fn(k);if(k<1)requestAnimationFrame(st);else end&&end()};requestAnimationFrame(st)};
+  const run=(D,fn,end)=>{const st=t=>{const k=Math.max(0,Math.min(1,(t-t0)/D));fn(k);if(k<1)requestAnimationFrame(st);else end&&end()};requestAnimationFrame(st)};
   try{H.tone(440,.12,'sine',.07)}catch(_){}
   if(I.act==='turn'||I.act==='flip'){let sw=false;run(700,k=>{const c=Math.cos(k*Math.PI);if(!sw&&k>=.5){sw=true;swap()}const a=Math.abs(c);it.setAttribute('transform',I.act==='turn'?`scale(${f(Math.max(.02,a))},1)`:`scale(1,${f(Math.max(.02,a))})`)},()=>{it.setAttribute('transform','');done()})}
   else if(I.act==='spin'){let sw=false;run(1100,k=>{if(!sw&&k>=.75){sw=true;swap()}const a=Math.abs(Math.cos(k*Math.PI*2));it.setAttribute('transform',`scale(${f(Math.max(.05,a))},1)`)},()=>{it.setAttribute('transform','');done()})}

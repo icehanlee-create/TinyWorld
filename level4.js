@@ -338,4 +338,23 @@ MAPHOOKS.push(({U,P,ink,FN})=>{if(U<4)return '';
  m+=P('M36,104 L42,92 L78,92 L84,104Z','#b9ab8c',1.3)+P('M44,92 L48,82 L72,82 L76,92Z','#c6b99a',1.3)+P('M51,82 L54,74 L66,74 L69,82Z','#b9ab8c',1.3)+`<rect x="57" y="96" width="6" height="8" fill="${ink}"/><path d="M42,94 q2,6 -1,10 M78,94 q-2,6 1,10" fill="none" stroke="#5f7a3f" stroke-width="1.6"/>`;
  m+=`<g transform="translate(64,126)"><rect x="-44" y="-11" width="88" height="20" rx="10" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4.5" text-anchor="middle" font-size="12" fill="${ink}" font-family="${FN}">森林古代遺跡</text></g></g>`;
  return m});
+
+/* ================= 登記：場景範圍、場地邊緣、冒險地圖（2026-11-09 從 index.html 搬來） ================= */
+H.SCENES[4]={x0:500,x1:2219,y1:2812,c:[1360,1562]};H.TARGET[4]=330;
+H.SKYC[4]='#e3e8d8';H.SKYY[4]=540;H.EDGEM[4]='LRB';H.EDGED[4]='LRB';
+H.EDGEDECO[4]=[['round',3],['bush',2.4],['fern',2.6],['pine',1],['rock',.6]];
+H.FRINGE[4]=[['round',1.6],['bush',2.4],['fern',3],['rock',1],['rubble',.8],['grassClump',1.4],['walker4',.4],['pine',.5]];
+H.DENS[4]=1.33;H.ROADK[4]={k:1.25,x0:500};
+H.FRINGEX[4]=[[0,660,1160,1140]];
+H.EDGEMY[4]={L:[[-400,676],[1110,3200]]};H.EDGEFILL[4]={L:'wall'};
+H.EDGELAND[4]=(x,y)=>x<500?(y>600&&y<1150?false:undefined):undefined;
+/* 小故事「石柱上的橘貓」 */
+{const {act,T,cat,limb,f,OL,pk,r,sr,shade,kid,heart,bubble,HATS}=H;
+H.STORIES[4]={title:'石柱上的橘貓',giver:()=>act(0,0,1,{view:'fq',pose:'reach',hat:6,mood:2}),who:'探險隊長',
+    target:()=>`<rect x="-10" y="-30" width="20" height="30" fill="#b9ab8c"/><path d="M-12,-30 h24 l-2,-4 h-20Z" fill="#c6b99a"/>`+T(0,-34,1,cat('#e8913a')+`<g transform="translate(0,9) scale(.62)">${HATS[6]()}</g>`),tw:28,th:64,
+    helper:()=>act(0,0,1,{view:'side',pose:'hold',hat:6,extra:`<path d="M-4,-2 L26,-58 M6,4 L36,-52" fill="none" stroke="#a8703f" stroke-width="2.6"/><path d="M2,-10 L12,-5 M8,-22 L18,-17 M14,-34 L24,-29 M20,-46 L30,-41" fill="none" stroke="#a8703f" stroke-width="2.2"/>`}),hw:48,hh:66,
+    ask:'探險隊長：我的貓追著蝴蝶跑進遺跡了！牠戴著一頂迷你探險帽。',
+    need:'橘貓爬到石柱上下不來了⋯要找梯子！好像有個隊員扛著梯子。',
+    got:'隊員：梯子借你，慢慢爬！',
+    ok:'把橘貓抱下來了！牠乖乖跟著你。快去告訴隊長！'};}
 })();

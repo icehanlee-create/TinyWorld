@@ -322,8 +322,7 @@ function structures5(){
  for(let i=0;i<12;i++){const x=sr(560,2160),y=sr(20,140);add(x,y,20,10,'bird',`<path d="M-8,0 q4,-6 8,0 q4,-6 8,0" fill="none" stroke-width="1.8"/>`,{mark:false})}
  // 外海：帆船、漁船
  [[700,280,1],[1150,230,0],[1520,300,1],[560,2060,0],[880,2440,0]].forEach(([x,y,k])=>add(x,y,110,70,k?'sail5':'boat5',k?sail5():boat5(),{mark:false,s:.8}));
- // 復活島入口：預留擱淺帆船（礁岩東南）、船長和摩艾剪影（東南外海）的位置，散落物件不會擺進去
- mark(RAPA.ship.x,RAPA.ship.y,170,150);mark(RAPA.sil.x,RAPA.sil.y,170,80);
+ // 復活島入口（擱淺帆船、摩艾剪影）預留的位置寫在 level101.js 的 H.RESERVE[5]，引擎在 structures 之前就先佔好
  // 燈塔島
  add(LH.x,LH.y,90,270,'lighthouse5',lighthouse5());mark(LH.x,LH.y,70,40);
  add(1790,520,90,90,'beachHut',house5(64,50),{s:.85});
@@ -376,146 +375,7 @@ RIDES.ferry={text:'往東南走到小鎮港口，搭小渡輪往東南方的海�
  s+=loop([[40,590],[220,598],[340,585]].map(([x,y])=>`<path d="M${x},${y} q12,-8 24,0 q12,8 24,0" fill="none" stroke="#e8f6f6" stroke-width="3"/>`).join(''),1.8);
  return s+`</g></svg>`}};
 
-/* ================= 復活島（海上秘境）入口 =================
-   第 5 關過關後重玩才有：
-   1. 東南外海每隔一陣子淡淡浮出一排摩艾剪影（約 2 秒淡出）。
-   2. 點到剪影 → 燈塔島東南的礁岩上出現擱淺帆船，船長頭上冒「！」（之後每局都在）。
-   3. 點船長 → 海圖碎片被風吹走了 → 場景裡藏一塊碎片（每局隨機：海鷗叼著飛／卡在漁網堆／掉在椰子樹下；提示燈泡不會指）。
-   4. 碎片拿回去 → 帆升起 → 問「要現在出航嗎？」：現在出航＝帆船過場後進入復活島秘境（level101.js）；等一下＝船留著，之後點船就能出發。
-   進度存在 townhunt-rapa：{ship:1 帆船出現了, ready:1 海圖拼好（冒險地圖出現航線）, went:1 出航過一次} */
-const RAPA={ship:{x:2035,y:738},cap:{x:2021,y:700},sil:{x:2185,y:2488}};/* 船長站在船上（船舷擋住腳） */
-let RP={};try{RP=JSON.parse(localStorage.getItem('townhunt-rapa')||'{}')||{}}catch(_){RP={}}
-const rpSave=()=>{try{localStorage.setItem('townhunt-rapa',JSON.stringify(RP))}catch(_){}};
-const cleared5=()=>{try{return !!localStorage.getItem('townhunt-best-L5')}catch(_){return false}};
-/* ---- 美術 ---- */
-const moaiShape=(h=34)=>{const k=h/34,p=[[-6,0],[-6.5,-14],[-7.5,-16],[-7,-26],[-7.8,-30],[-6,-34],[5,-34],[6.6,-31],[6,-27],[8.6,-21],[6.4,-20],[6.8,-14],[6,0]];
- return 'M'+p.map(([x,y])=>f(x*k)+','+f(y*k)).join(' L')+'Z'};
-/* 一排背對海的摩艾站在低低的小島上（淡灰藍剪影，使用者選 A） */
-const moaiRow=(col='#5d6f80')=>{const hs=[30,36,33,38,31],xs=[-44,-22,0,22,44];
- let s=`<path d="M-66,2 Q-60,-6 -40,-6 H40 Q60,-6 66,2 Q0,8 -66,2Z" fill="${col}" stroke="none"/>`;
- xs.forEach((x,i)=>{s+=`<path transform="translate(${x},-4)" d="${moaiShape(hs[i])}" fill="${col}" stroke="none"/>`;if(i===3)s+=`<rect x="${x-6}" y="${-4-hs[i]-6}" width="11" height="6" rx="2" fill="${col}" stroke="none"/>`});
- return s};
-const silhSVG=()=>moaiRow()+`<path d="M-80,6 q8,-3 16,0 q8,3 16,0 M40,7 q8,-3 16,0 q8,3 16,0" fill="none" stroke="#e8f6f6" stroke-width="1.6" opacity=".8"/>`;
-/* 擱淺的木造帆船（使用者選 A）：up=false 收帆斜斜卡在礁岩上；up=true 海圖拼好、帆升起 */
-const shipSVG=(up,crew='')=>{let s=`<ellipse cx="6" cy="4" rx="78" ry="9" fill="#000" opacity=".12" stroke="none"/><path d="M-70,6 L-62,-6 L-50,-10 L-40,-2 L-30,6Z" fill="#6b6e70"/><path d="M40,6 L48,-8 L60,-12 L70,-2 L74,6Z" fill="#6b6e70"/>`;
- let hull=`<path d="M-66,-30 L64,-30 Q70,-30 66,-22 L52,-2 Q0,6 -50,-2 L-68,-22 Q-72,-30 -66,-30Z" fill="#8a5a3a"/><path d="M-66,-24 H64" fill="none" stroke="#fbf6ea" stroke-width="2.6"/>`;
- hull+=`<path d="M-58,-14 Q0,-8 58,-14" fill="none" stroke="#6b4428" stroke-width="1.4"/>`+[-40,-20,0,20,40].map(x=>`<path d="M${x},-30 v-4" fill="none" stroke-width="1.6"/>`).join('')+`<path d="M-64,-34 H62" fill="none" stroke-width="1.6"/>`;
- let b=`<rect x="-56" y="-48" width="26" height="18" fill="#c99a5b"/><rect x="-50" y="-44" width="8" height="7" fill="#9fd3e0" stroke-width="1.2"/><path d="M-60,-48 H-26" fill="none" stroke-width="2.4"/>`;
- b+=`<path d="M8,-30 V-${up?132:118}" fill="none" stroke="#6b4428" stroke-width="4"/>`;
- if(up)b+=`<path d="M12,-126 Q50,-90 54,-40 L12,-40Z" fill="#fbf6ea"/><path d="M12,-100 Q40,-80 46,-60" fill="none" stroke="#e6dcc6" stroke-width="1.4"/><path d="M4,-118 Q-28,-86 -34,-44 L4,-44Z" fill="#e8d6b0"/><path d="M8,-132 l14,5 l-14,5Z" fill="#d8413a" stroke-width="1.2"/>`;
- else b+=`<path d="M-30,-96 L46,-100" fill="none" stroke="#6b4428" stroke-width="3"/><path d="M-26,-96 Q-20,-84 -10,-92 Q0,-82 10,-94 Q22,-84 30,-96 Q38,-86 44,-99" fill="#e8d6b0" stroke-width="1.6"/><path d="M8,-118 L-58,-34 M8,-118 L62,-34" fill="none" stroke-width="1" opacity=".55"/>`;
- s+=`<g transform="rotate(${up?-3:-9})">${b}${crew}${hull}</g>`;
- return s+`<path d="M-84,8 q8,-4 16,0 q8,4 16,0 M50,8 q8,-4 16,0 q8,4 16,0" fill="none" stroke="#e8f6f6" stroke-width="1.8"/>`};
-const sailing=()=>shipSVG(true,T(-14,-24,.8,captainSVG())).replace(/<path d="M-70,6[^>]*>|<path d="M40,6 L48[^>]*>/g,'');
-const capHat=`<path d="M-15,-44 Q-14,-56 0,-58 Q14,-56 15,-44Z" fill="#fbf9f3"/><path d="M-15,-44 H15 L17,-40 H-17Z" fill="#2f3f5a"/><circle cx="0" cy="-50" r="2.6" fill="#f5c842" stroke-width="1"/>`;
-let capArt='';const captainSVG=()=>capArt||(capArt=act(0,0,1,{view:'fq',pose:'stand',hat:-1,hair:'#e8e4dc',hs:3,shirt:'#2f4f7a',pants:'#3d3833',beard:true,mood:2,top:'tee',bottom:'pants'})+T(0,0,1,capHat));
-const bangSVG=(t)=>`<g class="cpop" transform="translate(0,-84)"><path d="M-11,-12 h22 q4,0 4,4 v10 q0,4 -4,4 h-8 l-3,5 l-3,-5 h-8 q-4,0 -4,-4 v-10 q0,-4 4,-4z" fill="#fff7d6" stroke-width="1.6"/>${t==='!'?`<path d="M0,-8 V-1" fill="none" stroke="#d8413a" stroke-width="3"/><circle cx="0" cy="3" r="1.6" fill="#d8413a" stroke="none"/>`:`<text x="0" y="2.5" text-anchor="middle" font-size="12" font-weight="800" fill="${OL}" stroke="none" font-family="PingFang TC,Noto Sans TC,sans-serif">${t}</text>`}</g>`;
-/* 海圖碎片：泛黃羊皮紙一角，撕開的邊、虛線航線、小摩艾記號 */
-const chartSVG=()=>`<path d="M-12,-10 L12,-12 L13,-2 L9,1 L12,4 L8,8 L10,11 L-11,12 Z" fill="#efe0b4"/><path d="M-8,6 Q-2,-2 4,-4" fill="none" stroke="#a8461f" stroke-width="1.3" stroke-dasharray="2.4 2.2"/><path d="M5,-8 l1.6,0 l.4,3 l-.6,1 h-1.6Z" fill="#5d6f80" stroke-width=".8"/><path d="M-9,-8 h5 M-9,-5 h3" fill="none" stroke="#c9a978" stroke-width="1.1"/>`;
-/* 叼著碎片飛的海鷗；wing：翅膀上下拍 */
-const gullFlySVG=(up)=>`<path d="M-2,-2 Q-16,${up?-18:-2} -28,${up?-10:4} Q-16,${up?-10:0} -4,2Z" fill="#fbf9f3" stroke-width="1.6"/><path d="M2,-2 Q16,${up?-20:-2} 28,${up?-12:4} Q16,${up?-10:0} 4,2Z" fill="#fbf9f3" stroke-width="1.6"/><ellipse cx="0" cy="0" rx="9" ry="5" fill="#fbf9f3"/><circle cx="8" cy="-2" r="4.4" fill="#fbf9f3"/><path d="M12,-2 l5,1 l-5,2Z" fill="#f5c842" stroke-width="1"/><circle cx="9" cy="-3" r=".9" fill="${OL}" stroke="none"/>`+T(18,6,.55,chartSVG());
-
-/* ---- 圖層：fgSvg 裡、物件下面一層（船、船長、碎片），最上面一層（剪影、海鷗） ---- */
-const NSv='http://www.w3.org/2000/svg';
-function layers(){let lo=document.getElementById('rapaL'),hi=document.getElementById('rapaT');
- if(!lo){const il=document.getElementById('itemsL');lo=document.createElementNS(NSv,'g');lo.id='rapaL';['stroke','stroke-width','stroke-linejoin','stroke-linecap'].forEach(a=>lo.setAttribute(a,il.getAttribute(a)));il.parentNode.insertBefore(lo,il);
-  hi=lo.cloneNode(false);hi.id='rapaT';il.parentNode.appendChild(hi)}
- return [lo,hi]}
-let G={};/* 這一局的狀態 */
-let flashT=null,gullRAF=0;
-function clearRapa(){clearTimeout(flashT);cancelAnimationFrame(gullRAF);const l=document.getElementById('rapaL'),t=document.getElementById('rapaT');if(l)l.innerHTML='';if(t)t.innerHTML='';G={}}
-function drawShip(){const [lo]=layers();let el=document.getElementById('rapaShip');if(!el){el=document.createElementNS(NSv,'g');el.id='rapaShip';lo.appendChild(el)}
- const b=!RP.ready&&!G.talked?'!':G.has&&!RP.ready?'…':'';
- el.innerHTML=T(RAPA.ship.x,RAPA.ship.y,1,`<g class="an a-rock" style="--d:4.2s">${shipSVG(!!RP.ready,T(-14,-24,.8,captainSVG()+(b?bangSVG(b):'')))}</g>`)}
-function newGame5(sc){clearRapa();if(sc!==5||!cleared5())return;
- const [,hi]=layers();G={talked:false,has:false,frag:null,silUntil:0};
- hi.insertAdjacentHTML('afterbegin',`<g id="rapaSil" opacity="0" transform="translate(${RAPA.sil.x},${RAPA.sil.y}) scale(1.2)">${silhSVG()}</g>`);
- if(RP.ship)drawShip();
- flashT=setTimeout(flash,H.testOn&&H.testOn()?2500:8000)}
-H.NGHOOKS.push(newGame5);
-/* 剪影閃現：淡入 .5 秒、停 1.5 秒、淡出 .6 秒；每隔 16 秒（測試模式 6 秒） */
-function flash(){const el=document.getElementById('rapaSil');if(!el)return;const busy=!H.game().running||document.querySelector('.overlay:not(.hide)')||document.getElementById('ride').classList.contains('on');
- if(!busy){const t0=performance.now(),D=2600;G.silUntil=t0+D+700;
-  const step=now=>{const k=(now-t0)/D;if(!document.getElementById('rapaSil'))return;const o=k<.19?k/.19:k<.77?1:Math.max(0,1-(k-.77)/.23);el.setAttribute('opacity',(o*.78).toFixed(2));if(k<1)requestAnimationFrame(step);else el.setAttribute('opacity','0')};requestAnimationFrame(step)}
- flashT=setTimeout(flash,H.testOn&&H.testOn()?6000:16000)}
-const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-function dirTo(a,b){const dx=b.x-a.x,dy=b.y-a.y,ang=Math.atan2(dy,dx)*180/Math.PI,dirs=['右邊','右下方','下面','左下方','左邊','左上方','上面','右上方'];return dirs[Math.round(((ang+360)%360)/45)%8]}
-/* 點剪影 */
-function tapSil(){if(!RP.ship){RP.ship=1;rpSave();drawShip();const el=document.getElementById('rapaShip');if(el)el.classList.add('cpop');H.burst(RAPA.cap.x,RAPA.cap.y-60);
-  try{[392,523,659].forEach((q,i)=>tone(q,.3,'sine',.08,i*.16))}catch(_){}
-  H.toast('遠方好像有一排石頭巨人⋯\n咦？燈塔旁的礁岩上，多了一艘擱淺的帆船！',5200)}
- else H.toast(RP.ready?'那排石頭巨人又出現了⋯帆船隨時可以出航！':'那排石頭巨人又出現了⋯燈塔旁的船長好像知道些什麼。',3200)}
-/* 藏海圖碎片：每局隨機（海鷗叼著飛／卡在漁網堆／掉在椰子樹下），提示燈泡不會指 */
-function placeFrag(){const [lo,hi]=layers(),SC=H.SCENES[5],used=new Set(H.items().map(it=>it.occ).filter(Boolean)),cl=H.dbg.clover()||{};
- [cl.story,cl.bonus].forEach(c=>c&&used.add(c.host));
- const ok=sp=>!used.has(sp)&&sp.x>SC.x0+120&&sp.x<SC.x1-120&&sp.y>380&&sp.y<SC.y1-160&&!H.items().some(o=>Math.hypot(o.x-sp.x,o.y-sp.y)<60)&&dist(sp,RAPA.cap)>500;
- const hosts={net:H.sprites.filter(sp=>sp.kind==='netPile'&&ok(sp)),palm:H.sprites.filter(sp=>sp.kind==='palm'&&ok(sp))};
- const opts=['gull'];if(hosts.net.length)opts.push('net');if(hosts.palm.length)opts.push('palm');
- const kind=G.forceKind&&opts.includes(G.forceKind)?G.forceKind:opts[Math.floor(Math.random()*opts.length)];
- if(kind==='gull'){const c={x:sr(900,1850),y:sr(700,2150)};G.frag={kind,c,rx:150,ry:70,t0:performance.now(),x:c.x,y:c.y};
-  hi.insertAdjacentHTML('beforeend',`<g id="rapaGull"></g>`);let flap=0;
-  const step=now=>{const F=G.frag;if(!F||F.kind!=='gull'||F.got)return;const el=document.getElementById('rapaGull');if(!el)return;
-   const a=(now-F.t0)/14000*Math.PI*2,x=F.c.x+Math.cos(a)*F.rx,y=F.c.y+Math.sin(a)*F.ry-Math.sin(a*3)*14;F.x=x;F.y=y;
-   const up=Math.floor(now/260)%2===0,dir=-Math.sin(a)<0?-1:1;if(up!==flap||!el.firstChild){flap=up;el.innerHTML=`<g transform="scale(${dir},1)">${gullFlySVG(up)}</g>`}else el.firstChild.setAttribute('transform',`scale(${dir},1)`);
-   el.setAttribute('transform',`translate(${f(x)},${f(y)})`);gullRAF=requestAnimationFrame(step)};gullRAF=requestAnimationFrame(step)}
- else{const L=hosts[kind],h=L[Math.floor(Math.random()*L.length)];
-  const p=kind==='net'?{x:h.x-16,y:h.y-10,rot:-22}:{x:h.x+(Math.random()<.5?-16:16),y:h.y-3,rot:sr(-25,25)};
-  G.frag={kind,host:h,...p};lo.insertAdjacentHTML('beforeend',`<g id="rapaFrag" class="cpop" transform="translate(${f(p.x)},${f(p.y)}) rotate(${f(p.rot)}) scale(.8)">${chartSVG()}</g>`)}}
-function gotFrag(){const F=G.frag;if(!F||F.got)return;F.got=true;G.has=true;cancelAnimationFrame(gullRAF);
- const el=document.getElementById(F.kind==='gull'?'rapaGull':'rapaFrag');
- if(F.kind==='gull'&&el){/* 海鷗嚇一跳，碎片掉下來：海鷗往上飛走 */el.innerHTML=gullFlySVG(true).replace(/<g transform="translate\(18,6\)[\s\S]*$/,'');const t0=performance.now(),x0=F.x,y0=F.y;
-  const step=now=>{const k=Math.min(1,(now-t0)/900);el.setAttribute('transform',`translate(${f(x0+k*160)},${f(y0-k*220)})`);el.setAttribute('opacity',(1-k).toFixed(2));if(k<1)requestAnimationFrame(step);else el.remove()};requestAnimationFrame(step)}
- else if(el){el.classList.remove('cpop');el.classList.add('got');setTimeout(()=>el.remove(),500)}
- H.burst(F.x,F.y);H.floatText(F.x,F.y-24,'海圖碎片！');H.sfx.found();drawShip();
- H.toast(F.kind==='gull'?'海鷗嚇了一跳，嘴裡的紙片掉下來了⋯是海圖碎片！\n快拿去給擱淺帆船的船長。':`在${F.kind==='net'?'漁網堆':'椰子樹下'}找到一張舊海圖的碎片！上面畫著一排石頭巨人⋯\n快拿去給擱淺帆船的船長。`,4600)}
-/* 點船長或帆船 */
-function tapCap(){
- if(RP.ready){askSail();return}
- if(G.has){RP.ready=1;rpSave();G.has=false;drawShip();const el=document.getElementById('rapaShip');if(el)el.classList.add('cpop');H.burst(RAPA.ship.x+10,RAPA.ship.y-90);
-  try{[523,659,784,1047].forEach((q,i)=>tone(q,.22,'triangle',.14,i*.1))}catch(_){}
-  H.toast('船長：太好了！海圖拼起來了⋯就是這座島！\n帆升起來了，風向也剛剛好。',3400);setTimeout(()=>{if(H.game().running)askSail()},2600);return}
- if(!G.talked){G.talked=true;drawShip();placeFrag();
-  H.toast('船長：你也看到那些石頭巨人了？\n我的海圖被風吹走一角，沒有它找不到那座島⋯\n碎片應該還在這座港口附近，能幫我找找嗎？',6000);return}
- H.toast('船長：海圖碎片應該還在這附近⋯會不會被海鷗叼走，或卡在什麼東西裡？',3600)}
-/* 點擊判定（放在燈塔光束前面一起判斷） */
-const lhTap=TAPHOOKS[5];
-TAPHOOKS[5]=(x,y)=>{if(H.scene()===5&&cleared5()){const s=H.view().s,pad=Math.max(0,10/s-8);
-  if(G.frag&&!G.frag.got&&(G.frag.kind==='gull'?Math.hypot(x-G.frag.x,y-G.frag.y)<Math.max(32,20/s):Math.hypot(x-G.frag.x,y-G.frag.y)<Math.max(18,14/s)||(Math.abs(x-G.frag.host.x)<G.frag.host.w*.45&&y<=G.frag.host.y+6&&y>=G.frag.host.y-(G.frag.kind==='net'?G.frag.host.h+8:40)))){gotFrag();return true}
-  if(RP.ship&&Math.abs(x-RAPA.ship.x)<74+pad&&y<=RAPA.ship.y+10&&y>=RAPA.ship.y-136){tapCap();return true}
-  if(performance.now()<G.silUntil&&Math.abs(x-RAPA.sil.x)<96+pad&&y<=RAPA.sil.y+16&&y>=RAPA.sil.y-70){tapSil();return true}}
- return lhTap?lhTap(x,y):false};
-/* ---- 「要現在出航嗎？」對話框 ---- */
-const ov=document.createElement('div');ov.className='overlay hide';ov.id='rapaOv';document.body.appendChild(ov);
-let pausedAt=0;const pause=()=>{if(pausedAt)return;pausedAt=performance.now();H.clockHold()},resume=()=>{const g=H.game();if(pausedAt&&g.running)g.t0+=performance.now()-pausedAt;pausedAt=0;H.clockRun(false)};
-const pv=()=>`<svg viewBox="0 0 220 110" width="220" height="110" style="display:block;margin:0 auto 6px"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><rect x="0" y="0" width="220" height="62" rx="10" fill="#dcecef" stroke="none"/><rect x="0" y="58" width="220" height="52" rx="10" fill="#7fd6cf" stroke="none"/><g transform="translate(176,62) scale(.5)">${moaiRow('#7b8a98')}</g><g transform="translate(78,98) scale(.62)">${sailing()}</g></g></svg>`;
-function card(html){ov.innerHTML=`<div class="pcard" style="padding:20px 18px 18px;text-align:center">${html}</div>`;ov.classList.remove('hide')}
-function askSail(){pause();card(`${pv()}<b style="font-size:21px;display:block;margin-bottom:6px">要現在出航嗎？</b><p style="margin:0 0 14px;font-size:15px;line-height:1.6">船長：帆已經升好了。<br>要跟我一起去看看那些石頭巨人嗎？</p><button class="pbtn" id="rapaGo">⛵ 現在出航</button><div class="row2" style="display:flex;margin-top:10px"><button class="sbtn" id="rapaWait">等一下</button></div>`);
- ov.querySelector('#rapaGo').onclick=()=>{ov.classList.add('hide');RP.went=1;rpSave();pausedAt=0;H.goLevel(101)}; /* 出航：第一次播帆船過場，然後進入復活島（海上秘境） */
- ov.querySelector('#rapaWait').onclick=()=>{ov.classList.add('hide');resume();H.toast('船長：好，我在這裡等你。準備好了再來找我！\n（冒險地圖的海上也出現了新的航線）',4200)}}
-/* ---- 出航過場：帆船越過海浪，遠遠先看到一排摩艾剪影 ---- */
-RIDES.sail={text:'帆船出海，往東南方的海平線前進⋯',every:640,tick:k=>tone(k%2?200:160,.16,'sine',.05),svg:()=>{
- const loop=(inner,dur)=>`<g class="rl" style="--d:${dur}s"><g>${inner}</g><g transform="translate(399,0)">${inner}</g></g>`;
- let s=`<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><style>@keyframes rapaIn{0%,30%{opacity:0;transform:translateY(8px)}100%{opacity:.9;transform:none}}.rapaIn{animation:rapaIn 3.4s ease-out forwards}</style><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">`;
- s+=`<rect width="400" height="600" fill="#dcecef" stroke="none"/><circle cx="320" cy="150" r="30" fill="#fbf0c4" stroke="none"/>`;
- s+=loop(`<path d="M30,150 q20,-16 40,0 q20,-14 36,0Z M230,120 q16,-12 32,0 q14,-10 28,0Z" fill="#fbf9f3" stroke="#c9d8dc" stroke-width="1.6"/>`,40);
- s+=`<g class="rapaIn"><g transform="translate(262,300) scale(.8)">${moaiRow('#7b8a98')}</g><path d="M168,302 Q186,280 206,290 Q218,272 234,288 L238,302Z" fill="#9aa8b4" opacity=".7" stroke="none"/></g>`;
- s+=`<rect x="0" y="300" width="400" height="300" fill="${SEA}" stroke="none"/><path d="M0,300 H400" fill="none" stroke-width="1.6"/>`;
- s+=loop([[30,340],[150,330],[260,350],[360,336]].map(([x,y])=>`<path d="M${x},${y} q8,-5 16,0 q8,5 16,0" fill="none" stroke="#d8f0f2" stroke-width="2"/>`).join(''),12);
- s+=loop([[20,420],[120,460],[230,430],[330,470],[60,520],[280,540]].map(([x,y])=>`<path d="M${x},${y} q10,-6 20,0 q10,6 20,0" fill="none" stroke="#e8f6f6" stroke-width="2.4"/>`).join(''),4);
- s+=`<g class="an a-rock" style="--d:2.2s"><g transform="translate(196,476) scale(1.05)">${sailing()}</g></g>`;
- s+=loop(`<g transform="translate(80,200)"><path d="M-10,0 q5,-7 10,0 q5,-7 10,0" fill="none" stroke-width="2"/></g><g transform="translate(260,230)"><path d="M-8,0 q4,-6 8,0 q4,-6 8,0" fill="none" stroke-width="1.8"/></g>`,9);
- s+=loop([[40,590],[220,598],[340,585]].map(([x,y])=>`<path d="M${x},${y} q12,-8 24,0 q12,8 24,0" fill="none" stroke="#e8f6f6" stroke-width="3"/>`).join(''),1.8);
- return s+`</g></svg>`}};
-/* ---- 冒險地圖：海圖拼好之後，海島港口往東南出現虛線航線，通到淡淡光圈裡的復活島（秘境樣式，點了可以前往） ---- */
-H.MAPTOP.push(({U,ink,FN})=>{if(U<5||!RP.ready)return '';
- const rt='M272,378 Q284,394 288,396';
- let m=`<path d="${rt}" fill="none" stroke="#fffaf0" stroke-width="3.4" stroke-linecap="round"/><path d="${rt}" fill="none" stroke="#6a5aa8" stroke-width="1.8" stroke-dasharray="4 4" stroke-linecap="round"/>`;
- m+=`<g class="mnode" data-n="101" pointer-events="visiblePainted" style="cursor:pointer"><circle cx="305" cy="386" r="26" fill="transparent"/><g transform="translate(305,394)"><circle r="18" fill="#fff6c4" opacity=".8"/><circle r="18" fill="none" stroke="#6a5aa8" stroke-width="1.4" stroke-dasharray="3 3"/><ellipse cx="0" cy="5" rx="13" ry="4.5" fill="#a9b768" stroke="${ink}" stroke-width="1.3"/>`;
- m+=[-6,0,6].map((x,i)=>`<path transform="translate(${x},4) scale(${i===1?.36:.3})" d="${moaiShape(34)}" fill="#8f9aa6" stroke="${ink}" stroke-width="3.6"/>`).join('')+`</g>`;
- m+=`<g transform="translate(305,370)"><rect x="-21" y="-8" width="42" height="15" rx="7.5" fill="#fffaf0" stroke="#6a5aa8" stroke-width="1.5"/><text y="3.5" text-anchor="middle" font-size="10" fill="#4a3d82" font-family="${FN}">復活島</text></g></g>`;
- return m});
-/* 測試用 */
-H.dbg.rapa={G:()=>G,RP:()=>RP,flash:()=>{G.silUntil=0;clearTimeout(flashT);flash()},tapSil,tapCap,force:k=>{G.forceKind=k},sil:RAPA.sil,ship:RAPA.ship,cap:RAPA.cap,ask:askSail};
+/* 復活島（海上秘境）的入口寫在 level101.js（2026-11-09 搬過去）：擱淺帆船、船長、摩艾剪影、海圖碎片、出航過場、地圖航線。 */
 
 /* ================= 冒險地圖節點 ================= */
 HERE[5]=[293,340];
@@ -529,4 +389,19 @@ MAPHOOKS.push(({U,P,ink,FN})=>{if(U<5)return '';
  m+=`<path d="M236,370 Q234,356 240,346" fill="none" stroke="${ink}" stroke-width="2"/>`+P('M240,346 q-10,-2 -14,4 q8,0 14,-4Z M240,346 q10,-2 14,4 q-8,0 -14,-4Z M240,346 q-4,-8 -12,-8 q4,6 12,8Z M240,346 q4,-8 12,-8 q-4,6 -12,8Z','#5f8a3a',1.1);
  m+=`<g transform="translate(250,398)"><rect x="-32" y="-11" width="64" height="20" rx="10" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4.5" text-anchor="middle" font-size="12" fill="${ink}" font-family="${FN}">海島港口</text></g></g>`;
  return m});
+
+/* ================= 登記：場景範圍、場地邊緣、冒險地圖（2026-11-09 從 index.html 搬來） ================= */
+H.SCENES[5]={x0:500,x1:2219,y1:2520,c:[1300,1460]};H.TARGET[5]=330;
+H.SKYC[5]='#dcecef';H.SKYY[5]=150;H.EDGEM[5]='';H.EDGED[5]='LRB';
+H.EDGEDECO[5]=[['palm',2],['bush',.6]];
+H.DENS[5]=1;
+/* 小故事「纏住的小海豹」 */
+{const {act,T,cat,limb,f,OL,pk,r,sr,shade,kid,heart,bubble,HATS}=H;
+H.STORIES[5]={title:'纏住的小海豹',giver:()=>act(0,0,1,{view:'fq',pose:'reach',hat:-1,hair:'#e8e4dc',hs:3,shirt:'#3b5a8a',pants:'#5a4a3a',mood:2}),who:'燈塔奶奶',
+    target:()=>`<g transform="scale(1.35)">`+`<path d="M-20,0 Q-22,-12 -10,-16 Q4,-20 14,-12 Q20,-6 16,0Z" fill="#8f9aa6"/><path d="M-20,0 Q-22,-12 -10,-16" fill="none"/>`+`<circle cx="8" cy="-20" r="9" fill="#a3adb8"/><circle cx="5" cy="-22" r="1.6" fill="${OL}" stroke="none"/><circle cx="11" cy="-22" r="1.6" fill="${OL}" stroke="none"/><ellipse cx="8" cy="-17.5" rx="2" ry="1.4" fill="${OL}" stroke="none"/><path d="M-1,-26 Q-2,-35 8,-38 Q18,-35 17,-26 Q8,-23 -1,-26Z" fill="#f5c842"/><path d="M0,-29 Q8,-26.5 16,-29" fill="none" stroke="#fbf6ea" stroke-width="2"/><path d="M5,-36 l2,-2" fill="none" stroke="#fff" stroke-width="1.4"/>`+`<path d="M-22,-4 L14,-16 M-18,2 L18,-10 M-12,-14 L-4,4 M-2,-18 L6,2 M8,-14 L14,4 M-20,-10 L18,0" fill="none" stroke="#6f8f8a" stroke-width="1.6"/><circle cx="-14" cy="-14" r="3" fill="#f0802a" stroke-width="1.2"/>`+`</g>`,tw:60,th:52,
+    helper:()=>act(0,0,1,{view:'side',pose:'hold',hat:1,shirt:'#3b5a8a',pants:'#3d3833',beard:true,extra:`<g transform="translate(16,-20) rotate(-30)"><path d="M0,0 L16,-3 M0,0 L16,3" fill="none" stroke="#6f7f8f" stroke-width="3"/><circle cx="-3" cy="-3" r="3.2" fill="none" stroke="#d8413a" stroke-width="2.2"/><circle cx="-3" cy="3" r="3.2" fill="none" stroke="#d8413a" stroke-width="2.2"/></g>`}),hw:48,hh:64,
+    ask:'燈塔奶奶：我的小海豹不見了！牠戴著一頂黃色小水手帽。',
+    need:'小海豹被舊漁網纏住了，動不了⋯碼頭有人在補漁網，也許有剪刀。',
+    got:'漁夫：拿去，這把大剪刀小心用！',
+    ok:'剪開了！小海豹開心地拍拍手，跟著你走。快帶回奶奶身邊！'};}
 })();

@@ -92,6 +92,20 @@ function moaiLying(){let s=`<path d="M-90,6 Q-96,-26 -70,-38 Q-20,-52 40,-46 Q92
  return s}
 /* 倒在地上、臉朝下的摩艾（南岸的石台前很多這樣倒下來的） */
 function moaiFallen(){return `<ellipse cx="-50" cy="4" rx="64" ry="7" fill="#000" opacity=".14" stroke="none"/><g transform="translate(0,-14) rotate(-90) scale(.92)">${moaiSide(100,{c:'#a39a84'})}</g><path d="M-100,2 Q-50,8 0,2" fill="none" stroke="#7a7262" stroke-width="1.2"/>`}
+/* 巨人摩艾（使用者 2026-11-10 選 A～D 全部）：
+   A 中央草原站著的大巨人（約 3 倍高、戴紅帽）／B 採石場刻到一半、臉朝天躺著的巨人（取代原本的 moaiLying）
+   C 南邊草原從地裡探出頭的巨大頭／D 東加里奇 15 尊放大 TONGK 倍 */
+const TONGK=1.75,GIANT={F:{x:1330,y:760},L:{x:1360,y:1010},H:{x:1560,y:1640}};
+function giantLying(){return `<path d="M-165,8 Q-174,-34 -146,-52 Q-50,-66 90,-62 Q164,-56 170,-18 Q172,6 156,12Z" fill="${TUFF2}"/><path d="M-150,-34 q24,-10 46,-6 M104,-50 q24,6 40,18" fill="none" stroke="${shade(TUFF2,-.25)}" stroke-width="1.5"/>`+
+ `<g transform="translate(-136,-14) rotate(90)">${moaiSide(270,{c:'#ada48c'})}</g><path d="M-162,6 Q0,20 160,10 L162,18 Q0,30 -164,14Z" fill="${shade(TUFF2,-.12)}"/><path d="M-120,0 l4,5 M-40,4 l3,5 M50,4 l3,5 M120,2 l3,5" fill="none" stroke="#6a604f" stroke-width="1.3"/>`}
+function giantHead(){return `<ellipse cx="0" cy="6" rx="96" ry="14" fill="#000" opacity=".13" stroke="none"/><g transform="scale(3.2)" stroke-width=".7">${moaiHead(100,-4)}</g>`+
+ `<path d="M-70,-8 l6,4 M44,-14 l7,3 M-20,-26 l5,2" fill="none" stroke="#7a6a48" stroke-width="1.6"/>`}
+/* 日出觀景點：石台上一塊木牌，畫著太陽從摩艾後面升起 */
+const VIEWPT={x:1745,y:1112};
+function viewPoint(){return `<ellipse cx="0" cy="2" rx="30" ry="5" fill="#000" opacity=".13" stroke="none"/><path d="M-26,0 Q-28,-10 -18,-12 H18 Q28,-10 26,0Z" fill="#bdb29a"/><path d="M-22,-6 H22" fill="none" stroke="#8f8674" stroke-width="1.2"/>`+
+ `<path d="M-2,-12 V-44 M2,-12 V-44" fill="none" stroke="#7a5235" stroke-width="2.4"/><rect x="-20" y="-58" width="40" height="22" rx="3" fill="#e8d6b0"/>`+
+ `<path d="M-14,-42 H14" fill="none" stroke="#7aa8c8" stroke-width="2"/><path d="M-7,-42 A7,7 0 0 1 7,-42Z" fill="#f5a04a" stroke-width="1.2"/><path d="M0,-52 v-2 M-8,-48 l-2,-1.5 M8,-48 l2,-1.5" fill="none" stroke="#f5a04a" stroke-width="1.4"/>`+
+ `<path d="M-15,-42 v-6 h3 v6 M10,-42 v-7 h3 v7" fill="#5d6f80" stroke-width="1"/>`}
 /* 石台（平台）：沿著一條線畫石砌的台子 */
 function ahu(A,B,wd=30,hh=14){const [ax,ay]=A,[bx,by]=B,L=Math.hypot(bx-ax,by-ay),ux=(bx-ax)/L,uy=(by-ay)/L,nx=-uy,ny=ux;
  const p=(t,o,dy=0)=>[ax+ux*t+nx*o,ay+uy*t+ny*o+dy];const e=24;
@@ -336,7 +350,93 @@ const nameSign=t=>{const w=t.length*14+22;return `<ellipse cx="2" cy="2" rx="${w
 const FACTS={turtle:'綠蠵龜（honu）探出頭來換氣～\n在復活島牠是神聖的動物，看看就好，不要摸喔。',booby:'藍臉鰹鳥！當地叫牠 kena，\n聽說北邊的白沙灘「Anakena」就是用牠的名字命名的。',tropic:'紅尾熱帶鳥在摩艾旁邊築巢，\n長長的紅色尾羽好漂亮。',
  lizardB:'黑色的小蜥蜴 moko uri uri，一溜煙躲進石縫了！',lizardW:'白色的小蜥蜴 moko tea-tea，在石頭上曬太陽。',rooster:'咕咕咕——！\n雞是最早划船來到島上的人帶來的。',lobster:'復活島的龍蝦，兩隻前腳像戴著手套。',crab:'小螃蟹橫著走開了～',
  whale:'座頭鯨！牠們會浮上來噴水、舉起尾巴潛下去，偶爾還會整個跳出水面。',shoal:'一群熱帶魚游過去了！復活島附近有很多別的地方看不到的魚。',frigate:'軍艦鳥在天上盤旋，公鳥的喉嚨有一個紅色的大氣囊。',tern:'燕鷗從頭上飛過去了～',horse:'島上的野馬自由自在地吃草，\n數量比住在島上的人還多！',noddy:'玄燕鷗：咖啡色的身體、白白的頭頂。',hen:'咕咕～母雞在找蟲吃。',cowR:'哞～這些牛是很久以前從船上帶來的。',sheepR:'咩～羊在草原上慢慢吃草。'};
+Object.assign(FACTS,{giantF:'好大的巨人摩艾！比其他摩艾高三倍，\n站在島的正中間，走到哪裡都看得到它的紅帽子。',
+ giantL:'這尊巨人還躺在岩壁上，只刻到一半。\n真的拉諾拉拉庫採石場也有一尊大約 21 公尺長、一直沒刻完的「巨人」！',
+ giantH:'咦？草地裡探出一顆超大的頭⋯\n採石場山坡上的摩艾，很多身體都埋在土裡，只露出頭喔。'});
 let factT=0;
+/* ---- 日出（2026-11-10 使用者選 B＋A）：走到東加里奇前的觀景點附近（VIEWPT 120 以內）自動播放，每局一次；之後走近點木牌可以再看。
+   B：遊戲畫面拉遠看整排東加里奇、整張圖染晨光、地上的摩艾影子往西慢慢拉長（約 5 秒，點一下跳過）
+   A：接著全螢幕平視大圖：太陽從 15 尊摩艾背後的海上升起，影子朝玩家越拉越長，畫面慢慢往右平移；點一下回到遊戲 */
+const moaiSil=(h=34)=>{const k=h/34,L=[[-6,0],[-6.6,-15],[-7.4,-16],[-8.2,-22],[-7.6,-27],[-7.2,-31],[-6,-34]],p=[...L,...L.slice().reverse().map(([x,y])=>[-x,y])];return 'M'+p.map(([x,y])=>f(x*k)+','+f(y*k)).join(' L')+'Z'};/* 正面剪影（背光） */
+let clkPaused=0;
+const holdClock=()=>{if(!clkPaused){clkPaused=performance.now();H.clockHold()}};
+const freeClock=()=>{const g=H.game();if(clkPaused&&g.running){g.t0+=performance.now()-clkPaused;H.clockRun(false)}clkPaused=0};
+let sunSeen=false,sunBusy=false;
+H.NGHOOKS.push(sc=>{sunSeen=false;sunBusy=false;clkPaused=0;['sunShadow','sunTint','sunGlow','sunSkip','sunPano'].forEach(id=>{const e=document.getElementById(id);if(e)e.remove()})});
+const SUNP={x:1880,y:1060};/* B 鏡頭中心 */
+function sunPanoSVG(){const W=900,Hh=844,hz=470,base=610,sx=450;
+ let s=`<svg id="sunPanoSvg" viewBox="0 0 ${W} ${Hh}" height="100%" preserveAspectRatio="xMinYMid meet" style="display:block;height:100%;width:auto"><defs>
+ <linearGradient id="spSky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3f4a8a"/><stop offset=".45" stop-color="#c9708a"/><stop offset=".8" stop-color="#f3a46a"/><stop offset="1" stop-color="#fcdc94"/></linearGradient>
+ <linearGradient id="spSea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f1b47c"/><stop offset="1" stop-color="#7a6a8e"/></linearGradient>
+ <radialGradient id="spGlow"><stop offset="0" stop-color="#fff4c0"/><stop offset=".35" stop-color="#ffd890" stop-opacity=".7"/><stop offset="1" stop-color="#ffd890" stop-opacity="0"/></radialGradient>
+ <linearGradient id="spGr" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d0a070"/><stop offset="1" stop-color="#8e9a5e"/></linearGradient>
+ <linearGradient id="spSh" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2a1e30" stop-opacity=".92"/><stop offset="1" stop-color="#2a1e30" stop-opacity=".45"/></linearGradient>
+ <clipPath id="spAbove"><rect width="${W}" height="${hz}"/></clipPath></defs>`;
+ s+=`<rect width="${W}" height="${hz}" fill="url(#spSky)"/>`;
+ s+=`<path d="M40,130 q30,-14 60,0 q24,-10 44,0Z M330,90 q26,-12 52,0 q20,-9 38,0Z M600,170 q30,-14 60,0 q24,-10 44,0Z M780,110 q20,-9 40,0 q16,-7 30,0Z M170,240 q20,-9 40,0 q16,-7 30,0Z" fill="#f5b8a8" opacity=".75"/>`;
+ s+=`<circle cx="${sx}" cy="${hz-40}" r="320" fill="url(#spGlow)"/><g clip-path="url(#spAbove)"><g id="spSun"><circle cx="${sx}" cy="${hz-72}" r="46" fill="#fff3b4"/></g></g>`;
+ s+=`<rect y="${hz}" width="${W}" height="${base-hz}" fill="url(#spSea)"/>`;
+ for(let i=0;i<8;i++)s+=`<path d="M${sx-30-i*12},${hz+8+i*16} H${sx+30+i*12}" stroke="#fff3b4" stroke-width="3" opacity="${f(.85-i*.1)}"/>`;
+ s+=`<rect y="${base-30}" width="${W}" height="${Hh-base+30}" fill="url(#spGr)"/>`;
+ const hs=[112,124,118,130,121,127,134,140,129,122,131,119,126,116,110],xs=hs.map((_,i)=>48+i*57);
+ /* 影子：從腳下朝看的人越拉越長、越寬（太陽在正後方，所以影子向外散開） */
+ let sh='';xs.forEach((x,i)=>{const w=hs[i]*.24,L=Hh-base+40,off=(x-sx)*.7;sh+=`<path d="M${f(x-w*.9)},${base} L${f(x+w*.9)},${base} L${f(x+w*2+off)},${base+L} L${f(x-w*2+off)},${base+L}Z" fill="url(#spSh)"/>`});
+ s+=`<g id="spShadow">${sh}</g>`;
+ s+=`<rect x="10" y="${base-26}" width="${W-20}" height="30" rx="3" fill="#2a2234"/><path d="M10,${base-26} H${W-10}" stroke="#f3a46a" stroke-width="2" opacity=".7"/>`;
+ xs.forEach((x,i)=>{const h=hs[i];s+=`<path transform="translate(${x},${base-24})" d="${moaiSil(h)}" fill="#2a2234" stroke="#f6b070" stroke-width="2.2" stroke-opacity=".7"/>`;
+  if(i===7)s+=`<rect x="${f(x-h*.2)}" y="${f(base-24-h-h*.15)}" width="${f(h*.4)}" height="${f(h*.15)}" rx="6" fill="#3a2a2e" stroke="#f6b070" stroke-width="2" stroke-opacity=".7"/>`});
+ return s+`</svg>`}
+function playSunrise(E){if(sunBusy)return;sunBusy=true;sunSeen=true;holdClock();E.cineStart();
+ const st=document.getElementById('stage'),sc=H.scr(),NS='http://www.w3.org/2000/svg';
+ /* B：地上的影子（畫在地面上、所有東西下面） */
+ const g=document.createElementNS(NS,'g');g.id='sunShadow';let sh='';
+ for(let i=0;i<15;i++){const k=i/14,x=lerp(TONG[0][0],TONG[1][0],k),y=lerp(TONG[0][1],TONG[1][1],k)-14;
+  sh+=`<g transform="translate(${f(x)},${f(y)})"><g class="sunSh" transform="scale(0,1)"><path d="M0,-15 L-430,-26 Q-462,0 -430,26 L0,15Z" fill="#2a2038" opacity=".5"/></g></g>`}
+ g.innerHTML=sh;const gnd=document.getElementById('gnd');if(gnd)gnd.after(g);else document.getElementById('bg').prepend(g);
+ const tint=document.createElement('div');tint.id='sunTint';tint.style.cssText='position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1.4s;mix-blend-mode:multiply;background:linear-gradient(270deg,rgba(255,180,100,.6),rgba(240,130,110,.32) 55%,rgba(80,70,140,.26))';
+ const glow=document.createElement('div');glow.id='sunGlow';glow.style.cssText='position:absolute;right:-140px;top:24%;width:320px;height:320px;border-radius:50%;pointer-events:none;opacity:0;transition:opacity 2.4s;background:radial-gradient(circle,rgba(255,244,190,1) 0 18%,rgba(255,220,140,.6) 35%,rgba(255,220,140,0) 70%)';
+ const skip=document.createElement('div');skip.id='sunSkip';skip.style.cssText='position:absolute;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center;padding-bottom:22%;color:#fff8e6;text-shadow:0 2px 8px rgba(0,0,0,.7);font-size:17px;letter-spacing:2px;opacity:0;transition:opacity 1.2s';
+ skip.textContent='清晨的東加里奇⋯';
+ st.append(tint,glow,skip);requestAnimationFrame(()=>{tint.style.opacity=1;glow.style.opacity=1;skip.style.opacity=1});
+ try{[262,330,392].forEach((q,i)=>H.tone(q,1.2,'sine',.05,i*.5))}catch(_){}
+ H.tweenTo(sc.base*.62,SUNP.x,SUNP.y,1500);
+ const t0=performance.now();let raf=0,done=false;
+ const grow=now=>{const k=Math.min(1,Math.max(0,(now-t0-900)/3400)),e=1-(1-k)**3;g.querySelectorAll('.sunSh').forEach(el=>el.setAttribute('transform',`scale(${f(e)},1)`));if(k<1&&!done)raf=requestAnimationFrame(grow)};raf=requestAnimationFrame(grow);
+ const toA=()=>{if(done)return;done=true;cancelAnimationFrame(raf);g.querySelectorAll('.sunSh').forEach(el=>el.setAttribute('transform','scale(1,1)'));skip.remove();showPano(E)};
+ skip.onclick=toA;setTimeout(toA,5600)}
+function showPano(E){const ov=document.createElement('div');ov.id='sunPano';ov.className='overlay';
+ ov.style.cssText='position:fixed;inset:0;z-index:60;padding:0;margin:0;display:block;background:#2a2234;overflow:hidden;opacity:0;transition:opacity .9s';
+ document.body.appendChild(ov);
+ /* 手機 Safari 的 SVG「height:100%、width:auto」常常算成寬度 0（整張圖看不見），所以先量畫面，直接給像素寬高 */
+ const vh=ov.clientHeight||window.innerHeight,vw0=ov.clientWidth||window.innerWidth,k=Math.max(vh/844,vw0/900),pw=Math.round(900*k),ph=Math.round(844*k);
+ ov.innerHTML=`<div id="spPan" style="position:absolute;left:0;top:${Math.round((vh-ph)/2)}px;width:${pw}px;height:${ph}px">${sunPanoSVG().replace('height="100%" preserveAspectRatio="xMinYMid meet" style="display:block;height:100%;width:auto"',`width="${pw}" height="${ph}" style="display:block"`)}</div>`+
+  `<div id="spCap" style="position:absolute;left:0;right:0;bottom:12%;text-align:center;color:#fff8e6;text-shadow:0 2px 10px rgba(0,0,0,.7);opacity:0;transition:opacity 1.4s"><b style="display:block;font-size:26px;letter-spacing:5px;margin-bottom:8px">東加里奇的日出</b><span style="font-size:15px;line-height:1.7">太陽從巨人們背後的海上升起，<br>長長的影子一路拉到你的腳邊⋯</span></div>`+
+  `<div id="spTap" style="position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 4%);text-align:center;color:#fff8e6;font-size:13px;opacity:0;transition:opacity 1s">點一下畫面，繼續探索</div>`;
+ const pan=ov.querySelector('#spPan'),sun=ov.querySelector('#spSun'),shd=ov.querySelector('#spShadow');
+ requestAnimationFrame(()=>{ov.style.opacity=1;const w=pw,vw=vw0;
+  try{pan.animate([{transform:'translateX(0)'},{transform:`translateX(${Math.min(0,vw-w)}px)`}],{duration:11000,easing:'ease-in-out',fill:'forwards'});
+   sun.animate([{transform:'translateY(130px)'},{transform:'translateY(0)'}],{duration:6000,easing:'ease-out',fill:'forwards'});
+   shd.style.transformBox='fill-box';shd.style.transformOrigin='50% 0';shd.animate([{transform:'scaleY(.15)',opacity:.4},{transform:'scaleY(1)',opacity:1}],{duration:5600,easing:'ease-out',fill:'forwards'})}catch(_){}});
+ setTimeout(()=>{const c=ov.querySelector('#spCap');if(c)c.style.opacity=1},1800);
+ setTimeout(()=>{const t=ov.querySelector('#spTap');if(t)t.style.opacity=.8},3600);
+ try{[392,494,587,784].forEach((q,i)=>H.tone(q,.6,'sine',.06,.4+i*.26))}catch(_){}
+ const t0=performance.now();
+ ov.onclick=()=>{if(performance.now()-t0<1200)return;ov.onclick=null;ov.style.opacity=0;
+  ['sunTint','sunGlow'].forEach(id=>{const e=document.getElementById(id);if(e){e.style.opacity=0;setTimeout(()=>e.remove(),1400)}});
+  setTimeout(()=>{ov.remove();const sh=document.getElementById('sunShadow');if(sh)sh.remove();E.cineEnd(()=>{sunBusy=false;freeClock()})},700)}}
+function tapView(x,y,E){if(!(Math.abs(x-VIEWPT.x)<34&&y<=VIEWPT.y+8&&y>=VIEWPT.y-62))return false;
+ const P=E&&E.P;if(P&&Math.hypot(P.x-VIEWPT.x,P.y-VIEWPT.y)>170){H.toast('「日出觀景點」⋯走到木牌旁邊，再看一次日出吧！',2600);return true}
+ playSunrise(E);return true}
+/* ---- 瞭望點：站在中央巨人摩艾腳下點它 → 爬上巨人的肩膀，鏡頭拉遠看整座島 3 秒再回來（2026-11-10 使用者選「加瞭望點」） ---- */
+let lookBusy=false;
+function tapGiant(x,y,E){const G0=GIANT.F;if(!(Math.abs(x-G0.x)<62&&y<=G0.y+10&&y>=G0.y-345))return false;
+ const P=E&&E.P;if(!P||Math.hypot(P.x-G0.x,P.y-G0.y)>190){const t=performance.now();if(t-factT>600){factT=t;H.toast(FACTS.giantF+'\n走到巨人腳下再點一次，好像可以爬上去看看？',3600)}return true}
+ if(lookBusy)return true;lookBusy=true;holdClock();E.cineStart();const sc=H.scr();
+ try{[392,523,659].forEach((q,i)=>H.tone(q,.25,'triangle',.08,i*.12))}catch(_){}
+ H.toast('爬上巨人的肩膀⋯整座島一覽無遺！',3600);
+ H.tweenTo(sc.base*.3,(SC.x0+SC.x1)/2,1280,1300,()=>setTimeout(()=>E.cineEnd(()=>{lookBusy=false;freeClock()}),2600));return true}
+/* 每一格檢查：走進觀景點範圍自動播日出（每局一次） */
+function sunTick(dt,P,E){if(!sunSeen&&!sunBusy&&Math.hypot(P.x-VIEWPT.x,P.y-VIEWPT.y)<120)playSunrise(E)}
 function tapCreature(x,y){const s=H.view().s,tol=Math.max(0,14/s-10);let best=null,bd=1e9;
  for(const m of C.movers){if(!FACTS[m.kind])continue;if(Math.abs(x-m.x)<m.w*.6+tol&&y<=m.y+10+tol&&y>=m.y-m.h-10-tol){if(m.jig)m.jig();const t=performance.now();if(t-factT>600){factT=t;H.toast(FACTS[m.kind],3000)}try{H.tone(660,.08,'triangle',.06)}catch(_){}return true}}
  for(const sp of H.sprites){if(!FACTS[sp.kind])continue;if(Math.abs(x-sp.x)<sp.w*.6+tol&&y<=sp.y+8+tol&&y>=sp.y-sp.h-8-tol){const d=Math.abs(y-(sp.y-sp.h/2));if(d<bd){bd=d;best=sp}}}
@@ -347,24 +447,27 @@ function tapCreature(x,y){const s=H.view().s,tol=Math.max(0,14/s-10);let best=nu
 /* ================= 場景 ================= */
 const C={n:N,movers:[],start:{x:1390,y:345},startDir:2,speed:185,terrain,solids:[],flips:[],types:TYPES101,decoys:DECOYS,decoyT:DECOYT,decoyArt:DECOYART,inspect:INSPECT,inReg,anyReg:'anyR',
  cloverHosts:new Set(['bushF','stonesF','crateF','canoeF','reedsF']),
+ /* 免檢查：場景裡一眼就分得出真假的 4 種（和它們的干擾物），點了直接收；小摩艾、鳥人雕刻、刻紋木板、鳥人蛋保留特寫卡 */
+ quick:new Set(['pukao','brick','obsidian','coal','shellNeck','beadNeck','featherCrown','duster']),
  thin:new Set(['grassT','flowers','lavaS','bird','trailM']),
- tall:new Set(['cowR','sheepR','nameSign','moaiS','moaiF','moaiH','palm','tent','house','raising','stall','walker','archaeo','horse','dancer','seller','petro','bigPukao','reedsF','ship','sieve']),
+ tall:new Set(['cowR','sheepR','nameSign','moaiS','moaiF','moaiH','palm','tent','house','raising','stall','walker','archaeo','horse','dancer','seller','petro','bigPukao','reedsF','ship','sieve','giantF','giantL','giantH','viewPt']),
  playerArt,story:STORY,
  clover:`<g transform="scale(.85)"><path d="M0,2 Q2,10 -2,16" fill="none" stroke="#4f7a3a" stroke-width="2"/>${[0,90,180,270].map(a=>`<g transform="rotate(${a})"><path d="M0,0 C-7,-3 -9,-12 -3,-13 C-1,-13 0,-11 0,-10 C0,-11 1,-13 3,-13 C9,-12 7,-3 0,0Z" fill="#6fae4a"/></g>`).join('')}<circle r="2" fill="#f5c842" stroke-width="1"/></g>`,
  openArt:h=>FK[h.kind].open(),flipName:h=>FK[h.kind].name,emptyMsg:h=>FK[h.kind].empty,
  where:(g,h)=>{const dx=h.x-g.x,dy=h.y-g.y,d=Math.hypot(dx,dy),dirs=['東','東南','南','西南','西','西北','北','東北'],k=((Math.round(Math.atan2(dy,dx)/(Math.PI/4))%8)+8)%8;
   const reg=[['beachR','北邊的白沙灘'],['tongR','東加里奇石台前'],['quarryR','採石場'],['campR','考古隊營地'],['akiviR','阿基維石台附近'],['craterR','火山口湖邊'],['orongoR','奧隆戈村'],['grassR','中央草原']].find(([k_])=>{const g_=REG[k_];return h.x>=g_.x&&h.x<=g_.x+g_.w&&h.y>=g_.y&&h.y<=g_.y+g_.h});
   return `${reg?reg[1]:(d<200?'這附近':dirs[k]+'邊')}的${FK[h.kind].name}底下（從這裡往${dirs[k]}走）`},
- tapScene:(x,y)=>{if(Math.abs(x-1300)<80&&y>20&&y<150){H.toast('船長：慢慢找，找齊了再回海島港口！\n（想先回去，可以從選單打開冒險地圖）',3600);return true}return tapCreature(x,y)},
- how:`<div><b style="font-size:22px">🕹️</b>左下角搖桿<br>走路</div><div><b style="font-size:22px">👆</b>走近東西<br>點一下拿起來</div><div><b style="font-size:22px">🔍</b>檢查看看<br>是不是它</div><div><b style="font-size:22px">🌿</b>草叢、石堆<br>可以翻開</div>`,
+ tick:sunTick,tapScene:(x,y,E)=>{if(tapView(x,y,E)||tapGiant(x,y,E))return true;if(Math.abs(x-1300)<80&&y>20&&y<150){H.toast('船長：慢慢找，找齊了再回海島港口！\n（想先回去，可以從選單打開冒險地圖）',3600);return true}return tapCreature(x,y)},
+ how:`<div><b style="font-size:22px">🕹️</b>左下角搖桿<br>走路</div><div><b style="font-size:22px">👆</b>走近東西<br>點一下拿起來</div><div><b style="font-size:22px">🔍</b>有些要檢查<br>才分得出來</div><div><b style="font-size:22px">🌿</b>草叢、石堆<br>可以翻開</div>`,
  rule:'這座島上的東西要走近才拿得到，拿錯了只要放回去就好。<br>幫頭上有「？」的人完成小故事，他會告訴你 🍀 幸運草藏在哪裡。（聽說還藏著別的秘密⋯）',
  homeBtn:'搭帆船回海島港口',homeNote:'船長在北邊海灣等你，隨時可以再來'};
 const E=H.SECRET.make(C);
 
 Object.assign(KIND,{grassT:{w:20,h:16,fn:grassT},flowers:{w:22,h:12,fn:flowers},lavaS:{w:26,h:14,fn:lava},horse:{w:84,h:84,fn:horse},rooster:{w:24,h:28,fn:rooster},cowR:{w:76,h:62,fn:()=>`<g transform="scale(1.65)" stroke-width="1.4">${KIND.cow.fn()}</g>`},sheepR:{w:52,h:42,fn:()=>`<g transform="scale(1.5)" stroke-width="1.5">${KIND.sheep.fn()}</g>`},hen:{w:24,h:28,fn:()=>KIND.chicken.fn()},walker:{w:30,h:62,fn:walker},archaeo:{w:30,h:62,fn:archaeo}});
-Object.assign(ANIM,{horse:['bob','peck'],dancer:['hop'],palm:['sway'],turtle:['swim'],shoal:['swim'],whale:['rock'],booby:['bob','wig'],tropic:['bob'],noddy:['peck','bob'],rooster:['peck','bob'],hen:['peck'],crab:['wig'],lobster:['wig'],cowR:['bob'],sheepR:['bob','sway']});
-['turtle','shoal','whale'].forEach(k=>ALWAYS.add(k));
-['moaiS','moaiF','moaiFall','ahu','house','tent','raising','stall','palm','ship','bigPukao','petro','moaiL'].forEach(k=>HEAVY.add(k));
+/* 只用在復活島（不影響第 5 關的螃蟹、海龜、椰子樹） */
+H.ANIMX[N]={horse:['bob','peck'],dancer:['hop'],palm:['sway'],turtle:['swim'],shoal:['swim'],whale:['rock'],booby:['bob','wig'],tropic:['bob'],noddy:['peck','bob'],rooster:['peck','bob'],hen:['peck'],crab:['wig'],lobster:['wig'],cowR:['bob'],sheepR:['bob','sway']};
+H.ALWAYSX[N]=new Set(['turtle','shoal','whale']);
+H.HEAVYX[N]=new Set(['moaiS','moaiF','moaiFall','ahu','house','tent','raising','stall','palm','ship','bigPukao','petro','moaiL','giantF','giantL','giantH','viewPt']);
 const put=(x,y,w,h,kind,svg,o={})=>{const sp=add(x,y,w,h,kind,svg,{sh:.6,...o});if(o.solid)C.solids.push({x:x+(o.solid[2]||0),y:y-(o.solid[3]||0),rx:o.solid[0],ry:o.solid[1]});return sp};
 const flipAt=(x,y,kind,force)=>{const K=FK[kind];if(!terrain(x,y)||(!force&&!canPlace(x,y,K.w,K.h,false,.6)))return null;if(force&&C.flips.some(h=>Math.hypot(h.x-x,h.y-y)<80))return null;const sp=put(x,y,K.w,K.h,kind,K.fn(),{fl:r()<.5,solid:[K.w*.3,6]});const h={sp,kind,x,y,w:K.w,h:K.h};C.flips.push(h);return h};
 const flipsIn=(reg,kind,n)=>{const g=REG[reg];let k=0;for(let t=0;t<400&&k<n;t++){const x=sr(g.x,g.x+g.w),y=sr(g.y,g.y+g.h);if(!inReg(reg,x,y))continue;if(C.flips.some(h=>Math.hypot(h.x-x,h.y-y)<110))continue;if(flipAt(x,y,kind))k++}};
@@ -435,8 +538,8 @@ function structures(){C.solids.length=0;C.flips.length=0;
  /* 北邊海灣：帆船（船長在船上等） */
  put(1300,118,150,130,'ship',ship()+T(-14,-12,.8,act(0,0,1,{view:'fq',pose:'stand',hat:-1,hair:'#e8e4dc',hs:3,shirt:'#2f4f7a',pants:'#3d3833',beard:true,mood:0,plain:true})+`<path d="M-15,-56 Q-14,-68 0,-70 Q14,-68 15,-56Z" fill="#fbf9f3"/><path d="M-15,-56 H15 L17,-52 H-17Z" fill="#2f3f5a"/>`),{mark:false});
  /* 東加里奇：15 尊大摩艾背對東邊的海、面向內陸（側面朝左） */
- for(let i=0;i<15;i++){const k=i/14,x=lerp(TONG[0][0],TONG[1][0],k),y=lerp(TONG[0][1],TONG[1][1],k)-14;put(x,y,44,118,'moaiS',moaiSide(sr(100,116),{pukao:i===6}),{mark:true})}
- for(let i=0;i<=16;i++){const k=i/16;C.solids.push({x:lerp(TONG[0][0],TONG[1][0],k),y:lerp(TONG[0][1],TONG[1][1],k)-4,rx:26,ry:18})}
+ for(let i=0;i<15;i++){const k=i/14,x=lerp(TONG[0][0],TONG[1][0],k),y=lerp(TONG[0][1],TONG[1][1],k)-14;put(x,y,74,204,'moaiS',moaiSide(sr(100,116)*TONGK,{pukao:i===6}),{mark:true})}
+ for(let i=0;i<=16;i++){const k=i/16;C.solids.push({x:lerp(TONG[0][0],TONG[1][0],k),y:lerp(TONG[0][1],TONG[1][1],k)-4,rx:34,ry:20})}
  /* 阿基維：7 尊摩艾面朝西邊的海 */
  for(let i=0;i<7;i++){const k=i/6,x=lerp(AKIVI[0][0],AKIVI[1][0],k),y=lerp(AKIVI[0][1],AKIVI[1][1],k)-12;put(x,y,40,100,'moaiS',moaiSide(sr(88,96)),{mark:true})}
  for(let i=0;i<=8;i++){const k=i/8;C.solids.push({x:lerp(AKIVI[0][0],AKIVI[1][0],k),y:lerp(AKIVI[0][1],AKIVI[1][1],k)-4,rx:24,ry:18})}
@@ -449,9 +552,14 @@ function structures(){C.solids.length=0;C.flips.length=0;
  put(1150,1990,52,40,'bigPukao',bigPukao(),{solid:[22,10]});
  /* 採石場：山坡上半埋的摩艾頭、一尊躺在岩壁上刻到一半的 */
  [[1440,1110,-6],[1500,1150,4],[1560,1125,-3],[1620,1160,6],[1690,1130,-8],[1745,1100,3],[1470,1060,2],[1660,1080,-4]].forEach(([x,y,t])=>put(x,y,46,62,'moaiH',moaiHead(sr(70,92),t),{solid:[16,8]}));
- put(1430,1000,190,60,'moaiL',moaiLying(),{solid:[90,14,0,6]});
+ put(GIANT.L.x,GIANT.L.y,330,100,'giantL',giantLying(),{solid:[150,20,0,10]});
  /* 考古隊：在立石像、營地 */
- put(1300,1050,150,130,'raising',raising(),{solid:[70,16,-30,0]});
+ put(1150,1150,150,130,'raising',raising(),{solid:[70,16,-30,0]});
+ /* 巨人摩艾：中央草原站著的大巨人、南邊草原從地裡探出頭的巨人 */
+ put(GIANT.F.x,GIANT.F.y,130,340,'giantF',moaiFront(330,{pukao:true}),{solid:[50,18],mark:true});
+ put(GIANT.H.x,GIANT.H.y,190,250,'giantH',giantHead(),{solid:[78,22]});
+ /* 東加里奇前廣場：日出觀景點 */
+ put(VIEWPT.x,VIEWPT.y,64,58,'viewPt',viewPoint(),{solid:[22,8]});
  put(1130,1290,90,60,'tent',tent(),{solid:[42,14]});put(1240,1300,64,32,'table',camTable(),{solid:[30,8]});put(1300,1380,34,30,'sieve',sieve(),{solid:[14,6]});put(1080,1380,56,32,'barrow',barrow(),{solid:[20,8]});
  [[1200,1395],[1350,1250]].forEach(([x,y])=>put(x,y,30,62,'archaeo',archaeo(),{solid:[10,6]}));
  /* 散落在草原上的紅色大石帽 */
@@ -521,4 +629,198 @@ HERE[N]=[279,402];
 NEXTINFO[N]={pv:rapaPreview,btn:'搭帆船出航',had:'帆船隨時可以出航',fresh:'帆船已經升好帆了',ride:'sail'};
 /* 海島港口的過關畫面「回到出發地」預覽用 */
 if(NEXTINFO[5]&&!NEXTINFO[5].pv)NEXTINFO[5].pv=()=>'';
+
+/* ================= 入口：第 5 關海島港口（2026-11-09 從 level5.js 搬來；出發地載入時這個檔案會一起載入） ================= */
+(function(){
+const {T,f,sr,OL,act,tone,RIDES,TAPHOOKS}=H;const SEA='#7cc0cc';
+/* ================= 復活島（海上秘境）入口 =================
+   第 5 關過關後重玩才有：
+   1. 東南外海每隔一陣子淡淡浮出一排摩艾剪影（約 2 秒淡出）。
+   2. 點到剪影 → 燈塔島東南的礁岩上出現擱淺帆船，船長頭上冒「！」（之後每局都在）。
+   3. 點船長 → 海圖被風吹破成 3 片：1 片被海鷗叼著（海鷗停下來才點得到），2 片隨機藏在漁網堆／椰子樹下／海灘小屋旁（提示燈泡不會指）。
+   4. 3 片都拿回去 → 帆升起 → 問「要現在出航嗎？」：現在出航＝帆船過場後進入復活島秘境（level101.js）；等一下＝船留著，之後點船就能出發。
+   進度存在 townhunt-rapa：{ship:1 帆船出現了, ready:1 海圖拼好（冒險地圖出現航線）, went:1 出航過一次} */
+const RAPA={ship:{x:2035,y:738},cap:{x:2021,y:700},sil:{x:2185,y:2488}};/* 船長站在船上（船舷擋住腳） */
+/* 在第 5 關預留擱淺帆船（礁岩東南）、船長和摩艾剪影（東南外海）的位置，散落物件不會擺進去 */
+(H.RESERVE[5]||(H.RESERVE[5]=[])).push([RAPA.ship.x,RAPA.ship.y,170,150],[RAPA.sil.x,RAPA.sil.y,170,80]);
+H.RESETKEYS.push('townhunt-rapa');
+let RP={};try{RP=JSON.parse(localStorage.getItem('townhunt-rapa')||'{}')||{}}catch(_){RP={}}
+const rpSave=()=>{try{localStorage.setItem('townhunt-rapa',JSON.stringify(RP))}catch(_){}};
+const cleared5=()=>{try{return !!localStorage.getItem('townhunt-best-L5')}catch(_){return false}};
+/* ---- 美術 ---- */
+const moaiShape=(h=34)=>{const k=h/34,p=[[-6,0],[-6.5,-14],[-7.5,-16],[-7,-26],[-7.8,-30],[-6,-34],[5,-34],[6.6,-31],[6,-27],[8.6,-21],[6.4,-20],[6.8,-14],[6,0]];
+ return 'M'+p.map(([x,y])=>f(x*k)+','+f(y*k)).join(' L')+'Z'};
+/* 一排背對海的摩艾站在低低的小島上（淡灰藍剪影，使用者選 A） */
+const moaiRow=(col='#5d6f80')=>{const hs=[30,36,33,38,31],xs=[-44,-22,0,22,44];
+ let s=`<path d="M-66,2 Q-60,-6 -40,-6 H40 Q60,-6 66,2 Q0,8 -66,2Z" fill="${col}" stroke="none"/>`;
+ xs.forEach((x,i)=>{s+=`<path transform="translate(${x},-4)" d="${moaiShape(hs[i])}" fill="${col}" stroke="none"/>`;if(i===3)s+=`<rect x="${x-6}" y="${-4-hs[i]-6}" width="11" height="6" rx="2" fill="${col}" stroke="none"/>`});
+ return s};
+const silhSVG=()=>moaiRow()+`<path d="M-80,6 q8,-3 16,0 q8,3 16,0 M40,7 q8,-3 16,0 q8,3 16,0" fill="none" stroke="#e8f6f6" stroke-width="1.6" opacity=".8"/>`;
+/* 擱淺的木造帆船（使用者選 A）：up=false 收帆斜斜卡在礁岩上；up=true 海圖拼好、帆升起 */
+const shipSVG=(up,crew='')=>{let s=`<ellipse cx="6" cy="4" rx="78" ry="9" fill="#000" opacity=".12" stroke="none"/><path d="M-70,6 L-62,-6 L-50,-10 L-40,-2 L-30,6Z" fill="#6b6e70"/><path d="M40,6 L48,-8 L60,-12 L70,-2 L74,6Z" fill="#6b6e70"/>`;
+ let hull=`<path d="M-66,-30 L64,-30 Q70,-30 66,-22 L52,-2 Q0,6 -50,-2 L-68,-22 Q-72,-30 -66,-30Z" fill="#8a5a3a"/><path d="M-66,-24 H64" fill="none" stroke="#fbf6ea" stroke-width="2.6"/>`;
+ hull+=`<path d="M-58,-14 Q0,-8 58,-14" fill="none" stroke="#6b4428" stroke-width="1.4"/>`+[-40,-20,0,20,40].map(x=>`<path d="M${x},-30 v-4" fill="none" stroke-width="1.6"/>`).join('')+`<path d="M-64,-34 H62" fill="none" stroke-width="1.6"/>`;
+ let b=`<rect x="-56" y="-48" width="26" height="18" fill="#c99a5b"/><rect x="-50" y="-44" width="8" height="7" fill="#9fd3e0" stroke-width="1.2"/><path d="M-60,-48 H-26" fill="none" stroke-width="2.4"/>`;
+ b+=`<path d="M8,-30 V-${up?132:118}" fill="none" stroke="#6b4428" stroke-width="4"/>`;
+ if(up)b+=`<path d="M12,-126 Q50,-90 54,-40 L12,-40Z" fill="#fbf6ea"/><path d="M12,-100 Q40,-80 46,-60" fill="none" stroke="#e6dcc6" stroke-width="1.4"/><path d="M4,-118 Q-28,-86 -34,-44 L4,-44Z" fill="#e8d6b0"/><path d="M8,-132 l14,5 l-14,5Z" fill="#d8413a" stroke-width="1.2"/>`;
+ else b+=`<path d="M-30,-96 L46,-100" fill="none" stroke="#6b4428" stroke-width="3"/><path d="M-26,-96 Q-20,-84 -10,-92 Q0,-82 10,-94 Q22,-84 30,-96 Q38,-86 44,-99" fill="#e8d6b0" stroke-width="1.6"/><path d="M8,-118 L-58,-34 M8,-118 L62,-34" fill="none" stroke-width="1" opacity=".55"/>`;
+ s+=`<g transform="rotate(${up?-3:-9})">${b}${crew}${hull}</g>`;
+ return s+`<path d="M-84,8 q8,-4 16,0 q8,4 16,0 M50,8 q8,-4 16,0 q8,4 16,0" fill="none" stroke="#e8f6f6" stroke-width="1.8"/>`};
+const sailing=()=>shipSVG(true,T(-14,-24,.8,captainSVG())).replace(/<path d="M-70,6[^>]*>|<path d="M40,6 L48[^>]*>/g,'');
+const capHat=`<path d="M-15,-44 Q-14,-56 0,-58 Q14,-56 15,-44Z" fill="#fbf9f3"/><path d="M-15,-44 H15 L17,-40 H-17Z" fill="#2f3f5a"/><circle cx="0" cy="-50" r="2.6" fill="#f5c842" stroke-width="1"/>`;
+let capArt='';const captainSVG=()=>capArt||(capArt=act(0,0,1,{view:'fq',pose:'stand',hat:-1,hair:'#e8e4dc',hs:3,shirt:'#2f4f7a',pants:'#3d3833',beard:true,mood:2,top:'tee',bottom:'pants'})+T(0,0,1,capHat));
+const bangSVG=(t)=>`<g class="cpop" transform="translate(0,-84)"><path d="M-11,-12 h22 q4,0 4,4 v10 q0,4 -4,4 h-8 l-3,5 l-3,-5 h-8 q-4,0 -4,-4 v-10 q0,-4 4,-4z" fill="#fff7d6" stroke-width="1.6"/>${t==='!'?`<path d="M0,-8 V-1" fill="none" stroke="#d8413a" stroke-width="3"/><circle cx="0" cy="3" r="1.6" fill="#d8413a" stroke="none"/>`:`<text x="0" y="2.5" text-anchor="middle" font-size="12" font-weight="800" fill="${OL}" stroke="none" font-family="PingFang TC,Noto Sans TC,sans-serif">${t}</text>`}</g>`;
+/* 海圖碎片：泛黃羊皮紙一角，撕開的邊、虛線航線、小摩艾記號 */
+const chartSVG=()=>`<path d="M-12,-10 L12,-12 L13,-2 L9,1 L12,4 L8,8 L10,11 L-11,12 Z" fill="#efe0b4"/><path d="M-8,6 Q-2,-2 4,-4" fill="none" stroke="#a8461f" stroke-width="1.3" stroke-dasharray="2.4 2.2"/><path d="M5,-8 l1.6,0 l.4,3 l-.6,1 h-1.6Z" fill="#5d6f80" stroke-width=".8"/><path d="M-9,-8 h5 M-9,-5 h3" fill="none" stroke="#c9a978" stroke-width="1.1"/>`;
+/* 叼著碎片飛的海鷗；wing：翅膀上下拍 */
+const gullFlySVG=(up)=>`<path d="M-2,-2 Q-16,${up?-18:-2} -28,${up?-10:4} Q-16,${up?-10:0} -4,2Z" fill="#fbf9f3" stroke-width="1.6"/><path d="M2,-2 Q16,${up?-20:-2} 28,${up?-12:4} Q16,${up?-10:0} 4,2Z" fill="#fbf9f3" stroke-width="1.6"/><ellipse cx="0" cy="0" rx="9" ry="5" fill="#fbf9f3"/><circle cx="8" cy="-2" r="4.4" fill="#fbf9f3"/><path d="M12,-2 l5,1 l-5,2Z" fill="#f5c842" stroke-width="1"/><circle cx="9" cy="-3" r=".9" fill="${OL}" stroke="none"/>`+T(18,6,.55,chartSVG());
+
+/* ---- 圖層：fgSvg 裡、物件下面一層（船、船長、碎片），最上面一層（剪影、海鷗） ---- */
+const NSv='http://www.w3.org/2000/svg';
+function layers(){let lo=document.getElementById('rapaL'),hi=document.getElementById('rapaT');
+ if(!lo){const il=document.getElementById('itemsL');lo=document.createElementNS(NSv,'g');lo.id='rapaL';['stroke','stroke-width','stroke-linejoin','stroke-linecap'].forEach(a=>lo.setAttribute(a,il.getAttribute(a)));il.parentNode.insertBefore(lo,il);
+  hi=lo.cloneNode(false);hi.id='rapaT';il.parentNode.appendChild(hi)}
+ return [lo,hi]}
+let G={};/* 這一局的狀態 */
+let flashT=null,gullRAF=0;
+function clearRapa(){clearTimeout(flashT);cancelAnimationFrame(gullRAF);const l=document.getElementById('rapaL'),t=document.getElementById('rapaT');if(l)l.innerHTML='';if(t)t.innerHTML='';G={frags:[]}}
+/* ---- 伏筆：東南小沙洲上拿望遠鏡看海的小孩（第 5 關一開始就在，過關前後都會說） ---- */
+const KID={x:2068,y:2252};
+(H.RESERVE[5]||(H.RESERVE[5]=[])).push([KID.x,KID.y,70,80]);
+function kidSVG(){return act(0,0,1,{view:'side',pose:'reach',hat:-1,hair:'#3d2a1e',shirt:'#f0b84a',pants:'#3b6ea5',mood:2,plain:true})+
+ `<g transform="translate(9,-38) rotate(-12)"><rect x="0" y="-3.4" width="18" height="6.8" rx="1.5" fill="#c9963a" stroke-width="1.4"/><rect x="14" y="-4.4" width="6" height="8.8" rx="1.5" fill="#a8762a" stroke-width="1.4"/><path d="M5,-3.4 v6.8 M10,-3.4 v6.8" fill="none" stroke="#7a5420" stroke-width="1"/></g>`}
+function drawKid(){const [lo]=layers();let el=document.getElementById('rapaKid');if(!el){el=document.createElementNS(NSv,'g');el.id='rapaKid';lo.appendChild(el)}
+ el.innerHTML=T(KID.x,KID.y,1,`<ellipse cx="0" cy="1" rx="12" ry="3" fill="#000" opacity=".14" stroke="none"/>${kidSVG()}`)}
+let kidT=0;
+function tapKid(x,y){if(!(Math.abs(x-KID.x)<26&&y<=KID.y+8&&y>=KID.y-66))return false;const t=performance.now();if(t-kidT<800)return true;kidT=t;
+ const el=document.getElementById('rapaKid');if(el){el.classList.remove('cpop');void el.getBBox;el.classList.add('cpop')}
+ const msg=!cleared5()?'拿望遠鏡的小孩：據說東南邊的海上出現了巨人族！\n我每天都在這裡看，總有一天會看到他們。'
+  :!RP.ship?'拿望遠鏡的小孩：據說東南邊的海上出現了巨人族！\n有時候⋯海平線上會冒出一排黑黑的影子，你也看看！'
+  :!RP.went?'拿望遠鏡的小孩：你看到巨人族了對不對？\n燈塔那邊的船長好像要出海去找他們！'
+  :'拿望遠鏡的小孩：你真的去過巨人族的島？\n好羨慕喔！下次帶我一起去！';
+ H.toast(msg,4200);return true}
+function drawShip(){const [lo]=layers();let el=document.getElementById('rapaShip');if(!el){el=document.createElementNS(NSv,'g');el.id='rapaShip';lo.appendChild(el)}
+ const n=gotN(),b=RP.ready?'':!G.talked||n>=FRAGN?'!':`${n}/${FRAGN}`;
+ el.innerHTML=T(RAPA.ship.x,RAPA.ship.y,1,`<g class="an a-rock" style="--d:4.2s">${shipSVG(!!RP.ready,T(-14,-24,.8,captainSVG()+(b?bangSVG(b):'')))}</g>`)}
+function newGame5(sc){clearRapa();if(sc!==5)return;drawKid();if(!cleared5())return;
+ const [,hi]=layers();G={talked:false,frags:[],silUntil:0};gullDrawn='';
+ hi.insertAdjacentHTML('afterbegin',`<g id="rapaSil" opacity="0" transform="translate(${RAPA.sil.x},${RAPA.sil.y}) scale(1.2)">${silhSVG()}</g>`);
+ if(RP.ship)drawShip();
+ flashT=setTimeout(flash,H.testOn&&H.testOn()?2500:8000)}
+H.NGHOOKS.push(newGame5);
+/* 確實上島才記「去過」（不管是從帆船出航，還是之後從冒險地圖的航線前往）；復活島卡片、收集冊秘境頁看這個 */
+H.NGHOOKS.push(sc=>{if(sc===101&&!RP.went){RP.went=1;rpSave()}});
+if(H.LEVELS[101])H.LEVELS[101].seen=()=>!!RP.went&&!!RP.ready;
+/* 剪影閃現：淡入 .5 秒、停 1.5 秒、淡出 .6 秒；每隔 16 秒（測試模式 6 秒） */
+function flash(){const el=document.getElementById('rapaSil');if(!el)return;const busy=!H.game().running||document.querySelector('.overlay:not(.hide)')||document.getElementById('ride').classList.contains('on');
+ if(!busy){const t0=performance.now(),D=2600;G.silUntil=t0+D+700;
+  const step=now=>{const k=(now-t0)/D;if(!document.getElementById('rapaSil'))return;const o=k<.19?k/.19:k<.77?1:Math.max(0,1-(k-.77)/.23);el.setAttribute('opacity',(o*.78).toFixed(2));if(k<1)requestAnimationFrame(step);else el.setAttribute('opacity','0')};requestAnimationFrame(step)}
+ flashT=setTimeout(flash,H.testOn&&H.testOn()?6000:16000)}
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function dirTo(a,b){const dx=b.x-a.x,dy=b.y-a.y,ang=Math.atan2(dy,dx)*180/Math.PI,dirs=['右邊','右下方','下面','左下方','左邊','左上方','上面','右上方'];return dirs[Math.round(((ang+360)%360)/45)%8]}
+/* 點剪影 */
+function tapSil(){if(!RP.ship){RP.ship=1;rpSave();drawShip();const el=document.getElementById('rapaShip');if(el)el.classList.add('cpop');H.burst(RAPA.cap.x,RAPA.cap.y-60);
+  try{[392,523,659].forEach((q,i)=>tone(q,.3,'sine',.08,i*.16))}catch(_){}
+  H.toast('遠方好像有一排石頭巨人⋯\n咦？燈塔旁的礁岩上，多了一艘擱淺的帆船！',5200)}
+ else H.toast(RP.ready?'那排石頭巨人又出現了⋯帆船隨時可以出航！':'那排石頭巨人又出現了⋯燈塔旁的船長好像知道些什麼。',3200)}
+/* 海圖碎片：被風吹成 3 片（2026-11-10 使用者定案）。
+   ① 一定有一片被海鷗叼著：海鷗在港口裡飛來飛去，偶爾停在屋頂、船上休息，「停下來」的時候才點得到。
+   ② ③ 另外兩片每局隨機藏在漁網堆裡／椰子樹下／海灘小屋旁（兩片離得遠一點）。提示燈泡不會指。 */
+const FRAGN=3,HOSTNAME={netPile:'漁網堆裡',palm:'椰子樹下',beachHut:'海灘小屋旁'};
+const PERCH=['beachHut','bungalow','warehouse','house5','stall5','dryRack','boat5','anchorStatue','lifeguard','iceCart','sign','buoy'];
+/* 停著的海鷗（翅膀收起來，嘴裡叼著碎片） */
+const gullSitSVG=()=>`<path d="M-6,2 l-2,7 M2,2 l1,7" fill="none" stroke="#e0a030" stroke-width="1.6"/><path d="M-14,-2 Q-12,-12 0,-11 Q8,-10 9,-4 Q6,4 -6,3 Q-12,3 -14,-2Z" fill="#fbf9f3" stroke-width="1.6"/><path d="M-12,-4 Q-4,-10 4,-6 Q-2,-1 -12,-4Z" fill="#c9ccd2" stroke-width="1.2"/><path d="M-14,-2 l-6,-2 l2,4Z" fill="#c9ccd2" stroke-width="1.2"/><circle cx="8" cy="-12" r="5" fill="#fbf9f3" stroke-width="1.6"/><path d="M12,-12 l6,1 l-6,2Z" fill="#f5c842" stroke-width="1"/><circle cx="9" cy="-13" r="1" fill="${OL}" stroke="none"/>`+T(20,-7,.5,chartSVG());
+function perchSpots(){return H.sprites.filter(sp=>PERCH.includes(sp.kind)).map(sp=>({x:sp.x+sr(-sp.w*.18,sp.w*.18),y:sp.y-sp.h*.82}))}
+function placeFrags(){const [lo,hi]=layers(),SC=H.SCENES[5],used=new Set(H.items().map(it=>it.occ).filter(Boolean)),cl=H.dbg.clover()||{};
+ [cl.story,cl.bonus].forEach(c=>c&&used.add(c.host));
+ const ok=sp=>!used.has(sp)&&sp.x>SC.x0+120&&sp.x<SC.x1-120&&sp.y>380&&sp.y<SC.y1-160&&!H.items().some(o=>Math.hypot(o.x-sp.x,o.y-sp.y)<60)&&dist(sp,RAPA.cap)>420;
+ const pool=H.sprites.filter(sp=>HOSTNAME[sp.kind]&&ok(sp)).sort(()=>Math.random()-.5);
+ G.frags=[];
+ /* ① 海鷗 */
+ const P=perchSpots();G.perches=P.length?P:[{x:1300,y:1300},{x:1700,y:1700},{x:1000,y:1800}];
+ const g0=G.perches[Math.floor(Math.random()*G.perches.length)];
+ G.frags.push({kind:'gull',x:g0.x,y:g0.y,mode:'sit',until:performance.now()+4000,at:g0});
+ hi.insertAdjacentHTML('beforeend',`<g id="rapaGull"></g>`);
+ /* ② ③ 藏在東西旁邊 */
+ const picked=[];for(const h of pool){if(picked.length>=FRAGN-1)break;if(picked.every(q=>dist(q,h)>320))picked.push(h)}
+ for(const h of pool){if(picked.length>=FRAGN-1)break;if(!picked.includes(h))picked.push(h)}
+ picked.forEach((h,i)=>{const p=h.kind==='netPile'?{x:h.x-16,y:h.y-10,rot:-22}:h.kind==='beachHut'?{x:h.x+h.w*.42,y:h.y-4,rot:sr(-20,20)}:{x:h.x+(Math.random()<.5?-16:16),y:h.y-3,rot:sr(-25,25)};
+  const F={kind:h.kind,host:h,id:'rapaFrag'+i,...p};G.frags.push(F);
+  lo.insertAdjacentHTML('beforeend',`<g id="${F.id}" class="cpop" transform="translate(${f(p.x)},${f(p.y)}) rotate(${f(p.rot)}) scale(.8)">${chartSVG()}</g>`)});
+ cancelAnimationFrame(gullRAF);gullRAF=requestAnimationFrame(gullStep)}
+/* 海鷗：停 4～6 秒 → 飛到另一個停的地方（飛的時候點不到） */
+let gullDrawn='';
+function gullStep(now){const F=G.frags&&G.frags[0];if(!F||F.kind!=='gull'||F.got)return;const el=document.getElementById('rapaGull');if(!el)return;
+ const busy=!H.game().running||document.querySelector('.overlay:not(.hide)');
+ if(F.mode==='sit'){if(busy)F.until=Math.max(F.until,now+1500);
+  if(now>F.until){const far=G.perches.filter(q=>q!==F.at&&dist(q,F)>300),L=far.length?far:G.perches.filter(q=>q!==F.at),to=L.length?L[Math.floor(Math.random()*L.length)]:{x:F.x+200,y:F.y};
+   F.mode='fly';F.from={x:F.x,y:F.y};F.to=to;F.t0=now;F.dur=Math.max(3000,dist(F,to)/130*1000)}
+  const k='sit';if(gullDrawn!==k){gullDrawn=k;el.innerHTML=`<g class="an a-bob" style="--d:1.6s">${gullSitSVG()}</g>`}}
+ else{const k=Math.min(1,(now-F.t0)/F.dur),e=k<.5?2*k*k:1-(-2*k+2)**2/2;
+  F.x=F.from.x+(F.to.x-F.from.x)*e;F.y=F.from.y+(F.to.y-F.from.y)*e-Math.sin(Math.PI*k)*90;
+  const up=Math.floor(now/260)%2===0,dir=F.to.x<F.from.x?-1:1,key='fly'+up+dir;
+  if(gullDrawn!==key){gullDrawn=key;el.innerHTML=`<g transform="scale(${dir},1)">${gullFlySVG(up)}</g>`}
+  if(k>=1){F.mode='sit';F.at=F.to;F.x=F.to.x;F.y=F.to.y;F.until=now+sr(4200,6200)}}
+ el.setAttribute('transform',`translate(${f(F.x)},${f(F.y)})`);gullRAF=requestAnimationFrame(gullStep)}
+const gotN=()=>(G.frags||[]).filter(F=>F.got).length;
+function gotFrag(F){if(!F||F.got)return;F.got=true;const n=gotN();
+ const el=document.getElementById(F.kind==='gull'?'rapaGull':F.id);
+ if(F.kind==='gull'){cancelAnimationFrame(gullRAF);if(el){/* 海鷗嚇一跳，碎片掉下來：海鷗往上飛走 */el.innerHTML=gullFlySVG(true).replace(/<g transform="translate\(18,6\)[\s\S]*$/,'');const t0=performance.now(),x0=F.x,y0=F.y;
+  const step=now=>{const k=Math.min(1,(now-t0)/900);el.setAttribute('transform',`translate(${f(x0+k*160)},${f(y0-k*220)})`);el.setAttribute('opacity',(1-k).toFixed(2));if(k<1)requestAnimationFrame(step);else el.remove()};requestAnimationFrame(step)}}
+ else if(el){el.classList.remove('cpop');el.classList.add('got');setTimeout(()=>el.remove(),500)}
+ H.burst(F.x,F.y);H.floatText(F.x,F.y-24,`海圖碎片 ${n}/${FRAGN}`);H.sfx.found();drawShip();
+ const where=F.kind==='gull'?'海鷗嚇了一跳，嘴裡的紙片掉下來了⋯是海圖碎片！':`在${HOSTNAME[F.kind]}找到一片舊海圖的碎片！`;
+ H.toast(`${where}（${n}/${FRAGN}）\n`+(n<FRAGN?`還差 ${FRAGN-n} 片。`+(F.kind!=='gull'&&!G.frags[0].got?'聽說有一片被海鷗叼走了⋯':''):'三片都找齊了！上面畫著一排石頭巨人⋯\n快拿去給擱淺帆船的船長。'),4600)}
+/* 點船長或帆船 */
+function tapCap(){
+ if(RP.ready){askSail();return}
+ if(G.talked&&gotN()>=FRAGN){RP.ready=1;rpSave();drawShip();const el=document.getElementById('rapaShip');if(el)el.classList.add('cpop');H.burst(RAPA.ship.x+10,RAPA.ship.y-90);
+  try{[523,659,784,1047].forEach((q,i)=>tone(q,.22,'triangle',.14,i*.1))}catch(_){}
+  H.toast('船長：太好了！三片海圖拼起來了⋯就是這座島！\n帆升起來了，風向也剛剛好。',3400);setTimeout(()=>{if(H.game().running)askSail()},2600);return}
+ if(!G.talked){G.talked=true;placeFrags();drawShip();
+  H.toast('船長：你也看到那些石頭巨人了？\n我的海圖被風吹破成三片，沒有它找不到那座島⋯\n有一片好像被海鷗叼走了！另外兩片應該還在港口附近。',6400);return}
+ const n=gotN();H.toast(`船長：已經找到 ${n} 片了，還差 ${FRAGN-n} 片⋯\n`+(G.frags[0].got?'看看漁網堆、椰子樹下或海灘小屋旁吧。':'海鷗停下來休息的時候，說不定拿得回來。'),3600)}
+/* 點擊判定（放在燈塔光束前面一起判斷） */
+const lhTap=TAPHOOKS[5];
+TAPHOOKS[5]=(x,y)=>{if(H.scene()===5&&tapKid(x,y))return true;
+ if(H.scene()===5&&cleared5()){const s=H.view().s,pad=Math.max(0,10/s-8);
+  for(const F of (G.frags||[])){if(F.got)continue;
+   if(F.kind==='gull'){if(Math.hypot(x-F.x,y-(F.y-6))<Math.max(30,20/s)){if(F.mode==='sit')gotFrag(F);else{const t=performance.now();if(t-(G.gullMsg||0)>2200){G.gullMsg=t;H.toast('海鷗飛得太快了⋯\n等牠停下來休息的時候再試試！',2400)}}return true}continue}
+   if(Math.hypot(x-F.x,y-F.y)<Math.max(18,14/s)||(Math.abs(x-F.host.x)<F.host.w*.45&&y<=F.host.y+6&&y>=F.host.y-(F.kind==='netPile'?F.host.h+8:F.kind==='beachHut'?F.host.h*.6:40))){gotFrag(F);return true}}
+  if(RP.ship&&Math.abs(x-RAPA.ship.x)<74+pad&&y<=RAPA.ship.y+10&&y>=RAPA.ship.y-136){tapCap();return true}
+  if(performance.now()<G.silUntil&&Math.abs(x-RAPA.sil.x)<96+pad&&y<=RAPA.sil.y+16&&y>=RAPA.sil.y-70){tapSil();return true}}
+ return lhTap?lhTap(x,y):false};
+/* ---- 「要現在出航嗎？」對話框 ---- */
+const ov=document.createElement('div');ov.className='overlay hide';ov.id='rapaOv';document.body.appendChild(ov);
+let pausedAt=0;const pause=()=>{if(pausedAt)return;pausedAt=performance.now();H.clockHold()},resume=()=>{const g=H.game();if(pausedAt&&g.running)g.t0+=performance.now()-pausedAt;pausedAt=0;H.clockRun(false)};
+const pv=()=>`<svg viewBox="0 0 220 110" width="220" height="110" style="display:block;margin:0 auto 6px"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><rect x="0" y="0" width="220" height="62" rx="10" fill="#dcecef" stroke="none"/><rect x="0" y="58" width="220" height="52" rx="10" fill="#7fd6cf" stroke="none"/><g transform="translate(176,62) scale(.5)">${moaiRow('#7b8a98')}</g><g transform="translate(78,98) scale(.62)">${sailing()}</g></g></svg>`;
+function card(html){ov.innerHTML=`<div class="pcard" style="padding:20px 18px 18px;text-align:center">${html}</div>`;ov.classList.remove('hide')}
+function askSail(){pause();card(`${pv()}<b style="font-size:21px;display:block;margin-bottom:6px">要現在出航嗎？</b><p style="margin:0 0 14px;font-size:15px;line-height:1.6">船長：帆已經升好了。<br>要跟我一起去看看那些石頭巨人嗎？</p><button class="pbtn" id="rapaGo">⛵ 現在出航</button><div class="row2" style="display:flex;margin-top:10px"><button class="sbtn" id="rapaWait">等一下</button></div>`);
+ ov.querySelector('#rapaGo').onclick=()=>{ov.classList.add('hide');pausedAt=0;H.goLevel(101)}; /* RP.went 改成真的上島（NGHOOKS）才記 */ /* 出航：第一次播帆船過場，然後進入復活島（海上秘境） */
+ ov.querySelector('#rapaWait').onclick=()=>{ov.classList.add('hide');resume();H.toast('船長：好，我在這裡等你。準備好了再來找我！\n（冒險地圖的海上也出現了新的航線）',4200)}}
+/* ---- 出航過場：帆船越過海浪，遠遠先看到一排摩艾剪影 ---- */
+RIDES.sail={text:'帆船出海，往東南方的海平線前進⋯',every:640,tick:k=>tone(k%2?200:160,.16,'sine',.05),svg:()=>{
+ const loop=(inner,dur)=>`<g class="rl" style="--d:${dur}s"><g>${inner}</g><g transform="translate(399,0)">${inner}</g></g>`;
+ let s=`<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><style>@keyframes rapaIn{0%,30%{opacity:0;transform:translateY(8px)}100%{opacity:.9;transform:none}}.rapaIn{animation:rapaIn 3.4s ease-out forwards}</style><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">`;
+ s+=`<rect width="400" height="600" fill="#dcecef" stroke="none"/><circle cx="320" cy="150" r="30" fill="#fbf0c4" stroke="none"/>`;
+ s+=loop(`<path d="M30,150 q20,-16 40,0 q20,-14 36,0Z M230,120 q16,-12 32,0 q14,-10 28,0Z" fill="#fbf9f3" stroke="#c9d8dc" stroke-width="1.6"/>`,40);
+ s+=`<g class="rapaIn"><g transform="translate(262,300) scale(.8)">${moaiRow('#7b8a98')}</g><path d="M168,302 Q186,280 206,290 Q218,272 234,288 L238,302Z" fill="#9aa8b4" opacity=".7" stroke="none"/></g>`;
+ s+=`<rect x="0" y="300" width="400" height="300" fill="${SEA}" stroke="none"/><path d="M0,300 H400" fill="none" stroke-width="1.6"/>`;
+ s+=loop([[30,340],[150,330],[260,350],[360,336]].map(([x,y])=>`<path d="M${x},${y} q8,-5 16,0 q8,5 16,0" fill="none" stroke="#d8f0f2" stroke-width="2"/>`).join(''),12);
+ s+=loop([[20,420],[120,460],[230,430],[330,470],[60,520],[280,540]].map(([x,y])=>`<path d="M${x},${y} q10,-6 20,0 q10,6 20,0" fill="none" stroke="#e8f6f6" stroke-width="2.4"/>`).join(''),4);
+ s+=`<g class="an a-rock" style="--d:2.2s"><g transform="translate(196,476) scale(1.05)">${sailing()}</g></g>`;
+ s+=loop(`<g transform="translate(80,200)"><path d="M-10,0 q5,-7 10,0 q5,-7 10,0" fill="none" stroke-width="2"/></g><g transform="translate(260,230)"><path d="M-8,0 q4,-6 8,0 q4,-6 8,0" fill="none" stroke-width="1.8"/></g>`,9);
+ s+=loop([[40,590],[220,598],[340,585]].map(([x,y])=>`<path d="M${x},${y} q12,-8 24,0 q12,8 24,0" fill="none" stroke="#e8f6f6" stroke-width="3"/>`).join(''),1.8);
+ return s+`</g></svg>`}};
+/* ---- 冒險地圖：海圖拼好之後，海島港口往東南出現虛線航線，通到淡淡光圈裡的復活島（秘境樣式，點了可以前往） ---- */
+H.MAPTOP.push(({U,ink,FN})=>{if(U<5||!RP.ready)return '';
+ const rt='M272,378 Q284,394 288,396';
+ let m=`<path d="${rt}" fill="none" stroke="#fffaf0" stroke-width="3.4" stroke-linecap="round"/><path d="${rt}" fill="none" stroke="#6a5aa8" stroke-width="1.8" stroke-dasharray="4 4" stroke-linecap="round"/>`;
+ m+=`<g class="mnode" data-n="101" pointer-events="visiblePainted" style="cursor:pointer"><circle cx="305" cy="386" r="26" fill="transparent"/><g transform="translate(305,394)"><circle r="18" fill="#fff6c4" opacity=".8"/><circle r="18" fill="none" stroke="#6a5aa8" stroke-width="1.4" stroke-dasharray="3 3"/><ellipse cx="0" cy="5" rx="13" ry="4.5" fill="#a9b768" stroke="${ink}" stroke-width="1.3"/>`;
+ m+=[-6,0,6].map((x,i)=>`<path transform="translate(${x},4) scale(${i===1?.36:.3})" d="${moaiShape(34)}" fill="#8f9aa6" stroke="${ink}" stroke-width="3.6"/>`).join('')+`</g>`;
+ m+=`<g transform="translate(305,370)"><rect x="-21" y="-8" width="42" height="15" rx="7.5" fill="#fffaf0" stroke="#6a5aa8" stroke-width="1.5"/><text y="3.5" text-anchor="middle" font-size="10" fill="#4a3d82" font-family="${FN}">復活島</text></g></g>`;
+ return m});
+/* 測試用 */
+H.dbg.rapa={G:()=>G,RP:()=>RP,flash:()=>{G.silUntil=0;clearTimeout(flashT);flash()},tapSil,tapCap,frags:()=>G.frags,kid:KID,tapKid,gotFrag,sil:RAPA.sil,ship:RAPA.ship,cap:RAPA.cap,ask:askSail};
+})();
 })();
