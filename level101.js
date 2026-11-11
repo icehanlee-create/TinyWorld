@@ -365,7 +365,7 @@ let clkPaused=0;
 const holdClock=()=>{if(!clkPaused){clkPaused=performance.now();H.clockHold()}};
 const freeClock=()=>{const g=H.game();if(clkPaused&&g.running){g.t0+=performance.now()-clkPaused;H.clockRun(false)}clkPaused=0};
 let sunSeen=false,sunBusy=false;
-H.NGHOOKS.push(sc=>{sunSeen=false;sunBusy=false;clkPaused=0;['sunShadow','sunTint','sunGlow','sunSkip','sunPano'].forEach(id=>{const e=document.getElementById(id);if(e)e.remove()})});
+H.NGHOOKS.push(sc=>{sunSeen=false;sunBusy=false;lookBusy=false;clkPaused=0;if(sc===N)preIsle();['sunShadow','sunTint','sunGlow','sunSkip','sunPano','isleOv'].forEach(id=>{const e=document.getElementById(id);if(e)e.remove()})});
 const SUNP={x:1880,y:1060};/* B 鏡頭中心 */
 /* A 全螢幕大圖：拆成 5 張圖片（天空、太陽、海和地面、影子、摩艾），只移動、縮放這幾張圖片（手機上最順）。
    2026-11-10 iPhone 回報：整張 SVG 用動畫移動會卡、而且 Safari 會畫出大塊深色方塊，所以改成這樣。 */
@@ -436,14 +436,31 @@ function showPano(E){const ov=document.createElement('div');ov.id='sunPano';ov.c
 function tapView(x,y,E){if(!(Math.abs(x-VIEWPT.x)<34&&y<=VIEWPT.y+8&&y>=VIEWPT.y-62))return false;
  const P=E&&E.P;if(P&&Math.hypot(P.x-VIEWPT.x,P.y-VIEWPT.y)>170){H.toast('「日出觀景點」⋯走到木牌旁邊，再看一次日出吧！',2600);return true}
  playSunrise(E);return true}
-/* ---- 瞭望點：站在中央巨人摩艾腳下點它 → 爬上巨人的肩膀，鏡頭拉遠看整座島 3 秒再回來（2026-11-10 使用者選「加瞭望點」） ---- */
+/* ---- 瞭望點：站在中央巨人摩艾腳下點它 → 爬上巨人的肩膀，看整座島 3 秒再回來（2026-11-10 使用者選「加瞭望點」）
+   2026-11-11：原本是鏡頭拉遠到 0.3 倍，iPhone Safari 記憶體不夠會重新載入網頁（玩家說「跳出關卡」）。
+   使用者決定改成顯示預先畫好的全島圖 rapa_island.jpg（760×1132，只有地景和佈景，沒有物件、角色；
+   要重畫：tools/bake_isle.py（Playwright 截 #bg 的全景，再縮成 760 寬 JPEG））。紅點是玩家現在的位置。 */
+const ISLEIMG='rapa_island.jpg',ISLEW=760,ISLEH=1132;let isleIm=null;
+const preIsle=()=>{if(!isleIm){isleIm=new Image();isleIm.src=ISLEIMG}};
 let lookBusy=false;
 function tapGiant(x,y,E){const G0=GIANT.F;if(!(Math.abs(x-G0.x)<62&&y<=G0.y+10&&y>=G0.y-345))return false;
  const P=E&&E.P;if(!P||Math.hypot(P.x-G0.x,P.y-G0.y)>190){const t=performance.now();if(t-factT>600){factT=t;H.toast(FACTS.giantF+'\n走到巨人腳下再點一次，好像可以爬上去看看？',3600)}return true}
- if(lookBusy)return true;lookBusy=true;holdClock();E.cineStart();const sc=H.scr();
+ if(lookBusy)return true;lookBusy=true;holdClock();E.cineStart();preIsle();
  try{[392,523,659].forEach((q,i)=>H.tone(q,.25,'triangle',.08,i*.12))}catch(_){}
- H.toast('爬上巨人的肩膀⋯整座島一覽無遺！',3600);
- H.tweenTo(sc.base*.3,(SC.x0+SC.x1)/2,1280,1300,()=>setTimeout(()=>E.cineEnd(()=>{lookBusy=false;freeClock()}),2600));return true}
+ const ov=document.createElement('div');ov.id='isleOv';
+ ov.style.cssText='position:fixed;inset:0;z-index:60;background:#2f9db6;opacity:0;transition:opacity .6s;display:flex;align-items:center;justify-content:center;overflow:hidden';
+ const vw=window.innerWidth,vh=window.innerHeight,k=Math.min(vw/ISLEW,(vh*.86)/ISLEH),w=Math.round(ISLEW*k),h=Math.round(ISLEH*k);
+ const SC=H.SCENES[N],mx=(P.x-SC.x0)/(SC.x1-SC.x0)*w,my=P.y/SC.y1*h;
+ ov.innerHTML=`<div style="position:relative;width:${w}px;height:${h}px"><img src="${ISLEIMG}" alt="" draggable="false" style="display:block;width:${w}px;height:${h}px">`+
+  `<div style="position:absolute;left:${f(mx-9)}px;top:${f(my-9)}px;width:18px;height:18px;border-radius:50%;background:#e8574a;border:3px solid #fffdf4;box-shadow:0 0 0 2px #2b2420;animation:isleDot 1s ease-in-out infinite alternate"></div></div>`+
+  `<div style="position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top) + 18px);text-align:center;color:#fffdf4;font-size:17px;font-weight:700;letter-spacing:1px;text-shadow:0 2px 6px rgba(0,0,0,.55)">爬上巨人的肩膀⋯整座島一覽無遺！</div>`+
+  `<style>@keyframes isleDot{to{transform:scale(1.35)}}</style>`;
+ document.body.appendChild(ov);
+ const im=ov.querySelector('img'),show=()=>requestAnimationFrame(()=>{ov.style.opacity=1});
+ (im.decode?im.decode().catch(()=>{}):Promise.resolve()).then(show);
+ let closed=false;const t0=performance.now();
+ const close=()=>{if(closed)return;closed=true;ov.style.opacity=0;setTimeout(()=>{ov.remove();E.cineEnd(()=>{lookBusy=false;freeClock()})},600)};
+ ov.onclick=()=>{if(performance.now()-t0>900)close()};setTimeout(close,4200);return true}
 /* 每一格檢查：走進觀景點範圍自動播日出（每局一次） */
 function sunTick(dt,P,E){if(!sunSeen&&!sunBusy&&Math.hypot(P.x-VIEWPT.x,P.y-VIEWPT.y)<120)playSunrise(E)}
 function tapCreature(x,y){const s=H.view().s,tol=Math.max(0,14/s-10);let best=null,bd=1e9;
@@ -697,8 +714,8 @@ function clearRapa(){clearTimeout(flashT);cancelAnimationFrame(gullRAF);const l=
 const KID={x:2068,y:2252};
 (H.RESERVE[5]||(H.RESERVE[5]=[])).push([KID.x,KID.y,70,80]);
 /* 望遠鏡少年頭上的想念泡泡：遠方海上的帆船（2026-11-11） */
-const KIDTHINK=`<path d="M-17,0 q4,-3 8,0 q4,3 8,0 q4,-3 8,0 q4,3 8,0" fill="none" stroke="#3f8fb8" stroke-width="2.2"/><path d="M-11,-6 H11 L7,0 H-7Z" fill="#8a5a3a" stroke-width="1.5"/><path d="M0,-6 V-30" fill="none" stroke-width="1.6"/><path d="M1.5,-29 Q12,-18 10,-8 H1.5Z" fill="#fbf6ea" stroke-width="1.4"/><path d="M-1.5,-25 Q-9,-16 -8,-9 H-1.5Z" fill="#f2e6c4" stroke-width="1.3"/><path d="M0,-30 l5,2 l-5,2" fill="#d8413a" stroke-width="1"/>`;
-function kidSVG(){return H.qThink(KIDTHINK,30,34,-74)+act(0,0,1,{view:'side',pose:'up2',hat:-1,hair:'#3d2a1e',shirt:'#f0b84a',pants:'#3b6ea5',mood:2,plain:true})+
+/* 望遠鏡小孩頭上：問號徽章 H.qMark(-74,'?')（2026-11-11 使用者說想著帆船會讓人以為要找帆船；原本的 KIDTHINK 帆船圖刪掉） */
+function kidSVG(){return H.qMark(-74,'?')+act(0,0,1,{view:'side',pose:'up2',hat:-1,hair:'#3d2a1e',shirt:'#f0b84a',pants:'#3b6ea5',mood:2,plain:true})+
  `<g transform="translate(9,-33) rotate(-8)"><rect x="0" y="-3.4" width="18" height="6.8" rx="1.5" fill="#c9963a" stroke-width="1.4"/><rect x="14" y="-4.4" width="6" height="8.8" rx="1.5" fill="#a8762a" stroke-width="1.4"/><path d="M5,-3.4 v6.8 M10,-3.4 v6.8" fill="none" stroke="#7a5420" stroke-width="1"/></g>`}
 function drawKid(){const [lo]=layers();let el=document.getElementById('rapaKid');if(!el){el=document.createElementNS(NSv,'g');el.id='rapaKid';lo.appendChild(el)}
  el.innerHTML=T(KID.x,KID.y,1,`<ellipse cx="0" cy="1" rx="12" ry="3" fill="#000" opacity=".14" stroke="none"/>${kidSVG()}`)}

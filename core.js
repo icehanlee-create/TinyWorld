@@ -206,9 +206,15 @@ const qBubble=(x,y,t)=>`<g class="sq" transform="translate(${x},${y})"><path d="
    qThink(圖, 寬, 高, y)：y 是泡泡底部小圓點的位置（相對角色腳底）。秘境、望遠鏡少年也用它。 */
 const QHEART=`<path d="M0,6 C-9,0 -8,-7 -3.6,-7 C-1.6,-7 0,-5.4 0,-4 C0,-5.4 1.6,-7 3.6,-7 C8,-7 9,0 0,6Z" fill="#e8574a" stroke-width="1.4"/>`;
 const qThink=(art,w,h,y=-80)=>{const k=24/Math.max(w||26,h||26);return `<g class="sq"><g class="qbob"><path d="M-17,${y-14} q-6,-10 4,-14 q2,-9 12,-7 q6,-7 14,-1 q10,-2 11,8 q8,4 2,12 q2,9 -9,8 q-6,6 -14,1 q-9,4 -13,-2 q-9,0 -7,-5z" fill="#fffdf4" stroke-width="1.6"/><circle cx="-4" cy="${y+3}" r="2.6" fill="#fffdf4" stroke-width="1.2"/><circle cx="-1" cy="${y+9}" r="1.6" fill="#fffdf4" stroke-width="1"/><g transform="translate(2,${f(y-13+(h||26)*k/2)}) scale(${f(k)})">${art}</g></g></g>`};
-/* 故事角色的泡泡：還沒完成時想著「下一步要找的」（走失的動物；第 3 步換成幫手），完成後是愛心 */
-const storyThink=S=>{if(!S)return '';if(story&&story.done)return qThink(QHEART,16,16);
- if(story&&story.step===2)return qThink(S.helper(),S.hw,S.hh);return qThink(S.target(),S.tw,S.th)};
+/* 驚嘆號徽章（2026-11-11 使用者看 A～F 選 C）：金色圓徽章＋白色「！」，下方小尖角。
+   使用者說泡泡裡畫出要找的動物會讓難度下降，所以故事角色全程只顯示驚嘆號，完成後才變成愛心泡泡。
+   qMark(y)：y 是尖角的位置（相對角色腳底），和 qThink 的 y 一樣。 */
+const QGLYPH={'!':`<path d="M-3,-11 Q0,-13 3,-11 L1.6,2 Q0,3.2 -1.6,2Z" fill="#fffdf4" stroke-width="1.5"/><circle cy="7" r="2.6" fill="#fffdf4" stroke-width="1.4"/>`,
+ '?':`<path d="M-5,-5 Q-5,-11 0,-11 Q5.5,-11 5.5,-6 Q5.5,-2.4 1.4,-.6 Q0,0 0,3" fill="none" stroke-width="6.4" stroke-linecap="round"/><path d="M-5,-5 Q-5,-11 0,-11 Q5.5,-11 5.5,-6 Q5.5,-2.4 1.4,-.6 Q0,0 0,3" fill="none" stroke="#fffdf4" stroke-width="3.4" stroke-linecap="round"/><circle cy="7.6" r="2.6" fill="#fffdf4" stroke-width="1.4"/>`};
+/* qMark(y, ch)：ch 是 '!'（故事角色，預設）或 '?'（第 5 關望遠鏡小孩等「有事想問」的角色，2026-11-11 使用者要求同樣式） */
+const qMark=(y=-80,ch='!')=>`<g class="sq"><g class="qbob"><circle cy="${y-12}" r="12.5" fill="#f5c842" stroke-width="1.8"/><circle cy="${y-12}" r="9.6" fill="none" stroke="#fff3b0" stroke-width="1.2"/><g transform="translate(0,${y-12}) scale(.9)">${QGLYPH[ch]||QGLYPH['!']}</g><path d="M-3,${y+1} L0,${y+6} L3,${y+1}" fill="#f5c842" stroke-width="1.4"/></g></g>`;
+/* 故事角色頭上：還沒完成時是驚嘆號徽章（不畫出要找的東西），完成後是愛心泡泡 */
+const storyThink=S=>{if(!S)return '';if(story&&story.done)return qThink(QHEART,16,16);return qMark()};
 const bow=(x,y,c)=>`<path d="M${x},${y} l-5,-3 v6Z M${x},${y} l5,-3 v6Z" fill="${c}" stroke-width="1.1"/><circle cx="${x}" cy="${y}" r="1.6" fill="${c}" stroke-width="1"/>`;
 const STORIES={};/* 連環小故事：各關檔案自己設 STORIES[關卡] */
 const SEQ=['giver','target','helper','target','giver'];
@@ -666,7 +672,7 @@ level=Math.min(prog.unlocked,LEVELS.length-1);
 /* 給 level{n}.js、secret.js 使用的工具與資料 */
 window.TH={EDGELAND,ROADS,T,f,r,sr,pk,ri,rnd,shuffle,limb,shade,wob,OL,SNOW,SKIN,HAIR,SHIRT,PANTS,HATS,kid,chibi,act,wrapAn,heart,bubble,noteM,peekHead,faceHead,headOnly,
  cat,frog,owl,sheep,chicken,anyDog,dog,swan,pine,roundTree,bush,rock,barrel,crate,pot,lamp,bench,sign,fence,reeds,lily,well,tent,campfire,swirl,signpost,signIcon,stall,
- add,mark,canPlace,scatter,SCATREG,SCATOK,skyBirds,chaikin,bow,qBubble,qThink,QHEART,GC,GR,CELL,occ,mulberry32,DK,balloon,castle,fountain,house,kayak,lighthouse,mushHouse,rowboat,sailboat,tower,windmill,pig,barn,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,HEAVY,ANIM,ALWAYS,DUR,
+ add,mark,canPlace,scatter,SCATREG,SCATOK,skyBirds,chaikin,bow,qBubble,qThink,qMark,QHEART,GC,GR,CELL,occ,mulberry32,DK,balloon,castle,fountain,house,kayak,lighthouse,mushHouse,rowboat,sailboat,tower,windmill,pig,barn,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,HEAVY,ANIM,ALWAYS,DUR,
  ANIMX,ALWAYSX,HEAVYX,SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,mapHook,mapRoute,TAPHOOKS,NGHOOKS,MAPTOP,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,SECRETS,STORIES,SEQ,SKYC,SKYY,EDGEM,EDGED,EDGEDECO,EDGEMY,EDGEFILL,FRINGE,FRINGEX,RESERVE,ROADK,RESETKEYS,icon,starSvg,
  typeOf:id=>LEVELS.slice(1).flatMap(L_=>L_.types||[]).find(t=>t.id===id),colAdd,colClover,colBonus,colStory,updateCounts,win:()=>win(),goLevel:n=>goLevel(n),level:()=>level,rodeHas,pads:()=>pads(),scr:()=>({w:SW,h:SH,base}),apply:()=>apply(),clampV:()=>clampV(),rezoom:()=>{measure();clampV();apply()},updAnim:()=>updateAnim(),tweenTo:(s,x,y,d,cb)=>tweenTo(s,x,y,d,cb),curtain,pickView,walkPose,DENS,sprites,ride,toast,clockHold,clockRun,burst,floatText,sfx,items:()=>items,game:()=>st,scene:()=>scene,view:()=>view,testOn:()=>testMode,dbg:{clover:()=>clovers,step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG};
 applyTestUI();

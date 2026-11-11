@@ -89,6 +89,7 @@ button{font-family:var(--ui);cursor:pointer}
 #mapOv{z-index:12;isolation:isolate}#mapOv .mapc{-webkit-transform:translateZ(0);transform:translateZ(0)}
 /* 有任何面板打開時，背景場景暫停動畫，減少手機重繪與閃爍 */
 body:has(.overlay:not(.hide)) #world .an,body:has(.overlay:not(.hide)) .drift{animation-play-state:paused!important}
+body.cine #world .an,body.pano #world .an,body.cine .drift{animation-play-state:paused!important} /* 秘境鏡頭拉遠時暫停動畫，iPhone 比較不吃力 */
 .pcard{position:relative;width:100%;max-width:400px;background:var(--paper);border:2.5px solid var(--ink);border-radius:22px;box-shadow:0 5px 0 var(--ink)}
 .pbtn{width:100%;min-height:54px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--acc);color:#fff;border:2.5px solid var(--ink);border-radius:16px;box-shadow:0 4px 0 var(--ink);font-size:19px}
 .sbtn{flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--paper);color:var(--ink);border:2.5px solid var(--ink);border-radius:14px;font-size:15px;padding:0 12px}

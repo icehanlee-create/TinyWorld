@@ -119,7 +119,7 @@ function make(C){
   pe.setAttribute('transform',`translate(${f(P.x)},${f(P.y-(P.walk&&fr?1.6:0))})${fl<0?' scale(-1,1)':''}`)}
  /* 頭上的想念泡泡（2026-11-11 改成和主線一樣的 B）：'' 不畫；♥ 畫愛心；其他就畫「下一步要找的」 */
  const bubble=(t,y)=>{if(!t)return '';if(t==='♥')return H.qThink(H.QHEART,16,16,y-6);
-  const n=story&&story.step===2?ent.helper:ent.target;if(!n)return '';const a=n._a||(n._a=n.art());return H.qThink(a,n.w,n.h,y-6)};
+  return H.qMark(y-6)}; /* 2026-11-11 使用者選 C：故事角色只顯示驚嘆號徽章，不畫要找的東西 */
  E.ent=ent;E.addEnt=(id,o)=>{ent[id]=o;drawDyn()};E.redraw=()=>{drawDyn()};
 
  /* 角色被高的東西（摩艾、房子、樹）擋住時，把那個東西再畫一次在角色上面 */
@@ -180,16 +180,18 @@ function make(C){
  function stop(hard=true){on=false;cancelAnimationFrame(raf);closeCard(true);if(hard){clearLayers();setPano(false,true)}}
  H.NGHOOKS.push(sc=>{if(sc!==C.n)stop(true)});
 
+ /* 2026-11-11：鏡頭拉遠前先拿掉 will-change，不然 iPhone 要把放大時畫好的整張高解析度圖層留在記憶體，Safari 會當掉重新載入（玩家說「從關卡跳出去」） */
+ const liteLayer=v=>{['world','fogWorld'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.willChange=v?'auto':''})};
  /* ---- 全景（測試用）：可以縮小看整張、拖到任何地方 ---- */
- function setPano(v,quiet){pano=!!v;document.body.classList.toggle('pano',pano);if(!on&&!quiet)return;H.rezoom();
+ function setPano(v,quiet){pano=!!v;if(pano)liteLayer(true);document.body.classList.toggle('pano',pano);if(!on&&!quiet)return;H.rezoom();
   if(quiet)return;if(pano){const SC=H.SCENES[C.n],sc=H.scr();H.tweenTo(sc.base*.28,(SC.x0+SC.x1)/2,(SC.y1)/2,500);H.toast('🧪 全景：可以拖曳、縮放看整張秘境\n再按一次「全景」回到角色',3200)}
-  else{cam(true);H.toast('回到角色',1200)}}
+  else{cam(true);if(!cine)setTimeout(()=>liteLayer(false),400);H.toast('回到角色',1200)}}
  E.pano=v=>{if(v===undefined)return pano;setPano(v)};
  /* 演出用鏡頭（2026-11-10）：E.cineStart() 之後鏡頭不跟角色、可以拉遠到 base*.28、角色不能走；
     E.cineEnd(done) 慢慢回到角色。日出、瞭望點用 */
  E.cine=()=>cine>0;
- E.cineStart=()=>{cine++;document.body.classList.add('cine');JV.x=0;JV.y=0;P.walk=false;H.rezoom()};
- E.cineEnd=(done)=>{const sc=H.scr(),Pd=H.pads();H.tweenTo(sc.base*ZOOM,P.x,P.y-40,700,()=>{cine=Math.max(0,cine-1);if(!cine)document.body.classList.remove('cine');H.rezoom();cam(true);if(done)done()})};
+ E.cineStart=()=>{liteLayer(true);cine++;document.body.classList.add('cine');JV.x=0;JV.y=0;P.walk=false;H.rezoom()};
+ E.cineEnd=(done)=>{const sc=H.scr(),Pd=H.pads();H.tweenTo(sc.base*ZOOM,P.x,P.y-40,700,()=>{cine=Math.max(0,cine-1);if(!cine){document.body.classList.remove('cine');liteLayer(false)}H.rezoom();cam(true);if(done)done()})};
 
  /* ---- 點擊 ---- */
  const near=(x,y)=>Math.hypot(x-P.x,y-P.y)<=REACH;
