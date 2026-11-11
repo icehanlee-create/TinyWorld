@@ -123,7 +123,18 @@ function ground(){
  g+=[[960,238,.9],[1050,226,1],[1150,232,.85],[1370,228,.95],[1470,238,.85]].map(([x,y,k])=>`<g transform="translate(${x},${y}) scale(${k})"><path d="M-30,0 V-18 H30 V0Z" fill="#efe4cb"/><g transform="translate(0,-18)">${S.tileRoof(74,16)}</g></g>`).join('');
  g+=[[1005,196,1.2],[1190,186,1.5],[1420,194,1.3]].map(([x,y,k])=>`<g transform="translate(${x},${y}) scale(${k})" opacity=".8" stroke="none">${S.steam(1)}</g>`).join('');
  /* 北邊石階前的空地底色 */
- g+=`<rect x="${PX-PW/2-40}" y="230" width="${PW+80}" height="90" fill="#cfc9b9" stroke="none"/>`;
+ /* 北端：墊高的鳥居平台（石垣擋土牆）＋筆直一整段石階（2026-11-11 使用者：原本 3 小段疊起來很怪；平台要看得出比較高。和第 8 關同一套畫法） */
+ {const WX0=1100,WX1=1400,TOP=226,WY=300,WH=44,STB=462,n=14,h=(STB-WY)/n,w=PW-8;let t='';
+  t+=`<rect x="${WX0}" y="${TOP}" width="${WX1-WX0}" height="${WY-TOP}" rx="10" fill="#d6d0c0" stroke-width="1.8"/><path d="M${WX0+10},${TOP+26} H${WX1-10} M${WX0+10},${TOP+52} H${WX1-10}" stroke="#c2bcac" stroke-width="1.2" fill="none"/>`;
+  t+=`<path d="M${WX0},${WY+WH+10} H${WX1}" stroke="#000" stroke-opacity=".12" stroke-width="18" fill="none"/>`;
+  t+=`<path d="M${WX0},${WY} H${WX1} V${WY+WH-8} Q${WX1},${WY+WH} ${WX1-10},${WY+WH} H${WX0+10} Q${WX0},${WY+WH} ${WX0},${WY+WH-8}Z" fill="#a9a597" stroke-width="2.2"/>`;
+  for(let row=0;row<2;row++){const y=WY+7+row*17;let x=WX0+(row?-16:0);while(x<WX1){const bw=30+r()*30,x0=Math.max(WX0+2,x),x1=Math.min(WX1-2,x+bw);if(x1-x0>8)t+=`<rect x="${f(x0)}" y="${y}" width="${f(x1-x0-3)}" height="14" rx="4" fill="${pk(['#b8b3a4','#c2bdae','#aea999'])}" stroke-width="1.1"/>`;x+=bw}}
+  t+=`<path d="M${WX0},${WY} H${WX1}" stroke="#e2dccd" stroke-width="6" fill="none"/><path d="M${WX0},${WY+3} H${WX1}" stroke-width="1.2" fill="none"/>`;
+  const wall=x=>`<path d="M${x-8},${STB} V${WY} H${x+8} V${STB}Z" fill="#9a9488" stroke-width="1.6"/>`+Array.from({length:4},(_,i)=>`<path d="M${x-8},${f(STB-(i+.5)*40)} h16" fill="none" stroke-width="1"/>`).join('');
+  t+=wall(PX-w/2-9)+wall(PX+w/2+9);
+  for(let i=0;i<n;i++){const y=STB-i*h;t+=`<path d="M${PX-w/2},${f(y)} H${PX+w/2} V${f(y-h*.36)} H${PX-w/2}Z" fill="#a9a597" stroke-width="1.3"/><path d="M${PX-w/2},${f(y-h*.36)} H${PX+w/2} V${f(y-h)} H${PX-w/2}Z" fill="#cfc9b9" stroke-width="1.3"/>`;
+   if(r()<.5)t+=`<ellipse cx="${f(PX+sr(-w/2+10,w/2-10))}" cy="${f(y-h*.68)}" rx="3" ry="1.7" fill="#f7c4d3" stroke="none"/>`}
+  g+=t}
  /* 水池：石頭池邊、睡蓮葉、錦鯉、水面花瓣 */
  const blob=(p,k,dx=0,dy=0)=>{let d='';for(let i=0;i<28;i++){const t=i/28*Math.PI*2,w=1+.05*Math.sin(t*3+p.cx)+.03*Math.cos(t*5);d+=(i?'L':'M')+f(p.cx+dx+Math.cos(t)*p.rx*k*w)+','+f(p.cy+dy+Math.sin(t)*p.ry*k*w)}return d+'Z'};
  for(const p of PONDS){g+=`<path d="${blob(p,1.12)}" fill="#a9a395"/><path d="${blob(p,1)}" fill="#8ccbd2"/><path d="${blob(p,.8,0,6)}" fill="#7cc0cc" stroke="none"/>`;
@@ -290,7 +301,7 @@ function structures(){
   add(PX-PW/2-34,y,36,64,k%3===2?'skLanternDim':'skLantern',S.stoneLantern({moss:k%3===2,glow:k%3!==2}),{s:1.1});
   add(PX+PW/2+34,y-18,36,64,k%4===3?'skLanternDim':'skLantern',S.stoneLantern({moss:k%4===3,glow:k%4!==3}),{s:1.1});y-=gap}
  /* 北邊石階（接第 7 關） */
- [420,360,300].forEach(y=>add(PX,y,100,66,'skStairs',S.stairs(6),{s:1.7}));
+ /* 石階畫在地面層（ground 的「北端」），這裡不再疊 skStairs */
  add(PX,250,108,96,'skToriiLamp',S.torii({lamps:true}),{s:1.5,mark:false});
  /* 水池上的紅橋、大櫻花樹（樹下坐著賞櫻的人） */
  for(const p of PONDS)if(p.bridge)add(p.cx,p.cy+p.ry*.25,p.rx*1.1,40,'skBridge',redBridge(p.rx*1.1),{mark:false});
