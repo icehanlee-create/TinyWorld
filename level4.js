@@ -222,12 +222,12 @@ Object.assign(KIND,{
  watch:{w:28,h:32,fn:()=>T(0,-15,.95,DECOY.watch)},jarBroken:{w:26,h:30,fn:()=>T(0,-15,1,DECOY.jarBroken)},parrotR:{w:22,h:36,fn:()=>T(0,-18,1,DECOY.parrotR)},
  suitcase:{w:34,h:26,fn:suitcase},
  coinOld:{w:26,h:26,fn:()=>T(0,-12,.95,DECOY.coinOld)},
- walker4:{w:30,h:62,fn:()=>{const v=pickView(),p=walkPose(v);return act(0,0,r()<.5?1:-1,ex({view:v,pose:p,pack:v!=='front'&&v!=='fq'&&r()<.6}),true)}},
- digBrush:{w:60,h:46,fn:()=>act(-8,0,1,ex({pose:'crouch',pack:false,extra:`<g transform="translate(14,-12) rotate(40)"><rect x="-2" y="-8" width="4" height="10" fill="#c99a5b"/><path d="M-3,2 h6 l1,5 h-8Z" fill="#e8c46a"/></g>`}),'bob')+`<path d="M14,0 l8,-6 l10,2 l-3,6Z" fill="#c4703f" stroke-width="1.3"/>`},
- mapRead:{w:84,h:80,fn:()=>act(-16,0,1,ex({pose:'hold',extra:`<path d="M10,-24 L28,-28 L28,-12 L10,-8Z" fill="#f1e4c0" stroke-width="1.2"/><path d="M16,-20 l6,4 M22,-20 l-6,4" fill="none" stroke="#d8413a" stroke-width="1.2"/>`}),'bob')+act(16,0,-1,ex({pose:'reach'}),'bob')+wrapAn('float',bubble(-2,-76,'dots'),true)},
- photo:{w:44,h:66,fn:()=>act(0,0,r()<.5?1:-1,ex({pose:'hold',extra:`<rect x="10" y="-27" width="12" height="9" rx="2" fill="#3d3833"/><circle cx="16" cy="-22.5" r="2.6" fill="#9fb7e8" stroke-width="1"/>`}),'bob')},
- measure:{w:96,h:62,fn:()=>act(-30,0,1,ex({pose:'reach'}),'bob')+`<path d="M-18,-20 L28,-6" fill="none" stroke="#e0b44a" stroke-width="2.2"/>`+act(32,0,-1,ex({pose:'low'}),'bob')},
- hikerPair:{w:66,h:66,fn:()=>act(-12,0,1,ex({view:'back',pose:'walk',pack:true}),'bob')+act(13,0,1,ex({view:'back',pose:'walk',pack:true}),'bob')}
+ walker4:{w:30,h:62,fn:()=>{const v=pickView(),p=walkPose(v);return act(0,0,r()<.5?1:-1,ex({view:v,pose:p,pack:v!=='front'&&v!=='fq'&&r()<.6}),'step')}},
+ digBrush:{w:60,h:46,fn:()=>act(-8,0,1,ex({pose:'crouch',pack:false,extra:`<g transform="translate(14,-12) rotate(40)"><rect x="-2" y="-8" width="4" height="10" fill="#c99a5b"/><path d="M-3,2 h6 l1,5 h-8Z" fill="#e8c46a"/></g>`}),'work')+`<path d="M14,0 l8,-6 l10,2 l-3,6Z" fill="#c4703f" stroke-width="1.3"/>`},
+ mapRead:{w:84,h:80,fn:()=>act(-16,0,1,ex({pose:'hold',extra:`<path d="M10,-24 L28,-28 L28,-12 L10,-8Z" fill="#f1e4c0" stroke-width="1.2"/><path d="M16,-20 l6,4 M22,-20 l-6,4" fill="none" stroke="#d8413a" stroke-width="1.2"/>`}),'nod')+act(16,0,-1,ex({pose:'reach'}),'nod')+wrapAn('float',bubble(-2,-76,'dots'),true)},
+ photo:{w:44,h:66,fn:()=>act(0,0,r()<.5?1:-1,ex({pose:'hold',extra:`<rect x="10" y="-27" width="12" height="9" rx="2" fill="#3d3833"/><circle cx="16" cy="-22.5" r="2.6" fill="#9fb7e8" stroke-width="1"/>`}),false)},
+ measure:{w:96,h:62,fn:()=>act(-30,0,1,ex({pose:'reach'}),'work')+`<path d="M-18,-20 L28,-6" fill="none" stroke="#e0b44a" stroke-width="2.2"/>`+act(32,0,-1,ex({pose:'low'}),'work')},
+ hikerPair:{w:66,h:66,fn:()=>act(-12,0,1,ex({view:'back',pose:'walk',pack:true}),'step')+act(13,0,1,ex({view:'back',pose:'walk',pack:true}),'step')}
 });
 ['totem4','torch','pillar','pillarB','stele','rubble','temple','arch','wallGlyph','altar','sunDisk','guardian','bigTree','mapTable'].forEach(k=>HEAVY.add(k));
 ['pillar','pillarB','stele','rubble','fern','wallGlyph','suitcase'].forEach(k=>OCCK.add(k));
@@ -329,8 +329,7 @@ RIDES.trail={text:'從雪山往西走，穿過叢林，前往森林古代遺跡�
 HERE[4]=[96,70];
 MAPHOOKS.push(({U,P,ink,FN})=>{if(U<4)return '';
  const seg=(d,c)=>`<path d="${d}" fill="none" stroke="${ink}" stroke-width="7" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${c}" stroke-width="4.5" stroke-linecap="round"/>`;
- let m=seg('M212,94 Q196,112 172,120','#fbf9f3')+seg('M172,120 Q146,128 122,120','#c9a979')+seg('M122,120 Q104,114 92,104','#c6b99a');
- m+=`<path d="M212,94 Q196,112 172,120 Q146,128 122,120 Q104,114 92,104" fill="none" stroke="#a8461f" stroke-width="1.6" stroke-dasharray="4 5" stroke-linecap="round"/>`;
+ let m=H.mapRoute('M212,94 Q196,112 172,120 Q146,128 122,120 Q104,114 92,104','road',ink);
  m+=[[200,116,7],[186,106,5],[206,108,4]].map(([x,y,r_])=>`<ellipse cx="${x}" cy="${y}" rx="${r_}" ry="${r_*.45}" fill="#fbf9f3" stroke="${ink}" stroke-width=".9"/>`).join('');
  m+=[[160,132],[146,112],[136,134],[156,110]].map(([x,y])=>`<path d="M${x},${y} v4" stroke="${ink}" stroke-width="1.2"/><circle cx="${x}" cy="${y-3}" r="5" fill="#4f7a3a" stroke="${ink}" stroke-width="1.1"/><circle cx="${x+3}" cy="${y-5}" r="3" fill="#6f9a4a" stroke="none"/>`).join('');
  m+=[[112,128],[104,124]].map(([x,y])=>`<rect x="${x-2.5}" y="${y-8}" width="5" height="8" fill="#b9ab8c" stroke="${ink}" stroke-width="1"/>`).join('');

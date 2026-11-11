@@ -210,7 +210,7 @@ const warehouse=()=>{let s=`<ellipse cx="8" cy="3" rx="84" ry="8" fill="#000" op
  let pl='';for(let x=-66;x<74;x+=12)pl+=`M${x},-74 V0 `;s+=`<path d="${pl}" fill="none" stroke="#9c8766" stroke-width="1.2"/>`;
  s+=`<rect x="-24" y="-50" width="48" height="50" fill="#6b4a2b"/><path d="M-24,-50 L24,0 M24,-50 L-24,0" fill="none" stroke="#8a6a45" stroke-width="2"/>`;
  s+=`<path d="M-72,-70 Q-58,-40 -44,-70 Q-36,-44 -30,-70" fill="#6f8f8a" fill-opacity=".85" stroke-width="1.6"/><path d="M-68,-62 L-50,-62 M-62,-52 L-46,-54" fill="none" stroke="#a9c6c0" stroke-width="1"/>`+[[-60,-56],[-40,-60]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="3.4" fill="#f0802a" stroke-width="1.2"/>`).join('');
- s+=`<rect x="34" y="-60" width="30" height="16" fill="#3b5a8a"/><text x="49" y="-48" text-anchor="middle" font-size="10" fill="#fbf6ea" stroke="none" font-weight="700">漁會</text>`;return s};
+ s+=`<rect x="34" y="-60" width="30" height="16" fill="#3b5a8a"/>${H.signIcon('fish',1,49,-52)}`;return s};
 const fishOnIce=(x,y,c)=>`<g transform="translate(${x},${y})"><path d="M-8,0 Q-2,-5 6,-1 L10,-4 L10,4 L6,1 Q-2,5 -8,0Z" fill="${c}" stroke-width="1.2"/><circle cx="-5" cy="-.6" r=".9" fill="${OL}" stroke="none"/></g>`;
 const stall5=(kind)=>{const c=pk(['#3f8f8a','#5a86b0','#d8413a']);let s=`<ellipse cx="4" cy="2" rx="58" ry="6" fill="#000" opacity=".12" stroke="none"/><path d="M-48,0 V-64 M48,0 V-64" fill="none" stroke="${WOOD}" stroke-width="3"/>`;
  s+=`<rect x="-50" y="-34" width="100" height="34" fill="${WOOD2}"/><path d="M-50,-34 H50" fill="none" stroke-width="2.4"/><rect x="-46" y="-42" width="92" height="10" fill="#e6f4f6"/>`;
@@ -275,8 +275,8 @@ Object.assign(KIND,{
  starCookie:{w:28,h:28,fn:()=>T(0,-13,.9,DECOY.starCookie)},shellEmpty:{w:26,h:24,fn:()=>T(0,-12,.9,DECOY.shellEmpty)},bottleEmpty:{w:24,h:28,fn:()=>T(0,-13,.95,DECOY.bottleEmpty)},
  floatPink:{w:28,h:28,fn:()=>T(0,-13,.95,DECOY.floatPink)},harpoon:{w:24,h:36,fn:()=>T(0,-17,1,DECOY.harpoon)},clamShut:{w:28,h:24,fn:()=>T(0,-11,.9,DECOY.clamShut)},
  yarnBall:{w:26,h:26,fn:()=>T(0,-12,.9,DECOY.yarnBall)},chefHat:{w:28,h:28,fn:()=>T(0,-12,.95,DECOY.chefHat)},lemon:{w:28,h:22,fn:()=>T(0,-10,.9,DECOY.lemon)},paperRoll:{w:32,h:24,fn:()=>T(0,-12,.95,DECOY.paperRoll)},
- walker5:{w:30,h:62,fn:()=>{const v=pickView(),p=walkPose(v);return act(0,0,r()<.5?1:-1,bp({view:v,pose:p}),true)}},
- surfer:{w:34,h:66,fn:()=>act(0,0,r()<.5?1:-1,bp({view:pk(['side','fq','bq']),pose:'walk',extra:surf(pk(['#f5c842','#3f8f8a','#e86a6a']))}),true)},
+ walker5:{w:30,h:62,fn:()=>{const v=pickView(),p=walkPose(v);return act(0,0,r()<.5?1:-1,bp({view:v,pose:p}),'step')}},
+ surfer:{w:34,h:66,fn:()=>act(0,0,r()<.5?1:-1,bp({view:pk(['side','fq','bq']),pose:'walk',extra:surf(pk(['#f5c842','#3f8f8a','#e86a6a']))}),'step')},
  sunbathe:{w:90,h:90,fn:()=>{
   /* 做日光浴（2026-11-10 使用者從 A～D 選 A＋D，每個人隨機一種）：A 坐在躺椅上（側面，陽傘、飲料）／D 坐在毛巾上看海（背影，陽傘、小冰桶） */
   const parasol=(c1,c2,x=0)=>`<path d="M${x},0 L${x+6},-62" fill="none" stroke="#7a5235" stroke-width="2.4"/><path d="M${x-26},-54 Q${x+6},-84 ${x+38},-60 Q${x+6},-66 ${x-26},-54Z" fill="${c1}"/><path d="M${x-10},-60 Q${x+6},-80 ${x+6},-75 M${x+22},-60 Q${x+6},-80 ${x+6},-75" fill="none" stroke="${c2}" stroke-width="5"/><path d="M${x-26},-54 Q${x+6},-84 ${x+38},-60 Q${x+6},-66 ${x-26},-54Z" fill="none" stroke-width="1.6"/>`;
@@ -290,13 +290,13 @@ Object.assign(KIND,{
   let s=parasol(pk(['#e86a6a','#3f8f8a','#f5c842']),'#fbf6ea',18)+towel(pk(['#f5c842','#3f8f8a','#f0a8c8','#e86a6a','#5a86b0']),-30,30,0,9);
   s+=act(-2,-3,1,{view:'back',pose:'sit',...who(),top:pk(['bare','tee'])});
   return s+`<rect x="22" y="-10" width="12" height="9" rx="2" fill="#5a86b0" stroke-width="1.3"/><path d="M22,-7 h12" fill="none" stroke="#fbf6ea" stroke-width="1.6"/>`}},
- sandPlay:{w:60,h:50,fn:()=>act(-14,0,1,bp({pose:'crouch',hat:-1,top:'bare',bottom:'trunks',skin:pk([H.SKIN[2],H.SKIN[3],H.SKIN[4]]),pants:pk(['#d8413a','#3f8f8a','#f5c842','#5a86b0'])}),'bob')+T(16,0,.8,sandcastle())+`<path d="M-2,-4 h8 l-1,6 h-6Z" fill="${pk(['#d8413a','#5a86b0','#f5c842'])}" stroke-width="1.2"/>`},
- shellPick:{w:40,h:46,fn:()=>act(0,0,r()<.5?1:-1,bp({pose:'crouch'}),'bob')+`<path d="M12,-4 Q14,-10 18,-10 Q22,-10 22,-4Z" fill="#f2c6cf" stroke-width="1.1"/>`},
- netMend:{w:76,h:56,fn:()=>act(-18,0,1,fisher({pose:'sit'}),'bob')+T(20,0,.9,netPile())},
- fishing:{w:56,h:66,fn:()=>act(-8,0,1,fisher({pose:'hold',extra:rod}),'bob')},
- fishBuy:{w:70,h:62,fn:()=>act(-14,0,1,bp({pose:'reach'}),'bob')+act(16,0,-1,fisher({pose:'hold',extra:`<path d="M12,-18 q6,-4 12,0 q-6,4 -12,0Z" fill="#7aa0c0" stroke-width="1.1"/>`}),'bob')},
- iceBuy:{w:60,h:62,fn:()=>act(0,0,r()<.5?1:-1,bp({pose:'hold',extra:`<path d="M10,-20 l3,8 l3,-8Z" fill="#d9a85b" stroke-width="1"/><circle cx="13" cy="-22" r="3.4" fill="${pk(['#f0a8c8','#f5c842','#fbf6ea'])}" stroke-width="1.1"/>`}),'bob')},
- gullFeed:{w:60,h:62,fn:()=>act(-10,0,1,bp({pose:'reach'}),'bob')+T(18,0,1,gull())},
+ sandPlay:{w:60,h:50,fn:()=>act(-14,0,1,bp({pose:'crouch',hat:-1,top:'bare',bottom:'trunks',skin:pk([H.SKIN[2],H.SKIN[3],H.SKIN[4]]),pants:pk(['#d8413a','#3f8f8a','#f5c842','#5a86b0'])}),'bend')+T(16,0,.8,sandcastle())+`<path d="M-2,-4 h8 l-1,6 h-6Z" fill="${pk(['#d8413a','#5a86b0','#f5c842'])}" stroke-width="1.2"/>`},
+ shellPick:{w:40,h:46,fn:()=>act(0,0,r()<.5?1:-1,bp({pose:'crouch'}),'bend')+`<path d="M12,-4 Q14,-10 18,-10 Q22,-10 22,-4Z" fill="#f2c6cf" stroke-width="1.1"/>`},
+ netMend:{w:76,h:56,fn:()=>act(-18,0,1,fisher({pose:'sit'}),'work')+T(20,0,.9,netPile())},
+ fishing:{w:56,h:66,fn:()=>act(-8,0,1,fisher({pose:'hold',extra:rod}),false)},
+ fishBuy:{w:70,h:62,fn:()=>act(-14,0,1,bp({pose:'reach'}),'nod')+act(16,0,-1,fisher({pose:'hold',extra:`<path d="M12,-18 q6,-4 12,0 q-6,4 -12,0Z" fill="#7aa0c0" stroke-width="1.1"/>`}),'nod')},
+ iceBuy:{w:60,h:62,fn:()=>act(0,0,r()<.5?1:-1,bp({pose:'hold',extra:`<path d="M10,-20 l3,8 l3,-8Z" fill="#d9a85b" stroke-width="1"/><circle cx="13" cy="-22" r="3.4" fill="${pk(['#f0a8c8','#f5c842','#fbf6ea'])}" stroke-width="1.1"/>`}),'nod')},
+ gullFeed:{w:60,h:62,fn:()=>act(-10,0,1,bp({pose:'reach'}),'bend')+T(18,0,1,gull())},
  beachBall:{w:96,h:62,fn:()=>act(-30,0,1,bp({pose:'up2',hat:-1}),'hop')+wrapAn('float',`<circle cx="0" cy="-58" r="8" fill="#fbf6ea"/><path d="M-8,-58 Q0,-62 8,-58 M0,-66 Q-4,-58 0,-50" fill="none" stroke="#d8413a" stroke-width="2.4"/>`,true)+act(30,0,-1,bp({pose:'up2',hat:-1}),'hop')}
 });
 ['bungalow','palm','beachHut','warehouse','stall5','lighthouse5','house5','iceCart','lifeguard','anchorStatue','ferry5','boat5','sail5','dryRack','reefRock'].forEach(k=>HEAVY.add(k));
@@ -321,6 +321,16 @@ Object.assign(VPLAN,{bung:{sunbathe:2,fishing:3,chat:2},beach5:{sunbathe:3,sandP
  town5:{chat:3,handInHand:2,dogWalk:2,carryBox:2,petCat:2,iceBuy:1},dock5:{netMend:2,carryBox:2,chat:2,gullFeed:1},palms:{sleeping:1,reading:1,chat:2,handInHand:1,kiteFly:1},
  plaza5:{chat:3,iceBuy:2,gullFeed:1,throwCatch:1,handInHand:2,dogWalk:1},south5:{sunbathe:3,sandPlay:2,shellPick:2,beachBall:1},all5:{chat:3,handInHand:2,dogWalk:1}});
 
+/* 第 6 關伏筆：碼頭上要去賞櫻的旅客（2026-11-11 取代原本的「往櫻山」站牌；點了會聊到櫻花） */
+const SKTRAV={x:846,y:1370};
+const sakuraBubble=()=>`<g transform="translate(14,-78)"><path d="M-14,-10 h28 q4,0 4,4 v10 q0,4 -4,4 h-8 l-6,6 v-6 h-14 q-4,0 -4,-4 v-10 q0,-4 4,-4z" fill="#fbf6ea" stroke-width="1.6"/>`+
+ [0,1,2,3,4].map(k=>{const a=-Math.PI/2+k*Math.PI*2/5;return `<circle cx="${f(Math.cos(a)*3.6)}" cy="${f(-2+Math.sin(a)*3.6)}" r="2.9" fill="#f7c4d3" stroke-width="1"/>`}).join('')+`<circle cx="0" cy="-2" r="1.6" fill="#f0c040" stroke="none"/></g>`;
+const suitcase=`<g transform="translate(-24,0)"><rect x="-7" y="-18" width="14" height="17" rx="2.5" fill="#e8688a"/><path d="M-3,-18 v-4 h6 v4" fill="none" stroke-width="1.4"/><path d="M-7,-12 h14" fill="none" stroke="#fbf6ea" stroke-width="1.2"/><circle cx="-4" cy="0" r="1.6" fill="#4a4f5c" stroke-width="1"/><circle cx="4" cy="0" r="1.6" fill="#4a4f5c" stroke-width="1"/></g>`;
+const travelerSvg=()=>`<ellipse cx="2" cy="1" rx="30" ry="5" fill="#000" opacity=".15" stroke="none"/>`+suitcase+
+ act(-8,0,1,{view:'side',pose:'stand',hat:1,top:'tee',bottom:'shorts',shirt:'#f4b6c2'},'nod')+act(14,0,-1,{view:'fq',pose:'reach',hat:-1,top:'tee',bottom:'shorts'},'nod')+wrapAn('bob',sakuraBubble(),true);
+KIND.skTraveler={w:70,h:86,fn:travelerSvg};
+
+
 function structures5(){
  const onLand=(x,y)=>!sea(x,y);
  for(let i=0;i<12;i++){const x=sr(560,2160),y=sr(20,140);add(x,y,20,10,'bird',`<path d="M-8,0 q4,-6 8,0 q4,-6 8,0" fill="none" stroke-width="1.8"/>`,{mark:false})}
@@ -336,13 +346,14 @@ function structures5(){
  BUNG.forEach(([x,y],i)=>{const n=nearOnWalk(x,y-16);if(i%2===0)add(x,y,110,130,'bungalow',bungA(),{fl:n[0]>x});else add(x,y,120,120,'bungalow',bungB())});
  // 漁港島：渡輪、漁船、漁會倉庫
  add(640,1570,230,140,'ferry5',ferry(),{mark:false,s:.85});add(786,1520,50,50,'sign',signpost('往小鎮'));
+add(SKTRAV.x,SKTRAV.y,70,86,'skTraveler',travelerSvg(),{mark:false});
  [[1080,880,0],[1230,885,1],[1365,1160,0],[600,930,1]].forEach(([x,y,fl])=>add(x,y,120,80,'boat5',boat5(),{mark:false,fl:!!fl,s:.7}));
  add(700,1060,180,120,'warehouse',warehouse(),{s:.85});
  [[880,1260],[620,1220]].forEach(([x,y])=>add(x,y,70,46,'dryRack',dryRack()));
  // 魚市場（水上木平台）
  [[1080,990,'fish'],[1230,990,'shell'],[1100,1150,'coconut'],[1250,1140,'fish']].forEach(([x,y,k])=>add(x,y,110,86,'stall5',stall5(k)));
  // 釣魚的人坐在木棧道和平台邊
- [[1500,990,1],[1660,895,-1],[2096,1425,1],[1010,1220,-1]].forEach(([x,y,d])=>add(x,y,30,50,'fishing',act(0,0,d,fisher({pose:'sit',extra:d<0?rod.replace('M12,-18 L44,-46','M8,-14 L-30,-46').replace('M44,-46 Q52,-20 50,8','M-30,-46 Q-38,-20 -36,8'):rod}),'bob'),{mark:false}));
+ [[1500,990,1],[1660,895,-1],[2096,1425,1],[1010,1220,-1]].forEach(([x,y,d])=>add(x,y,30,50,'fishing',act(0,0,d,fisher({pose:'sit',extra:d<0?rod.replace('M12,-18 L44,-46','M8,-14 L-30,-46').replace('M44,-46 Q52,-20 50,8','M-30,-46 Q-38,-20 -36,8'):rod}),false),{mark:false}));
  // 礁湖裡：獨木舟、游泳和浮潛的人、浮標
  [[1180,1480],[1900,1160],[1330,2260],[2000,2100],[940,1880],[560,1300]].forEach(([x,y])=>{if(sea(x,y))add(x,y,60,30,'kayak',kayak5(),{mark:false,fl:r()<.5})});
  [[1150,1940],[1260,1980],[2120,1990],[900,2000],[1600,2300],[1780,2400]].forEach(([x,y])=>{if(sea(x,y))add(x,y,34,30,'swimmer',swimmer(),{mark:false})});
@@ -385,8 +396,8 @@ RIDES.ferry={text:'往東南走到小鎮港口，搭小渡輪往東南方的海�
 HERE[5]=[293,340];
 MAPHOOKS.push(({U,P,ink,FN})=>{if(U<5)return '';
  const land='M40,138 C30,196 42,256 70,288 Q86,302 104,306',sea_='M108,312 Q166,336 222,360';
- let m=`<path d="${land}" fill="none" stroke="${ink}" stroke-width="7" stroke-linecap="round"/><path d="${land}" fill="none" stroke="#ead7a6" stroke-width="4.5" stroke-linecap="round"/><path d="${land}" fill="none" stroke="#a8461f" stroke-width="1.6" stroke-dasharray="4 5" stroke-linecap="round"/>`;
- m+=`<path d="M98,300 h16 v4 h-16Z" fill="#c99a5b" stroke="${ink}" stroke-width="1.1"/><path d="${sea_}" fill="none" stroke="#fffaf0" stroke-width="3.4" stroke-linecap="round"/><path d="${sea_}" fill="none" stroke="#3b5a8a" stroke-width="1.8" stroke-dasharray="5 5" stroke-linecap="round"/>`;
+ let m=H.mapRoute(land,'road',ink);
+ m+=`<path d="M98,300 h16 v4 h-16Z" fill="#c99a5b" stroke="${ink}" stroke-width="1.1"/>`+H.mapRoute(sea_,'sea',ink);
  m+=`<g transform="translate(160,334) scale(.16)" stroke="${ink}" stroke-width="7">${ferry()}</g>`;
  m+=`<g class="mnode" data-n="5"><circle cx="250" cy="364" r="38" fill="transparent"/><ellipse cx="250" cy="372" rx="40" ry="13" fill="#ecd9a8" stroke="${ink}" stroke-width="1.4"/><ellipse cx="250" cy="370" rx="28" ry="8" fill="#a9b768" stroke="none"/>`;
  m+=P('M264,370 L266,340 L272,340 L274,370Z','#fbf9f3',1.3)+`<path d="M265,352 h9 M266,362 h8" stroke="#d8413a" stroke-width="3"/>`+P('M264,340 L269,332 L274,340Z','#d8413a',1.2);
@@ -408,4 +419,7 @@ H.STORIES[5]={title:'纏住的小海豹',giver:()=>act(0,0,1,{view:'fq',pose:'re
     need:'小海豹被舊漁網纏住了，動不了⋯碼頭有人在補漁網，也許有剪刀。',
     got:'漁夫：拿去，這把大剪刀小心用！',
     ok:'剪開了！小海豹開心地拍拍手，跟著你走。快帶回奶奶身邊！'};}
+/* 點碼頭的旅客：聊到櫻花（第 6 關伏筆，不算點錯） */
+{const t0=TAPHOOKS[5];let tt=0;TAPHOOKS[5]=(x,y)=>{if(Math.abs(x-SKTRAV.x)<36&&y<=SKTRAV.y+8&&y>=SKTRAV.y-80){const t=performance.now();if(t-tt>800){tt=t;
+ H.toast('要去賞櫻的旅客：聽說小鎮西邊的山上，櫻花全開了！\n從小鎮港口換搭小火車就到得了，我們要去看看！',4200)}return true}return t0?t0(x,y):false}}
 })();

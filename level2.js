@@ -32,7 +32,7 @@ function structures2(){skyBirds(2);
  add(2120,1620,120,90,'stall',stall('veg'));
  add(2360,1640,120,90,'stall',stall('fruit'));
  add(2600,1620,120,90,'stall',stall('bread'));
- [[2100,1642],[2145,1644],[2345,1662],[2585,1642]].forEach(([x,y])=>add(x,y,28,58,'walker',act(0,0,1,{view:'back',pose:pk(['reach','stand'])},true)));
+ [[2100,1642],[2145,1644],[2345,1662],[2585,1642]].forEach(([x,y])=>add(x,y,28,58,'walker',act(0,0,1,{view:'back',pose:pk(['reach','stand'])},'step')));
  add(2050,1460,62,72,'well',well());
  // teasers for future areas
  add(2632,590,50,50,'sign',signpost('纜車'));
@@ -76,18 +76,20 @@ H.SCENES[2]={x0:1760,x1:2800,c:[2250,880]};H.SCREG[2]=['farm','farmS'];H.TARGET[
 H.SKYC[2]='#f6efe0';H.SKYY[2]=350;H.EDGEM[2]='R';H.EDGED[2]='RB';
 H.EDGEDECO[2]=[['round',3],['bush',2],['pine',1],['rock',.6]];
 H.FRINGE[2]=[['round',1.8],['bush',2.2],['hay',.7],['grassClump',2.4],['rock',.8],['pebbles',.8],['walker',.4]];
-H.HERE[2]=[250,160];
+H.HERE[2]=[252,186];
 /* 借物件：農莊的東西每局隨機借幾種放進第 1 關 */
 H.BORROW[2]=[['egg',{1:['meadow','village','meadow','banks']}],['apple',{1:['village','plaza','village','meadow']}],['corn',{1:['meadow','village','plaza','meadow']}],['sunflower',{1:['meadow','banks','top','meadow']}]];
 /* 冒險地圖：小鎮往農莊的路 */
 H.mapHook(0,({U,P,ink,FN,f})=>{let g='';const on=U>=2;
  // path town -> farm
- if(on)g+=`<path d="M132,222 Q160,214 172,216 Q200,220 222,222" fill="none" stroke="#2b2420" stroke-width="8" stroke-linecap="round"/><path d="M132,222 Q160,214 172,216 Q200,220 222,222" fill="none" stroke="#ead7a6" stroke-width="5.5" stroke-linecap="round"/><path d="M132,222 Q160,214 172,216 Q200,220 222,222" fill="none" stroke="#a8461f" stroke-width="1.8" stroke-dasharray="4 5" stroke-linecap="round"/>`+P('M152,210 h14 v10 h-14Z','#c99a5b',1.4)+`<path d="M155,210 v10 M159,210 v10 M163,210 v10" stroke="${ink}" stroke-width=".9"/>`;
+ if(on)g+=H.mapRoute('M132,222 Q160,214 172,216 Q200,220 222,222','road',ink)+P('M152,210 h14 v10 h-14Z','#c99a5b',1.4)+`<path d="M155,210 v10 M159,210 v10 M163,210 v10" stroke="${ink}" stroke-width=".9"/>`;
  return g});
 /* 冒險地圖：農莊 */
 H.mapHook(4,({U,P,ink,FN,f})=>{let g='';const on=U>=2;
  // ---- farm ----
  if(on){let m=`<g class="mnode" data-n="2"><circle cx="262" cy="214" r="50" fill="transparent"/>`;
+  const FK=.7; /* 2026-11-11 農莊圖案縮小，以 (264,240) 為中心 */
+  m+=`<g transform="translate(264,240) scale(${FK}) translate(-264,-240)">`;
   // fields
   const field=(pts,c,lc)=>P('M'+pts.join(' L')+'Z',c,1.4)+`<g clip-path="none"></g>`;
   m+=field(['230,236','290,230','318,244','262,256'],'#d9c06a')+`<path d="M242,238 l50,-5 M250,243 l52,-5 M256,248 l52,-4" stroke="#b39b45" stroke-width="1.1"/>`;
@@ -104,7 +106,8 @@ H.mapHook(4,({U,P,ink,FN,f})=>{let g='';const on=U>=2;
   m+=`<g transform="translate(298,212)">`+P('M-5,0 L-3,-26 H3 L5,0Z','#f3e8cf',1.5)+`<g><animateTransform attributeName="transform" type="rotate" from="0 0 -26" to="360 0 -26" dur="9s" repeatCount="indefinite"/>`+P('M0,-26 L-2,-44 L2,-44Z M0,-26 L18,-28 L18,-24Z M0,-26 L2,-8 L-2,-8Z M0,-26 L-18,-24 L-18,-28Z','#fffaf0',1.3)+`</g><circle cy="-26" r="2" fill="${ink}"/></g>`;
   // hay bales
   [[226,230],[234,233]].forEach(([x,y])=>m+=`<circle cx="${x}" cy="${y-5}" r="5" fill="#e3c35e" stroke="${ink}" stroke-width="1.3"/><path d="M${x-2},${y-7} a2.5,2.5 0 1 1 3,3" fill="none" stroke="#b39b45" stroke-width="1"/>`);
-  m+=`<g transform="translate(270,296)"><rect x="-32" y="-11" width="64" height="20" rx="10" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4.5" text-anchor="middle" font-size="12" fill="${ink}" font-family="${FN}">東方農莊</text></g></g>`;
+  m+=`</g>`;
+  m+=`<g transform="translate(268,${f(240+56*FK-6)})"><rect x="-32" y="-11" width="64" height="20" rx="10" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4.5" text-anchor="middle" font-size="12" fill="${ink}" font-family="${FN}">東方農莊</text></g></g>`;
   g+=m}
  return g});
 /* ================= 過場：乾草車（從小鎮往東到農莊） ================= */

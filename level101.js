@@ -240,9 +240,9 @@ OUTFITS[N]=o=>{if(o.top)return o;o.skin=o.skin||pk([SKIN[2],SKIN[3],SKIN[3],SKIN
  if(o.top==='long')o.shirt=o.shirt||pk(['#3f6fa8','#c4572f','#3f8f8a','#5f7a3f','#e0a03a','#7a5a8a']);else o.shirt=o.shirt||pk(['#fbf6ea','#f5c842','#e86a6a','#5a86b0','#3f8f8a','#e8833a']);
  if(o.top==='tee'&&r()<.3)o.aloha=pk(['#fbf6ea','#f5c842','#e86a9a']);o.bottom=r()<.5?'shorts':'pants';o.pants=o.pants||pk(['#c9a46a','#5a86b0','#3d3833','#8a6a4a','#e8d6b0']);
  if(o.hat===undefined)o.hat=pk([CROWN,CROWN,-1,-1,1,4]);return o};
-const walker=()=>{const v=pickView(),p=walkPose(v);return act(0,0,r()<.5?1:-1,{view:v,pose:p},true)};
-const archaeo=()=>act(0,0,r()<.5?1:-1,{view:pk(['fq','side','bq','front']),pose:pk(['hold','reach','crouch','stand']),hat:6,shirt:pk(['#c9a46a','#7d8b4a','#5f7a8a','#e8d6b0']),pants:pk(['#6a5a48','#5a4a3a','#c9b48a']),top:'tee',bottom:pk(['pants','shorts']),skin:pk(SKIN)},true);
-const dancer=d=>act(0,0,d,{view:'fq',pose:'up2',hat:CROWN,top:'bare',bottom:'shorts',pants:'#d8413a',skin:SKIN[3]},'hop');
+const walker=()=>{const v=pickView(),p=walkPose(v);return act(0,0,r()<.5?1:-1,{view:v,pose:p},'step')};
+const archaeo=()=>act(0,0,r()<.5?1:-1,{view:pk(['fq','side','bq','front']),pose:pk(['hold','reach','crouch','stand']),hat:6,shirt:pk(['#c9a46a','#7d8b4a','#5f7a8a','#e8d6b0']),pants:pk(['#6a5a48','#5a4a3a','#c9b48a']),top:'tee',bottom:pk(['pants','shorts']),skin:pk(SKIN)},'work');
+const dancer=d=>act(0,0,d,{view:'fq',pose:'up2',hat:CROWN,top:'bare',bottom:'shorts',pants:'#d8413a',skin:SKIN[3]},'dance');
 const seller=()=>act(0,0,1,{view:'front',pose:'stand',hat:CROWN,shirt:'#e86a6a',top:'tee',bottom:'pants',pants:'#3d3833',skin:SKIN[3],mood:1});
 /* 主角：A 小探險家（遮陽探險盔、橄欖綠短袖、卡其短褲、棕色帆布背包） */
 const EXP={skin:SKIN[1],hair:'#3a2a22',hs:0,hat:6,shirt:'#7d8b4a',pants:'#c9b48a',top:'tee',bottom:'shorts',mood:0};
@@ -345,7 +345,10 @@ function whaleTick(m,dt){m.st=m.st??0;m.stT=(m.stT??Math.random()*4)-dt;if(m.stT
  m.stT=d+Math.random()*1.5;m.spF=sp;if(m.setArt)m.setArt(WHALE[name]);m.state=name}
 const whale=()=>WHALE.under;
 /* 木頭名牌 */
-const nameSign=t=>{const w=t.length*14+22;return `<ellipse cx="2" cy="2" rx="${w/2}" ry="4" fill="#000" opacity=".12" stroke="none"/><path d="M-${w/2-8},0 V-30 M${w/2-8},0 V-30" fill="none" stroke="#7a5235" stroke-width="3"/><rect x="${-w/2}" y="-52" width="${w}" height="26" rx="4" fill="#c99a5b" stroke-width="2"/><path d="M${-w/2+4},-48 h${w-8}" fill="none" stroke="#e0b884" stroke-width="1.4"/><text y="-34" text-anchor="middle" font-size="14" font-weight="700" fill="${OL}" stroke="none" font-family="Huninn,PingFang TC,Noto Sans TC,sans-serif">${t}</text>`};
+const nameSign=t=>{const w=58;return `<ellipse cx="2" cy="2" rx="${w/2}" ry="4" fill="#000" opacity=".12" stroke="none"/><path d="M-${w/2-8},0 V-30 M${w/2-8},0 V-30" fill="none" stroke="#7a5235" stroke-width="3"/><rect x="${-w/2}" y="-52" width="${w}" height="26" rx="4" fill="#c99a5b" stroke-width="2"/><path d="M${-w/2+4},-48 h${w-8}" fill="none" stroke="#e0b884" stroke-width="1.4"/>${H.signIcon(t.includes('火山')?'volcano':'quarry',1.35,0,-39)}`};
+/* 木頭名牌不寫字，點了才跳出地名（2026-11-11） */
+const NAMESIGNS=[[1010,1912,'📍 拉諾卡烏火山口'],[1360,1176,'📍 拉諾拉拉庫採石場（摩艾就是在這裡刻出來的）']];
+const tapNameSign=(x,y)=>{const s=NAMESIGNS.find(([sx,sy])=>Math.abs(x-sx)<34&&y>sy-58&&y<sy+6);if(!s)return false;H.toast(s[2],2600);return true};
 /* 點了會有反應、說明這是什麼（不算拿錯） */
 const FACTS={turtle:'綠蠵龜（honu）探出頭來換氣～\n在復活島牠是神聖的動物，看看就好，不要摸喔。',booby:'藍臉鰹鳥！當地叫牠 kena，\n聽說北邊的白沙灘「Anakena」就是用牠的名字命名的。',tropic:'紅尾熱帶鳥在摩艾旁邊築巢，\n長長的紅色尾羽好漂亮。',
  lizardB:'黑色的小蜥蜴 moko uri uri，一溜煙躲進石縫了！',lizardW:'白色的小蜥蜴 moko tea-tea，在石頭上曬太陽。',rooster:'咕咕咕——！\n雞是最早划船來到島上的人帶來的。',lobster:'復活島的龍蝦，兩隻前腳像戴著手套。',crab:'小螃蟹橫著走開了～',
@@ -463,7 +466,7 @@ const C={n:N,movers:[],start:{x:1390,y:345},startDir:2,speed:185,terrain,solids:
  where:(g,h)=>{const dx=h.x-g.x,dy=h.y-g.y,d=Math.hypot(dx,dy),dirs=['東','東南','南','西南','西','西北','北','東北'],k=((Math.round(Math.atan2(dy,dx)/(Math.PI/4))%8)+8)%8;
   const reg=[['beachR','北邊的白沙灘'],['tongR','東加里奇石台前'],['quarryR','採石場'],['campR','考古隊營地'],['akiviR','阿基維石台附近'],['craterR','火山口湖邊'],['orongoR','奧隆戈村'],['grassR','中央草原']].find(([k_])=>{const g_=REG[k_];return h.x>=g_.x&&h.x<=g_.x+g_.w&&h.y>=g_.y&&h.y<=g_.y+g_.h});
   return `${reg?reg[1]:(d<200?'這附近':dirs[k]+'邊')}的${FK[h.kind].name}底下（從這裡往${dirs[k]}走）`},
- tick:sunTick,tapScene:(x,y,E)=>{if(tapView(x,y,E)||tapGiant(x,y,E))return true;if(Math.abs(x-1300)<80&&y>20&&y<150){H.toast('船長：慢慢找，找齊了再回海島港口！\n（想先回去，可以從選單打開冒險地圖）',3600);return true}return tapCreature(x,y)},
+ tick:sunTick,tapScene:(x,y,E)=>{if(tapView(x,y,E)||tapGiant(x,y,E)||tapNameSign(x,y))return true;if(Math.abs(x-1300)<80&&y>20&&y<150){H.toast('船長：慢慢找，找齊了再回海島港口！\n（想先回去，可以從選單打開冒險地圖）',3600);return true}return tapCreature(x,y)},
  how:`<div><b style="font-size:22px">🕹️</b>左下角搖桿<br>走路</div><div><b style="font-size:22px">👆</b>走近東西<br>點一下拿起來</div><div><b style="font-size:22px">🔍</b>有些要檢查<br>才分得出來</div><div><b style="font-size:22px">🌿</b>草叢、石堆<br>可以翻開</div>`,
  rule:'這座島上的東西要走近才拿得到，拿錯了只要放回去就好。<br>幫頭上有「？」的人完成小故事，他會告訴你 🍀 幸運草藏在哪裡。（聽說還藏著別的秘密⋯）',
  homeBtn:'搭帆船回海島港口',homeNote:'船長在北邊海灣等你，隨時可以再來'};
@@ -693,8 +696,10 @@ function clearRapa(){clearTimeout(flashT);cancelAnimationFrame(gullRAF);const l=
 /* ---- 伏筆：東南小沙洲上拿望遠鏡看海的小孩（第 5 關一開始就在，過關前後都會說） ---- */
 const KID={x:2068,y:2252};
 (H.RESERVE[5]||(H.RESERVE[5]=[])).push([KID.x,KID.y,70,80]);
-function kidSVG(){return act(0,0,1,{view:'side',pose:'reach',hat:-1,hair:'#3d2a1e',shirt:'#f0b84a',pants:'#3b6ea5',mood:2,plain:true})+
- `<g transform="translate(9,-38) rotate(-12)"><rect x="0" y="-3.4" width="18" height="6.8" rx="1.5" fill="#c9963a" stroke-width="1.4"/><rect x="14" y="-4.4" width="6" height="8.8" rx="1.5" fill="#a8762a" stroke-width="1.4"/><path d="M5,-3.4 v6.8 M10,-3.4 v6.8" fill="none" stroke="#7a5420" stroke-width="1"/></g>`}
+/* 望遠鏡少年頭上的想念泡泡：遠方海上的帆船（2026-11-11） */
+const KIDTHINK=`<path d="M-17,0 q4,-3 8,0 q4,3 8,0 q4,-3 8,0 q4,3 8,0" fill="none" stroke="#3f8fb8" stroke-width="2.2"/><path d="M-11,-6 H11 L7,0 H-7Z" fill="#8a5a3a" stroke-width="1.5"/><path d="M0,-6 V-30" fill="none" stroke-width="1.6"/><path d="M1.5,-29 Q12,-18 10,-8 H1.5Z" fill="#fbf6ea" stroke-width="1.4"/><path d="M-1.5,-25 Q-9,-16 -8,-9 H-1.5Z" fill="#f2e6c4" stroke-width="1.3"/><path d="M0,-30 l5,2 l-5,2" fill="#d8413a" stroke-width="1"/>`;
+function kidSVG(){return H.qThink(KIDTHINK,30,34,-74)+act(0,0,1,{view:'side',pose:'up2',hat:-1,hair:'#3d2a1e',shirt:'#f0b84a',pants:'#3b6ea5',mood:2,plain:true})+
+ `<g transform="translate(9,-33) rotate(-8)"><rect x="0" y="-3.4" width="18" height="6.8" rx="1.5" fill="#c9963a" stroke-width="1.4"/><rect x="14" y="-4.4" width="6" height="8.8" rx="1.5" fill="#a8762a" stroke-width="1.4"/><path d="M5,-3.4 v6.8 M10,-3.4 v6.8" fill="none" stroke="#7a5420" stroke-width="1"/></g>`}
 function drawKid(){const [lo]=layers();let el=document.getElementById('rapaKid');if(!el){el=document.createElementNS(NSv,'g');el.id='rapaKid';lo.appendChild(el)}
  el.innerHTML=T(KID.x,KID.y,1,`<ellipse cx="0" cy="1" rx="12" ry="3" fill="#000" opacity=".14" stroke="none"/>${kidSVG()}`)}
 let kidT=0;
@@ -821,7 +826,7 @@ RIDES.sail={text:'帆船出海，往東南方的海平線前進⋯',every:640,ti
 /* ---- 冒險地圖：海圖拼好之後，海島港口往東南出現虛線航線，通到淡淡光圈裡的復活島（秘境樣式，點了可以前往） ---- */
 H.MAPTOP.push(({U,ink,FN})=>{if(U<5||!RP.ready)return '';
  const rt='M272,378 Q284,394 288,396';
- let m=`<path d="${rt}" fill="none" stroke="#fffaf0" stroke-width="3.4" stroke-linecap="round"/><path d="${rt}" fill="none" stroke="#6a5aa8" stroke-width="1.8" stroke-dasharray="4 4" stroke-linecap="round"/>`;
+ let m=H.mapRoute(rt,'sea',ink);
  m+=`<g class="mnode" data-n="101" pointer-events="visiblePainted" style="cursor:pointer"><circle cx="305" cy="386" r="26" fill="transparent"/><g transform="translate(305,394)"><circle r="18" fill="#fff6c4" opacity=".8"/><circle r="18" fill="none" stroke="#6a5aa8" stroke-width="1.4" stroke-dasharray="3 3"/><ellipse cx="0" cy="5" rx="13" ry="4.5" fill="#a9b768" stroke="${ink}" stroke-width="1.3"/>`;
  m+=[-6,0,6].map((x,i)=>`<path transform="translate(${x},4) scale(${i===1?.36:.3})" d="${moaiShape(34)}" fill="#8f9aa6" stroke="${ink}" stroke-width="3.6"/>`).join('')+`</g>`;
  m+=`<g transform="translate(305,370)"><rect x="-21" y="-8" width="42" height="15" rx="7.5" fill="#fffaf0" stroke="#6a5aa8" stroke-width="1.5"/><text y="3.5" text-anchor="middle" font-size="10" fill="#4a3d82" font-family="${FN}">復活島</text></g></g>`;

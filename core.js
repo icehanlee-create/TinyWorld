@@ -18,6 +18,14 @@ const VPLANX={},SCENE_IMPL={},WATERFN={},RIDES={},MAPHOOKS=[],NEXTINFO={},HERE={
    RESETKEYS：「重置進度」時要一起清掉的 localStorage（各檔案自己 push） */
 const RESERVE={},ROADK={},RESETKEYS=[];
 /* 冒險地圖上的一層：z 越小越先畫（越下面）。沒設 z 的當作 2。第 1～3 關：小鎮→農莊的路 0、纜車與雪山 1、第 4、5 關 2、小鎮 3、農莊 4 */
+
+/* 冒險地圖路線（2026-11-11 使用者選 D「桌遊點點路」）：一顆顆圓點。t＝'road' 陸路／'sea' 海路／'rail' 鐵路。
+   關卡的 mapHook／MAPHOOKS 畫路線一律用 H.mapRoute(d,t,ink)，全部關卡的路線就會一樣。 */
+function mapRoute(d,t,ink){ink=ink||'#2b2420';
+ const P=(w,c,gap)=>`<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-dasharray=".1 ${gap}"/>`;
+ if(t==='sea')return P(3.6,'#fffaf0',8)+P(2,'#4f86b0',8);
+ if(t==='rail')return P(4.6,ink,7)+P(2.6,'#f0c040',7);
+ return P(5,ink,8)+P(3,'#f3e2b0',8)}
 function mapHook(z,fn){fn.z=z;MAPHOOKS.push(fn);return fn}
 const r=()=>rng(),sr=(a,b)=>a+r()*(b-a),ri=(a,b)=>Math.floor(sr(a,b+1)),pk=a=>a[Math.floor(r()*a.length)];
 const rnd=(a,b)=>a+Math.random()*(b-a);
@@ -46,10 +54,10 @@ const sprites=[];
 /* 第 3、4 關場地再放大 1.25 倍：面積 ×1.56，密度降 15% → 數量 ×1.33 */
 const DENS={};/* 佈景密度倍數：各關檔案自己設 DENS[關卡] */
 const NOT_DECOY=new Set(['flowersY','koi','fishGrey','note']);const isDecoy=k=>DECOY[k]!==undefined&&!NOT_DECOY.has(k);
-const ANIM={storyHelper:['bob'],storyGiver:['bob'],storyTarget:['wig','bob'],capyW:['bob'],capyR:['bob','wig'],monkeyFam:['bob'],monkeyFamW:['bob'],steam:['steam'],monkeyR:['bob','wig'],monkeyW:['bob'],bather:['bob'],cow:['bob','wig'],pig:['bob','wig'],scarecrow:['sway'],cat:['bob','wig','sway'],dog:['hop','bob','wig'],chicken:['peck','peck','bob'],sheep:['bob','sway'],frog:['hop'],owl:['wig','bob'],
+const ANIM={storyHelper:['nod'],storyGiver:['nod'],storyTarget:['wig','bob'],capyW:['bob'],capyR:['bob','wig'],monkeyFam:['bob'],monkeyFamW:['bob'],steam:['steam'],monkeyR:['bob','wig'],monkeyW:['bob'],bather:['lean'],cow:['bob','wig'],pig:['bob','wig'],scarecrow:['sway'],cat:['bob','wig','sway'],dog:['hop','bob','wig'],chicken:['peck','peck','bob'],sheep:['bob','sway'],frog:['hop'],owl:['wig','bob'],
  swan:['rock'],boat:['rock'],sail:['rock'],balloon:['float'],bird:['flap'],koi:['swim'],seaFish:['swim']};
 const ALWAYS=new Set(['storyGiver','steam','bather','swan','boat','sail','balloon','bird']);
-const DUR={steam:[3,5],swing:[1.8,2.8],bob:[1.6,2.6],sway:[2.2,3.4],hop:[2.4,4],wig:[3,5],peck:[1.8,3],rock:[2.6,4],float:[4,6],flap:[.5,.8],swim:[2.5,4]};
+const DUR={lean:[2.4,3.6],step:[.55,.75],nod:[2.2,3.2],work:[.9,1.3],bend:[2,3],groove:[1.2,1.8],dance:[1.1,1.5],cheer:[.9,1.4],steam:[3,5],swing:[1.8,2.8],bob:[1.6,2.6],sway:[2.2,3.4],hop:[2.4,4],wig:[3,5],peck:[1.8,3],rock:[2.6,4],float:[4,6],flap:[.5,.8],swim:[2.5,4]};
 /* 只用在某一關、不影響別關的設定（秘境或分頭做的關卡用）：ANIMX[關卡]={kind:[動作]}、ALWAYSX[關卡]=Set、HEAVYX[關卡]=Set */
 const ANIMX={},ALWAYSX={},HEAVYX={};
 const animOf=k=>(ANIMX[SCN]&&ANIMX[SCN][k])||ANIM[k],alwaysOf=k=>ALWAYS.has(k)||!!(ALWAYSX[SCN]&&ALWAYSX[SCN].has(k)),heavyOf=k=>HEAVY.has(k)||!!(HEAVYX[SCN]&&HEAVYX[SCN].has(k));
@@ -60,7 +68,7 @@ function add(x,y,w,h,kind,inner,o={}){
  if(heavyOf(kind))inner=`<g stroke-width="2.7">${inner}</g>`;
  let svg=T(x,y,o.s||1,inner,o.fl);
  svg=svg.replace('<g ',`<g data-n="${sprites.length}"${inner.includes('class="an ')?` class="sp" data-x="${f(x)}" data-y="${f(y)}"`:''} `);
- const sp={x,y,w,h,kind,svg,n:sprites.length};sprites.push(sp);if(o.mark!==false)mark(x,y,w*(o.s||1),h*(o.s||1),o.sh||1);return sp}
+ const sp={x,y,w,h,kind,svg,n:sprites.length};{const m=o.say||(/data-say="([^"]*)"/.exec(inner)||[])[1];if(m)sp.say=m}sprites.push(sp);if(o.mark!==false)mark(x,y,w*(o.s||1),h*(o.s||1),o.sh||1);return sp}
 
 /* ================= scene assembly ================= */
 let groundSvg='';
@@ -193,6 +201,14 @@ function placeItems(){
 const itemsL=$('#itemsL'),marks=$('#marks'),fx=$('#fx');
 /* ---- 小故事：每關一位頭上有「？」的角色，幫他找到東西就送幸運草 ---- */
 const qBubble=(x,y,t)=>`<g class="sq" transform="translate(${x},${y})"><path d="M-11,-10 h22 q4,0 4,4 v9 q0,4 -4,4 h-9 l-5,5 v-5 h-8 q-4,0 -4,-4 v-9 q0,-4 4,-4z" fill="#fff7d6" stroke-width="1.6"/><text x="0" y="1.5" text-anchor="middle" font-size="12" font-weight="800" fill="${t==='♥'?'#d8413a':OL}" stroke="none" font-family="PingFang TC,Noto Sans TC,sans-serif">${t}</text></g>`;
+
+/* 想念泡泡（2026-11-11 使用者選 B）：頭上的雲朵泡泡裡畫出他想要的東西，取代原本的「？」對話框。
+   qThink(圖, 寬, 高, y)：y 是泡泡底部小圓點的位置（相對角色腳底）。秘境、望遠鏡少年也用它。 */
+const QHEART=`<path d="M0,6 C-9,0 -8,-7 -3.6,-7 C-1.6,-7 0,-5.4 0,-4 C0,-5.4 1.6,-7 3.6,-7 C8,-7 9,0 0,6Z" fill="#e8574a" stroke-width="1.4"/>`;
+const qThink=(art,w,h,y=-80)=>{const k=24/Math.max(w||26,h||26);return `<g class="sq"><g class="qbob"><path d="M-17,${y-14} q-6,-10 4,-14 q2,-9 12,-7 q6,-7 14,-1 q10,-2 11,8 q8,4 2,12 q2,9 -9,8 q-6,6 -14,1 q-9,4 -13,-2 q-9,0 -7,-5z" fill="#fffdf4" stroke-width="1.6"/><circle cx="-4" cy="${y+3}" r="2.6" fill="#fffdf4" stroke-width="1.2"/><circle cx="-1" cy="${y+9}" r="1.6" fill="#fffdf4" stroke-width="1"/><g transform="translate(2,${f(y-13+(h||26)*k/2)}) scale(${f(k)})">${art}</g></g></g>`};
+/* 故事角色的泡泡：還沒完成時想著「下一步要找的」（走失的動物；第 3 步換成幫手），完成後是愛心 */
+const storyThink=S=>{if(!S)return '';if(story&&story.done)return qThink(QHEART,16,16);
+ if(story&&story.step===2)return qThink(S.helper(),S.hw,S.hh);return qThink(S.target(),S.tw,S.th)};
 const bow=(x,y,c)=>`<path d="M${x},${y} l-5,-3 v6Z M${x},${y} l5,-3 v6Z" fill="${c}" stroke-width="1.1"/><circle cx="${x}" cy="${y}" r="1.6" fill="${c}" stroke-width="1"/>`;
 const STORIES={};/* 連環小故事：各關檔案自己設 STORIES[關卡] */
 const SEQ=['giver','target','helper','target','giver'];
@@ -203,10 +219,10 @@ function placeStory(sc){storySp={giver:null,target:null,helper:null};const S=STO
  const a=pt((x,y)=>Math.hypot(x-c[0],y-c[1])<700);if(!a)return;
  const b=pt((x,y)=>Math.hypot(x-c[0],y-c[1])>600&&Math.hypot(x-a[0],y-a[1])>500);if(!b)return;
  const h=pt((x,y)=>Math.hypot(x-a[0],y-a[1])>450&&Math.hypot(x-b[0],y-b[1])>450)||pt(()=>true);
- storySp.giver=add(a[0],a[1],30,62,'storyGiver',S.giver()+qBubble(2,-74,'？'),{sh:.7});
+ storySp.giver=add(a[0],a[1],30,62,'storyGiver',S.giver()+storyThink(S),{sh:.7});
  storySp.target=add(b[0],b[1],S.tw,S.th,'storyTarget',S.target(),{sh:.7,fl:r()<.5});
  if(h)storySp.helper=add(h[0],h[1],S.hw,S.hh,'storyHelper',S.helper(),{sh:.7,fl:r()<.5})}
-function storyBubble(t){const sp=storySp.giver;if(!sp)return;const el=document.querySelector(`#bg [data-n="${sp.n}"] .sq text`);if(el){el.textContent=t;el.setAttribute('fill',t==='♥'?'#d8413a':OL)}}
+function storyBubble(){const sp=storySp.giver;if(!sp)return;const el=document.querySelector(`#bg [data-n="${sp.n}"] .sq`);if(el)el.outerHTML=storyThink(STORIES[scene])}
 function onSpriteTap(sp){const S=STORIES[scene];
  const role=sp===storySp.giver?'giver':sp===storySp.target?'target':sp===storySp.helper?'helper':null;
  if(S&&story&&role){
@@ -214,15 +230,16 @@ function onSpriteTap(sp){const S=STORIES[scene];
   const want=SEQ[story.step];
   if(role===want){const msg=[S.ask,S.need,S.got,S.ok][story.step];story.step++;
    if(story.step>=SEQ.length){finishStory();return true}
-   toast(msg,4200);if(story.step===1)storyBubble('…');if(story.step===3)sfx.found();return true}
+   toast(msg,4200);storyBubble();if(story.step===3)sfx.found();return true}
   // 順序不對：給提示，不扣分
   const hint=role==='giver'?(story.step===0?S.ask:`${S.who}：拜託你了，${story.step>=4?'快帶回來給我！':'找到了嗎？'}`)
    :role==='target'?(story.step===0?'這是誰家的寶貝？好像有人在找牠⋯':story.step===2?S.need:'牠乖乖跟著你，快帶回去吧！')
    :(story.step<2?'（看起來正在忙⋯也許之後會需要幫忙）':'已經幫過你囉！');
   toast(hint,3200);if(story.step===0&&role==='giver')story.step=1;return true}
  for(const c of [clovers.story,clovers.bonus]){if(c&&!c.revealed&&!c.found&&sp===c.host){if(c.kind==='story'&&!(story&&story.done))return false;revealClover(c);return true}}
+ if(sp.say){toast(sp.say,1800);return true} /* 看板不寫字，點了才跳出名稱（2026-11-11） */
  return false}
-function finishStory(){if(!story||story.done)return;story.done=true;story.step=SEQ.length;const S=STORIES[scene];storyBubble('♥');colStory(level);sfx.typeDone();
+function finishStory(){if(!story||story.done)return;story.done=true;story.step=SEQ.length;const S=STORIES[scene];storyBubble();colStory(level);sfx.typeDone();
  const c=clovers.story,g=storySp.giver;if(g){burst(g.x,g.y-40);floatText(g.x,g.y-70,'📖 故事完成！')}
  if(c&&!c.found){addSpark(c,'fast');toast(`📖 ${S.title}：完成！\n${S.who}：謝謝你！我剛剛看到 🍀 幸運草藏在${dirFrom(g||{x:c.x,y:c.y},c)}的${HOSTN[c.host.kind]||'東西'}後面，去點點看！`,6000)}
  else if(!c){st.clover=true;colClover(level);toast(`📖 故事完成：${S.title}！送你一株幸運草 🍀`,3200)}
@@ -383,7 +400,7 @@ function setHintUI(){const b=$('#hintBtn');$('#hintN').textContent=testMode?'∞
 function applyTestUI(){document.querySelectorAll('.tbtn').forEach(b=>b.style.display=testMode?'':'none');$('#testBadge').style.display=testMode?'':'none';$('#winBtn').style.display=testMode?'':'none';$('#resetBtn').style.display=testMode?'':'none';setHintUI()}
 function newGame(keepView){const S=SEC();
  if(S){items=S.items();clovers={story:null,bonus:null};itemsL.innerHTML='';marks.innerHTML='';fx.innerHTML=''}else{placeItems();placeClover();renderItems()}
- story={step:0,done:false};storyBubble('？');renderTray();updateCounts();
+ story={step:0,done:false};storyBubble();renderTray();updateCounts();
  st={running:true,t0:performance.now(),hintsLeft:HINTS,misses:0,clover:false,bonus:false};setHintUI();
  measure();if(S)S.start();else if(!keepView){const c=LEVELS[level].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base}}clampV();apply();reveal(true);clearInterval(timer);timer=setInterval(tick,250);tick();
  NGHOOKS.forEach(h=>{try{h(scene)}catch(e){console.error(e)}})}
@@ -508,32 +525,38 @@ function typesFor(n){const own=LEVELS[n].types||[],all=LEVELS.slice(1).flatMap(L
  slots.forEach((i,k)=>out[i]=borrowed[k]);return out}
 function bestOf(n){let b=null;try{b=parseFloat(localStorage.getItem('townhunt-best-L'+n))}catch(_){}return b}
 function starsOf(n){try{return +localStorage.getItem('townhunt-stars-L'+n)||0}catch(_){return 0}}
+const MAPSW='#cfc98a'; /* 冒險地圖西南角（之後做沙漠）的底色 */
 function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,Noto Sans TC,sans-serif',R=mulberry32(4242);
  const P=(d,fill,sw=1.6,extra='')=>`<path d="${d}" fill="${fill}" stroke="${ink}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round" ${extra}/>`;
- let g=`<svg viewBox="0 0 342 430" role="img" aria-label="冒險地圖"><defs><clipPath id="mapClip"><path d="M18,26 Q170,16 324,28 Q332,220 322,406 Q170,416 20,406 Q12,220 18,26Z"/></clipPath>
+ let g=`<svg viewBox="-120 0 462 430" role="img" aria-label="冒險地圖"><defs><clipPath id="mapClip"><path d="M-102,26 Q110,16 324,28 Q332,220 322,406 Q110,416 -100,406 Q-108,220 -102,26Z"/></clipPath>
  <radialGradient id="mapVig" cx="50%" cy="50%" r="62%"><stop offset="70%" stop-color="#f1e2bf" stop-opacity="0"/><stop offset="100%" stop-color="#e8d3a5" stop-opacity=".85"/></radialGradient></defs>`;
  // parchment
- g+=`<path d="M10,14 Q60,4 120,12 Q200,2 262,10 Q320,6 334,20 Q340,120 332,220 Q342,330 330,416 Q250,426 170,418 Q90,428 14,418 Q2,320 10,220 Q4,110 10,14Z" fill="#f1e2bf" stroke="${ink}" stroke-width="2.5"/>`;
+ g+=`<path d="M-110,14 Q-40,4 40,12 Q140,2 262,10 Q320,6 334,20 Q340,120 332,220 Q342,330 330,416 Q250,426 140,418 Q20,428 -106,418 Q-118,320 -110,220 Q-116,110 -110,14Z" fill="#f1e2bf" stroke="${ink}" stroke-width="2.5"/>`;
  g+=`<g clip-path="url(#mapClip)">`;
  // land
- g+=`<rect x="0" y="0" width="342" height="430" fill="#c6cb8c"/>`;
+ g+=`<rect x="-120" y="0" width="462" height="430" fill="#c6cb8c"/>`;
+ /* 2026-11-11 地圖向西加寬 120（櫻花山城在西邊）；西南角留陸地（之後做沙漠）。西邊的亂數用 R2，東邊原本的圖案不變 */
+ const R2=mulberry32(4343);
+ g+=`<path d="M-120,300 H-4 Q-20,360 -14,430 H-120Z" fill="${MAPSW}"/>`;
  // grass texture
  let tf='';for(let i=0;i<70;i++){const x=20+R()*300,y=130+R()*160;tf+=`M${f(x)},${f(y)} l2,-4 l2,4 `}g+=`<path d="${tf}" fill="none" stroke="#9aa361" stroke-width="1.1" stroke-linecap="round"/>`;
  // foothills
- g+=P('M0,128 Q30,104 64,120 Q96,98 132,118 Q170,96 206,116 Q242,96 276,114 Q310,100 342,118 V0 H0Z','#93a35e',1.6);
+ g+=P('M-120,122 Q-92,102 -62,116 Q-30,100 0,128 Q30,104 64,120 Q96,98 132,118 Q170,96 206,116 Q242,96 276,114 Q310,100 342,118 V0 H-120Z','#93a35e',1.6);
  // mountains back row
  const mt=(x,y,w,h,c1,c2,snow)=>{let s=P(`M${x-w},${y} L${x},${y-h} L${x+w},${y}Z`,c1,1.7)+`<path d="M${x},${y-h} L${x+w},${y} L${x+w*.25},${y}Z" fill="${c2}" opacity=".9"/>`;
   if(snow)s+=P(`M${x-w*.32},${y-h*.68} L${x},${y-h} L${x+w*.32},${y-h*.68} L${x+w*.14},${y-h*.6} L${x},${y-h*.72} L${x-w*.14},${y-h*.6}Z`,'#fbf7ef',1.3);return s};
- [[44,96,30,50],[104,94,34,62],[170,90,36,66],[236,94,32,58],[296,96,32,52]].forEach(([x,y,w,h])=>g+=mt(x,y,w,h,'#b3b8b2','#959c98',1));
- [[16,112,26,40],[74,112,30,46],[138,110,30,44],[204,112,32,48],[268,112,28,42],[328,112,26,40]].forEach(([x,y,w,h])=>g+=mt(x,y,w,h,'#8e9a72','#76835c',0));
+ [[-76,94,32,56],[-16,96,30,52],[44,96,30,50],[104,94,34,62],[170,90,36,66],[236,94,32,58],[296,96,32,52]].forEach(([x,y,w,h])=>g+=mt(x,y,w,h,'#b3b8b2','#959c98',1));
+ [[-104,112,26,40],[-46,112,28,44],[16,112,26,40],[74,112,30,46],[138,110,30,44],[204,112,32,48],[268,112,28,42],[328,112,26,40]].forEach(([x,y,w,h])=>g+=mt(x,y,w,h,'#8e9a72','#76835c',0));
  // west forest
  const tree=(x,y,s)=>`<path d="M${f(x)},${f(y)} v5" stroke="${ink}" stroke-width="1.6"/>`+P(`M${f(x-7*s)},${f(y)} L${f(x)},${f(y-16*s)} L${f(x+7*s)},${f(y)}Z`,'#5f7a3f',1.3)+P(`M${f(x-5*s)},${f(y-7*s)} L${f(x)},${f(y-20*s)} L${f(x+5*s)},${f(y-7*s)}`,'#6f8a48',1.2);
  let tr=[];for(let i=0;i<26;i++)tr.push([22+R()*44,138+R()*150,.8+R()*.4]);[[300,140],[316,170],[308,262],[90,270],[196,282]].forEach(([x,y])=>tr.push([x,y,.9]));
+ for(let i=0;i<9;i++)tr.push([-114+R2()*108,126+R2()*24,.75+R2()*.35]);for(let i=0;i<4;i++)tr.push([-14+R2()*26,222+R2()*40,.8+R2()*.3]);
+ let tw='';for(let i=0;i<26;i++){const x=-110+R2()*104,y=220+R2()*70;tw+=`M${f(x)},${f(y)} l2,-4 l2,4 `}g+=`<path d="${tw}" fill="none" stroke="#9aa361" stroke-width="1.1" stroke-linecap="round"/>`;
  tr.sort((a,b)=>a[1]-b[1]).forEach(([x,y,s])=>g+=tree(x,y,s));
  // coast + sea
- g+=`<path d="M0,300 Q90,284 170,298 Q250,312 342,290 V430 H0Z" fill="#e8d6a4"/>`;
- g+=P('M0,308 Q90,292 170,306 Q250,320 342,298 V430 H0Z','#9cc6bd',2);
- g+=`<path d="M0,318 Q90,302 170,316 Q250,330 342,308" fill="none" stroke="#fffaf0" stroke-width="1.6" stroke-dasharray="10 8" opacity=".8"/>`;
+ g+=`<path d="M-26,430 Q-30,366 -12,326 Q2,298 40,294 Q100,284 170,298 Q250,312 342,290 V430Z" fill="#e8d6a4"/>`;
+ g+=P('M-12,440 Q-16,370 0,334 Q12,310 40,304 Q100,294 170,306 Q250,320 342,298 V440Z','#9cc6bd',2);
+ g+=`<path d="M4,430 Q2,372 12,344 Q22,320 46,314 Q100,304 170,316 Q250,330 342,308" fill="none" stroke="#fffaf0" stroke-width="1.6" stroke-dasharray="10 8" opacity=".8"/>`;
  g+=`<path d="M60,350 q7,-4 14,0 q7,4 14,0 M150,366 q7,-4 14,0 q7,4 14,0 M110,394 q7,-4 14,0 q7,4 14,0 M220,388 q7,-4 14,0 q7,4 14,0 M270,350 q7,-4 14,0 q7,4 14,0" fill="none" stroke="#fffaf0" stroke-width="1.8" stroke-linecap="round"/>`;
  // river
  g+=`<path d="M150,108 Q136,150 150,196 Q166,246 178,306" fill="none" stroke="${ink}" stroke-width="9" stroke-linecap="round"/><path d="M150,108 Q136,150 150,196 Q166,246 178,306" fill="none" stroke="#9cc6bd" stroke-width="6" stroke-linecap="round"/>`;
@@ -541,8 +564,8 @@ function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,
  g+=`<path d="M200,150 q4,-4 8,0 q4,-4 8,0 M222,140 q3,-3 6,0 q3,-3 6,0 M86,150 q3,-3 6,0 q3,-3 6,0" fill="none" stroke="${ink}" stroke-width="1.3"/>`;
  [...MAPHOOKS].sort((a,b)=>(a.z??2)-(b.z??2)).forEach(h=>{g+=h({U,P,ink,FN,f})});
  // vignette
- g+=`<rect x="0" y="0" width="342" height="430" fill="url(#mapVig)" pointer-events="none"/></g>`; /* 暈影不能擋住地點的點擊 */
- g+=`<path d="M24,30 Q170,20 318,32 Q326,220 316,400 Q170,410 26,400 Q18,220 24,30Z" fill="none" stroke="#a8916a" stroke-width="1.2" stroke-dasharray="4 5"/>`;
+ g+=`<rect x="-120" y="0" width="462" height="430" fill="url(#mapVig)" pointer-events="none"/></g>`; /* 暈影不能擋住地點的點擊 */
+ g+=`<path d="M-96,30 Q110,20 318,32 Q326,220 316,400 Q110,410 -94,400 Q-102,220 -96,30Z" fill="none" stroke="#a8916a" stroke-width="1.2" stroke-dasharray="4 5"/>`;
  g+='<g pointer-events="none">';MAPTOP.forEach(h=>{g+=h({U,P,ink,FN,f})});g+='</g>'; /* 畫在暈影上面的東西（例如秘境的光圈） */
  // compass
  g+=`<g transform="translate(58,368)"><circle r="20" fill="#f1e2bf" stroke="${ink}" stroke-width="2"/><circle r="15" fill="none" stroke="#c9b48a" stroke-width="1"/><path d="M0,-17 L5,0 L0,17 L-5,0Z" fill="#a8461f" stroke="${ink}" stroke-width="1.4"/><path d="M-17,0 L0,-4 L17,0 L0,4Z" fill="#e8dcc0" stroke="${ink}" stroke-width="1.1"/><text x="0" y="-24" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">北</text></g>`;
@@ -642,9 +665,9 @@ if(!TL){const before=prog.unlocked;while(LEVELS[prog.unlocked+1]&&starsOf(prog.u
 level=Math.min(prog.unlocked,LEVELS.length-1);
 /* 給 level{n}.js、secret.js 使用的工具與資料 */
 window.TH={EDGELAND,ROADS,T,f,r,sr,pk,ri,rnd,shuffle,limb,shade,wob,OL,SNOW,SKIN,HAIR,SHIRT,PANTS,HATS,kid,chibi,act,wrapAn,heart,bubble,noteM,peekHead,faceHead,headOnly,
- cat,frog,owl,sheep,chicken,anyDog,dog,swan,pine,roundTree,bush,rock,barrel,crate,pot,lamp,bench,sign,fence,reeds,lily,well,tent,campfire,swirl,signpost,stall,
- add,mark,canPlace,scatter,SCATREG,SCATOK,skyBirds,chaikin,bow,qBubble,GC,GR,CELL,occ,mulberry32,DK,balloon,castle,fountain,house,kayak,lighthouse,mushHouse,rowboat,sailboat,tower,windmill,pig,barn,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,HEAVY,ANIM,ALWAYS,DUR,
- ANIMX,ALWAYSX,HEAVYX,SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,mapHook,TAPHOOKS,NGHOOKS,MAPTOP,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,SECRETS,STORIES,SEQ,SKYC,SKYY,EDGEM,EDGED,EDGEDECO,EDGEMY,EDGEFILL,FRINGE,FRINGEX,RESERVE,ROADK,RESETKEYS,icon,starSvg,
+ cat,frog,owl,sheep,chicken,anyDog,dog,swan,pine,roundTree,bush,rock,barrel,crate,pot,lamp,bench,sign,fence,reeds,lily,well,tent,campfire,swirl,signpost,signIcon,stall,
+ add,mark,canPlace,scatter,SCATREG,SCATOK,skyBirds,chaikin,bow,qBubble,qThink,QHEART,GC,GR,CELL,occ,mulberry32,DK,balloon,castle,fountain,house,kayak,lighthouse,mushHouse,rowboat,sailboat,tower,windmill,pig,barn,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,HEAVY,ANIM,ALWAYS,DUR,
+ ANIMX,ALWAYSX,HEAVYX,SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,mapHook,mapRoute,TAPHOOKS,NGHOOKS,MAPTOP,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,SECRETS,STORIES,SEQ,SKYC,SKYY,EDGEM,EDGED,EDGEDECO,EDGEMY,EDGEFILL,FRINGE,FRINGEX,RESERVE,ROADK,RESETKEYS,icon,starSvg,
  typeOf:id=>LEVELS.slice(1).flatMap(L_=>L_.types||[]).find(t=>t.id===id),colAdd,colClover,colBonus,colStory,updateCounts,win:()=>win(),goLevel:n=>goLevel(n),level:()=>level,rodeHas,pads:()=>pads(),scr:()=>({w:SW,h:SH,base}),apply:()=>apply(),clampV:()=>clampV(),rezoom:()=>{measure();clampV();apply()},updAnim:()=>updateAnim(),tweenTo:(s,x,y,d,cb)=>tweenTo(s,x,y,d,cb),curtain,pickView,walkPose,DENS,sprites,ride,toast,clockHold,clockRun,burst,floatText,sfx,items:()=>items,game:()=>st,scene:()=>scene,view:()=>view,testOn:()=>testMode,dbg:{clover:()=>clovers,step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG};
 applyTestUI();
 ensureUpTo(prog.unlocked,()=>{while(level>1&&!rodeHas(level))level--;while(level>1&&!LEVELS[level].types)level--;if(!LEVELS[1].types){$('#loading').textContent='找不到 level1.js，請確認它和 index.html 放在同一個資料夾';return}setLevel(level);

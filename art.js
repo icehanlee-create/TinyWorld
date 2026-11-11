@@ -15,7 +15,7 @@ const ROOF=['#76804a','#b85a35','#6a7488','#7f5a40','#d98a42','#5d6640','#a85640
 /* ================= characters ================= */
 const HAIRS=[
  c=>`<path d="M-13,-35 Q-13,-49 0,-49 Q13,-49 13,-35 Q7,-41 0,-40 Q-7,-41 -13,-35Z" fill="${c}"/>`,
- c=>`<path d="M-13,-36 L-12,-46 L-7,-43 L-4,-51 L1,-45 L6,-50 L8,-43 L13,-37 Q5,-42 -13,-36Z" fill="${c}"/>`,
+ c=>`<path d="M-13,-35 Q-14,-42 -11,-46 L-7,-45 L-5,-52 L-1,-47 L3,-53 L6,-46 L10,-48 L11,-45 Q14,-41 13,-35 Q7,-41 0,-40 Q-7,-41 -13,-35Z" fill="${c}"/>`, /* 2026-11-11 刺刺頭改成左右對稱、瀏海接回臉的弧線 */
  c=>`<path d="M-13,-34 Q-12,-49 0,-49 Q12,-49 13,-34 Q10,-40 6,-41 Q0,-37 -6,-41 Q-10,-39 -13,-34Z" fill="${c}"/>`,
  c=>`<circle cx="0" cy="-50" r="6" fill="${c}"/><path d="M-13,-35 Q-13,-48 0,-48 Q13,-48 13,-35 Q6,-41 -13,-35Z" fill="${c}"/>`,
  c=>`<circle cx="-8" cy="-44" r="6" fill="${c}"/><circle cx="8" cy="-44" r="6" fill="${c}"/><circle cx="0" cy="-48" r="6.5" fill="${c}"/>`
@@ -40,25 +40,39 @@ const BODY=c=>`<path d="M-8,-5 Q-9,-17 0,-18 Q9,-17 8,-5 Q0,-2 -8,-5Z" fill="${c
 /* ---------- 服裝：依場景換穿著（OUTFITS[關卡]，例如海島清涼、雪山保暖） ---------- */
 const OUTFITS={};let DR=null; /* 依場景換穿著：各關檔案自己設定 OUTFITS[關卡] */
 function outfitOf(o){if(o._of)return o;const F=OUTFITS[SCN];o={...o,_of:1};return F&&!o.plain?F(o):o}
-function dressStart(o,sk,sh,pa){DR={top:o.top,bottom:o.bottom,sk,sh,pa,aloha:o.aloha,scarf:o.scarf,mitts:o.mitts,boots:o.boots}}
+function dressStart(o,sk,sh,pa){DR={top:o.top,bottom:o.bottom,sk,sh,pa,aloha:o.aloha,scarf:o.scarf,mitts:o.mitts,boots:o.boots,kim:o.kim,obi:o.obi,pat:o.pat}}
+/* 和服（top:'kimono'；kim＝樣式 'A' 振袖／'B' 浴衣／'C' 羽織、obi＝腰帶色、pat＝花紋色；腳只露出白足袋＋木屐） */
+const KIMSLV={A:[4.2,7.5],B:[3.4,4.6],C:[3.6,5]};
+function kimPat(c,st,pat){if(!pat)return '';if(st==='B')return [-5,-1,3,7].map(x=>`<path d="M${x},-17 V-2" fill="none" stroke="${pat}" stroke-width="1.3" opacity=".75"/>`).join('');
+ return [[-5,-15],[4,-14.5],[-6,-5],[5,-4],[0,-3]].map(([x,y])=>`<g transform="translate(${x},${y})" stroke="none" fill="${pat}"><circle cx="0" cy="-1.2" r="1"/><circle cx="1.1" cy="-.4" r="1"/><circle cx=".7" cy="1" r="1"/><circle cx="-.7" cy="1" r="1"/><circle cx="-1.1" cy="-.4" r="1"/></g>`).join('')}
 const ptsOf=d=>{const n=d.match(/-?[\d.]+/g).map(Number),p=[];for(let i=0;i+1<n.length;i+=2)p.push([n[i],n[i+1]]);return p};
 const segA=(d,t)=>{const [a,b]=ptsOf(d);return `M${a[0]},${a[1]} L${f(a[0]+(b[0]-a[0])*t)},${f(a[1]+(b[1]-a[1])*t)}`};
 const segZ=(d,t)=>{const p=ptsOf(d),a=p[p.length-2],b=p[p.length-1];return `M${f(b[0]+(a[0]-b[0])*t)},${f(b[1]+(a[1]-b[1])*t)} L${b[0]},${b[1]}`};
 function armLimb(d,c,w=3.2){const T=DR&&DR.top;
  if(T==='tank'||T==='bare')return limb(d,DR.sk,w);
  if(T==='tee')return limb(d,DR.sk,w)+limb(segA(d,.42),c,w+.7);
+ if(T==='kimono'){const p=ptsOf(d),a=p[0],e=p[p.length-1],t=.62,m=[a[0]+(e[0]-a[0])*t,a[1]+(e[1]-a[1])*t],[rx,ry]=KIMSLV[DR.kim]||KIMSLV.A,cc=DR.kim==='C'?'#4a4f5c':c;
+  return limb(d,DR.sk,w)+`<path d="M${f(m[0]-rx)},${f(m[1]-1)} Q${f(m[0]-rx)},${f(m[1]+ry)} ${f(m[0])},${f(m[1]+ry)} Q${f(m[0]+rx)},${f(m[1]+ry)} ${f(m[0]+rx)},${f(m[1]-1)}Z" fill="${cc}" stroke-width="1.3"/>`+limb(segA(d,t),cc,w+2.4)}
  if(T==='coat'){const p=ptsOf(d),e=p[p.length-1];return limb(d,c,w+1.2)+`<circle cx="${e[0]}" cy="${e[1]}" r="2.6" fill="${DR.mitts||'#d8413a'}" stroke-width="1.2"/>`}
  return limb(d,c,w)}
 function legLimb(d,c,w=3.2){const B=DR&&DR.bottom;
+ if(B==='kimono')return limb(segZ(d,.32),'#fbf6ea',w)+limb(segZ(d,.08),'#6b4a32',w+.8);
  if(B==='shorts'||B==='trunks'){const p=ptsOf(d);return limb(d,DR.sk,w)+limb(p.length>2?`M${p[0][0]},${p[0][1]} L${p[1][0]},${p[1][1]}`:segA(d,.5),c,w+.5)}
  if(DR&&DR.boots)return limb(d,c,w)+limb(segZ(d,.45),DR.boots,w+.6);
  return limb(d,c,w)}
 function legRect(x,c){const B=DR&&DR.bottom;
+ if(B==='kimono')return `<rect x="${x+.3}" y="-3.2" width="4.9" height="3" rx="1.3" fill="#fbf6ea"/><rect x="${x-.2}" y="-.6" width="5.9" height="1.8" rx=".6" fill="#6b4a32" stroke-width="1"/>`;
  if(B==='shorts'||B==='trunks')return `<rect x="${x}" y="-7" width="5.5" height="7" rx="2.7" fill="${DR.sk}"/><rect x="${x}" y="-7" width="5.5" height="3.9" rx="1.6" fill="${c}"/>`;
  let s=`<rect x="${x}" y="-7" width="5.5" height="7" rx="2.7" fill="${c}"/>`;if(DR&&DR.boots)s+=`<rect x="${x-.3}" y="-3.4" width="6.1" height="3.6" rx="1.6" fill="${DR.boots}"/>`;return s}
 function bodyD(c){const T=DR&&DR.top;
  if(T==='bare')return BODY(DR.sk)+`<path d="M-8,-5 Q0,-2 8,-5 L8.3,-8.5 Q0,-6 -8.3,-8.5Z" fill="${DR.pa}"/>`;
  if(T==='tank')return BODY(DR.sk)+`<path d="M-6.5,-5 Q-7.5,-15 -3.5,-17.3 L3.5,-17.3 Q7.5,-15 6.5,-5 Q0,-2.5 -6.5,-5Z" fill="${c}"/>`;
+ if(T==='kimono'){const st=DR.kim||'A',ob=DR.obi||'#f0c040',hem=st==='A'?-.2:-1.4;
+  let g=`<path d="M-8.6,-16.8 Q0,-19.2 8.6,-16.8 L9.8,${hem} Q0,${hem+2.2} -9.8,${hem}Z" fill="${c}"/>`+kimPat(c,st,DR.pat)+
+   `<path d="M-4.6,-18.2 L.6,-10.6 L4.6,-18.2" fill="none" stroke="#fbf6ea" stroke-width="2.2"/><path d="M-4.6,-18.2 L.6,-10.6 L4.6,-18.2 M.6,-10.6 L-2.4,${f(hem+.6)}" fill="none" stroke-width="1.1"/>`;
+  g+=st==='B'?`<rect x="-9.2" y="-11.4" width="18.4" height="2.8" rx=".8" fill="${ob}" stroke-width="1.2"/>`:`<rect x="-9.3" y="-12.6" width="18.6" height="4.4" rx="1" fill="${ob}" stroke-width="1.3"/><path d="M-9,-10.4 H9" fill="none" stroke="#d8413a" stroke-width="1"/>`;
+  if(st==='C')g+=`<path d="M-9,-17 Q-10.4,-9 -10,-6.5 L-4.8,-6.5 L-3.6,-17.6Z M9,-17 Q10.4,-9 10,-6.5 L4.8,-6.5 L3.6,-17.6Z" fill="#4a4f5c" stroke-width="1.2"/><circle cx="-3.5" cy="-12" r="1" fill="#fbf6ea" stroke="none"/><circle cx="3.5" cy="-12" r="1" fill="#fbf6ea" stroke="none"/>`;
+  return g}
  if(T==='coat')return `<path d="M-10,-4 Q-11.5,-18 0,-19.5 Q11.5,-18 10,-4 Q0,-1 -10,-4Z" fill="${c}"/><path d="M-9,-10 Q0,-8 9,-10 M0,-18 V-3" fill="none" stroke="${shade(c,-.25)}" stroke-width="1.1"/>`+(DR.scarf?`<path d="M-7.5,-19.5 Q0,-15.5 7.5,-19.5 L7.5,-16.5 Q0,-12.5 -7.5,-16.5Z" fill="${DR.scarf}" stroke-width="1.3"/><path d="M3,-15.5 l1.5,8 h3.5 l-2,-8.5" fill="${DR.scarf}" stroke-width="1.2"/>`:'');
  let s=BODY(c);if(T==='tee'&&DR.aloha)s+=[[-4,-12],[3,-14],[1,-8],[-3,-7],[5,-9]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.3" fill="${DR.aloha}" stroke="none"/>`).join('');return s}
 function chibi(o={}){o=outfitOf(o);
@@ -98,7 +112,7 @@ function kid(o={}){o=outfitOf(o);
  const L={sk:o.skin||pk(SKIN),hr:o.hair||pk(HAIR),sh:o.shirt||pk(SHIRT),pa:o.pants||pk(PANTS),hs:o.hs??ri(0,4),hat:o.hat??(r()<.33?ri(0,5):-1)};
  const v=o.view||'side',p=o.pose||'stand';
  if(v==='fq'||v==='bq')return kidQ(o,L,v,p);
- if(v==='front')return chibi({skin:L.sk,hair:L.hr,shirt:L.sh,pants:L.pa,hs:L.hs,hat:L.hat,arm:o.arm??0,sit:p==='sit',beard:o.beard,mood:o.mood,top:o.top,bottom:o.bottom,aloha:o.aloha,scarf:o.scarf,mitts:o.mitts,boots:o.boots,_of:1})+(o.extra||'');
+ if(v==='front')return chibi({skin:L.sk,hair:L.hr,shirt:L.sh,pants:L.pa,hs:L.hs,hat:L.hat,arm:o.arm??0,sit:p==='sit',beard:o.beard,mood:o.mood,top:o.top,bottom:o.bottom,aloha:o.aloha,scarf:o.scarf,mitts:o.mitts,boots:o.boots,kim:o.kim,obi:o.obi,pat:o.pat,_of:1})+(o.extra||'');
  dressStart(o,L.sk,L.sh,L.pa);
  const legs=o.legs||p,cy=p==='crouch'?5:0,A=ARMS[v][p]||ARMS[v].stand;
  const s0=v==='side'?[-1,-14]:[-6,-14],s1=v==='side'?[1,-14]:[6,-14];
@@ -134,9 +148,9 @@ function kidQ(o,L,v,p){dressStart(o,L.sk,L.sh,L.pa);const front=v==='fq',legs=o.
  let u=bodyD(L.sh);
  if(front)u+=armLimb(`M${s0[0]},${s0[1]} L${A[0][0]-4},${A[0][1]}`,L.sh); /* 近的手（畫面左邊）畫在身體前面 */
  let h=`<circle cy="-35" r="13" fill="${L.sk}"/>`;
- if(front){h+=`<ellipse cx="-12.5" cy="-33" rx="2.2" ry="3" fill="${L.sk}"/>`+`<g transform="translate(-2,0)">${HAIRS[L.hs](L.hr)}</g>`+`<g transform="translate(3.2,0) scale(.84,1)">${face(o.eyes==='closed'?3:(o.mood??ri(0,3)))}</g>`;
+ if(front){h+=`<ellipse cx="-12.5" cy="-33" rx="2.2" ry="3" fill="${L.sk}"/>`+`<g transform="translate(-.8,-35) scale(1.07,1.04) translate(0,35)">${HAIRS[L.hs](L.hr)}</g>`+`<g transform="translate(3.2,0) scale(.84,1)">${face(o.eyes==='closed'?3:(o.mood??ri(0,3)))}</g>`;
   if(o.beard)h+=`<path d="M-5,-29 Q3,-12 12,-29 Q7,-26 3,-28 Q-1,-26 -5,-29Z" fill="#fbf6ea"/>`}
- else h+=`<ellipse cx="9.5" cy="-30" rx="4" ry="5" fill="${L.sk}"/><ellipse cx="12.6" cy="-33" rx="2.2" ry="3" fill="${L.sk}"/>`+`<g transform="translate(-2.4,0)">${SH_BACK[L.hs](L.hr)}</g>`;
+ else h+=`<ellipse cx="9.5" cy="-30" rx="4" ry="5" fill="${L.sk}"/><ellipse cx="12.6" cy="-33" rx="2.2" ry="3" fill="${L.sk}"/>`+`<g transform="translate(-.9,-35) scale(1.07,1.04) translate(0,35)">${SH_BACK[L.hs](L.hr)}</g>`;
  if(L.hat>=0)h+=`<g transform="translate(-1,0)">${HATS[L.hat]()}</g>`;
  u+=headG(h);
  g+=cy?`<g transform="translate(0,${cy})">${u}</g>`:u;
@@ -145,7 +159,9 @@ function kidQ(o,L,v,p){dressStart(o,L.sk,L.sh,L.pa);const front=v==='fq',legs=o.
 const pickView=()=>{const x=r();return x<.1?'front':x<.32?'fq':x<.62?'side':x<.8?'bq':'back'};
 const walkPose=v=>v==='front'?'stand':pk(['walk','stand','walk','reach','stand']);
 const wrapAn=(a,inner,force)=>{if(!force&&r()>=.75)return inner;const[d0,d1]=DUR[a];return `<g class="an a-${a}" style="--d:${f(sr(d0,d1))}s;animation-delay:-${f(sr(0,4))}s">${inner}</g>`};
-function act(x,y,dir,o={},anim){const a=anim===true?pk(['bob','sway','hop','wig','bob','sway']):anim;let inner=kid(o);if(a)inner=wrapAn(a,inner,o.force);return T(x,y,o.s||1,inner,dir<0)}
+/* 2026-11-11 人物動作依活動：step 小碎步、nod 點頭、work 用力做事、bend 彎腰、groove 大搖擺、dance 跳舞、hop／cheer 跳、lean 輕晃、false 不動。沒指定（true）時隨機輕晃或點頭；舊的 bob／sway 當成輕晃 */
+const PERSON_AN={bob:'lean',sway:'lean',float:'lean'};
+function act(x,y,dir,o={},anim){let a=anim===true?pk(['lean','nod','lean','nod','lean','lean']):anim;if(a&&PERSON_AN[a])a=PERSON_AN[a];let inner=kid(o);if(a)inner=wrapAn(a,inner,o.force);return T(x,y,o.s||1,inner,dir<0)}
 const heart=(x,y,c='#d8413a')=>`<path transform="translate(${x},${y})" d="M0,4 C-8,-2 -5,-9 0,-5 C5,-9 8,-2 0,4Z" fill="${c}" stroke-width="1.3"/>`;
 const noteM=(x,y)=>`<g transform="translate(${x},${y})"><path d="M2,0 V-11 L9,-13 V-2" fill="none" stroke-width="1.6"/><ellipse cx="0" cy="0" rx="2.8" ry="2.1" fill="${OL}" stroke="none"/><ellipse cx="7" cy="-2" rx="2.8" ry="2.1" fill="${OL}" stroke="none"/></g>`;
 function bubble(x,y,c){let g=`<g transform="translate(${x},${y})"><path d="M-14,-10 h28 q4,0 4,4 v10 q0,4 -4,4 h-14 l-6,6 v-6 h-8 q-4,0 -4,-4 v-10 q0,-4 4,-4z" fill="#fbf6ea" stroke-width="1.6"/>`;
@@ -153,35 +169,35 @@ function bubble(x,y,c){let g=`<g transform="translate(${x},${y})"><path d="M-14,
  return g+'</g>'}
 const pinkFlowers=(x,y)=>[[0,0],[9,-5],[15,2]].map(([dx,dy])=>{const c=pk(['#f0a8a0','#c58be0','#fbf6ea','#e86a6a']);return `<g transform="translate(${x+dx},${y+dy})"><path d="M0,0 V-12" fill="none" stroke="#5f8f3f" stroke-width="1.6"/>${[0,1,2,3,4].map(i=>{const a=i*1.2566;return `<circle cx="${f(Math.cos(a)*3.3)}" cy="${f(-12+Math.sin(a)*3.3)}" r="2.6" fill="${c}" stroke-width="1"/>`}).join('')}<circle cy="-12" r="1.8" fill="#f5c842" stroke-width=".8"/></g>`}).join('');
 const VIG={
- throwCatch:{w:120,h:84,fn:()=>{const b=pk(['#d8413a','#6fa8d0','#e8913a']);return act(-42,0,1,{pose:'up'},'sway')+act(42,0,-1,{pose:'reach'},'hop')+`<path d="M-21,-28 Q2,-90 28,-22" fill="none" stroke-dasharray="3 4" stroke-width="1.2"/>`+wrapAn('float',`<circle cx="4" cy="-68" r="5" fill="${b}"/>`,true)}},
+ throwCatch:{w:120,h:84,fn:()=>{const b=pk(['#d8413a','#6fa8d0','#e8913a']);return act(-42,0,1,{pose:'up'},'hop')+act(42,0,-1,{pose:'reach'},'hop')+`<path d="M-21,-28 Q2,-90 28,-22" fill="none" stroke-dasharray="3 4" stroke-width="1.2"/>`+wrapAn('float',`<circle cx="4" cy="-68" r="5" fill="${b}"/>`,true)}},
  chase:{w:110,h:64,fn:()=>`<path d="M-58,-32 h-10 M-56,-22 h-13 M-58,-12 h-9" fill="none" stroke-width="1.4"/>`+act(-30,0,1,{pose:'run',mood:1},'hop')+act(28,0,1,{pose:'run'},'hop')},
- jumpRope:{w:130,h:74,fn:()=>act(-52,0,1,{pose:'reach'},'bob')+act(52,0,-1,{pose:'reach'},'bob')+`<path d="M-38,-18 Q0,12 38,-18" fill="none" stroke="#c4572f" stroke-width="2.2"/>`+act(0,-6,1,{view:pk(['back','side']),pose:'up2',force:true},'hop')},
- seesaw:{w:130,h:60,fn:()=>`<path d="M-9,0 L0,-12 L9,0Z" fill="#8a5a3a"/>`+wrapAn('rock',`<rect x="-58" y="-17" width="116" height="7" rx="3" fill="#c4572f"/>`+act(-44,-16,1,{pose:'sit',s:.85})+act(44,-16,-1,{pose:'sit',s:.85}),true)},
- chat:{w:84,h:86,fn:()=>act(-16,0,1,{view:pk(['side','side','fq'])},'bob')+act(16,0,-1,{view:pk(['side','fq','fq']),pose:pk(['stand','reach'])},'bob')+wrapAn('bob',bubble(r()<.5?-24:20,-74,pk(['dots','heart','note','dots'])),true)},
- handInHand:{w:66,h:62,fn:()=>{const v=pk(['back','bq','bq']);return act(-11,0,1,{view:v,pose:'stand'},'bob')+act(11,0,1,{view:v,pose:'stand'},'bob')+`<circle cx="0" cy="-8" r="3.2" fill="${pk(SKIN)}" stroke-width="1.4"/>`}},
- benchPair:{w:72,h:56,fn:()=>act(-13,-6,1,{view:'back',pose:'stand'},'bob')+act(13,-6,1,{view:'back',pose:pk(['stand','up'])},'bob')+`<rect x="-31" y="-24" width="62" height="6" rx="2" fill="#a0663f"/><rect x="-31" y="-14" width="62" height="6" rx="2" fill="#a0663f"/><path d="M-26,-8 V0 M26,-8 V0" fill="none" stroke-width="3"/>`},
- dogWalk:{w:110,h:62,fn:()=>{const d=anyDog();return `<path d="M-18,-9 Q${f(4+d.cx/2)},-2 ${f(22+d.cx)},${f(d.cy)}" fill="none" stroke="#c4572f" stroke-width="1.6"/>`+act(-24,0,1,{pose:'walk'},'bob')+T(22,0,1,wrapAn('hop',d.svg))}},
- petDog:{w:76,h:58,fn:()=>act(-22,0,1,{pose:'crouch',mood:0},'bob')+T(22,0,1,wrapAn(pk(['wig','hop']),anyDog().svg,true),true)+wrapAn('float',heart(2,-46),true)},
- feedChickens:{w:112,h:60,fn:()=>act(-36,0,1,{pose:'low'},'bob')+`<g fill="#e8c46a" stroke="none">${[...Array(8)].map(()=>`<circle cx="${f(sr(-20,44))}" cy="${f(sr(-5,3))}" r="1.6"/>`).join('')}</g>`+[[6,-3],[28,2],[44,-6]].map(([x,y])=>T(x,y,1,wrapAn('peck',chicken(),true),true)).join('')},
- petCat:{w:62,h:56,fn:()=>act(-14,0,1,{pose:'crouch',mood:0},'bob')+T(14,0,1,wrapAn('wig',cat(pk(['#e8913a','#fbf6ea','#c9c2b6']))))+wrapAn('float',heart(2,-42),true)},
- shepherd:{w:140,h:74,fn:()=>act(-52,0,1,{pose:'walk',hat:1},'bob')+`<path d="M-46,-9 L-41,-62 Q-39,-70 -32,-65" fill="none" stroke="#7a5235" stroke-width="2.6"/>`+[[-14,0],[14,-8],[40,2]].map(([x,y])=>T(x,y,1,wrapAn('bob',sheep()))).join('')},
- violin:{w:132,h:80,fn:()=>act(0,0,1,{pose:'hold',extra:`<ellipse cx="14" cy="-19" rx="6.5" ry="4.2" fill="#a8703f" transform="rotate(-25 14 -19)"/><path d="M6,-30 L24,-10" fill="none" stroke-width="1.4"/>`},'sway')+wrapAn('float',noteM(18,-58)+noteM(-6,-66),true)+act(-46,0,1,{pose:'sit',s:.85},'bob')+act(46,0,-1,{s:.85,mood:1},'hop')},
- flute:{w:100,h:80,fn:()=>act(-14,0,1,{pose:'hold',extra:`<path d="M14,-23 L33,-27" fill="none" stroke="${OL}" stroke-width="4.5"/><path d="M14,-23 L33,-27" fill="none" stroke="#e0b44a" stroke-width="2.4"/>`},'sway')+wrapAn('float',noteM(26,-56),true)+act(34,0,-1,{pose:'sit',s:.85},'bob')},
- flowerWatch:{w:60,h:48,fn:()=>act(-12,0,1,{pose:'crouch'},'bob')+pinkFlowers(10,0)},
- watering:{w:76,h:62,fn:()=>act(-20,0,1,{pose:'reach',extra:`<path d="M11,-22 h11 v10 h-11z" fill="#6fa8a0"/><path d="M22,-19 L30,-26" fill="none" stroke-width="2.6"/><path d="M13,-22 Q16,-30 20,-22" fill="none" stroke-width="1.6"/>`},'bob')+wrapAn('bob',`<path d="M10,-25 q6,8 12,14 M12,-24 q5,8 14,12" fill="none" stroke="#7fb8c8" stroke-dasharray="2 3" stroke-width="1.6"/>`,true)+T(26,0,1,pot())},
- mushroomPick:{w:80,h:50,fn:()=>`<g transform="translate(-34,0)"><path d="M-10,-12 Q0,-24 10,-12" fill="none" stroke-width="2"/><path d="M-11,-12 L11,-12 L8,0 L-8,0Z" fill="#c99a5b"/></g>`+act(-12,0,1,{pose:'crouch'},'bob')+T(18,-11,.75,DECOY.mushTan)+T(30,-9,.6,DECOY.mushTan)},
- sweep:{w:64,h:62,fn:()=>act(-10,0,1,{pose:'low',extra:`<path d="M11,-9 L22,-1" fill="none" stroke="#7a5235" stroke-width="2.6"/><path d="M19,-3 L30,0 L26,5 L16,3Z" fill="#e8c46a"/>`},'sway')+wrapAn('float',`<circle cx="32" cy="-4" r="3" fill="#ecd9ae" stroke-width="1"/><circle cx="37" cy="-8" r="2" fill="#ecd9ae" stroke-width="1"/>`,true)},
- carryBox:{w:44,h:72,fn:()=>act(0,0,r()<.5?1:-1,{pose:'hold',legs:'walk',extra:`<rect x="8" y="-28" width="18" height="16" fill="#c99a5b"/><path d="M8,-22.5 H26 M8,-17 H26" fill="none" stroke="#8a6a3a" stroke-width="1.1"/><path d="M8,-28 h3 v3 M26,-28 h-3 v3 M8,-12 h3 v-3 M26,-12 h-3 v-3" fill="none" stroke="#5a5f64" stroke-width="1.6"/>`},'bob')},
+ jumpRope:{w:130,h:74,fn:()=>act(-52,0,1,{pose:'reach'},'hop')+act(52,0,-1,{pose:'reach'},'hop')+`<path d="M-38,-18 Q0,12 38,-18" fill="none" stroke="#c4572f" stroke-width="2.2"/>`+act(0,-6,1,{view:pk(['back','side']),pose:'up2',force:true},'hop')},
+ seesaw:{w:130,h:60,fn:()=>`<path d="M-9,0 L0,-12 L9,0Z" fill="#8a5a3a"/>`+wrapAn('rock',`<rect x="-58" y="-17" width="116" height="7" rx="3" fill="#c4572f"/>`+act(-44,-16,1,{pose:'sit',s:.85})+act(44,-16,-1,{pose:'sit',s:.85}),'hop')},
+ chat:{w:84,h:86,fn:()=>act(-16,0,1,{view:pk(['side','side','fq'])},'nod')+act(16,0,-1,{view:pk(['side','fq','fq']),pose:pk(['stand','reach'])},'nod')+wrapAn('bob',bubble(r()<.5?-24:20,-74,pk(['dots','heart','note','dots'])),true)},
+ handInHand:{w:66,h:62,fn:()=>{const v=pk(['back','bq','bq']);return act(-11,0,1,{view:v,pose:'stand'},'step')+act(11,0,1,{view:v,pose:'stand'},'step')+`<circle cx="0" cy="-8" r="3.2" fill="${pk(SKIN)}" stroke-width="1.4"/>`}},
+ benchPair:{w:72,h:56,fn:()=>act(-13,-6,1,{view:'back',pose:'stand'},'nod')+act(13,-6,1,{view:'back',pose:pk(['stand','up'])},'nod')+`<rect x="-31" y="-24" width="62" height="6" rx="2" fill="#a0663f"/><rect x="-31" y="-14" width="62" height="6" rx="2" fill="#a0663f"/><path d="M-26,-8 V0 M26,-8 V0" fill="none" stroke-width="3"/>`},
+ dogWalk:{w:110,h:62,fn:()=>{const d=anyDog();return `<path d="M-18,-9 Q${f(4+d.cx/2)},-2 ${f(22+d.cx)},${f(d.cy)}" fill="none" stroke="#c4572f" stroke-width="1.6"/>`+act(-24,0,1,{pose:'walk'},'step')+T(22,0,1,wrapAn('hop',d.svg))}},
+ petDog:{w:76,h:58,fn:()=>act(-22,0,1,{pose:'crouch',mood:0},'bend')+T(22,0,1,wrapAn(pk(['wig','hop']),anyDog().svg,true),true)+wrapAn('float',heart(2,-46),true)},
+ feedChickens:{w:112,h:60,fn:()=>act(-36,0,1,{pose:'low'},'bend')+`<g fill="#e8c46a" stroke="none">${[...Array(8)].map(()=>`<circle cx="${f(sr(-20,44))}" cy="${f(sr(-5,3))}" r="1.6"/>`).join('')}</g>`+[[6,-3],[28,2],[44,-6]].map(([x,y])=>T(x,y,1,wrapAn('peck',chicken(),true),true)).join('')},
+ petCat:{w:62,h:56,fn:()=>act(-14,0,1,{pose:'crouch',mood:0},'bend')+T(14,0,1,wrapAn('wig',cat(pk(['#e8913a','#fbf6ea','#c9c2b6']))))+wrapAn('float',heart(2,-42),true)},
+ shepherd:{w:140,h:74,fn:()=>act(-52,0,1,{pose:'walk',hat:1},'lean')+`<path d="M-46,-9 L-41,-62 Q-39,-70 -32,-65" fill="none" stroke="#7a5235" stroke-width="2.6"/>`+[[-14,0],[14,-8],[40,2]].map(([x,y])=>T(x,y,1,wrapAn('bob',sheep()))).join('')},
+ violin:{w:132,h:80,fn:()=>act(0,0,1,{pose:'hold',extra:`<ellipse cx="14" cy="-19" rx="6.5" ry="4.2" fill="#a8703f" transform="rotate(-25 14 -19)"/><path d="M6,-30 L24,-10" fill="none" stroke-width="1.4"/>`},'groove')+wrapAn('float',noteM(18,-58)+noteM(-6,-66),true)+act(-46,0,1,{pose:'sit',s:.85},'groove')+act(46,0,-1,{s:.85,mood:1},'groove')},
+ flute:{w:100,h:80,fn:()=>act(-14,0,1,{pose:'hold',extra:`<path d="M14,-23 L33,-27" fill="none" stroke="${OL}" stroke-width="4.5"/><path d="M14,-23 L33,-27" fill="none" stroke="#e0b44a" stroke-width="2.4"/>`},'groove')+wrapAn('float',noteM(26,-56),true)+act(34,0,-1,{pose:'sit',s:.85},'groove')},
+ flowerWatch:{w:60,h:48,fn:()=>act(-12,0,1,{pose:'crouch'},'lean')+pinkFlowers(10,0)},
+ watering:{w:76,h:62,fn:()=>act(-20,0,1,{pose:'reach',extra:`<path d="M11,-22 h11 v10 h-11z" fill="#6fa8a0"/><path d="M22,-19 L30,-26" fill="none" stroke-width="2.6"/><path d="M13,-22 Q16,-30 20,-22" fill="none" stroke-width="1.6"/>`},'work')+wrapAn('bob',`<path d="M10,-25 q6,8 12,14 M12,-24 q5,8 14,12" fill="none" stroke="#7fb8c8" stroke-dasharray="2 3" stroke-width="1.6"/>`,true)+T(26,0,1,pot())},
+ mushroomPick:{w:80,h:50,fn:()=>`<g transform="translate(-34,0)"><path d="M-10,-12 Q0,-24 10,-12" fill="none" stroke-width="2"/><path d="M-11,-12 L11,-12 L8,0 L-8,0Z" fill="#c99a5b"/></g>`+act(-12,0,1,{pose:'crouch'},'bend')+T(18,-11,.75,DECOY.mushTan)+T(30,-9,.6,DECOY.mushTan)},
+ sweep:{w:64,h:62,fn:()=>act(-10,0,1,{pose:'low',extra:`<path d="M11,-9 L22,-1" fill="none" stroke="#7a5235" stroke-width="2.6"/><path d="M19,-3 L30,0 L26,5 L16,3Z" fill="#e8c46a"/>`},'work')+wrapAn('float',`<circle cx="32" cy="-4" r="3" fill="#ecd9ae" stroke-width="1"/><circle cx="37" cy="-8" r="2" fill="#ecd9ae" stroke-width="1"/>`,true)},
+ carryBox:{w:44,h:72,fn:()=>act(0,0,r()<.5?1:-1,{pose:'hold',legs:'walk',extra:`<rect x="8" y="-28" width="18" height="16" fill="#c99a5b"/><path d="M8,-22.5 H26 M8,-17 H26" fill="none" stroke="#8a6a3a" stroke-width="1.1"/><path d="M8,-28 h3 v3 M26,-28 h-3 v3 M8,-12 h3 v-3 M26,-12 h-3 v-3" fill="none" stroke="#5a5f64" stroke-width="1.6"/>`},'step')},
  laundry:{w:130,h:80,fn:()=>{let g=`<path d="M-60,0 V-66 M60,0 V-66" fill="none" stroke="#7a5235" stroke-width="3"/><path d="M-60,-62 Q0,-50 60,-62" fill="none" stroke-width="1.2"/>`;
   [[-38,-58],[-14,-55],[12,-55],[36,-58]].forEach(([x,y],i)=>{const c=pk(SHIRT);g+=wrapAn('swing',i%2?`<path d="M${x-8},${y} h16 l2,16 h-20z" fill="${c}"/>`:`<path d="M${x-9},${y} h18 l4,6 -4,2 v10 h-14 v-10 l-4,-2z" fill="${c}"/>`,true)});
-  return g+act(-24,0,1,{view:'back',pose:'up2'},'bob')}},
- painting:{w:80,h:72,fn:()=>act(-20,0,1,{pose:'reach',hat:pk([-1,4,5]),extra:`<path d="M14,-18 L22,-31" fill="none" stroke-width="1.6"/>`},'bob')+`<path d="M8,0 L16,-58 L24,0 M16,-58 L16,0" fill="none" stroke="#7a5235" stroke-width="2.4"/><rect x="2" y="-62" width="28" height="24" fill="#fbf6ea"/><g stroke="none"><circle cx="10" cy="-52" r="4" fill="#6fa8a0"/><circle cx="21" cy="-48" r="5" fill="#f0a8a0"/><path d="M4,-40 Q16,-48 28,-40Z" fill="#8f9d58"/></g>`},
- reading:{w:44,h:52,fn:()=>`<path d="M-11,-8 L-10,0 L10,0 L11,-8 Q0,-12 -11,-8Z" fill="#a8703f"/>`+act(-2,-7,1,{pose:'sit',extra:`<path d="M6,-14 Q9,-18 13,-16 Q16,-18 19,-14 L19,-8 Q16,-11 13,-9 Q9,-11 6,-8Z" fill="#fbf6ea" stroke-width="1.3"/>`},'bob')},
- kiteFly:{w:80,h:150,fn:()=>{const c=pk(['#c4572f','#6fa8a0','#9a6fa8']);return act(-24,0,1,{pose:'up'},'sway')+`<path d="M-3,-25 Q12,-90 26,-118" fill="none" stroke-width=".9"/>`+wrapAn('sway',`<g transform="translate(26,-120)"><path d="M0,14 q-6,8 0,14 q6,8 0,14" fill="none" stroke-width="1.1"/><path d="M0,-14 L10,0 L0,16 L-10,0Z" fill="${c}"/><path d="M0,-14 V16 M-10,0 H10" fill="none" stroke-width="1"/></g>`,true)}},
- stretch:{w:34,h:74,fn:()=>act(0,0,1,{view:'back',pose:'up2'},'sway')},
+  return g+act(-24,0,1,{view:'back',pose:'up2'},'work')}},
+ painting:{w:80,h:72,fn:()=>act(-20,0,1,{pose:'reach',hat:pk([-1,4,5]),extra:`<path d="M14,-18 L22,-31" fill="none" stroke-width="1.6"/>`},false)+`<path d="M8,0 L16,-58 L24,0 M16,-58 L16,0" fill="none" stroke="#7a5235" stroke-width="2.4"/><rect x="2" y="-62" width="28" height="24" fill="#fbf6ea"/><g stroke="none"><circle cx="10" cy="-52" r="4" fill="#6fa8a0"/><circle cx="21" cy="-48" r="5" fill="#f0a8a0"/><path d="M4,-40 Q16,-48 28,-40Z" fill="#8f9d58"/></g>`},
+ reading:{w:44,h:52,fn:()=>`<path d="M-11,-8 L-10,0 L10,0 L11,-8 Q0,-12 -11,-8Z" fill="#a8703f"/>`+act(-2,-7,1,{pose:'sit',extra:`<path d="M6,-14 Q9,-18 13,-16 Q16,-18 19,-14 L19,-8 Q16,-11 13,-9 Q9,-11 6,-8Z" fill="#fbf6ea" stroke-width="1.3"/>`},false)},
+ kiteFly:{w:80,h:150,fn:()=>{const c=pk(['#c4572f','#6fa8a0','#9a6fa8']);return act(-24,0,1,{pose:'up'},'lean')+`<path d="M-3,-25 Q12,-90 26,-118" fill="none" stroke-width=".9"/>`+wrapAn('sway',`<g transform="translate(26,-120)"><path d="M0,14 q-6,8 0,14 q6,8 0,14" fill="none" stroke-width="1.1"/><path d="M0,-14 L10,0 L0,16 L-10,0Z" fill="${c}"/><path d="M0,-14 V16 M-10,0 H10" fill="none" stroke-width="1"/></g>`,true)}},
+ stretch:{w:34,h:74,fn:()=>act(0,0,1,{view:'back',pose:'up2'},'lean')},
  sleeping:{w:76,h:36,fn:()=>`<rect x="-36" y="-7" width="72" height="9" rx="3" fill="${pk(['#f0a8a0','#6fa8a0','#e0b44a'])}"/>`+T(24,-3,1,`<g transform="rotate(-90)">${kid({pose:'stand',eyes:'closed',hat:-1})}</g>`)+wrapAn('float',`<text x="-14" y="-22" font-size="12" font-weight="800" fill="${OL}" stroke="none" font-family="sans-serif">z Z</text>`,true)},
- walker:{w:30,h:62,fn:()=>{const v=pickView(),p=walkPose(v);return act(0,0,r()<.5?1:-1,{view:v,pose:p},true)}},
- gnome:{w:30,h:76,fn:()=>act(0,0,r()<.5?1:-1,{view:pk(['side','side','fq','bq','back','front']),pose:pk(['walk','stand','crouch']),hat:2,beard:r()<.6,hair:'#9a9a9a'},true)}
+ walker:{w:30,h:62,fn:()=>{const v=pickView(),p=walkPose(v);return act(0,0,r()<.5?1:-1,{view:v,pose:p},'step')}},
+ gnome:{w:30,h:76,fn:()=>act(0,0,r()<.5?1:-1,{view:pk(['side','side','fq','bq','back','front']),pose:pk(['walk','stand','crouch']),hat:2,beard:r()<.6,hair:'#9a9a9a'},'lean')}
 };
 
 const headOnly=()=>{const hr=pk(HAIR);return `<circle cy="0" r="9" fill="${pk(SKIN)}"/>`+`<g transform="translate(0,25) scale(.7)">${HAIRS[ri(0,4)](hr)}${face(ri(0,3))}</g>`};
@@ -280,7 +296,29 @@ function barn(){const w=120,h=66,sd=30,sy=15,c='#a85640';let g=`<path d="M${-w/2
  g+=`<rect x="-9" y="${-h-28}" width="18" height="16" fill="#3d3833"/>`+`<g transform="translate(0,${-h-14}) scale(.5)">${headOnly()}</g>`;
  return g}
 const cow=()=>`<path d="M-17,-17 Q-23,-12 -21,-5" fill="none" stroke-width="1.6"/><circle cx="-21" cy="-4" r="2.2" fill="${OL}" stroke="none"/><path d="M-11,0 V-8 M-5,0 V-8 M5,0 V-8 M10,0 V-8" fill="none" stroke-width="3.4"/><ellipse cx="-2" cy="-15" rx="16" ry="10" fill="#fbf6ea"/><path d="M-14,-21 q4,-4 9,-1 q2,5 -3,7 q-6,1 -6,-6Z M2,-12 q3,-3 7,0 q0,4 -4,4 q-4,0 -3,-4Z" fill="${OL}" stroke="none"/><ellipse cx="0" cy="-5.5" rx="3.4" ry="2" fill="#f0b4a8" stroke-width="1.4"/><path d="M8,-31 q-3,-3 -1,-7 M19,-31 q3,-3 1,-7" fill="none" stroke="#5c4a3d" stroke-width="2.6"/><ellipse cx="6" cy="-27" rx="4.5" ry="2.2" fill="#fbf6ea" transform="rotate(-25 6 -27)"/><ellipse cx="22" cy="-27" rx="4.5" ry="2.2" fill="#fbf6ea" transform="rotate(25 22 -27)"/><ellipse cx="14" cy="-24" rx="9" ry="8.5" fill="#fbf6ea"/><path d="M9,-31 q3,4 7,1 q-1,-3 -5,-3Z" fill="${OL}" stroke="none"/><ellipse cx="14" cy="-18" rx="7.5" ry="4.8" fill="#f0b4a8"/><circle cx="11.5" cy="-18" r=".9" fill="${OL}" stroke="none"/><circle cx="16.5" cy="-18" r=".9" fill="${OL}" stroke="none"/><circle cx="10.5" cy="-25" r="1.4" fill="${OL}" stroke="none"/><circle cx="17.5" cy="-25" r="1.4" fill="${OL}" stroke="none"/><path d="M7,-13.5 Q14,-11 21,-13.5" fill="none" stroke="#c4473c" stroke-width="2"/><circle cx="14" cy="-10.5" r="2.4" fill="#f5c842" stroke-width="1.3"/>`;
-const signpost=t=>`<path d="M0,0 V-40" fill="none" stroke="#7a5235" stroke-width="3"/><path d="M-22,-48 L16,-48 L24,-39 L16,-30 L-22,-30Z" fill="#d4ac52"/><text x="-2" y="-35" font-size="10" text-anchor="middle" fill="${OL}" stroke="none" font-weight="700" font-family="PingFang TC,Noto Sans TC,sans-serif">${t}</text>`;
+/* ---- 看板圖示（2026-11-11：場景裡的看板不寫字，改畫圖示；中心在 (0,0)、大約 ±8 的範圍） ---- */
+const SIGNICON={
+ farm:`<path d="M-7,6 V-1 L0,-7 L7,-1 V6Z" fill="#c4473c" stroke-width="1.2"/><path d="M-3,6 V1 H3 V6 M-3,1 L3,6 M3,1 L-3,6" fill="none" stroke="#fbf6ea" stroke-width="1"/>`,
+ island:`<path d="M-8,5 Q0,-1 8,5Z" fill="#e8d49a" stroke-width="1"/><path d="M1,3 Q0,-2 2,-5" fill="none" stroke="#7a5235" stroke-width="1.4"/><path d="M2,-5 q-5,-1 -7,2 M2,-5 q5,-1 7,2 M2,-5 q-2,-3 -5,-3 M2,-5 q3,-3 6,-2" fill="none" stroke="#4f8a3a" stroke-width="1.5"/><path d="M-9,7 q2,-1.6 4,0 q2,1.6 4,0 q2,-1.6 4,0 q2,1.6 4,0" fill="none" stroke="#3f8fb8" stroke-width="1.1"/>`,
+ ruins:`<rect x="-9" y="-7" width="18" height="3" fill="#a89a7a" stroke-width="1"/><rect x="-7" y="-4" width="4" height="10" fill="#c6b99a" stroke-width="1"/><rect x="3" y="-4" width="4" height="10" fill="#c6b99a" stroke-width="1"/><path d="M-6,0 h2 M4,2 h2" stroke-width=".8" fill="none"/>`,
+ cable:`<path d="M-9,-6 L9,-9" fill="none" stroke-width="1"/><path d="M0,-7.5 V-4" fill="none" stroke-width="1"/><rect x="-5" y="-4" width="10" height="9" rx="2" fill="#c4473c" stroke-width="1.1"/><rect x="-3.4" y="-2.4" width="6.8" height="3" fill="#d6ecf0" stroke="none"/>`,
+ onsen:`<path d="M-7,2 Q-7,7 0,7 Q7,7 7,2" fill="none" stroke="#c8362f" stroke-width="1.8"/><path d="M-3.5,3 q-2,-2 0,-4 q2,-2 0,-4 M0,3 q-2,-2 0,-4 q2,-2 0,-4.5 M3.5,3 q-2,-2 0,-4 q2,-2 0,-4" fill="none" stroke="#c8362f" stroke-width="1.5"/>`,
+ ski:`<g transform="translate(.6,.4) scale(.8)"><g fill="#3d3833" stroke="none"><g transform="rotate(-18)"><rect x="-9" y="5" width="18" height="3.2" rx="1.6"/><circle cx="1.6" cy="-8.4" r="2.6"/><path d="M-0.6,-5.6 Q-3.6,-2 -4.4,1.4 L-5.6,5.4 H-3.2 L-1.4,1.8 L1.6,0 L3.4,5.4 H5.8 L4.6,-0.6 Q4.6,-3.4 2.8,-5.6Z"/><path d="M-0.4,-5 L-6.8,-6.6 L-7.2,-5.2 L-0.6,-3.2Z M2.8,-4.8 L8.4,-2.4 L7.8,-1 L2.4,-2.8Z"/></g></g><g fill="#fbf6ea" stroke-width=".7"><circle cx="-9.6" cy="7.4" r="1.6"/><circle cx="-11.6" cy="5" r="1.2"/><circle cx="-12" cy="8.4" r="1"/></g></g>`,
+ town:`<path d="M-7,-1 L0,-7 L7,-1Z" fill="#c4572f" stroke-width="1.1"/><rect x="-5" y="-1" width="10" height="7" fill="#f2dfb0" stroke-width="1.1"/><rect x="-1.5" y="2" width="3" height="4" fill="#7a5235" stroke="none"/>`,
+ fish:`<path d="M-8,0 Q-2,-6 5,0 Q-2,6 -8,0Z M5,0 L9,-4 V4Z" fill="#fbf6ea" stroke="none"/><circle cx="-4.6" cy="-.6" r="1" fill="#3b5a8a" stroke="none"/>`,
+ sakura:[0,72,144,216,288].map(a=>`<ellipse transform="rotate(${a})" cx="0" cy="-3.6" rx="2.7" ry="3.6" fill="#f6b6c8" stroke-width=".8"/>`).join('')+`<circle r="1.6" fill="#e0b44a" stroke="none"/>`,
+ taiko:`<path d="M-6,-6 L-8,-10 M6,-6 L8,-10" fill="none" stroke="#7a5235" stroke-width="1.4"/><rect x="-6" y="-4" width="12" height="10" rx="3" fill="#b5532f" stroke-width="1.1"/><ellipse cx="0" cy="-4" rx="6" ry="2" fill="#f2e6c4" stroke-width="1.1"/><circle cx="0" cy="1.5" r="1.8" fill="none" stroke="#e0b44a" stroke-width="1"/>`,
+ geta:[-4.5,4.5].map(x=>`<rect x="${x-3.4}" y="-7" width="6.8" height="14" rx="3" fill="#d9b070" stroke-width="1.1"/><path d="M${x-2.4},-1 L${x},-4.5 L${x+2.4},-1" fill="none" stroke="#c8362f" stroke-width="1.4"/>`).join(''),
+ foot:`<path d="M-9,6 q2,-1.6 4,0 q2,1.6 4,0 q2,-1.6 4,0 q2,1.6 4,0 q2,-1.6 4,0" fill="none" stroke="#3f8fb8" stroke-width="1.4"/>`+[[-3.6,1],[3.6,-1]].map(([x,y])=>`<g transform="translate(${x},${y})" fill="#f2c9a0" stroke-width=".8"><ellipse cx="0" cy="0" rx="2.4" ry="3.6"/><circle cx="-1.8" cy="-5" r=".9"/><circle cx="0" cy="-5.6" r=".95"/><circle cx="1.8" cy="-5" r=".9"/></g>`).join(''),
+ soldout:`<ellipse cx="0" cy="3" rx="8" ry="3.2" fill="#d9b070" stroke-width="1"/><path d="M-8,3 V-1 Q0,-4 8,-1 V3" fill="#e8c88a" stroke-width="1"/><path d="M-6,-6 L6,6 M6,-6 L-6,6" fill="none" stroke="#c8362f" stroke-width="2.4"/>`,
+ volcano:`<path d="M-11,6 L-4,-5 H4 L11,6Z" fill="#9a7a5a" stroke-width="1.1"/><ellipse cx="0" cy="-5" rx="4" ry="1.5" fill="#6fb5c8" stroke-width=".9"/><path d="M-6,1 l2,-2 M5,2 l-2,-3" fill="none" stroke="#6f5a42" stroke-width="1"/>`,
+ quarry:`<path d="M-7,7 V-4 Q-7,-8 -2,-8 Q3,-8 3,-4 V7Z" fill="#8f8a80" stroke-width="1.1"/><path d="M-6,-3 H2 M-2,-3 V2 L-3.5,2" fill="none" stroke-width="1"/><path d="M5,-2 L10,-7" fill="none" stroke="#7a5235" stroke-width="1.6"/><rect x="8" y="-9" width="4" height="3" rx=".8" transform="rotate(45 10 -7.5)" fill="#9aa0a4" stroke-width=".9"/>`,
+ anchor:`<circle cy="-5.5" r="1.8" fill="none" stroke-width="1.3"/><path d="M0,-3.7 V6 M-3.5,-1.5 H3.5 M-6,2 Q-5,6 0,6 Q5,6 6,2" fill="none" stroke-width="1.4"/>`
+};
+const signIcon=(k,s=1,x=0,y=0)=>`<g transform="translate(${x},${y}) scale(${s})" stroke="${OL}">${SIGNICON[k]||''}</g>`;
+const SIGNSAY={'海島':'往海島港口 →','小島':'往小島 →','農莊':'往東方農莊 →','遺跡':'往森林古代遺跡 →','纜車':'往纜車站 →','溫泉':'往溫泉 →','滑雪場':'往滑雪場 →','小鎮':'往奇幻小鎮 →','往小鎮':'往奇幻小鎮 →'};
+const SIGNKEY={'海島':'island','小島':'island','農莊':'farm','遺跡':'ruins','纜車':'cable','溫泉':'onsen','滑雪場':'ski','小鎮':'town','往小鎮':'town'};
+const signpost=t=>`<g data-say="${SIGNSAY[t]||t}"></g><path d="M0,0 V-40" fill="none" stroke="#7a5235" stroke-width="3"/><path d="M-22,-48 L16,-48 L24,-39 L16,-30 L-22,-30Z" fill="#d4ac52"/>${signIcon(SIGNKEY[t]||'town',1.12,-1,-39)}`;
 /* ================= buildings & props ================= */
 function shade(hex,a){const n=parseInt(hex.slice(1),16);let R=n>>16,G=n>>8&255,B=n&255;const t=a<0?0:255,q=Math.abs(a);R=Math.round(R+(t-R)*q);G=Math.round(G+(t-G)*q);B=Math.round(B+(t-B)*q);return '#'+((1<<24)+(R<<16)+(G<<8)+B).toString(16).slice(1)}
 function wob(pts,amt=1.1){return pts.map((p,i)=>(i?'L':'M')+f(p[0]+sr(-amt,amt))+','+f(p[1]+sr(-amt,amt))).join('')+'Z'}
@@ -392,7 +430,7 @@ function ferry(ride){let s=`<path d="M-104,-20 L96,-20 Q112,-20 104,-6 L92,8 Q0,
  s+=`<rect x="-70" y="-58" width="130" height="38" fill="#fbf9f3"/><path d="M60,-58 L76,-20 H60Z" fill="#e6e0d0"/>`+[-58,-40,-22,-4,14,32].map(x=>`<rect x="${x}" y="-50" width="12" height="11" rx="2" fill="#9fd3e0" stroke-width="1.3"/>`).join('');
  s+=`<rect x="-40" y="-84" width="74" height="26" fill="#fbf9f3"/>`+[-32,-14,4,20].map(x=>`<rect x="${x}" y="-78" width="10" height="9" rx="2" fill="#9fd3e0" stroke-width="1.2"/>`).join('')+`<path d="M-46,-84 H40" fill="none" stroke-width="2.6"/>`;
  s+=`<path d="M-24,-84 L-20,-112 H-4 L0,-84Z" fill="#d8413a"/><path d="M-21,-104 H-3" fill="none" stroke="#3d3833" stroke-width="3"/>`+`<path d="M-70,-58 V-62 H60 V-58" fill="none" stroke-width="1.4"/><path d="M-70,-66 H60" fill="none" stroke-width="1.2"/>`;
- s+=`<circle cx="-82" cy="-30" r="6" fill="none" stroke="#d8413a" stroke-width="3"/><text x="0" y="-24" text-anchor="middle" font-size="9" fill="#3b5a8a" stroke="none" font-weight="700">海島號</text>`;
+ s+=`<circle cx="-82" cy="-30" r="6" fill="none" stroke="#d8413a" stroke-width="3"/>${signIcon('anchor',.9,0,-27)}`;
  if(ride)s+=`<g class="an a-float" style="--d:3s"><path d="M-10,-130 q6,-4 10,0 q6,-4 10,0" fill="none" stroke-width="1.6"/></g>`;
  return s+`<path d="M-118,12 q10,-5 20,0 q10,5 20,0 M80,12 q10,-5 20,0 q10,5 20,0" fill="none" stroke="#e8f6f6" stroke-width="2"/>`}
 function sailboat(){return `<path d="M0,-6 V-70" fill="none" stroke-width="3"/><path d="M3,-66 L36,-14 L3,-14Z" fill="#fbf6ea"/><path d="M-3,-60 L-30,-18 L-3,-18Z" fill="#c4572f"/><path d="M-44,-8 L44,-8 L32,8 L-32,8Z" fill="#6f7f9a"/><path d="M-36,0 H36" fill="none" stroke="#fbf6ea" stroke-width="2"/>`}

@@ -59,7 +59,7 @@ function lodge(w,h,o={}){const wall=o.wall||pk(['#b98a5a','#c99a6a','#efe4cc','#
  g+=`<circle cx="0" cy="${f(-h-rh*.42)}" r="5" fill="#f6d27a"/>`;
  const dw=Math.min(22,w*.2);
  g+=`<rect x="${-dw/2}" y="${-30}" width="${dw}" height="30" fill="#5a3a26"/>`;
- if(o.noren!==false&&(o.noren||r()<.55)){const nc=pk(['#4a5a78','#6a7488','#a85640']);g+=`<path d="M${-dw/2-3},-31 H${dw/2+3} V-16 H${dw/2-4} V-21 H${-dw/2+4} V-16 H${-dw/2-3}Z" fill="${nc}"/><path d="M0,-31 V-21" fill="none" stroke="#fbf6ea" stroke-width="1.2"/><text x="0" y="-22.5" font-size="8" text-anchor="middle" fill="#fbf6ea" stroke="none" font-weight="700" font-family="PingFang TC,Noto Sans TC,sans-serif">湯</text>`}
+ if(o.noren!==false&&(o.noren||r()<.55)){const nc=pk(['#4a5a78','#6a7488','#a85640']);g+=`<path d="M${-dw/2-3},-31 H${dw/2+3} V-16 H${dw/2-4} V-21 H${-dw/2+4} V-16 H${-dw/2-3}Z" fill="${nc}"/><path d="M0,-31 V-21" fill="none" stroke="#fbf6ea" stroke-width="1.2"/><g transform="translate(0,-25) scale(.62)" stroke="#fbf6ea"><path d="M-7,2 Q-7,7 0,7 Q7,7 7,2" fill="none" stroke-width="2"/><path d="M-3.5,3 q-2,-2 0,-4 q2,-2 0,-4 M0,3 q-2,-2 0,-4 q2,-2 0,-4.5 M3.5,3 q-2,-2 0,-4 q2,-2 0,-4" fill="none" stroke-width="1.7"/></g>`}
  [[-hw+10],[hw-10-16]].forEach(([x])=>{if(w>90)g+=`<rect x="${f(x)}" y="${f(-h+10)}" width="16" height="14" fill="#f6d27a"/><path d="M${f(x+8)},${f(-h+10)} v14 M${f(x)},${f(-h+17)} h16" fill="none" stroke-width="1.2"/>`});
  g+=`<path d="M${f(-hw+8)},${f(-h+4)} v6" fill="none" stroke-width="1"/><ellipse cx="${f(-hw+8)}" cy="${f(-h+16)}" rx="5" ry="6.5" fill="#d8413a"/><path d="M${f(-hw+3)},${f(-h+16)} h10" fill="none" stroke-width="1"/>`;
  g+=`<path d="M${-hw-6},2 Q${f(-hw/2)},-7 0,0 Q${f(hw/2)},-6 ${hw+sd},${-sy+2} L${hw+sd+4},2Z" fill="${SNOW}"/>`;
@@ -70,7 +70,7 @@ function cableStation(){let g=`<path d="M-104,2 L124,-20 L134,10 L-90,14Z" fill=
  g+=[-78,-62,54,70].map(x=>`<rect x="${x}" y="-60" width="12" height="16" fill="#cfe4ea"/>`).join('');
  g+=`<path d="M-98,-76 L98,-76 L126,-92 L-70,-92Z" fill="#6a7488"/><path d="M-98,-80 L96,-80 L124,-96 L-70,-96Z" fill="${SNOW}"/>`;
  g+=`<path d="M12,-90 L18,-128 L42,-128 L48,-90" fill="#8a8f94"/><ellipse cx="30" cy="-132" rx="24" ry="7" fill="#c4473c"/><ellipse cx="30" cy="-132" rx="8" ry="2.4" fill="#3d3833"/>`;
- g+=`<rect x="-34" y="-72" width="68" height="17" rx="3" fill="#fbf6ea"/><text x="0" y="-59" font-size="12" text-anchor="middle" fill="${OL}" stroke="none" font-weight="700" font-family="PingFang TC,Noto Sans TC,sans-serif">纜車站</text>`;
+ g+=`<rect x="-34" y="-72" width="68" height="17" rx="3" fill="#fbf6ea"/>${H.signIcon('cable',1.2,0,-63.5)}`;
  return g}
 /* 岸上的雪猴有尾巴（泡在水裡的看不到尾巴） */
 const monkey=()=>limb('M-6,-4 Q-17,-3 -18,-11 Q-18,-16 -14,-17','#a8937a',2.8)+`<ellipse cx="0" cy="-9" rx="10" ry="9" fill="#b9a48a"/><circle cx="0" cy="-22" r="8" fill="#b9a48a"/><ellipse cx="0" cy="-21" rx="5.5" ry="5" fill="#e8a0a0"/><g fill="${OL}" stroke="none"><circle cx="-2" cy="-22.5" r="1"/><circle cx="2" cy="-22.5" r="1"/></g><path d="M-1.5,-18.5 q1.5,1 3,0" fill="none" stroke-width="1"/>`;
@@ -206,16 +206,16 @@ Object.assign(KIND,{
  coffee:{w:28,h:24,fn:()=>T(0,-12,.95,DECOY.coffee)},tubPlain:{w:26,h:22,fn:()=>T(0,-11,.95,DECOY.tubPlain)},skisBlue:{w:22,h:34,fn:()=>T(0,-16,.95,DECOY.skisBlue)},
  beanieTeal:{w:30,h:26,fn:()=>T(0,-11,.95,DECOY.beanieTeal)},beanieRed:{w:30,h:26,fn:()=>T(0,-11,.95,DECOY.beanieRed)},snowmanPlain:{w:30,h:32,fn:()=>T(0,-15,.95,DECOY.snowmanPlain)},
  sled:{w:38,h:14,fn:()=>T(0,-5,1,DECOY.sled)},acorn:{w:20,h:24,fn:()=>T(0,-11,.9,DECOY.acorn)},
- walker3:{w:30,h:62,fn:()=>{const v=pickView(),p=walkPose(v);return act(0,0,r()<.5?1:-1,{view:v,pose:p,hat:pk([0,0,0,3,4,-1])},true)}},
+ walker3:{w:30,h:62,fn:()=>{const v=pickView(),p=walkPose(v);return act(0,0,r()<.5?1:-1,{view:v,pose:p,hat:pk([0,0,0,3,4,-1])},'step')}},
  boarder:{w:62,h:72,fn:boarder},
- skier:{w:50,h:62,fn:()=>`<path d="M-32,-4 h-12 M-30,-14 h-9" fill="none" stroke="#b7c5cc" stroke-width="2"/>`+act(0,0,1,{pose:'run',hat:0,extra:skiBoard(pk(['#5a86b0','#e0b44a','#6f9a4a','#9a6fa8']))},'bob')},
- sledKid:{w:56,h:52,fn:()=>`<path d="M-36,-4 h-12 M-34,-12 h-8" fill="none" stroke="#b7c5cc" stroke-width="2"/>`+sledBig()+act(-2,-10,1,{pose:'sit',hat:0,mood:1,s:.9},'bob')},
- buildSnowman:{w:96,h:62,fn:()=>act(-30,0,1,{pose:'low',hat:0},'bob')+`<circle cx="-6" cy="-9" r="10" fill="#fbf7ef"/>`+act(32,0,-1,{pose:'reach',hat:pk([0,4])},'bob')+`<circle cx="14" cy="-7" r="7" fill="#fbf7ef"/>`},
- snowballFight:{w:130,h:70,fn:()=>`<path d="M-62,0 Q-62,-14 -48,-14 Q-34,-14 -34,0Z" fill="${SNOW}"/>`+act(-40,0,1,{pose:'up',hat:0},'hop')+act(44,0,-1,{pose:'reach',hat:0,mood:1},'bob')+`<path d="M-30,-42 Q4,-80 30,-34" fill="none" stroke-dasharray="3 4" stroke-width="1.2"/>`+wrapAn('float',`<circle cx="6" cy="-62" r="5" fill="#fbf7ef"/>`,true)},
- skate:{w:44,h:60,fn:()=>`<path d="M-30,2 q10,-6 22,0 M-34,8 q12,-5 26,0" fill="none" stroke="#fbf9f3" stroke-width="2"/>`+act(0,0,1,{pose:'run',hat:pk([0,0,4])},'sway')},
- skatePair:{w:66,h:62,fn:()=>`<path d="M-40,4 q16,-8 34,0" fill="none" stroke="#fbf9f3" stroke-width="2"/>`+act(-11,0,1,{view:'back',pose:'walk',hat:0},'sway')+act(11,0,1,{view:'back',pose:'walk',hat:0},'sway')+`<circle cx="0" cy="-8" r="3.2" fill="${pk(SKIN)}" stroke-width="1.4"/>`},
- cocoaChat:{w:84,h:86,fn:()=>act(-16,0,1,{pose:'hold',hat:pk([0,-1]),extra:`<g transform="translate(15,-20) scale(.55)">${mugShape(false)}</g>`},'bob')+act(16,0,-1,{pose:'hold',hat:pk([0,4]),extra:`<g transform="translate(15,-20) scale(.55)">${mugShape(false)}</g>`},'bob')+wrapAn('float',steamPuff().replace('opacity=".8"','opacity=".5" transform="translate(0,-50) scale(.5)"'),true)},
- shovel:{w:70,h:62,fn:()=>act(-10,0,1,{pose:'low',hat:0,extra:`<path d="M11,-12 L24,-2" fill="none" stroke="#7a5235" stroke-width="2.6"/><path d="M21,-5 L31,-1 L27,5 L18,1Z" fill="#9aa0a4"/>`},'sway')+`<path d="M22,0 Q30,-12 42,-8 Q50,-6 50,0Z" fill="${SNOW}"/>`}
+ skier:{w:50,h:62,fn:()=>`<path d="M-32,-4 h-12 M-30,-14 h-9" fill="none" stroke="#b7c5cc" stroke-width="2"/>`+act(0,0,1,{pose:'run',hat:0,extra:skiBoard(pk(['#5a86b0','#e0b44a','#6f9a4a','#9a6fa8']))},false)},
+ sledKid:{w:56,h:52,fn:()=>`<path d="M-36,-4 h-12 M-34,-12 h-8" fill="none" stroke="#b7c5cc" stroke-width="2"/>`+sledBig()+act(-2,-10,1,{pose:'sit',hat:0,mood:1,s:.9},false)},
+ buildSnowman:{w:96,h:62,fn:()=>act(-30,0,1,{pose:'low',hat:0},'work')+`<circle cx="-6" cy="-9" r="10" fill="#fbf7ef"/>`+act(32,0,-1,{pose:'reach',hat:pk([0,4])},'work')+`<circle cx="14" cy="-7" r="7" fill="#fbf7ef"/>`},
+ snowballFight:{w:130,h:70,fn:()=>`<path d="M-62,0 Q-62,-14 -48,-14 Q-34,-14 -34,0Z" fill="${SNOW}"/>`+act(-40,0,1,{pose:'up',hat:0},'hop')+act(44,0,-1,{pose:'reach',hat:0,mood:1},'hop')+`<path d="M-30,-42 Q4,-80 30,-34" fill="none" stroke-dasharray="3 4" stroke-width="1.2"/>`+wrapAn('float',`<circle cx="6" cy="-62" r="5" fill="#fbf7ef"/>`,true)},
+ skate:{w:44,h:60,fn:()=>`<path d="M-30,2 q10,-6 22,0 M-34,8 q12,-5 26,0" fill="none" stroke="#fbf9f3" stroke-width="2"/>`+act(0,0,1,{pose:'run',hat:pk([0,0,4])},'groove')},
+ skatePair:{w:66,h:62,fn:()=>`<path d="M-40,4 q16,-8 34,0" fill="none" stroke="#fbf9f3" stroke-width="2"/>`+act(-11,0,1,{view:'back',pose:'walk',hat:0},'groove')+act(11,0,1,{view:'back',pose:'walk',hat:0},'groove')+`<circle cx="0" cy="-8" r="3.2" fill="${pk(SKIN)}" stroke-width="1.4"/>`},
+ cocoaChat:{w:84,h:86,fn:()=>act(-16,0,1,{pose:'hold',hat:pk([0,-1]),extra:`<g transform="translate(15,-20) scale(.55)">${mugShape(false)}</g>`},'nod')+act(16,0,-1,{pose:'hold',hat:pk([0,4]),extra:`<g transform="translate(15,-20) scale(.55)">${mugShape(false)}</g>`},'nod')+wrapAn('float',steamPuff().replace('opacity=".8"','opacity=".5" transform="translate(0,-50) scale(.5)"'),true)},
+ shovel:{w:70,h:62,fn:()=>act(-10,0,1,{pose:'low',hat:0,extra:`<path d="M11,-12 L24,-2" fill="none" stroke="#7a5235" stroke-width="2.6"/><path d="M21,-5 L31,-1 L27,5 L18,1Z" fill="#9aa0a4"/>`},'work')+`<path d="M22,0 Q30,-12 42,-8 Q50,-6 50,0Z" fill="${SNOW}"/>`}
 });
 POOL.slope=[['pineS',3.2],['rockS',.8],['snowMound',1.6],['walker3',.9],['snowmanBig',.6],['skisBlue',.15],['sled',.25],['acorn',.3],['beanieTeal',.3],['beanieRed',.2],['snowmanPlain',.5],['mittenGreen',.25],['scarfBlue',.25],['dog',.2]];
 POOL.inn=[['walker3',2.6],['snowMound',1],['pineS',.5],['barrel',.8],['crate',.6],['woodpile',.8],['toro',.6],['lamp',.4],['tubPlain',.4],['bucket',.3],['coffee',.35],['scarfBlue',.3],['mittenPlain',.3],['mittenGreen',.2],['beanieRed',.3],['beanieTeal',.2],['acorn',.3],['cat',.5],['dog',.3],['peekBarrel',.3],['peekCrate',.25],['crateStack',.3],['keyGrey',.25],['snowmanPlain',.3]];

@@ -162,7 +162,7 @@ function structures1(){skyBirds(1);
  add(1470,1475,40,30,'rock',`<path d="M-26,0 Q-30,-14 -14,-20 Q4,-26 20,-16 Q30,-8 26,0Z" fill="#9a9a8a"/><g transform="translate(0,-14) scale(.8)">${kid({shirt:'#6fa8a0',hair:'#c4572f',hs:2,pose:'up'})}<path d="M-9,-8 Q-14,8 -24,10 Q-18,0 -10,-2" fill="#6fa8a0"/></g>`,{mark:false});
  for(const [x,y] of [[380,958],[1150,1268],[880,1212]])add(x,y,34,34,'swan',swan(),{mark:false,fl:r()<.5});
  [[680,1215],[1270,1400]].forEach(([x,y])=>add(x,y,30,56,'fisher',`<path d="M9,-9 L26,-66" fill="none" stroke="#7a5235" stroke-width="2.4"/><path d="M26,-66 Q34,-50 32,-40" fill="none" stroke-width=".9"/><circle cx="32" cy="-40" r="2.5" fill="#d8413a" stroke-width="1"/>`+act(0,0,1,{view:'back',pose:'sit',hat:1},'bob')));
- add(1150,1185,30,56,'fisher',act(0,0,-1,{pose:'sit',hat:1,extra:`<path d="M10,-11 L40,-44" fill="none" stroke="#7a5235" stroke-width="2.4"/><path d="M40,-44 Q46,-10 44,30" fill="none" stroke-width=".9"/>`},'bob'));
+ add(1150,1185,30,56,'fisher',act(0,0,-1,{pose:'sit',hat:1,extra:`<path d="M10,-11 L40,-44" fill="none" stroke="#7a5235" stroke-width="2.4"/><path d="M40,-44 Q46,-10 44,30" fill="none" stroke-width=".9"/>`},false));
  // forest
  add(260,1320,120,115,'mush',mushHouse(),{sh:.85});
  add(600,1380,120,115,'mush',mushHouse(),{s:.85,sh:.85});
@@ -180,7 +180,7 @@ function structures1(){skyBirds(1);
  add(1280,1530,120,90,'stall',stall('potion'));
  add(870,1680,120,90,'stall',stall('bread'));
  add(1290,1680,120,90,'stall',stall('pumpkin'));
- [[860,1552],[905,1554],[1270,1552],[885,1702],[1305,1702]].forEach(([x,y])=>add(x,y,28,58,'walker',act(0,0,1,{view:'back',pose:pk(['reach','stand'])},true)));
+ [[860,1552],[905,1554],[1270,1552],[885,1702],[1305,1702]].forEach(([x,y])=>add(x,y,28,58,'walker',act(0,0,1,{view:'back',pose:pk(['reach','stand'])},'step')));
  add(1120,1775,90,80,'sail',sailboat(),{mark:false});
  add(1690,1770,70,170,'light',lighthouse(),{mark:false});
  add(860,1765,80,30,'boat',rowboat(),{mark:false});
@@ -242,12 +242,14 @@ H.FRINGE[1]=[['pine',1.4],['round',1.4],['bush',2.2],['rock',1],['grassClump',2.
 H.FRINGEX[1]=[[0,540,460,880]];
 H.EDGEMY[1]={L:[[-400,352],[1684,2400]]};H.EDGEFILL[1]={L:[352,1684,'#535b37',[566,844,'#7d6044','#6a5038']]};
 H.EDGELAND[1]=(x,y)=>x<0?(y>352&&y<1684):undefined;
-H.HERE[1]=[127,142];
+H.HERE[1]=[122,160];
 /* 冒險地圖：小鎮（城堡和房子） */
 H.mapHook(3,({U,P,ink,FN,f})=>{let g='';const on=U>=2;
  // ---- town ----
  const house=(x,y,c)=>P(`M${x-7},${y} V${y-8} H${x+7} V${y}Z`,'#f3e8cf',1.3)+P(`M${x-9},${y-8} L${x},${y-16} L${x+9},${y-8}Z`,c,1.3)+`<rect x="${x-2}" y="${y-5}" width="4" height="5" fill="${ink}"/>`;
  let t=`<g class="mnode" data-n="1"><circle cx="100" cy="206" r="46" fill="transparent"/>`;
+ const TK=.7; /* 2026-11-11 小鎮圖案縮小（使用者：範圍太大），以 (100,222) 為中心 */
+ t+=`<g transform="translate(100,222) scale(${TK}) translate(-100,-222)">`;
  t+=`<ellipse cx="100" cy="228" rx="50" ry="20" fill="#000" opacity=".1"/><ellipse cx="100" cy="222" rx="48" ry="20" fill="#e6d6ad" stroke="${ink}" stroke-width="1.4"/>`;
  [[64,224,'#b14d27'],[78,236,'#6a7488'],[126,236,'#c98a3a'],[138,222,'#b14d27'],[60,208,'#c98a3a'],[142,206,'#6a7488'],[100,242,'#b14d27']].sort((a,b)=>a[1]-b[1]).forEach(([x,y,c])=>{if(y<215)t+=house(x,y,c)});
  // castle
@@ -259,7 +261,8 @@ H.mapHook(3,({U,P,ink,FN,f})=>{let g='';const on=U>=2;
  t+=P('M-6,0 V-10 Q0,-17 6,-10 V0Z','#7a4e32',1.5)+`<path d="M-3,-11 V0 M0,-13 V0 M3,-11 V0" stroke="${ink}" stroke-width=".8"/>`+`<path d="M-26,-12 h46" stroke="${ink}" stroke-width=".7" opacity=".35"/>`;
  t+=`</g>`;
  [[64,224,'#b14d27'],[78,236,'#6a7488'],[126,236,'#c98a3a'],[138,222,'#b14d27'],[100,242,'#b14d27']].sort((a,b)=>a[1]-b[1]).forEach(([x,y,c])=>{if(y>=215&&!(x===100))t+=house(x,y,c)});
- t+=`<g transform="translate(100,262)"><rect x="-32" y="-11" width="64" height="20" rx="10" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4.5" text-anchor="middle" font-size="12" fill="${ink}" font-family="${FN}">奇幻小鎮</text></g></g>`;
+ t+=`</g>`;
+ t+=`<g transform="translate(100,${f(222+40*TK-6)})"><rect x="-32" y="-11" width="64" height="20" rx="10" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4.5" text-anchor="middle" font-size="12" fill="${ink}" font-family="${FN}">奇幻小鎮</text></g></g>`;
  g+=t;
  return g});
 })();

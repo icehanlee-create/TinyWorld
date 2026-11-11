@@ -117,7 +117,9 @@ function make(C){
   const pe=document.getElementById('secP');if(!pe)return;const [v,fl]=DIRV[P.dir],fr=P.walk?(Math.floor(P.ph*7)%2):-1,k=v+fl+fr;
   if(P.view!==k){P.view=k;pe.innerHTML=C.playerArt(v,fr)}
   pe.setAttribute('transform',`translate(${f(P.x)},${f(P.y-(P.walk&&fr?1.6:0))})${fl<0?' scale(-1,1)':''}`)}
- const bubble=(t,y)=>`<g class="cpop" transform="translate(0,${y})"><path d="M-11,-10 h22 q4,0 4,4 v9 q0,4 -4,4 h-9 l-5,5 v-5 h-8 q-4,0 -4,-4 v-9 q0,-4 4,-4z" fill="#fff7d6" stroke-width="1.6"/><text x="0" y="1.5" text-anchor="middle" font-size="12" font-weight="800" fill="${t==='♥'?'#d8413a':OL}" stroke="none" font-family="PingFang TC,Noto Sans TC,sans-serif">${t}</text></g>`;
+ /* 頭上的想念泡泡（2026-11-11 改成和主線一樣的 B）：'' 不畫；♥ 畫愛心；其他就畫「下一步要找的」 */
+ const bubble=(t,y)=>{if(!t)return '';if(t==='♥')return H.qThink(H.QHEART,16,16,y-6);
+  const n=story&&story.step===2?ent.helper:ent.target;if(!n)return '';const a=n._a||(n._a=n.art());return H.qThink(a,n.w,n.h,y-6)};
  E.ent=ent;E.addEnt=(id,o)=>{ent[id]=o;drawDyn()};E.redraw=()=>{drawDyn()};
 
  /* 角色被高的東西（摩艾、房子、樹）擋住時，把那個東西再畫一次在角色上面 */

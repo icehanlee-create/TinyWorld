@@ -130,6 +130,14 @@ body:has(.overlay:not(.hide)) #world .an,body:has(.overlay:not(.hide)) .drift{an
 .an{transform-box:fill-box;transform-origin:50% 100%;animation-duration:var(--d,2s);animation-iteration-count:infinite;animation-timing-function:ease-in-out;animation-play-state:paused}
 .on .an{animation-play-state:running}
 .still .an{animation:none!important}
+.a-step{animation-name:step}@keyframes step{0%,50%,100%{transform:translateY(0) rotate(-1.2deg)}25%,75%{transform:translateY(-1.4px) rotate(1.2deg)}}
+.a-nod{animation-name:nod}@keyframes nod{0%,55%,100%{transform:rotate(0)}18%{transform:rotate(3deg)}32%{transform:rotate(-.5deg)}44%{transform:rotate(2.2deg)}}
+.a-work{animation-name:work}@keyframes work{0%,100%{transform:rotate(0)}40%{transform:rotate(7deg)}60%{transform:rotate(-1.5deg)}}
+.a-bend{animation-name:bend}@keyframes bend{0%,100%{transform:rotate(0) scale(1,1)}50%{transform:rotate(9deg) scale(1,.96)}}
+.a-groove{animation-name:groove}@keyframes groove{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+.a-dance{animation-name:dance}@keyframes dance{0%,100%{transform:translateY(0) rotate(-6deg)}25%{transform:translateY(-6px) rotate(0)}50%{transform:translateY(0) rotate(6deg)}75%{transform:translateY(-6px) rotate(0)}}
+.a-cheer{animation-name:hop}
+.a-lean{animation-name:lean}@keyframes lean{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}} /* 2026-11-11 人物改成輕輕左右晃（原本上下浮動看起來怪） */
 .a-bob{animation-name:bob}.a-sway{animation-name:sway}.a-hop{animation-name:hop}.a-wig{animation-name:wig}.a-peck{animation-name:peck}
 .a-float{animation-name:float}.a-rock{animation-name:rock}.a-swim{animation-name:swim}.a-flap{animation-name:flap}
 .a-swing{transform-origin:50% 0%;animation-name:swing}@keyframes swing{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
@@ -141,6 +149,7 @@ body:has(.overlay:not(.hide)) #world .an,body:has(.overlay:not(.hide)) .drift{an
 @keyframes hop{0%,62%,100%{transform:translateY(0) scale(1,1)}70%{transform:translateY(0) scale(1.06,.92)}80%{transform:translateY(-7px) scale(.96,1.05)}90%{transform:translateY(0) scale(1.05,.95)}}
 @keyframes wig{0%,55%,100%{transform:rotate(0)}65%{transform:rotate(-9deg)}75%{transform:rotate(8deg)}85%{transform:rotate(-4deg)}}
 @keyframes peck{0%,60%,100%{transform:rotate(0)}70%,80%{transform:rotate(22deg)}}
+@keyframes qbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}.qbob{animation:qbob 2.6s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 @keyframes rock{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-2px) rotate(3deg)}}
 @keyframes swim{0%,100%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
@@ -157,6 +166,8 @@ body.secret .chip .ok{width:17px;height:17px;font-size:9px;right:-4px;top:-4px}
 .lcard.secret{background:#efe9fb;border-color:#4a3d82}.colsec.secret{background:#f1ecfa}
 #loading{position:absolute;inset:0;display:grid;place-items:center;font-size:15px;color:var(--muted)}
 #stage{overflow:hidden;touch-action:none;background:#f4ede0;cursor:grab}
+/* 2026-11-11 手機（觸控、可以兩指縮放）藏起右邊的縮放按鈕，電腦保留 */
+@media (hover:none) and (pointer:coarse){.zpill{display:none!important}}
 </style>
 </head>
 <body>
