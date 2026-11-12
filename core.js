@@ -172,13 +172,38 @@ function sampleIn(reg,t){const g=REG[reg];
 function canFloat(x,y,t){if(Math.random()>.12)return false;if(items.filter(o=>o.float).length>=3||items.some(o=>o.float&&o.t.id===t.id))return false;
  for(let k=0;k<8;k++){const a=k*Math.PI/4;if(!isWater(x+Math.cos(a)*55,y+Math.sin(a)*55))return isWater(x-14,y)&&isWater(x+14,y)&&isWater(x,y+10)}return false}
 function frontBlocked(sp){return sprites.some(o=>o!==sp&&o.y>sp.y&&o.y-o.h*.9<sp.y&&Math.abs(o.x-sp.x)<(o.w+sp.w)/2.2)}
+/* ===== 物件擺放（2026-11-12 使用者定案）=====
+   每種 4 個：合理的位置佔 55～65%（每種 2 或 3 個各半，平均 2.5 個），放在 SPOTS[關卡][物件id] 列的東西上或旁邊；
+   其餘的至少一半「顏色相近混在一起」（BLEND[關卡][物件id] 列的干擾物、同色佈景旁）或隨機；剩下的照舊（42% 藏在東西後面露出一半，否則隨機）。
+   SPOTS 一筆：[kind, fy, fx]：位置＝東西腳底 + (±fx×寬, −fy×高)；fx>0.5 表示放在旁邊（左右其中一邊）；或 [kind, sp=>[dx,dy]] 自己算。
+   沒有設定的關卡或物件（例如秘境、借來的物件）就照舊。 */
+const SPOTS={},BLEND={};
+const spotOK=(c,minD)=>c.x>(SCENES[scene].x0||0)+12&&c.x<(SCENES[scene].x1||1e9)-12&&!isWater(c.x,c.y)&&!items.some(o=>Math.hypot(o.x-c.x,o.y-c.y)<minD);
+function spotPos(t,used,regs){const cap=s=>Math.max(1,Math.round(s.w/30)),full=s=>(used.get(s)||0)>=cap(s); /* 大的東西（神社、山屋）可以放好幾個 */const L=(SPOTS[scene]||{})[t.id];if(!L||!L.length)return null;
+ const inReg=s=>regs.some(k=>{const g=REG[k];return g&&s.x>g.x-60&&s.x<g.x+g.w+60&&s.y>g.y-60&&s.y<g.y+g.h+60});
+ let cands=sprites.filter(s=>!full(s)&&L.some(e=>e[0]===s.kind));if(!cands.length)return null;
+ const near=cands.filter(inReg);if(near.length&&Math.random()<.7)cands=near;
+ for(let k=0;k<40;k++){const s=cands[Math.floor(Math.random()*cands.length)],es=L.filter(e=>e[0]===s.kind),e=es[Math.floor(Math.random()*es.length)];let dx,dy;
+  if(typeof e[1]==='function'){const q=e[1](s);if(!q)continue;[dx,dy]=q}else{const fy=e[1]??.5,fx=e[2]??.3;dx=fx>.5?(Math.random()<.5?-1:1)*fx*s.w:rnd(-fx,fx)*s.w;dy=-fy*s.h}
+  const c={x:s.x+dx,y:s.y+dy};if(!spotOK(c,k<25?60:40))continue;used.set(s,(used.get(s)||0)+1);return c}
+ return null}
+function blendPos(t,used,regs){const L=(BLEND[scene]||{})[t.id];if(!L||!L.length)return null;
+ const inReg=s=>regs.some(k=>{const g=REG[k];return g&&s.x>g.x&&s.x<g.x+g.w&&s.y>g.y&&s.y<g.y+g.h});
+ let cands=sprites.filter(s=>!used.has(s)&&L.includes(s.kind));const near=cands.filter(inReg);if(near.length)cands=near;if(!cands.length)return null;
+ for(let k=0;k<30;k++){const s=cands[Math.floor(Math.random()*cands.length)],side=Math.random()<.5?-1:1,c={x:s.x+side*rnd(.35,.6)*Math.max(s.w,26),y:s.y-rnd(0,.25)*s.h};if(!spotOK(c,55))continue;used.add(s);return c}
+ return null}
 function placeItems(){
  items=[];
- const usedOcc=new Set();
+ const usedOcc=new Set(),spotUse=new Map();
  for(const t of TYPES){
-  const regs=shuffle(t.regions.slice());
+  const regs=shuffle(t.regions.slice()),hasSpot=!!((SPOTS[scene]||{})[t.id]);
+  /* 這一種的 4 個各用哪種方式：合理 2～3 個；其餘至少一半混色／隨機 */
+  const nS=hasSpot&&t.id!=='fish'?(Math.random()<.5?3:2):0,rest=4-nS,nB=hasSpot?Math.ceil(rest/2):0;
+  const how=[...Array(nS).fill('spot'),...Array(nB).fill('blend')];while(how.length<4)how.push('old');
   for(let i=0;i<4;i++){
-   let p=null;
+   let p=null,mode='old';
+   if(how[i]==='spot'){p=spotPos(t,spotUse,regs);if(p)mode='spot'}
+   else if(how[i]==='blend'){p=blendPos(t,usedOcc,regs);if(p)mode='blend';else{mode='rand';for(let k=0;k<60&&!p;k++){const c=sampleIn(regs[(i+k)%regs.length],t);if(c&&!items.some(o=>Math.hypot(o.x-c.x,o.y-c.y)<60))p=c}}}
    for(let tries=0;tries<400&&!p;tries++){
     const reg=regs[(i+Math.floor(tries/80))%regs.length],minD=tries<250?75:45;
     const wantPeek=t.id!=='fish'&&reg!=='sky'&&Math.random()<.42;
@@ -194,7 +219,7 @@ function placeItems(){
     p=c;
    }
    if(!p)p=sampleIn(regs[0],t)||{x:500,y:1500};
-   items.push({t,x:p.x,y:p.y,float:!!p.float,occ:p.occ||null,r:t.r,rot:rnd(-t.rot,t.rot),sc:rnd(.85,1.02),fl:Math.random()<.5,found:false});
+   items.push({t,x:p.x,y:p.y,float:!!p.float,occ:p.occ||null,r:t.r,rot:rnd(-t.rot,t.rot),sc:rnd(.85,1.02),fl:Math.random()<.5,found:false,how:mode});
   }
  }
 }
@@ -309,7 +334,13 @@ function zoomAt(px,py,fac){const wx=(px-view.tx)/view.s,wy=(py-view.ty)/view.s;v
 const centerW=()=>({x:(SW/2-view.tx)/view.s,y:(SH/2-view.ty)/view.s});
 const pts=new Map();let tap=null,pinch=null,rect=null;
 const loc=e=>({x:e.clientX-rect.left,y:e.clientY-rect.top});
+/* 幽靈手指（2026-11-12 修）：iPhone 有時不送手指抬起（pointerup／pointercancel），那根手指會一直留在 pts，
+   之後一根手指滑動會被當成兩指縮放（畫面忽大忽小）、也點不到東西。三道保險：
+   1. 新的一次觸碰是「第一根手指」（isPrimary）時，清掉舊的；2. lostpointercapture 也算抬起；
+   3. 觸控事件 touchend／touchcancel 時，螢幕上已經沒有手指就全部清掉；切到背景也清掉。 */
+const clearPts=()=>{pts.clear();pinch=null;tap=null};
 stage.addEventListener('pointerdown',e=>{if(e.target.closest('.zpill'))return;rect=stage.getBoundingClientRect();try{stage.setPointerCapture(e.pointerId)}catch(_){}
+ if(e.isPrimary&&pts.size)clearPts();
  pts.set(e.pointerId,loc(e));if(pts.size===1){const p=loc(e);tap={id:e.pointerId,x:p.x,y:p.y,t:performance.now(),moved:false}}else{tap=null;startPinch()}});
 function startPinch(){const[a,b]=[...pts.values()];const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2};pinch={d0:Math.hypot(a.x-b.x,a.y-b.y)||1,s0:view.s,wx:(m.x-view.tx)/view.s,wy:(m.y-view.ty)/view.s}}
 stage.addEventListener('pointermove',e=>{const p=pts.get(e.pointerId);if(!p)return;const n=loc(e),dx=n.x-p.x,dy=n.y-p.y;p.x=n.x;p.y=n.y;
@@ -319,7 +350,10 @@ stage.addEventListener('pointermove',e=>{const p=pts.get(e.pointerId);if(!p)retu
 function endPtr(e){if(!pts.has(e.pointerId))return;pts.delete(e.pointerId);
  if(e.type==='pointerup'&&tap&&tap.id===e.pointerId&&!tap.moved&&performance.now()-tap.t<700)onTap(tap.x,tap.y);
  if(pts.size<2)pinch=null;tap=null}
-stage.addEventListener('pointerup',endPtr);stage.addEventListener('pointercancel',endPtr);
+stage.addEventListener('pointerup',endPtr);stage.addEventListener('pointercancel',endPtr);stage.addEventListener('lostpointercapture',endPtr);
+const touchGone=e=>{if(!e.touches||e.touches.length===0){if(pts.size)clearPts()}};
+document.addEventListener('touchend',touchGone,{passive:true});document.addEventListener('touchcancel',touchGone,{passive:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)clearPts()});window.addEventListener('blur',clearPts);
 stage.addEventListener('wheel',e=>{e.preventDefault();if(CAMLOCK())return;rect=stage.getBoundingClientRect();const p=loc(e);zoomAt(p.x,p.y,Math.exp(-e.deltaY*.0015))},{passive:false});
 $('#zin').onclick=()=>{const c=centerW();tweenTo(view.s*1.6,c.x,c.y,300)};
 $('#zout').onclick=()=>{const c=centerW();tweenTo(view.s/1.6,c.x,c.y,300)};
@@ -409,7 +443,19 @@ function newGame(keepView){const S=SEC();
  story={step:0,done:false};storyBubble();renderTray();updateCounts();
  st={running:true,t0:performance.now(),hintsLeft:HINTS,misses:0,clover:false,bonus:false};setHintUI();
  measure();if(S)S.start();else if(!keepView){const c=LEVELS[level].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base}}clampV();apply();reveal(true);clearInterval(timer);timer=setInterval(tick,250);tick();
- NGHOOKS.forEach(h=>{try{h(scene)}catch(e){console.error(e)}})}
+ NGHOOKS.forEach(h=>{try{h(scene)}catch(e){console.error(e)}});pickSecretHint()}
+/* 秘境提示（2026-11-11 使用者要求）：玩家過關過的關卡裡，如果還有沒完成的秘境，每局隨機挑「一位」頭上是「…」的路人，
+   點他會說一句那個秘境的提示（一局只有一位，免得太雜）。秘境在 levels.js 的 addLevel 加 hint:['…','…'] 就會自動加入。
+   條件：這一關過關過（有 best）、秘境的出發地過關過、秘境還沒過關。挑人在 newGame 最後做，不影響物件和場景的亂數。 */
+const DOTSIG='cx="-6" cy="-1" r="1.7"';let hintSp=null,hintMsg='';
+function pickSecretHint(){hintSp=null;hintMsg='';if(SEC())return;if(!(bestOf(level)>0))return;
+ const cand=SECRET_IDS.filter(n=>{const L=LEVELS[n];return L&&L.hint&&L.hint.length&&!(bestOf(n)>0)&&bestOf(L.home)>0});if(!cand.length)return;
+ const ppl=sprites.filter(s=>s.svg&&s.svg.includes(DOTSIG)&&s!==storySp.giver&&s!==storySp.helper);if(!ppl.length)return;
+ const R=Math.random;hintSp=ppl[Math.floor(R()*ppl.length)];const L=LEVELS[cand[Math.floor(R()*cand.length)]];hintMsg=L.hint[Math.floor(R()*L.hint.length)]}
+function tapSecretHint(wx,wy){const sp=hintSp;if(!sp||!(Math.abs(wx-sp.x)<sp.w*.5&&wy<=sp.y+4&&wy>=sp.y-sp.h))return false;
+ toast('💬 '+hintMsg,5200);try{tone(660,.08,'triangle',.05);setTimeout(()=>tone(880,.1,'triangle',.05),90)}catch(_){}
+ const el=document.querySelector(`#bg [data-n="${sp.n}"]`);if(el&&!el.querySelector(':scope > .jig')){const w=document.createElementNS(NS,'g');w.setAttribute('class','jig');while(el.firstChild)w.appendChild(el.firstChild);el.appendChild(w);setTimeout(()=>{while(w.firstChild)el.insertBefore(w.firstChild,w);w.remove()},520)}
+ return true}
 function onTap(sx,sy){if(!st.running)return;const wx=(sx-view.tx)/view.s,wy=(sy-view.ty)/view.s;{const S=SEC();if(S){S.tap(wx,wy);return}}if(!isRevealed(wx,wy))return;let best=null,bd=1e9,near=false;
  for(const c of [clovers.story,clovers.bonus])if(c&&c.revealed&&!c.found&&Math.hypot(c.x-wx,c.y-wy)<Math.max(14,13/view.s)){foundClover(c);return}
  for(const it of items){if(!isRevealed(it.x,it.y))continue;const d=Math.hypot(it.x-wx,it.y-wy),lim=Math.max(it.r*it.sc+3,13/view.s);if(d<lim){if(it.found)near=true;else if(d<bd){best=it;bd=d}}}
@@ -420,7 +466,7 @@ function found(it){it.found=true;colAdd(it.t.id);it.el.classList.add('got');cons
  const el=it.el;setTimeout(()=>{el.style.display='none'},600);
  burst(it.x,it.y);const n=leftOf(it.t.id);floatText(it.x,it.y-rr-4,n?`${it.t.short} 還有 ${n}`:`${it.t.short} 全部找到！`);updateCounts(it.t.id);
  if(n===0)sfx.typeDone();else sfx.found();if(leftOf()===0)win()}
-function miss(wx,wy){if(TAPHOOKS[scene]&&TAPHOOKS[scene](wx,wy))return; /* 場景裡的小互動（例如第 4 關圖騰眨眼），不算點錯 */
+function miss(wx,wy){if(tapSecretHint(wx,wy))return;if(TAPHOOKS[scene]&&TAPHOOKS[scene](wx,wy))return; /* 場景裡的小互動（例如第 4 關圖騰眨眼），不算點錯 */
  st.misses++;sfx.miss();
  let hit=null;for(let i=sprites.length-1;i>=0;i--){const sp=sprites[i],sc=(sp.s||1);if(['bird','balloon'].includes(sp.kind))continue;if(Math.abs(wx-sp.x)<sp.w*.5&&wy<=sp.y+4&&wy>=sp.y-sp.h){hit=i;break}}
  /* 故事角色、走失的動物、藏幸運草的東西優先判定（就算前面有別人擋著） */
@@ -673,8 +719,12 @@ level=Math.min(prog.unlocked,LEVELS.length-1);
 window.TH={EDGELAND,ROADS,T,f,r,sr,pk,ri,rnd,shuffle,limb,shade,wob,OL,SNOW,SKIN,HAIR,SHIRT,PANTS,HATS,kid,chibi,act,wrapAn,heart,bubble,noteM,peekHead,faceHead,headOnly,
  cat,frog,owl,sheep,chicken,anyDog,dog,swan,pine,roundTree,bush,rock,barrel,crate,pot,lamp,bench,sign,fence,reeds,lily,well,tent,campfire,swirl,signpost,signIcon,stall,
  add,mark,canPlace,scatter,SCATREG,SCATOK,skyBirds,chaikin,bow,qBubble,qThink,qMark,QHEART,GC,GR,CELL,occ,mulberry32,DK,balloon,castle,fountain,house,kayak,lighthouse,mushHouse,rowboat,sailboat,tower,windmill,pig,barn,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,HEAVY,ANIM,ALWAYS,DUR,
- ANIMX,ALWAYSX,HEAVYX,SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,mapHook,mapRoute,TAPHOOKS,NGHOOKS,MAPTOP,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,SECRETS,STORIES,SEQ,SKYC,SKYY,EDGEM,EDGED,EDGEDECO,EDGEMY,EDGEFILL,FRINGE,FRINGEX,RESERVE,ROADK,RESETKEYS,icon,starSvg,
- typeOf:id=>LEVELS.slice(1).flatMap(L_=>L_.types||[]).find(t=>t.id===id),colAdd,colClover,colBonus,colStory,updateCounts,win:()=>win(),goLevel:n=>goLevel(n),level:()=>level,rodeHas,pads:()=>pads(),scr:()=>({w:SW,h:SH,base}),apply:()=>apply(),clampV:()=>clampV(),rezoom:()=>{measure();clampV();apply()},updAnim:()=>updateAnim(),tweenTo:(s,x,y,d,cb)=>tweenTo(s,x,y,d,cb),curtain,pickView,walkPose,DENS,sprites,ride,toast,clockHold,clockRun,burst,floatText,sfx,items:()=>items,game:()=>st,scene:()=>scene,view:()=>view,testOn:()=>testMode,dbg:{clover:()=>clovers,step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG};
+ ANIMX,ALWAYSX,HEAVYX,SPOTS,BLEND,SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,mapHook,mapRoute,TAPHOOKS,NGHOOKS,MAPTOP,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,SECRETS,STORIES,SEQ,SKYC,SKYY,EDGEM,EDGED,EDGEDECO,EDGEMY,EDGEFILL,FRINGE,FRINGEX,RESERVE,ROADK,RESETKEYS,icon,starSvg,
+ typeOf:id=>LEVELS.slice(1).flatMap(L_=>L_.types||[]).find(t=>t.id===id),colAdd,colClover,colBonus,colStory,updateCounts,win:()=>win(),goLevel:n=>goLevel(n),level:()=>level,rodeHas,pads:()=>pads(),scr:()=>({w:SW,h:SH,base}),apply:()=>apply(),clampV:()=>clampV(),rezoom:()=>{measure();clampV();apply()},updAnim:()=>updateAnim(),tweenTo:(s,x,y,d,cb)=>tweenTo(s,x,y,d,cb),curtain,pickView,walkPose,DENS,sprites,ride,toast,clockHold,clockRun,burst,floatText,sfx,items:()=>items,game:()=>st,scene:()=>scene,view:()=>view,testOn:()=>testMode,dbg:{clover:()=>clovers,hint:()=>({sp:hintSp,msg:hintMsg}),step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG};
+/* 測試模式：選單列出測試中的關卡（編號 900 以上、還沒接上主線的主線關卡），在 Claude 作品裡也能直接玩（2026-11-12） */
+LEVELS.forEach((L_,n)=>{if(!L_||n<900||L_.secret||document.getElementById('tLv'+n))return;const b=document.createElement('button');b.id='tLv'+n;b.className='tbtn';b.style.display='none';b.innerHTML=`<span>🧪 測試中的關卡：${L_.title}</span>`;
+ b.onclick=()=>{closeMenu();toast('🧪 載入測試中的關卡⋯',1400);ensureUpTo(899,()=>goLevel(n))};const a=document.getElementById('tGiver');a.parentNode.insertBefore(b,a);
+ const sb=document.createElement('button');sb.id='tLvS'+n;sb.className='sbtn tbtn';sb.style.cssText='display:none;flex:none;margin-top:6px';sb.textContent='🧪 玩測試中的關卡：'+L_.title;sb.onclick=b.onclick;const row=document.querySelector('#startOv .testrow');if(row)row.appendChild(sb)});
 applyTestUI();
 ensureUpTo(prog.unlocked,()=>{while(level>1&&!rodeHas(level))level--;while(level>1&&!LEVELS[level].types)level--;if(!LEVELS[1].types){$('#loading').textContent='找不到 level1.js，請確認它和 index.html 放在同一個資料夾';return}setLevel(level);
 setTimeout(()=>{
