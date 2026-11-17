@@ -200,9 +200,17 @@ function placeItems(){
   /* 這一種的 4 個各用哪種方式：合理 2～3 個；其餘至少一半混色／隨機 */
   const nS=hasSpot&&t.id!=='fish'?(Math.random()<.5?3:2):0,rest=4-nS,nB=hasSpot?Math.ceil(rest/2):0;
   const how=[...Array(nS).fill('spot'),...Array(nB).fill('blend')];while(how.length<4)how.push('old');
+  /* 2026-11-18：每一種有 1 個只露出一小角（藏在樹叢、岩石、房子等後面，大約只露出四分之一） */
+  const cornerI=t.id==='fish'?-1:Math.floor(Math.random()*4);
   for(let i=0;i<4;i++){
    let p=null,mode='old';
-   if(how[i]==='spot'){p=spotPos(t,spotUse,regs);if(p)mode='spot'}
+   if(i===cornerI){const rr=t.r*.84;
+    const cands=sprites.filter(s=>OCCK.has(s.kind)&&!usedOcc.has(s)&&s.h>=rr*2.2&&s.w>=rr*2.6&&t.regions.some(k=>{const g=REG[k];return g&&s.x>g.x&&s.x<g.x+g.w&&s.y>g.y&&s.y<g.y+g.h})&&!frontBlocked(s));
+    for(let k=0;k<30&&!p&&cands.length;k++){const sp=cands[Math.floor(Math.random()*cands.length)],side=Math.random()<.5?-1:1;
+     const c={x:sp.x+side*(sp.w*.5-t.r*.42),y:sp.y-Math.max(rr+4,Math.min(sp.h*.45,40))};
+     if(!isWater(c.x,c.y)&&!items.some(o=>Math.hypot(o.x-c.x,o.y-c.y)<60)){usedOcc.add(sp);p={...c,occ:sp};mode='corner'}}}
+   if(p){}
+   else if(how[i]==='spot'){p=spotPos(t,spotUse,regs);if(p)mode='spot'}
    else if(how[i]==='blend'){p=blendPos(t,usedOcc,regs);if(p)mode='blend';else{mode='rand';for(let k=0;k<60&&!p;k++){const c=sampleIn(regs[(i+k)%regs.length],t);if(c&&!items.some(o=>Math.hypot(o.x-c.x,o.y-c.y)<60))p=c}}}
    for(let tries=0;tries<400&&!p;tries++){
     const reg=regs[(i+Math.floor(tries/80))%regs.length],minD=tries<250?75:45;
@@ -219,7 +227,7 @@ function placeItems(){
     p=c;
    }
    if(!p)p=sampleIn(regs[0],t)||{x:500,y:1500};
-   items.push({t,x:p.x,y:p.y,float:!!p.float,occ:p.occ||null,r:t.r,rot:rnd(-t.rot,t.rot),sc:rnd(.85,1.02),fl:Math.random()<.5,found:false,how:mode});
+   items.push({t,x:p.x,y:p.y,float:!!p.float,occ:p.occ||null,r:t.r,rot:rnd(-t.rot,t.rot),sc:rnd(.76,.92),fl:Math.random()<.5,found:false,how:mode});
   }
  }
 }
@@ -661,22 +669,22 @@ function northMap(P,ink){const R=mulberry32(5151);let g='';
  tr.sort((a,b)=>a[1]-b[1]).forEach(([x,y,s])=>g+=P(`M${f(x-6*s)},${f(y)} L${f(x)},${f(y-15*s)} L${f(x+6*s)},${f(y)}Z`,'#3f5d48',1.2)+`<path d="M${f(x-3*s)},${f(y-8*s)} L${f(x)},${f(y-15*s)} L${f(x+3*s)},${f(y-8*s)}" fill="#fbf9f3" stroke="${ink}" stroke-width="1"/>`);
  return g}
 function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,Noto Sans TC,sans-serif',R=mulberry32(4242);
- const NO=MAPNODES.some(m=>m.north&&isOpen(m.n))?170:0,WO=MAPNODES.some(m=>m.west&&isOpen(m.n))?80:0;NWO=WO;/* 2026-11-18 地圖可以拖曳縮放之後：map 有 west:true 的關卡（櫻花參道、滑沙場、金字塔）去得了，地圖往西加寬 80（櫻花山城左邊的名牌、沙漠一區）。11-17d 原本是 200 */ /* 2026-11-17 北方雪國：addLevel 的 map 加 north:true 的關卡「去得了」之後，地圖往北長高 170；之前維持原本大小（11-17b 起不再寫死第 11 關） */
+ const NO=MAPNODES.some(m=>m.north&&isOpen(m.n))?170:0,WO=MAPNODES.some(m=>m.west&&isOpen(m.n))?80:0,EO=MAPNODES.some(m=>m.east&&isOpen(m.n))?110:0;NWO=WO;/* 2026-11-18 map 有 east:true 的關卡（綠島）去得了，地圖往東加寬 110 *//* 2026-11-18 地圖可以拖曳縮放之後：map 有 west:true 的關卡（櫻花參道、滑沙場、金字塔）去得了，地圖往西加寬 80（櫻花山城左邊的名牌、沙漠一區）。11-17d 原本是 200 */ /* 2026-11-17 北方雪國：addLevel 的 map 加 north:true 的關卡「去得了」之後，地圖往北長高 170；之前維持原本大小（11-17b 起不再寫死第 11 關） */
  const P=(d,fill,sw=1.6,extra='')=>`<path d="${d}" fill="${fill}" stroke="${ink}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round" ${extra}/>`;
- let g=`<svg viewBox="${-120-WO} ${-NO} ${462+WO} ${430+NO}" role="img" aria-label="冒險地圖"><defs><clipPath id="mapClip"><path d="${NO?`M${-102-WO},-144 Q110,-154 324,-142 Q334,130 322,406 Q110,416 ${-100-WO},406 Q${-110-WO},130 ${-102-WO},-144Z`:`M${-102-WO},26 Q110,16 324,28 Q332,220 322,406 Q110,416 ${-100-WO},406 Q${-108-WO},220 ${-102-WO},26Z`}"/></clipPath>
+ let g=`<svg viewBox="${-120-WO} ${-NO} ${462+WO+EO} ${430+NO}" role="img" aria-label="冒險地圖"><defs><clipPath id="mapClip"><path d="${NO?`M${-102-WO},-144 Q110,-154 ${324+EO},-142 Q${334+EO},130 ${322+EO},406 Q110,416 ${-100-WO},406 Q${-110-WO},130 ${-102-WO},-144Z`:`M${-102-WO},26 Q110,16 ${324+EO},28 Q${332+EO},220 ${322+EO},406 Q110,416 ${-100-WO},406 Q${-108-WO},220 ${-102-WO},26Z`}"/></clipPath>
  <radialGradient id="mapVig" cx="50%" cy="50%" r="${WO?76:62}%"><stop offset="70%" stop-color="#f1e2bf" stop-opacity="0"/><stop offset="100%" stop-color="#e8d3a5" stop-opacity=".85"/></radialGradient></defs>`;
  // parchment
- g+=`<path d="${NO?`M${-110-WO},-156 Q-40,-166 40,-158 Q140,-168 262,-160 Q320,-164 334,-150 Q342,-40 332,80 Q340,200 332,300 Q342,360 330,416 Q250,426 140,418 Q20,428 ${-106-WO},418 Q${-118-WO},320 ${-110-WO},220 Q${-116-WO},30 ${-112-WO},-60 Q${-114-WO},-120 ${-110-WO},-156Z`:`M${-110-WO},14 Q-40,4 40,12 Q140,2 262,10 Q320,6 334,20 Q340,120 332,220 Q342,330 330,416 Q250,426 140,418 Q20,428 ${-106-WO},418 Q${-118-WO},320 ${-110-WO},220 Q${-116-WO},110 ${-110-WO},14Z`}" fill="#f1e2bf" stroke="${ink}" stroke-width="2.5"/>`;
+ g+=`<path d="${NO?`M${-110-WO},-156 Q-40,-166 40,-158 Q140,-168 262,-160 Q${320+EO},-164 ${334+EO},-150 Q${342+EO},-40 ${332+EO},80 Q${340+EO},200 ${332+EO},300 Q${342+EO},360 ${330+EO},416 Q250,426 140,418 Q20,428 ${-106-WO},418 Q${-118-WO},320 ${-110-WO},220 Q${-116-WO},30 ${-112-WO},-60 Q${-114-WO},-120 ${-110-WO},-156Z`:`M${-110-WO},14 Q-40,4 40,12 Q140,2 262,10 Q${320+EO},6 ${334+EO},20 Q${340+EO},120 ${332+EO},220 Q${342+EO},330 ${330+EO},416 Q250,426 140,418 Q20,428 ${-106-WO},418 Q${-118-WO},320 ${-110-WO},220 Q${-116-WO},110 ${-110-WO},14Z`}" fill="#f1e2bf" stroke="${ink}" stroke-width="2.5"/>`;
  g+=`<g clip-path="url(#mapClip)">`;
  // land
- g+=`<rect x="${-120-WO}" y="${-NO}" width="${462+WO}" height="${430+NO}" fill="#c6cb8c"/>`;
+ g+=`<rect x="${-120-WO}" y="${-NO}" width="${462+WO+EO}" height="${430+NO}" fill="#c6cb8c"/>`;
  /* 2026-11-11 地圖向西加寬 120（櫻花山城在西邊）；西南角留陸地（之後做沙漠）。西邊的亂數用 R2，東邊原本的圖案不變 */
  const R2=mulberry32(4343);
  g+=`<path d="M${-120-WO},300 H-4 Q-20,360 -14,430 H${-120-WO}Z" fill="${MAPSW}"/>`;
  // grass texture
  let tf='';for(let i=0;i<70;i++){const x=20+R()*300,y=130+R()*160;tf+=`M${f(x)},${f(y)} l2,-4 l2,4 `}g+=`<path d="${tf}" fill="none" stroke="#9aa361" stroke-width="1.1" stroke-linecap="round"/>`;
  // foothills
- g+=P((WO?`M${-120-WO},118 Q${-120-WO*.6},100 ${-120-WO*.3},116 Q-150,104 -120,122`:'M-120,122')+' Q-92,102 -62,116 Q-30,100 0,128 Q30,104 64,120 Q96,98 132,118 Q170,96 206,116 Q242,96 276,114 Q310,100 342,118 V0 H'+(-120-WO)+'Z','#93a35e',1.6);
+ g+=P((WO?`M${-120-WO},118 Q${-120-WO*.6},100 ${-120-WO*.3},116 Q-150,104 -120,122`:'M-120,122')+' Q-92,102 -62,116 Q-30,100 0,128 Q30,104 64,120 Q96,98 132,118 Q170,96 206,116 Q242,96 276,114 Q310,100 '+(342+EO)+',118 V0 H'+(-120-WO)+'Z','#93a35e',1.6);
  if(NO)g+=northMap(P,ink);
  // mountains back row
  const mt=(x,y,w,h,c1,c2,snow)=>{let s=P(`M${x-w},${y} L${x},${y-h} L${x+w},${y}Z`,c1,1.7)+`<path d="M${x},${y-h} L${x+w},${y} L${x+w*.25},${y}Z" fill="${c2}" opacity=".9"/>`;
@@ -691,18 +699,19 @@ function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,
  let tw='';for(let i=0;i<26;i++){const x=-110+R2()*104,y=220+R2()*70;tw+=`M${f(x)},${f(y)} l2,-4 l2,4 `}g+=`<path d="${tw}" fill="none" stroke="#9aa361" stroke-width="1.1" stroke-linecap="round"/>`;
  tr.sort((a,b)=>a[1]-b[1]).forEach(([x,y,s])=>g+=tree(x,y,s));
  // coast + sea
- g+=`<path d="M-26,430 Q-30,366 -12,326 Q2,298 40,294 Q100,284 170,298 Q250,312 342,290 V430Z" fill="#e8d6a4"/>`;
- g+=P('M-12,440 Q-16,370 0,334 Q12,310 40,304 Q100,294 170,306 Q250,320 342,298 V440Z','#9cc6bd',2);
- g+=`<path d="M4,430 Q2,372 12,344 Q22,320 46,314 Q100,304 170,316 Q250,330 342,308" fill="none" stroke="#fffaf0" stroke-width="1.6" stroke-dasharray="10 8" opacity=".8"/>`;
+ g+=`<path d="M-26,430 Q-30,366 -12,326 Q2,298 40,294 Q100,284 170,298 Q250,312 ${342+EO},290 V430Z" fill="#e8d6a4"/>`;
+ g+=P('M-12,440 Q-16,370 0,334 Q12,310 40,304 Q100,294 170,306 Q250,320 '+(342+EO)+',298 V440Z','#9cc6bd',2);
+ g+=`<path d="M4,430 Q2,372 12,344 Q22,320 46,314 Q100,304 170,316 Q250,330 ${342+EO},308" fill="none" stroke="#fffaf0" stroke-width="1.6" stroke-dasharray="10 8" opacity=".8"/>`;
  g+=`<path d="M60,350 q7,-4 14,0 q7,4 14,0 M150,366 q7,-4 14,0 q7,4 14,0 M110,394 q7,-4 14,0 q7,4 14,0 M220,388 q7,-4 14,0 q7,4 14,0 M270,350 q7,-4 14,0 q7,4 14,0" fill="none" stroke="#fffaf0" stroke-width="1.8" stroke-linecap="round"/>`;
+ if(EO){const R3=mulberry32(5151);[[356,94,34,60],[412,92,34,56]].forEach(([x,y,w,h])=>g+=mt(x,y,w,h,'#b3b8b2','#959c98',1));[[362,112,28,44],[420,112,28,44]].forEach(([x,y,w,h])=>g+=mt(x,y,w,h,'#8e9a72','#76835c',0));let te=[];for(let i=0;i<14;i++)te.push([346+R3()*104,134+R3()*150,.8+R3()*.4]);te.sort((a,b)=>a[1]-b[1]).forEach(([x,y,s])=>g+=tree(x,y,s));let tw3='';for(let i=0;i<16;i++){const x=346+R3()*100,y=150+R3()*130;tw3+=`M${f(x)},${f(y)} l2,-4 l2,4 `}g+=`<path d="${tw3}" fill="none" stroke="#9aa361" stroke-width="1.1" stroke-linecap="round"/>`;g+=`<path d="M344,372 q7,-4 14,0 q7,4 14,0 M400,350 q7,-4 14,0 q7,4 14,0 M380,396 q7,-4 14,0 q7,4 14,0 M436,380 q7,-4 14,0 q7,4 14,0" fill="none" stroke="#fffaf0" stroke-width="1.8" stroke-linecap="round"/>`}
  // river
  g+=`<path d="M150,108 Q136,150 150,196 Q166,246 178,306" fill="none" stroke="${ink}" stroke-width="9" stroke-linecap="round"/><path d="M150,108 Q136,150 150,196 Q166,246 178,306" fill="none" stroke="#9cc6bd" stroke-width="6" stroke-linecap="round"/>`;
  // birds
  g+=`<path d="M200,150 q4,-4 8,0 q4,-4 8,0 M222,140 q3,-3 6,0 q3,-3 6,0 M86,150 q3,-3 6,0 q3,-3 6,0" fill="none" stroke="${ink}" stroke-width="1.3"/>`;
  [...MAPHOOKS].sort((a,b)=>(a.z??2)-(b.z??2)).forEach(h=>{g+=h({U,P,ink,FN,f,open:isOpen})});
  // vignette
- g+=`<rect x="${-120-WO}" y="${-NO}" width="${462+WO}" height="${430+NO}" fill="url(#mapVig)" pointer-events="none"/></g>`; /* 暈影不能擋住地點的點擊 */
- g+=`<path d="${NO?`M${-96-WO},-140 Q110,-150 318,-138 Q328,130 316,400 Q110,410 ${-94-WO},400 Q${-104-WO},130 ${-96-WO},-140Z`:`M${-96-WO},30 Q110,20 318,32 Q326,220 316,400 Q110,410 ${-94-WO},400 Q${-102-WO},220 ${-96-WO},30Z`}" fill="none" stroke="#a8916a" stroke-width="1.2" stroke-dasharray="4 5"/>`;
+ g+=`<rect x="${-120-WO}" y="${-NO}" width="${462+WO+EO}" height="${430+NO}" fill="url(#mapVig)" pointer-events="none"/></g>`; /* 暈影不能擋住地點的點擊 */
+ g+=`<path d="${NO?`M${-96-WO},-140 Q110,-150 ${318+EO},-138 Q${328+EO},130 ${316+EO},400 Q110,410 ${-94-WO},400 Q${-104-WO},130 ${-96-WO},-140Z`:`M${-96-WO},30 Q110,20 ${318+EO},32 Q${326+EO},220 ${316+EO},400 Q110,410 ${-94-WO},400 Q${-102-WO},220 ${-96-WO},30Z`}" fill="none" stroke="#a8916a" stroke-width="1.2" stroke-dasharray="4 5"/>`;
  g+='<g pointer-events="none">';MAPTOP.forEach(h=>{g+=h({U,P,ink,FN,f,open:isOpen})});g+='</g>'; /* 畫在暈影上面的東西（例如秘境的光圈） */
  /* 2026-11-18 大區名牌（遠看才顯示，放大後換成各關名字）：levels.js 用 addRegion 登記 */
  g+='<g pointer-events="none">';MAPREGIONS.forEach(r=>{if(!r.ids.some(isOpen))return;g+=`<g class="rlab" data-t="translate(${r.x},${r.y})" transform="translate(${r.x},${r.y})"><text y="5" text-anchor="middle" font-size="14" letter-spacing="3" fill="#5a3d22" stroke="#f8eed6" stroke-width="5" stroke-linejoin="round" paint-order="stroke" font-family="${FN}">${r.name}</text></g>`});g+='</g>';
@@ -712,7 +721,7 @@ function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,
  const here=HERE[level]||[100,150];
  g+=`<g class="mpin" data-t="translate(${here[0]},${here[1]})" transform="translate(${here[0]},${here[1]})" pointer-events="none"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="1.6s" repeatCount="indefinite"/>`+P('M0,14 C-10,2 -11,-4 -11,-8 A11,11 0 1 1 11,-8 C11,-4 10,2 0,14Z','#f5c842',2)+`<circle cy="-8" r="4" fill="${ink}"/></g></g>`;
  g+='</svg>';
- $('#mapSvg').innerHTML=g;MAPVB={x:-120-WO,y:-NO,w:462+WO,h:430+NO};
+ $('#mapSvg').innerHTML=g;MAPVB={x:-120-WO,y:-NO,w:462+WO+EO,h:430+NO};
  /* 各關名牌加上 mlab（縮放時保持看得清楚）；屬於大區的關卡，遠看時名牌藏起來 */
  document.querySelectorAll('#mapSvg .mnode').forEach(m=>{const n=+m.dataset.n;if(MAPREGIONS.some(r=>r.ids.includes(n)))m.classList.add('inreg');
   m.querySelectorAll('g').forEach(e=>{if(e.querySelector(':scope>rect')&&e.querySelector(':scope>text')){e.classList.add('mlab');e.dataset.t=e.getAttribute('transform')||''}})});
