@@ -66,7 +66,7 @@ function add(x,y,w,h,kind,inner,o={}){
  const A=animOf(kind);
  if(A&&(alwaysOf(kind)||r()<.75)){const a=pk(A),[d0,d1]=DUR[a];inner=`<g class="an a-${a}" style="--d:${f(sr(d0,d1))}s;animation-delay:-${f(sr(0,4))}s">${inner}</g>`}
  if(heavyOf(kind))inner=`<g stroke-width="2.7">${inner}</g>`;
- let svg=T(x,y,o.s||1,inner,o.fl);
+ let svg=T(x,y,(o.s||1)*(isDecoy(kind)?.85:1),inner,o.fl); /* 2026-11-18：物件縮小 15%，干擾物也跟著縮小 15% */
  svg=svg.replace('<g ',`<g data-n="${sprites.length}"${inner.includes('class="an ')?` class="sp" data-x="${f(x)}" data-y="${f(y)}"`:''} `);
  const sp={x,y,w,h,kind,svg,n:sprites.length};{const m=o.say||(/data-say="([^"]*)"/.exec(inner)||[])[1];if(m)sp.say=m}sprites.push(sp);if(o.mark!==false)mark(x,y,w*(o.s||1),h*(o.s||1),o.sh||1);return sp}
 
@@ -227,7 +227,7 @@ function placeItems(){
     p=c;
    }
    if(!p)p=sampleIn(regs[0],t)||{x:500,y:1500};
-   items.push({t,x:p.x,y:p.y,float:!!p.float,occ:p.occ||null,r:t.r,rot:rnd(-t.rot,t.rot),sc:rnd(.76,.92),fl:Math.random()<.5,found:false,how:mode});
+   items.push({t,x:p.x,y:p.y,float:!!p.float,occ:p.occ||null,r:t.r,rot:rnd(-t.rot,t.rot),sc:rnd(.72,.87),fl:Math.random()<.5,found:false,how:mode});
   }
  }
 }
