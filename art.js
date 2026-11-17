@@ -163,7 +163,8 @@ const wrapAn=(a,inner,force)=>{if(!force&&r()>=.75)return inner;const[d0,d1]=DUR
 const PERSON_AN={bob:'lean',sway:'lean',float:'lean'};
 function act(x,y,dir,o={},anim){let a=anim===true?pk(['lean','nod','lean','nod','lean','lean']):anim;if(a&&PERSON_AN[a])a=PERSON_AN[a];let inner=kid(o);if(a)inner=wrapAn(a,inner,o.force);return T(x,y,o.s||1,inner,dir<0)}
 const heart=(x,y,c='#d8413a')=>`<path transform="translate(${x},${y})" d="M0,4 C-8,-2 -5,-9 0,-5 C5,-9 8,-2 0,4Z" fill="${c}" stroke-width="1.3"/>`;
-const noteM=(x,y)=>`<g transform="translate(${x},${y})"><path d="M2,0 V-11 L9,-13 V-2" fill="none" stroke-width="1.6"/><ellipse cx="0" cy="0" rx="2.8" ry="2.1" fill="${OL}" stroke="none"/><ellipse cx="7" cy="-2" rx="2.8" ry="2.1" fill="${OL}" stroke="none"/></g>`;
+/* 2026-11-18g：音符加 class="nt"；整組人物被左右翻轉時，core.js fixNotes() 會把音符翻回來（不然符桿跑到左邊、看起來畫反了） */
+const noteM=(x,y)=>`<g class="nt" data-p="${x},${y}" transform="translate(${x},${y})"><path d="M2,0 V-11 L9,-13 V-2" fill="none" stroke-width="1.6"/><ellipse cx="0" cy="0" rx="2.8" ry="2.1" fill="${OL}" stroke="none"/><ellipse cx="7" cy="-2" rx="2.8" ry="2.1" fill="${OL}" stroke="none"/></g>`;
 function bubble(x,y,c){let g=`<g transform="translate(${x},${y})"><path d="M-14,-10 h28 q4,0 4,4 v10 q0,4 -4,4 h-14 l-6,6 v-6 h-8 q-4,0 -4,-4 v-10 q0,-4 4,-4z" fill="#fbf6ea" stroke-width="1.6"/>`;
  if(c==='heart')g+=heart(0,-2);else if(c==='note')g+=noteM(-3,4);else g+=`<g fill="${OL}" stroke="none"><circle cx="-6" cy="-1" r="1.7"/><circle cx="0" cy="-1" r="1.7"/><circle cx="6" cy="-1" r="1.7"/></g>`;
  return g+'</g>'}
@@ -495,3 +496,43 @@ Object.assign(KIND,{
  peekBarrel:{w:28,h:40,fn:()=>wrapAn('hop',peekHead(0,-24,.58,true))+`<path d="M-11,0 Q-14,-13 -11,-26 L11,-26 Q14,-13 11,0Z" fill="#a8703f"/><path d="M-13,-8 H13 M-13,-18 H13" fill="none"/><path d="M4,-25 Q10,-13 6,-1" fill="none" stroke-width=".9"/>`},
  peekCrate:{w:28,h:38,fn:()=>wrapAn('bob',peekHead(sr(-4,4),-20,.55,false))+crate()}
 });
+
+/* ===== 駱駝（2026-11-18 使用者看 A～H 選項圖，選「B、G 都用」）=====
+   B 雙峰駱駝：深棕、毛茸茸；G 修長＋市集盛裝：細長腳有膝蓋、S 形長脖子、彩色鞍毯＋流蘇＋彩球。
+   CAMELART.stand(c,c2,bag)、CAMELART.rest(c,c2) 兩種輪流出（用計數，不用亂數，不影響場景擺放）；
+   要指定哪一種用 CAMELART.B／CAMELART.G。都是面朝左、腳在 y=0；站著約 70×90，趴著約 76×50。
+   沙漠三關（level11～13）的 CAMEL、出口商隊、過場都用這裡的圖。 */
+const CAMELART=(()=>{
+ const sh=(rx=30)=>`<ellipse cx="0" cy="1" rx="${rx}" ry="5" fill="#000" opacity=".13" stroke="none"/>`;
+ const legs=(xs,top,c2,w=6)=>{const d=xs.map(([a,b])=>`M${a},${top} L${b},0`).join(' ');return `<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w}" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${c2}" stroke-width="${w-2.6}" stroke-linecap="round"/>`};
+ const eye=(x,y,r=1.4)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${OL}" stroke="none"/>`;
+ const fluff=(d,c)=>`<path d="${d}" fill="none" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>`;
+ /* 原本的淺色 → 雙峰駱駝的棕色 */
+ const BROWN={'#d6aa66':'#a87a4a','#c99a58':'#9a6c40','#dcb878':'#b58a58','#cfa262':'#9e7244','#d6b072':'#a98050','#c99a5b':'#9a6c40'};
+ const bc=c=>BROWN[c]||(c&&c.startsWith('#e')?c:'#a87a4a');
+ const B={stand:(c,c2,bag=true)=>{c=bc(c);c2=shade(c,-.3);return sh(30)+legs([[-17,-19],[-9,-8],[11,13],[19,21]],-30,c2,6.4)+
+  `<path d="M-19,-16 l-2,4 l3,2 M-9,-16 l-2,4 l3,2 M11,-16 l2,4 l-3,2 M19,-16 l2,4 l-3,2" fill="none" stroke="${c2}" stroke-width="1.6"/>`+
+  `<path d="M-24,-34 Q-28,-46 -18,-46 Q-14,-68 -3,-48 Q3,-44 8,-48 Q18,-70 25,-44 Q30,-30 18,-29 L-18,-29 Q-25,-29 -24,-34Z" fill="${c}"/>`+
+  fluff('M-16,-58 q2,-4 5,-2 q2,-4 5,0 M12,-60 q2,-4 5,-2 q2,-4 5,1',c2)+
+  `<path d="M-20,-42 Q-30,-48 -33,-64 L-26,-68 Q-23,-54 -12,-46Z" fill="${c}"/>`+fluff('M-27,-62 l-4,3 M-25,-56 l-5,2 M-22,-50 l-5,2',c2)+
+  `<ellipse cx="-36" cy="-70" rx="10" ry="6" fill="${c}"/><path d="M-30,-76 q-4,-6 2,-6 q4,0 2,6" fill="${c2}" stroke-width="1.1"/>${eye(-37,-72)}<path d="M-45,-68 q2,1 4,0" fill="none" stroke-width="1.1"/><path d="M26,-40 q6,8 1,15 l3,3" fill="none" stroke-width="1.6"/>`+
+  (bag?`<path d="M-6,-48 Q2,-52 10,-48 L10,-36 L-6,-36Z" fill="#2f6f73"/><path d="M-6,-42 H10" stroke="#f5c842" stroke-width="1.6"/><rect x="-22" y="-40" width="12" height="14" rx="3" fill="#8a5a3a"/><rect x="11" y="-40" width="11" height="13" rx="3" fill="#c4473a"/>`:'')},
+  rest:(c,c2)=>{c=bc(c);c2=shade(c,-.3);return sh(30)+`<path d="M-24,0 Q-28,-14 -14,-16 Q-10,-36 -1,-18 Q4,-15 9,-18 Q17,-38 24,-14 Q30,0 18,0Z" fill="${c}"/>`+fluff('M-12,-28 q2,-4 5,-1 M11,-30 q2,-4 5,0',c2)+
+  `<path d="M-14,0 h10 M10,0 h10" fill="none" stroke="${c2}" stroke-width="3"/><path d="M-20,-12 Q-34,-14 -36,-30 L-30,-33 Q-27,-22 -14,-18Z" fill="${c}"/>`+fluff('M-31,-27 l-4,2 M-28,-21 l-5,1',c2)+
+  `<ellipse cx="-39" cy="-33" rx="9" ry="5" fill="${c}"/>${eye(-40,-35)}<path d="M-34,-38 q-3,-5 2,-5 q3,0 2,5" fill="${c2}" stroke-width="1.1"/>`},
+  saddleY:-46,riderX:2.5};
+ const deco=(y,w=1)=>`<path d="M${-16*w},${y-14} Q0,${y-28} ${18*w},${y-14} L${20*w},${y} L${-18*w},${y}Z" fill="#b8402e"/><path d="M${-17*w},${y-6} H${19*w}" stroke="#f0c040" stroke-width="2.4"/><path d="M${-16*w},${y-11} H${18*w}" stroke="#2f6f9a" stroke-width="2"/><path d="M${-18*w},${y} ${Array.from({length:Math.round(12*w)},(_,i)=>`l3,${i%2?-5:5}`).join(' ')}" fill="none" stroke="#f0c040" stroke-width="1.6"/>`;
+ const G={stand:(c='#d9b57a',c2='#b38a52',bag=true)=>sh(28)+legs([[-16,-18],[-9,-8],[12,13],[19,22]],-36,c2,4.6)+
+  `<g fill="${c2}" stroke-width="1.2"><circle cx="-17" cy="-17" r="2.6"/><circle cx="-8.5" cy="-17" r="2.6"/><circle cx="12.5" cy="-17" r="2.6"/><circle cx="20.5" cy="-17" r="2.6"/></g>`+
+  `<path d="M-22,-40 Q-24,-50 -12,-52 Q-2,-74 10,-54 Q22,-54 26,-44 Q27,-35 18,-35 L-16,-35 Q-23,-35 -22,-40Z" fill="${c}"/>`+
+  `<path d="M-18,-48 Q-30,-52 -34,-68 Q-36,-80 -42,-84 L-36,-90 Q-28,-84 -26,-70 Q-24,-58 -12,-52Z" fill="${c}"/>`+
+  `<path d="M-38,-92 Q-30,-94 -34,-86 Q-44,-80 -54,-84 Q-58,-88 -52,-90Z" fill="${c}"/><path d="M-55,-84 q2,3 6,2" fill="none" stroke-width="1.3"/>${eye(-41,-89,1.2)}<path d="M-34,-92 l1,-4 l3,3" fill="${c2}" stroke-width="1.1"/>`+
+  `<path d="M26,-42 q4,10 0,18" fill="none" stroke-width="1.6"/><path d="M26,-24 l-2,5 l4,0Z" fill="${c2}" stroke-width="1.1"/>`+
+  (bag?deco(-36)+`<g stroke-width="1.1"><circle cx="-12" cy="-30" r="2.2" fill="#e85d8a"/><circle cx="0" cy="-30" r="2.2" fill="#4fa7a8"/><circle cx="12" cy="-30" r="2.2" fill="#f0c040"/></g><circle cx="-36" cy="-96" r="3.2" fill="#e85d8a" stroke-width="1.1"/><path d="M-41,-86 L-34,-94" stroke="#c4473a" stroke-width="2" fill="none"/><circle cx="-30" cy="-74" r="3" fill="#e0a030" stroke-width="1.2"/>`:''),
+  rest:(c='#cfa66c',c2='#a87e48')=>sh(30)+`<path d="M-24,0 Q-26,-14 -12,-16 Q-2,-36 10,-18 Q24,-20 26,-6 Q26,0 16,0Z" fill="${c}"/><path d="M-16,0 q6,-6 12,0 M8,0 q6,-6 12,0" fill="none" stroke="${c2}" stroke-width="2.4"/>`+
+  `<path d="M-10,-18 Q2,-32 14,-18 L16,-8 L-12,-8Z" fill="#b8402e"/><path d="M-11,-12 H15" stroke="#f0c040" stroke-width="2"/><path d="M-12,-8 l3,4 l3,-4 l3,4 l3,-4 l3,4 l3,-4 l3,4 l3,-4 l3,4" fill="none" stroke="#f0c040" stroke-width="1.4"/>`+
+  `<path d="M-18,-10 Q-32,-14 -34,-30 Q-36,-40 -42,-44 L-36,-50 Q-28,-44 -26,-30 Q-24,-18 -12,-16Z" fill="${c}"/><path d="M-38,-52 Q-30,-54 -34,-46 Q-44,-40 -54,-44 Q-58,-48 -52,-50Z" fill="${c}"/>${eye(-41,-49,1.2)}<path d="M-55,-44 q2,3 6,2" fill="none" stroke-width="1.3"/><circle cx="-36" cy="-56" r="3" fill="#e85d8a" stroke-width="1.1"/>`,
+  saddleY:-52,riderX:-1};
+ let ns=0,nr=0;
+ return {B,G,deco,stand:(c,c2,bag)=>(ns++%2?G:B).stand(c,c2,bag),rest:(c,c2)=>(nr++%2?G:B).rest(c,c2),next:()=>ns++%2?G:B};
+})();

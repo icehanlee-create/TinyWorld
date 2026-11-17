@@ -266,3 +266,9 @@ H.mapHook(3,({U,P,ink,FN,f})=>{let g='';const on=U>=2;
  g+=t;
  return g});
 })();
+
+/* ===== 物件的合理位置（2026-11-12）：SPOTS 合理的地方（佔 55～65%）、BLEND 顏色相近的東西（其餘的至少一半）。說明在 core.js 的 placeItems ===== */
+(function(){const H=window.TH;if(!H||!H.SPOTS)return;
+H.SPOTS[1]={"hat":[["crate",0.9],["barrel",0.95],["fence",0.8,0.35],["stall",0.4,0.3],["sign",0.3,0.6]],"key":[["house",0.03,0.25],["crate",0.9],["well",0.05,0.6],["stall",0.4,0.3],["pot",0.05,0.6]],"potion":[["stall",0.4,0.35],["crate",0.9],["barrel",0.95],["house",0.03,0.3],["tent",0.05,0.6]],"mushroom":[["pine",0.03,0.6],["round",0.03,0.6],["bush",0.05,0.6],["rock",0.05,0.6]],"cat":[["fence",0.85,0.3],["barrel",0.95],["crate",0.9],["house",0.03,0.3],["well",0.05,0.6]],"pumpkin":[["house",0.03,0.3],["fence",0.05,0.6],["hay",0.05,0.6],["stall",0.05,0.6],["crate",0.05,0.6]],"star":[["round",0.6,0.25],["pine",0.5,0.2],["house",0.75,0.15],["balloon",0.3,0.2]],"letter":[["house",0.03,0.3],["crate",0.9],["well",0.05,0.6],["benchPair",0.4,0.2],["sign",0.05,0.6]],"snail":[["rock",0.7,0.2],["bush",0.05,0.6],["pot",0.6,0.15],["mushTan",0.05,0.6],["fence",0.05,0.6]],"cake":[["stall",0.4,0.35],["crate",0.9],["tent",0.05,0.6],["benchPair",0.05,0.6],["barrel",0.95]],"umbrella":[["house",0.03,0.4],["fence",0.05,0.6],["round",0.03,0.6],["stall",0.05,0.6],["lamp",0.05,0.6]]};
+H.BLEND[1]={"hat":["hatBrown","hatGreen","flowersY"],"key":["keyGrey","pebbles"],"potion":["bottleG","bottleB","flowersY"],"mushroom":["mushTan","mushBrown","flowersY"],"cat":["rock","cat"],"pumpkin":["pumpkinPlain","flowersY"],"star":["flowersY","lily"],"letter":["note","pebbles"],"snail":["rock","pebbles"],"cake":["cupcake","flowersY"],"umbrella":["umbYellow","bush","grassClump"]};
+})();
