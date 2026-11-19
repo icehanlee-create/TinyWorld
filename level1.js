@@ -140,10 +140,50 @@ function buildGround(sc){const SC=SCENES[sc];
 }
 const TERR=[[660,300,1515],[800,300,1515],[940,300,1515],[1080,1060,1515]];
 function mark0(x0,y0,x1,y1){for(let j=Math.floor(y0/CELL);j<=Math.floor(y1/CELL);j++)for(let i=Math.floor(x0/CELL);i<=Math.floor(x1/CELL);i++)if(i>=0&&j>=0&&i<GC&&j<GR)occ[j*GC+i]=1}
+/* 2026-11-19 城堡改成方形城郭（使用者選 C）：正面城牆＋兩側城牆往後縮＋後牆＋四角圓塔＋中央主塔，放大 1.35 倍。
+   佔位置的範圍（add 的 330×300）沒變，房子、石階位置不變；畫法和第 17 關主堡同一種。 */
+const castleL1=(()=>{const f=v=>Math.round(v*10)/10;
+const cren=(x0,x1,y,h=14,st=26,mw=15,fill='#e2d7bc')=>{let d='';for(let x=x0;x<=x1-mw;x+=st)d+=`M${f(x)},${f(y)} v-${h} h${mw} v${h} `;return `<path d="${d}" fill="${fill}"/>`};
+const stones=(x0,x1,y0,y1,dy=20,len=44,col='#b8ad90')=>{let s='',k=0;for(let y=y0+dy;y<y1-2;y+=dy,k++)for(let x=x0+6+(k%2)*(len*.68);x<x1-len*.5;x+=len*1.36)s+=`M${f(x)},${f(y)} h${f(Math.min(len,x1-x-6))} `;return `<path d="${s}" fill="none" stroke="${col}" stroke-width="1.3"/>`};
+const flag=(x,y)=>`<path d="M${x},${y} v-20" fill="none"/><path d="M${x},${y-20} l18,5 l-18,5Z" fill="#e0b44a" stroke-width="1.5"/>`;
+/* 圓柱塔：底部弧線、右側陰影、頂端圓形垛口、圓錐屋頂 */
+const rTower=(cx,by,w,h,roof,o={})=>{const x0=cx-w/2,x1=cx+w/2,top=by-h,e=w*.14,C=o.c||'#e2d7bc',C2=o.c2||'#cfc2a2';let s='';
+ s+=`<path d="M${f(x0)},${f(top)} V${f(by)} Q${f(cx)},${f(by+e*2)} ${f(x1)},${f(by)} V${f(top)}Z" fill="${C}"/>`;
+ s+=`<path d="M${f(cx+w*.2)},${f(top)} V${f(by+e*.84)} Q${f(cx+w*.36)},${f(by+e*.6)} ${f(x1)},${f(by)} V${f(top)}Z" fill="${C2}" stroke="none"/>`;
+ let b='';for(let y=top+26;y<by-8;y+=24)b+=`M${f(x0+2)},${f(y)} Q${f(cx)},${f(y+e*1.8)} ${f(x1-2)},${f(y)} `;s+=`<path d="${b}" fill="none" stroke="#bfb291" stroke-width="1.1" opacity=".75"/>`;
+ s+=`<path d="M${f(x0)},${f(top)} V${f(by)} Q${f(cx)},${f(by+e*2)} ${f(x1)},${f(by)} V${f(top)}" fill="none"/>`;
+ for(let y=top+34;y<by-40;y+=Math.max(56,h/3.2))s+=`<path d="M${f(cx-5)},${f(y+16)} V${f(y+5)} Q${f(cx)},${f(y-2)} ${f(cx+5)},${f(y+5)} V${f(y+16)}Z" fill="#3a3040"/>`;
+ const pt=top-12;s+=`<path d="M${f(x0-5)},${f(top)} V${f(pt)} Q${f(cx)},${f(pt+e*2)} ${f(x1+5)},${f(pt)} V${f(top)} Q${f(cx)},${f(top+e*2)} ${f(x0-5)},${f(top)}Z" fill="${C}"/>`;
+ if(roof){const ap=pt-w*1.12;s+=`<path d="M${f(x0-9)},${f(pt)} Q${f(cx)},${f(pt+e*2.4)} ${f(x1+9)},${f(pt)} L${f(cx)},${f(ap)}Z" fill="${roof}"/><path d="M${f(cx)},${f(ap)} L${f(cx+w*.22)},${f(pt+e*1.5)} Q${f(cx+w*.42)},${f(pt+e*1.1)} ${f(x1+9)},${f(pt)}Z" fill="#000" opacity=".13" stroke="none"/>`+flag(cx,ap)}
+ else{let m='';for(let a=-.8;a<=.81;a+=.4){const x=cx+a*(w/2+5);m+=`M${f(x-5)},${f(pt+e*2*(1-a*a))} v-9 h10 v9 `}s+=`<path d="${m}" fill="${C}"/>`}
+ return s};
+/* 方塔（原本的畫法） */
+const sTower=(cx,by,w,h,roof)=>{const top=by-h;let s=`<path d="M${cx-w/2},${by} V${top} H${cx+w/2} V${by}Z" fill="#e2d7bc"/><path d="M${cx+w/6},${by} V${top} H${cx+w/2} V${by}Z" fill="#cfc2a2" stroke="none"/><path d="M${cx-w/2},${by} V${top} H${cx+w/2} V${by}" fill="none"/>`;
+ s+=`<path d="M${cx-w/2-8},${top} L${cx},${f(top-w*1.1)} L${cx+w/2+8},${top}Z" fill="${roof}"/>`+flag(cx,f(top-w*1.1));
+ for(let y=top+40;y<by-60;y+=70)s+=`<path d="M${cx-6},${y+18} V${y+6} Q${cx},${y-2} ${cx+6},${y+6} V${y+18}Z" fill="#3a3040"/>`;return s};
+/* 方形城郭（斜俯視）：後牆內側、後面兩座塔、中央主塔、兩側城牆往後縮、正面城牆、前面兩座塔 */
+const compound=o=>{const {cx,by,fw,fh,dep,bw,bh}=o,ft=by-fh,bb=by-dep,btop=bb-bh;let s='';
+ s+=`<path d="M${cx-bw},${bb} H${cx+bw} L${cx+fw},${ft} H${cx-fw}Z" fill="#cfc6aa"/>`;
+ s+=`<rect x="${cx-bw}" y="${btop}" width="${2*bw}" height="${bh}" fill="#d2c6a8"/>`+stones(cx-bw,cx+bw,btop,bb,18,40,'#bcae8c')+cren(cx-bw,cx+bw,btop,11,24,13,'#d2c6a8');
+ s+=rTower(cx-bw,bb+4,o.bt.w,o.bt.h,o.broof)+rTower(cx+bw,bb+4,o.bt.w,o.bt.h,o.broof);
+ if(o.keep){const k=o.keep;s+=rTower(cx,k.base,k.w,k.h,k.roof)}
+ for(const sg of [-1,1]){const xf=cx+sg*fw,xb=cx+sg*bw,inw=-sg;
+  s+=`<path d="M${xf},${by} V${ft} L${xb},${btop} V${bb}Z" fill="#c6b994"/>`;
+  let ln='';for(const t of [.25,.5,.75])ln+=`M${xf},${f(by-fh*t)} L${xb},${f(bb-bh*t)} `;s+=`<path d="${ln}" fill="none" stroke="#ab9e78" stroke-width="1.2"/>`;
+  const wk=o.walk||14;s+=`<path d="M${xf},${ft} L${xf+inw*wk},${ft} L${xb+inw*wk*.7},${btop} L${xb},${btop}Z" fill="#e3d9c0"/>`;
+  let m='';const n=Math.max(3,Math.round((ft-btop)/22));for(let i=0;i<n;i++){const t=(i+.5)/n,x=xf+(xb-xf)*t,y=ft+(btop-ft)*t;m+=`M${f(x-sg*1)},${f(y)} v-10 h${inw*7} v10 `}s+=`<path d="${m}" fill="#c6b994"/>`;
+ }
+ s+=`<rect x="${cx-fw}" y="${ft}" width="${2*fw}" height="${fh}" fill="#e8ddc2"/>`+stones(cx-fw,cx+fw,ft,by,o.sd||20,o.sl||46,'#c9bd9c')+cren(cx-fw,cx+fw,ft,o.ch||14,o.cs||26,o.cw||15,'#e8ddc2');
+ if(o.door){const dw=o.door;s+=`<path d="M${cx-dw},${by} V${f(by-dw*1.7)} Q${cx},${f(by-dw*2.7)} ${cx+dw},${f(by-dw*1.7)} V${by}Z" fill="#5a3a2a"/><path d="M${cx-dw*.6},${by} V${f(by-dw*2)} M${cx},${by} V${f(by-dw*2.4)} M${cx+dw*.6},${by} V${f(by-dw*2)} M${cx-dw},${f(by-dw*.7)} H${cx+dw} M${cx-dw},${f(by-dw*1.4)} H${cx+dw}" fill="none" stroke="#c9a26a" stroke-width="1.6"/>`}
+ if(o.extra)s+=o.extra;
+ s+=rTower(cx-fw,by+4,o.ft.w,o.ft.h,o.froof)+rTower(cx+fw,by+4,o.ft.w,o.ft.h,o.froof);
+ return s};
+
+ return ()=>`<g transform="scale(1.35)">${compound({cx:0,by:0,fw:125,fh:92,dep:128,bw:106,bh:74,ft:{w:62,h:172},bt:{w:46,h:132},froof:'#c4572f',broof:'#c4572f',keep:{base:-60,w:78,h:190,roof:'#6f7f9a'},door:24})}</g>`})();
 function structures1(){skyBirds(1);
  add(300,230,60,110,'balloon',balloon('#c4572f','#e0b44a'),{mark:false});
  add(1500,290,60,110,'balloon',balloon('#6fa8a0','#fbf6ea'),{mark:false,s:.75});
- add(900,545,330,300,'castle',castle(),{sh:.95});
+ add(900,545,330,300,'castle',castleL1(),{sh:.95});
  add(1330,575,60,330,'tower',tower(58,230,{roof:'#d98a42',rh:120,door:true}),{sh:.9});
  add(560,580,80,200,'mill',windmill(),{sh:.6});
  [[380,500,.7],[1450,490,.7],[700,450,.5],[1700,470,.6],[250,690,.45],[60,650,.5],[2200,470,.6],[2470,450,.5]].forEach(([x,y,k])=>add(x,y-2,30,30,'peek',wrapAn('bob',peekHead(0,-14*k/.7,k,true),true),{mark:false}));

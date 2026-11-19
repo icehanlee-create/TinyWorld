@@ -70,6 +70,13 @@ addLevel({n:16,title:'海底世界',file:'level16.js',c:[1250,1820],
  find:{after:10,from:5,hint:['路人：海島港口的燈塔很神奇喔，聽說有人去點它一下，光就會轉向什麼地方⋯','路人：南邊外海那艘紅色打撈船的船長，只認燈塔的信號——燈塔的光沒照到他，他理都不理人。','路人：燈塔的光照到哪裡，哪裡就有新的冒險在等你。']},
  map:{x:150,y:410,ic:'🤿',name:'海底世界'},next:{pv:()=>seaPreview(),btn:'坐潛水鐘沉下去',had:'潛水鐘隨時可以再沉下去',fresh:'燈塔照到的打撈船船長在等你',ride:'bell16'},
  desc:'坐潛水鐘沉到海底：2 種老朋友加上 <b>10 種海底新東西</b>。'});
+const gatePreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#e2eef0"/><g stroke="#2b2420" stroke-width="1.5" stroke-linejoin="round"><path d="M0,58 V26 H120 V58Z" fill="#d6cbb0"/><path d="M40,58 V12 H80 V58Z" fill="#e8ddc2"/><path d="M36,12 L60,-2 L84,12Z" fill="#5c6f96"/><path d="M50,58 V42 Q60,32 70,42 V58Z" fill="#3a2e28"/><path d="M0,58 H120 V70 H0Z" fill="#7cb4bc" stroke="none"/><path d="M52,58 H68 L71,72 H49Z" fill="#b98a56"/><path d="M0,70 H120 V84 H0Z" fill="#a9b768" stroke="none"/><path d="M14,26 H30 L26,40 L30,54 H14Z M90,26 H106 L102,40 L106,54 H90Z" fill="#b8402e"/></g></svg>`;
+addLevel({n:17,title:'城門廣場',file:'level17.js',c:[1250,1820],
+ find:{after:10,from:1,hint:['路人：小鎮北邊城堡的大門口，站著兩位衛兵，好像在等客人進城！','路人：聽說城堡裡面今天有市集，城門口的衛兵會帶人走過吊橋喔。','路人：沿著小鎮中間的石階一直往北走上去，就是城堡大門了，衛兵說旅人都可以進去看看。']},
+ map:{x:100,y:198,ic:'🏰',name:'城門廣場'},next:{pv:()=>gatePreview(),btn:'跟衛兵進城堡',had:'衛兵隨時可以帶你進城',fresh:'小鎮城堡大門前的衛兵在等你',ride:'bridge17'},
+ desc:'走過吊橋進城門：4 種老朋友加上 <b>8 種城門廣場新東西</b>。'});
 /* 冒險地圖的大區（2026-11-18）：遠看只顯示大區名，放大才顯示各關名字。x,y 是大區名牌的位置 */
 addRegion({name:'櫻花山城',ids:[6,7,8,9],x:-68,y:250});
 addRegion({name:'沙漠',ids:[11,12,13],x:-85,y:392});
+/* 2026-11-19 城堡系列（第 17 關起）隸屬於奇幻小鎮：發現城門廣場之後，遠看只顯示大區名「奇幻小鎮」，放大才看得到「奇幻小鎮」「城堡」兩個名牌；還沒發現時完全不變 */
+addRegion({name:'奇幻小鎮',get ids(){return window.TH&&window.TH.isOpen(17)?[1,17]:[17]},x:100,y:244});
