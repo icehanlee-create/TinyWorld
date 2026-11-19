@@ -320,7 +320,8 @@ const awning=()=>`<path d="M-40,0 V-44 M40,0 V-44" fill="none" stroke-width="2.6
 const turban=`<path d="M-15,-45 Q-17,-60 0,-62 Q17,-60 15,-45 Q0,-50 -15,-45Z" fill="#f1e6cc"/><path d="M-13,-53 Q0,-60 13,-52 M-14,-48 Q0,-55 14,-47" fill="none" stroke="#c9b48a" stroke-width="1.2"/><circle cx="0" cy="-56" r="2.4" fill="#c4473a" stroke-width="1"/>`;
 let lead='';const leader=()=>lead||(lead=act(0,0,1,{view:'fq',pose:'stand',hat:-1,hs:3,skin:'#c98d5e',hair:'#2b2420',shirt:'#2f6f73',pants:'#8a5a3a',beard:true,mood:2,top:'long',bottom:'pants'})+T(0,0,1,turban));
 const svg=found=>T(-56,-20,1,awning())+T(-104,2,1,camelRest())+T(74,6,1,camel())+
- T(10,10,1,(found?'':H.qMark(-80,'?'))+leader()); /* 領隊頭上問號徽章（「有事想問玩家」，和第 5 關望遠鏡小孩一樣；故事角色才用驚嘆號） */
+/* 2026-11-18 使用者：入口角色頭上從「？」改成「…」（和一般路人一樣，增加探索難度）；圓點半徑 1.75，不會被當成路人提示（DOTSIG） */
+ T(10,10,1,(found?'':`<g class="qbob">${H.bubble(14,-74,'dots').replace(/r="1\.7"/g,'r="1.75"')}</g>`)+leader()); /* 領隊頭上「…」（「有事想問玩家」，和第 5 關望遠鏡小孩一樣；故事角色才用驚嘆號） */
 const pv=()=>`<svg viewBox="0 0 220 110" width="220" height="110" style="display:block"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><rect x="0" y="0" width="220" height="110" rx="10" fill="#f6dfa8" stroke="none"/><circle cx="176" cy="30" r="14" fill="#f5c842" stroke="none"/><path d="M0,76 Q50,56 100,74 T220,70 V110 H0Z" fill="#e8c47a"/><path d="M0,92 Q60,80 120,92 T220,90 V110 H0Z" fill="#d9ad5f"/><g transform="translate(110,92) scale(.75)">${camel()}</g><g transform="translate(60,92) scale(.55)">${camel('#c99a5b','#a87a3c',false)}</g></g></svg>`;
 H.EXITS[N]={x:CAR.x-10,y:CAR.y,w:240,h:96,svg,ask:{pv,title:'要跟商隊出發嗎？',
  text:'商隊領隊：我們要回西南邊的沙漠綠洲了。<br>綠洲市集可熱鬧了，要一起來嗎？',again:'商隊領隊：又要去綠洲市集嗎？<br>駱駝都準備好了！',

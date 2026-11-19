@@ -143,3 +143,9 @@ function rideSVG(){
 }
 H.RIDES.cart={text:'乾草車出發，前往東方農莊⋯',every:230,tick:k=>tone(k%2?520:420,.06,'triangle',.06),svg:rideSVG};}
 })();
+
+/* ===== 物件的合理位置（2026-11-12）：SPOTS 合理的地方（佔 55～65%）、BLEND 顏色相近的東西（其餘的至少一半）。說明在 core.js 的 placeItems ===== */
+(function(){const H=window.TH;if(!H||!H.SPOTS)return;
+H.SPOTS[2]={"cat":[["fence",0.85,0.3],["hay",0.9,0.3],["barrel",0.95],["crate",0.9],["house",0.03,0.3]],"key":[["house",0.03,0.25],["barn",0.03,0.15],["crate",0.9],["well",0.05,0.6],["bucket",0.05,0.6]],"letter":[["house",0.03,0.3],["crate",0.9],["bench",0.4,0.25],["stall",0.4,0.3],["barrel",0.95]],"star":[["fruitTree",0.6,0.25],["round",0.6,0.25],["barn",0.7,0.2],["house",0.75,0.15],["scarecrow",0.8,0.1]],"umbrella":[["house",0.03,0.4],["fence",0.05,0.6],["fruitTree",0.03,0.6],["stall",0.05,0.6],["bench",0.05,0.6]],"snail":[["rock",0.7,0.2],["bush",0.05,0.6],["pot",0.6,0.15],["fence",0.05,0.6]],"carrot":[["stall",0.4,0.35],["crate",0.9],["bucket",0.05,0.6],["hay",0.05,0.6],["pig",0.05,0.6]],"egg":[["chicken",0.05,0.6],["hay",0.9,0.3],["crate",0.9],["bucket",0.05,0.6],["stall",0.4,0.3]],"corn":[["stall",0.4,0.35],["crate",0.9],["hay",0.05,0.6],["barn",0.03,0.4],["scarecrow",0.05,0.6]],"milk":[["cow",0.05,0.6],["barn",0.03,0.35],["stall",0.4,0.3],["crate",0.05,0.6],["bucket",0.05,0.6]],"sunflower":[["fence",0.05,0.6],["house",0.03,0.45],["scarecrow",0.05,0.6],["bush",0.05,0.6]],"apple":[["fruitTree",0.5,0.3],["fruitTree",0.03,0.6],["stall",0.4,0.3],["crate",0.9],["bucket",0.05,0.6]]};
+H.BLEND[2]={"cat":["cat","barrel"],"key":["keyGrey","pebbles"],"letter":["note","pebbles"],"star":["flowersY"],"umbrella":["bush","grassClump"],"snail":["rock","pebbles"],"carrot":["whiteCarrot","tomato"],"egg":["pebbles","chicken"],"corn":["flowersY","hay"],"milk":["bucket","pot"],"sunflower":["flowersY"],"apple":["tomato","fruitTree"]};
+})();

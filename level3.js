@@ -122,6 +122,13 @@ function buildGround3(){const NS_=`stroke="none"`;let s='';
  s+=`<rect x="0" y="-400" width="3000" height="4000" fill="#f7f5ef" ${NS_}/><rect x="0" y="-400" width="3000" height="${zy(480)+410}" fill="#e6eef0" ${NS_}/>`;
  const peak=(x,y,w,h,c)=>`<path d="M${x-w},${y} L${f(x-w*.35)},${f(y-h*.7)} L${x},${y-h} L${f(x+w*.4)},${f(y-h*.62)} L${x+w},${y}Z" fill="${c}"/><path d="M${x},${y-h} L${f(x+w*.4)},${f(y-h*.62)} L${x+w},${y} L${f(x+w*.15)},${y}Z" fill="#b8c7ce" ${NS_} opacity=".75"/><path d="M${f(x-w*.35)},${f(y-h*.7)} L${x},${y-h} L${f(x+w*.4)},${f(y-h*.62)} L${f(x+w*.22)},${f(y-h*.52)} L${f(x+w*.06)},${f(y-h*.64)} L${f(x-w*.12)},${f(y-h*.5)} L${f(x-w*.24)},${f(y-h*.6)}Z" fill="${SNOW}"/>`;
  [[300,440,260,300],[1000,440,300,370],[1700,440,280,320]].forEach(([x,y,w,h])=>s+=`<g opacity=".55">${peak(zx(x),zy(y),w*Z3,h*Z3,'#d3dde1')}</g>`);
+ /* 第 10 關伏筆（2026-11-12）：後面那座遠山的山腳有包廂纜車往上，車廂一路開進山頂上方的雲裡（不用亂數，其他東西位置不變） */
+ {const a=[1160,720],b=[1336,46],L=(t,o=0)=>[f(a[0]+(b[0]-a[0])*t+o),f(a[1]+(b[1]-a[1])*t+o*.5)];let g=`<g opacity=".8" stroke="#6a7488">`;
+  g+=`<path d="M${L(0).join(',')} L${L(1).join(',')} M${L(0,9).join(',')} L${L(1,9).join(',')}" fill="none" stroke-width="1.6"/>`;
+  [.22,.5].forEach(t=>{const[x,y]=L(t).map(Number);g+=`<path d="M${x+4},${y} V${y+70} M${x-3},${y+2} H${x+13}" fill="none" stroke="#7d868c" stroke-width="3"/>`});
+  [[.13,'#e0b44a',0],[.36,'#c4473c',9],[.64,'#5a86b0',0],[.84,'#e0b44a',9]].forEach(([t,c,o])=>{const[x,y]=L(t,o);g+=`<g transform="translate(${x},${y})" stroke-width="1.1"><path d="M0,0 V6" fill="none"/><rect x="-8" y="6" width="16" height="15" rx="4" fill="${c}"/><rect x="-6" y="8.5" width="12" height="6" rx="2" fill="#d6ecf0"/></g>`});
+  g+=`</g><g fill="#fff" stroke="#c9d6dc" stroke-width="2">${[[1290,64,26],[1326,46,34],[1366,60,28],[1402,72,20],[1250,80,18]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}"/>`).join('')}</g><g fill="#fff" stroke="none">${[[1290,64,24],[1326,46,32],[1366,60,26],[1402,72,18],[1250,80,16]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}"/>`).join('')}<rect x="1236" y="70" width="180" height="22" rx="11"/></g>`;
+  s+=g}
  [[620,450,300,390],[1330,450,320,430],[1950,450,260,330],[60,450,240,300]].forEach(([x,y,w,h])=>s+=peak(zx(x),zy(y),w*Z3,h*Z3,'#dfe7ea'));
  [[700,120,1],[1200,70,.8],[1550,160,1],[900,240,.7],[420,190,.8],[1750,90,.8]].forEach(([x,y,k])=>s+=T(zx(x),zy(y),k,swirl()));
  s+=`<path d="${zp('M0,480 Q300,438 600,462 Q900,432 1200,458 Q1500,436 1800,460 Q2000,448 2200,462')} V3600 H0Z" fill="#f7f5ef"/>`;
@@ -312,4 +319,10 @@ function cableRideSVG(){
  s+=`<g transform="translate(200,320) scale(2.3)" stroke-width="1">${cabinSVG('#c4473c',true)}</g>`;
  return s+`</g></svg>`}
 H.RIDES.cable={text:'搭纜車上山，前往雪山溫泉村⋯',every:420,tick:k=>tone(k%3?300:360,.09,'sine',.05),svg:cableRideSVG};}
+})();
+
+/* ===== 物件的合理位置（2026-11-12）：SPOTS 合理的地方（佔 55～65%）、BLEND 顏色相近的東西（其餘的至少一半）。說明在 core.js 的 placeItems ===== */
+(function(){const H=window.TH;if(!H||!H.SPOTS)return;
+H.SPOTS[3]={"letter":[["house",0.03,0.3],["crate",0.9],["bench",0.4,0.25],["stall",0.4,0.3],["barrel",0.95]],"egg":[["tubStack",0.05,0.6],["toro",0.05,0.6],["stall",0.4,0.3],["crate",0.9],["bfence",0.05,0.6]],"cat":[["barrel",0.95],["crate",0.9],["woodpile",0.9,0.3],["house",0.03,0.3],["bench",0.4,0.25]],"key":[["house",0.03,0.25],["crate",0.9],["lamp",0.05,0.6],["stall",0.4,0.3],["toro",0.05,0.6]],"scarf":[["snowmanBig",0.55,0.1],["bench",0.4,0.25],["bfence",0.7,0.3],["lamp",0.5,0.6]],"mitten":[["bench",0.4,0.25],["bfence",0.85,0.3],["snowmanBig",0.6,0.45],["woodpile",0.9,0.3],["crate",0.9]],"cocoa":[["stall",0.4,0.35],["bench",0.4,0.25],["crate",0.9],["barrel",0.95],["woodpile",0.05,0.6]],"tub":[["tubStack",0.05,0.6],["toro",0.05,0.6],["bfence",0.05,0.6],["house",0.03,0.35]],"skis":[["house",0.03,0.45],["pineS",0.03,0.6],["bfence",0.05,0.6],["sign",0.05,0.6],["lamp",0.05,0.6]],"pinecone":[["pineS",0.03,0.6],["pineS",0.45,0.2],["woodpile",0.05,0.6]],"beanie":[["snowmanBig",0.95,0.05],["bench",0.4,0.25],["bfence",0.85,0.3],["crate",0.9],["lamp",0.05,0.6]],"snowman":[["snowMound",0.1,0.6],["pineS",0.03,0.6],["house",0.03,0.4],["rockS",0.05,0.6]]};
+H.BLEND[3]={"letter":["snowMound","keyGrey"],"egg":["snowMound","rockS"],"cat":["crate","barrel"],"key":["keyGrey"],"scarf":["scarfBlue"],"mitten":["mittenPlain","mittenGreen"],"cocoa":["coffee"],"tub":["tubPlain","crate"],"skis":["skisBlue"],"pinecone":["acorn","woodpile"],"beanie":["beanieTeal","beanieRed"],"snowman":["snowmanPlain","snowMound"]};
 })();

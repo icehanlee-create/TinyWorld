@@ -714,8 +714,9 @@ function clearRapa(){clearTimeout(flashT);cancelAnimationFrame(gullRAF);const l=
 const KID={x:2068,y:2252};
 (H.RESERVE[5]||(H.RESERVE[5]=[])).push([KID.x,KID.y,70,80]);
 /* 望遠鏡少年頭上的想念泡泡：遠方海上的帆船（2026-11-11） */
-/* 望遠鏡小孩頭上：問號徽章 H.qMark(-74,'?')（2026-11-11 使用者說想著帆船會讓人以為要找帆船；原本的 KIDTHINK 帆船圖刪掉） */
-function kidSVG(){return H.qMark(-74,'?')+act(0,0,1,{view:'side',pose:'up2',hat:-1,hair:'#3d2a1e',shirt:'#f0b84a',pants:'#3b6ea5',mood:2,plain:true})+
+/* 望遠鏡小孩頭上：原本是問號徽章（2026-11-11 拿掉帆船圖），2026-11-18 改成和一般路人一樣的「…」 */
+/* 2026-11-18 使用者：入口角色頭上從「？」改成「…」（和一般路人一樣，增加探索難度）；圓點半徑 1.75，不會被當成路人提示（DOTSIG） */
+function kidSVG(){return `<g class="qbob">${H.bubble(14,-70,'dots').replace(/r="1\.7"/g,'r="1.75"')}</g>`+act(0,0,1,{view:'side',pose:'up2',hat:-1,hair:'#3d2a1e',shirt:'#f0b84a',pants:'#3b6ea5',mood:2,plain:true})+
  `<g transform="translate(9,-33) rotate(-8)"><rect x="0" y="-3.4" width="18" height="6.8" rx="1.5" fill="#c9963a" stroke-width="1.4"/><rect x="14" y="-4.4" width="6" height="8.8" rx="1.5" fill="#a8762a" stroke-width="1.4"/><path d="M5,-3.4 v6.8 M10,-3.4 v6.8" fill="none" stroke="#7a5420" stroke-width="1"/></g>`}
 function drawKid(){const [lo]=layers();let el=document.getElementById('rapaKid');if(!el){el=document.createElementNS(NSv,'g');el.id='rapaKid';lo.appendChild(el)}
  el.innerHTML=T(KID.x,KID.y,1,`<ellipse cx="0" cy="1" rx="12" ry="3" fill="#000" opacity=".14" stroke="none"/>${kidSVG()}`)}
@@ -824,7 +825,7 @@ let pausedAt=0;const pause=()=>{if(pausedAt)return;pausedAt=performance.now();H.
 const pv=()=>`<svg viewBox="0 0 220 110" width="220" height="110" style="display:block;margin:0 auto 6px"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><rect x="0" y="0" width="220" height="62" rx="10" fill="#dcecef" stroke="none"/><rect x="0" y="58" width="220" height="52" rx="10" fill="#7fd6cf" stroke="none"/><g transform="translate(176,62) scale(.5)">${moaiRow('#7b8a98')}</g><g transform="translate(78,98) scale(.62)">${sailing()}</g></g></svg>`;
 function card(html){ov.innerHTML=`<div class="pcard" style="padding:20px 18px 18px;text-align:center">${html}</div>`;ov.classList.remove('hide')}
 function askSail(){pause();card(`${pv()}<b style="font-size:21px;display:block;margin-bottom:6px">要現在出航嗎？</b><p style="margin:0 0 14px;font-size:15px;line-height:1.6">船長：帆已經升好了。<br>要跟我一起去看看那些石頭巨人嗎？</p><button class="pbtn" id="rapaGo">⛵ 現在出航</button><div class="row2" style="display:flex;margin-top:10px"><button class="sbtn" id="rapaWait">等一下</button></div>`);
- ov.querySelector('#rapaGo').onclick=()=>{ov.classList.add('hide');pausedAt=0;H.goLevel(101)}; /* RP.went 改成真的上島（NGHOOKS）才記 */ /* 出航：第一次播帆船過場，然後進入復活島（海上秘境） */
+ ov.querySelector('#rapaGo').onclick=()=>{ov.classList.add('hide');pausedAt=0;H.goLevel(101,1)}; /* RP.went 改成真的上島（NGHOOKS）才記 */ /* 出航：第一次播帆船過場，然後進入復活島（海上秘境） */
  ov.querySelector('#rapaWait').onclick=()=>{ov.classList.add('hide');resume();H.toast('船長：好，我在這裡等你。準備好了再來找我！\n（冒險地圖的海上也出現了新的航線）',4200)}}
 /* ---- 出航過場：帆船越過海浪，遠遠先看到一排摩艾剪影 ---- */
 RIDES.sail={text:'帆船出海，往東南方的海平線前進⋯',every:640,tick:k=>tone(k%2?200:160,.16,'sine',.05),svg:()=>{

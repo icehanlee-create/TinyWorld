@@ -555,15 +555,19 @@ RIDES.stairs={text:'穿過一座座鳥居，石階一直往上⋯',every:380,tic
   `<g class="skStFront" opacity=".45" style="animation:skStB 4.2s cubic-bezier(.3,0,.6,1) forwards;transform:translateY(-1090px)">${fr}</g></g></svg>`}};
 
 /* ================= 12. 冒險地圖：第 7 關節點（接在第 6 關上方，座標是加寬後地圖的西邊） ================= */
-HERE[N]=[-82,222];
+HERE[N]=[-96,170];
 MAPHOOKS.push(({U,P,ink,FN})=>{if(U<N)return '';
- const road='M-78,278 Q-62,266 -74,254 Q-84,248 -82,246';
+ const road='M-50,220 Q-66,216 -78,206';
  let m=H.mapRoute(road,'road',ink);
- m+=`<g class="mnode" data-n="${N}"><circle cx="-82" cy="244" r="26" fill="transparent"/><ellipse cx="-82" cy="250" rx="21" ry="7" fill="#cfd9a0" stroke="${ink}" stroke-width="1.3"/>`+
+ m+=`<g class="mnode" data-n="${N}"><g transform="translate(-14,-52)"><circle cx="-82" cy="244" r="26" fill="transparent"/><ellipse cx="-82" cy="250" rx="21" ry="7" fill="#cfd9a0" stroke="${ink}" stroke-width="1.3"/>`+
   P('M-94,248 V238 L-88,232 L-82,238 V248Z','#f1e8d2',1.3)+P('M-98,239 L-88,229 L-78,239Z','#6f7088',1.3)+P('M-80,248 V240 L-74,235 L-68,240 V248Z','#efe4cb',1.3)+P('M-83,241 L-74,232 L-65,241Z','#6f7088',1.3)+
   `<g fill="#fff" stroke="${ink}" stroke-width="1"><circle cx="-90" cy="224" r="3.4"/><circle cx="-85" cy="219" r="4.2"/><circle cx="-77" cy="222" r="3"/></g>`+
-  `<g transform="translate(-34,246)"><rect x="-26" y="-10" width="52" height="19" rx="9.5" fill="#fffaf0" stroke="${ink}" stroke-width="1.6"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">溫泉老街</text></g></g>`;
+  `</g><g transform="translate(-147,194)"><rect x="-26" y="-10" width="52" height="19" rx="9.5" fill="#fffaf0" stroke="${ink}" stroke-width="1.6"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">溫泉老街</text></g></g>`;
  return m});
 })();
 
-
+/* ===== 物件的合理位置（2026-11-12）：SPOTS 合理的地方（佔 55～65%）、BLEND 顏色相近的東西（其餘的至少一半）。說明在 core.js 的 placeItems ===== */
+(function(){const H=window.TH;if(!H||!H.SPOTS)return;
+H.SPOTS[7]={"sk_dango":[["skManjuStall",0.4,0.3],["skBench",0.4,0.25],["skSouvenirStall",0.4,0.3],["skShopP",0.25,0.3],["skKingyoStall",0.4,0.3]],"sk_wagasa":[["skBench",0.05,0.6],["skShopB",0.03,0.4],["skShopG",0.03,0.4],["skRedLamp",0.05,0.6],["skFootbath",0.05,0.5]],"sk_maneki":[["skShopR",0.25,0.3],["skShopP",0.25,0.3],["skSouvenirStall",0.4,0.3],["skGetaShop",0.4,0.3],["skHotel",0.03,0.3]],"sk_furin":[["skShopB",0.75,0.35],["skShopG",0.75,0.35],["skShopR",0.75,0.35],["skHotel",0.6,0.3],["skSouvenirStall",0.6,0.3]],"sk_geta":[["skGetaShop",0.4,0.3],["skFootbath",0.05,0.5],["skHotel",0.03,0.3],["skBench",0.05,0.6],["skOkeStack",0.05,0.6]],"sk_daruma":[["skSouvenirStall",0.4,0.3],["skShopP",0.25,0.3],["skShrine",0.05,0.5],["skShopR",0.25,0.3]],"sk_manju":[["skManjuStall",0.4,0.3],["skSteamer",0.05,0.6],["skBench",0.4,0.25],["skSouvenirStall",0.4,0.3]],"sk_sensu":[["skBuyo",0.1,0.4],["skBench",0.4,0.25],["skShopG",0.25,0.3],["skSouvenirStall",0.4,0.3]],"sk_towel":[["skFootbath",0.2,0.4],["skOkeStack",0.6,0.3],["skHotel",0.03,0.3],["skEggSpring",0.05,0.5],["skLaundry",0.4,0.3]],"sk_kazaguruma":[["skSouvenirStall",0.5,0.3],["skShopP",0.25,0.3],["skBench",0.05,0.6],["skKingyoStall",0.5,0.3]],"sk_milk":[["skFootbath",0.2,0.4],["skBench",0.4,0.25],["skHotel",0.03,0.3],["skPingPong",0.05,0.5],["skSteamer",0.05,0.6]],"sk_kingyo":[["skKingyoStall",0.4,0.3],["skBench",0.4,0.25],["skRedLamp",0.05,0.6],["skSouvenirStall",0.05,0.6]]};
+H.BLEND[7]={"sk_dango":["skBallStr","skSwirlPop"],"sk_wagasa":["skUmbrella"],"sk_maneki":["skDollCat"],"sk_furin":["skBellString","skVaseWhite"],"sk_geta":["skSlipper"],"sk_daruma":["skRedBall","skRedLamp"],"sk_manju":["skBaozi"],"sk_sensu":["skMapFold"],"sk_towel":["skTissue"],"sk_kazaguruma":["skSwirlPop"],"sk_milk":["skVaseWhite"],"sk_kingyo":["skBalloonOr"]};
+})();

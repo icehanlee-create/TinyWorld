@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>奇幻小鎮大搜查．單關測試</title></head>
+<body style="font-family:-apple-system,'PingFang TC','Noto Sans TC',sans-serif;padding:16px 20px;background:#f6efe0;color:#2b2420;line-height:1.7">
+<h3 style="margin:0 0 4px">🧪 奇幻小鎮大搜查．單關測試</h3>
+<p style="margin:0 0 12px;font-size:14px">直接開到某一關，測試模式自動打開（無限提示、✓ 直接過關、找提問的人／幸運草）。<br>進度只存在記憶體：不會影響正式進度，重新整理就從頭開始。<br>用法：<code>test.html?level=6</code>（會轉到 <code>index.html?test=6</code>）。</p>
+<div id="list"></div>
+<script>/* 只借 levels.js 的清單來列出關卡 */const LV=[];function addLevel(L){LV.push(L)}</script>
+<script src="levels.js"></script>
+<script>
+const q=new URLSearchParams(location.search).get('level');
+if(q)location.replace('index.html?test='+encodeURIComponent(q));
+else document.getElementById('list').innerHTML=LV.length?LV.map(L=>`<p style="margin:4px 0"><a href="index.html?test=${L.n}">${L.n}．${L.title}</a>${L.secret?'（秘境，出發地：第 '+L.home+' 關）':''}</p>`).join(''):'找不到 levels.js，請確認它和 test.html 放在同一個資料夾';
+</script>
+</body></html>

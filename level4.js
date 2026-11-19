@@ -357,3 +357,9 @@ H.STORIES[4]={title:'石柱上的橘貓',giver:()=>act(0,0,1,{view:'fq',pose:'re
     got:'隊員：梯子借你，慢慢爬！',
     ok:'把橘貓抱下來了！牠乖乖跟著你。快去告訴隊長！'};}
 })();
+
+/* ===== 物件的合理位置（2026-11-12）：SPOTS 合理的地方（佔 55～65%）、BLEND 顏色相近的東西（其餘的至少一半）。說明在 core.js 的 placeItems ===== */
+(function(){const H=window.TH;if(!H||!H.SPOTS)return;
+H.SPOTS[4]={"key":[["suitcase",0.9,0.3],["crate",0.9],["pillarB",0.05,0.6],["stele",0.05,0.6],["mapTable",0.5,0.3]],"pinecone":[["pine",0.03,0.6],["round",0.03,0.6],["bigTree",0.02,0.25],["fern",0.1,0.3]],"coin":[["altar",0.5,0.3],["pillarB",0.95,0.2],["rubble",0.3,0.3],["jarBroken",0.05,0.6],["stele",0.05,0.6]],"scarab":[["stele",0.6,0.2],["wallGlyph",0.5,0.35],["pillarB",0.6,0.2],["rubble",0.3,0.3]],"mask":[["wallGlyph",0.5,0.35],["altar",0.5,0.3],["pillar",0.6,0.2],["tent",0.05,0.6],["mapTable",0.5,0.3]],"scroll":[["mapTable",0.5,0.3],["suitcase",0.9,0.3],["tent",0.05,0.6],["crate",0.9],["altar",0.5,0.3]],"magnifier":[["mapTable",0.5,0.3],["suitcase",0.9,0.3],["crate",0.9],["tent",0.05,0.6]],"ruby":[["altar",0.5,0.3],["rubble",0.3,0.3],["pillarB",0.95,0.2],["guardian",0.05,0.6],["jarBroken",0.05,0.6]],"brush":[["crate",0.9],["suitcase",0.9,0.3],["mapTable",0.5,0.3],["tent",0.05,0.6],["rubble",0.05,0.6]],"compass":[["mapTable",0.5,0.3],["suitcase",0.9,0.3],["tent",0.05,0.6],["crate",0.9]],"amphora":[["rubble",0.05,0.6],["pillarB",0.05,0.6],["altar",0.05,0.6],["crate",0.05,0.6],["stele",0.05,0.6]],"parrot":[["round",0.6,0.25],["bigTree",0.4,0.25],["pillarB",0.95,0.2],["pillar",0.95,0.2],["pine",0.5,0.2]]};
+H.BLEND[4]={"key":["keyGrey"],"pinecone":["acorn","fern"],"coin":["coinOld"],"scarab":["scarabG"],"mask":["maskWood","fern"],"scroll":["scrollPlain"],"magnifier":["mirror","watch"],"ruby":["berries"],"brush":["paintbrush"],"compass":["watch","mirror"],"amphora":["jarBroken","pot"],"parrot":["parrotR","bfly"]};
+})();

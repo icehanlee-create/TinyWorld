@@ -116,6 +116,31 @@ TAPHOOKS[5]=(x,y)=>{if(Math.abs(x-LH.x)>34||y>LH.y+6||y<LH.y-250)return false;if
  requestAnimationFrame(step);return true};
 
 const DEEP='#2f9db6',MID='#4fbfc8',LAG='#7fd6cf',SHAL='#a8e6dc',VSHAL='#cdefe3',SANDL='#f3e5bb';
+/* 2026-11-18：南邊外海的紅色打撈船（海底世界 level16 的入口佈景）。一直停在這裡，固定座標、不用亂數；
+   第 10 關 2 星後，點燈塔光束會轉過來照它，船長頭上才出現「…」（程式在 level16.js 最後面）。 */
+const SAL5={x:1310,y:2502,s:.78}; /* 船頭朝右，吊臂和潛水鐘在右邊（左邊是南岸小島） */
+const bell5=()=>`<path d="M-44,0 V-50 Q-44,-96 0,-96 Q44,-96 44,-50 V0Z" fill="#c8743a"/><path d="M22,-90 Q44,-80 44,-50 V0 H30 V-50 Q30,-76 14,-90Z" fill="#a85a2a" stroke="none"/><path d="M-36,-60 Q-34,-84 -14,-90" fill="none" stroke="#e8a070" stroke-width="4" stroke-linecap="round"/>`+
+ `<rect x="-49" y="-12" width="98" height="13" rx="3" fill="#5a4a42"/>`+[-40,-26,-13,0,13,26,40].map(x=>`<circle cx="${x}" cy="-5.5" r="2" fill="#d8b060" stroke="none"/>`).join('')+
+ [-1,1].map(d=>`<circle cx="${d*35}" cy="-56" r="7" fill="#9fd8e6" stroke="#e0b040" stroke-width="3.4"/><circle cx="${d*35}" cy="-56" r="7" fill="none" stroke-width="1.2"/>`).join('')+
+ `<circle cx="0" cy="-52" r="23" fill="#9fd8e6"/><circle cx="0" cy="-52" r="23" fill="none" stroke="#e0b040" stroke-width="6"/><circle cx="0" cy="-52" r="26" fill="none" stroke-width="1.4"/><circle cx="0" cy="-52" r="20" fill="none" stroke-width="1.2"/><path d="M0,-72 V-32 M-20,-52 H20" fill="none" stroke="#e0b040" stroke-width="3"/><path d="M-12,-64 Q-6,-69 2,-69" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".8"/>`+
+ `<circle cx="0" cy="-106" r="8" fill="none" stroke="${OL}" stroke-width="6"/><circle cx="0" cy="-106" r="8" fill="none" stroke="#e0b040" stroke-width="3.4"/><rect x="-7" y="-100" width="14" height="6" rx="2" fill="#e0b040"/>`;
+const salvage5=()=>{const X=SAL5.x,Y=SAL5.y;let s=`<g transform="translate(${X},${Y}) scale(${-SAL5.s},${SAL5.s})" stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">`;
+ s+=`<ellipse cx="0" cy="12" rx="150" ry="14" fill="#2a8aa2" opacity=".35" stroke="none"/>`;
+ /* 吊臂、鋼索、潛水鐘（半個泡在水裡） */
+ s+=`<path d="M-150,-122 V-46" fill="none" stroke="#3d3833" stroke-width="2.2"/><g transform="translate(-150,6) scale(.5)">${bell5()}</g><path d="M-188,6 q8,-4 16,0 q8,4 16,0 q8,-4 16,0 q8,4 16,0 q8,-4 16,0" fill="none" stroke="#e8f6f6" stroke-width="2"/>`;
+ /* 船身 */
+ s+=`<path d="M-124,-30 L120,-30 L106,8 Q0,18 -102,8Z" fill="#c8372d"/><path d="M-120,-20 H117" fill="none" stroke="#fbf6ea" stroke-width="5"/><path d="M-120,-20 H117" fill="none" stroke-width="1"/><path d="M-106,4 Q0,13 104,4" fill="none" stroke="#3b5a8a" stroke-width="4"/>`;
+ [-80,-56,60,84].forEach(x=>s+=`<circle cx="${x}" cy="-8" r="4" fill="#9fd3e0" stroke-width="1.4"/>`);
+ /* 船艙 */
+ s+=`<rect x="24" y="-78" width="64" height="48" fill="#fbf6ea"/><path d="M18,-78 H94 L88,-88 H24Z" fill="#3b5a8a"/>`+[34,52,70].map(x=>`<rect x="${x}" y="-68" width="11" height="11" rx="2" fill="#9fd3e0" stroke-width="1.4"/>`).join('')+
+  `<circle cx="56" cy="-42" r="8" fill="none" stroke="${OL}" stroke-width="7"/><circle cx="56" cy="-42" r="8" fill="none" stroke="#fbf6ea" stroke-width="4.4"/><circle cx="56" cy="-42" r="8" fill="none" stroke="#d8413a" stroke-width="4.4" stroke-dasharray="6.28 6.28"/>`+
+  `<path d="M80,-88 V-118" fill="none" stroke-width="2.2"/><path d="M80,-118 L100,-112 L80,-106Z" fill="#f5c842" stroke-width="1.6"/>`;
+ /* 黃色吊臂 */
+ s+=`<path d="M-30,-30 V-120 M-30,-118 L-154,-126" fill="none" stroke="${OL}" stroke-width="9"/><path d="M-30,-30 V-120 M-30,-118 L-154,-126" fill="none" stroke="#f2c230" stroke-width="5.6"/><path d="M-30,-60 L-90,-122" fill="none" stroke="${OL}" stroke-width="3"/><circle cx="-152" cy="-124" r="5" fill="#5a5f68"/><rect x="-40" y="-52" width="20" height="16" rx="3" fill="#5a5f68"/><circle cx="-30" cy="-44" r="5" fill="#9aa2ac" stroke-width="1.4"/>`;
+ /* 船長（橘色上衣、白鬍子、水手帽），站在甲板上 */
+ s+=`<g transform="translate(-70,-30)">${act(0,0,1,{view:'fq',pose:'stand',hat:-1,hs:0,hair:'#e8e4dc',skin:'#c98d5e',shirt:'#e8823a',pants:'#3b4a6a',top:'long',bottom:'pants',mood:2,beard:true,arm:0,plain:true,
+  extra:'<g transform="translate(0,-34) scale(1.385) translate(0,35)" stroke-width="1.45"><path d="M-12,-43 Q-12,-52 0,-52 Q12,-52 12,-43Z" fill="#fbf9f3"/><rect x="-14" y="-45" width="28" height="4.6" rx="2" fill="#2f3f5a"/><path d="M-13,-41 Q0,-38 13,-41 L11,-38 Q0,-35 -11,-38Z" fill="#2f3f5a"/><circle cx="0" cy="-47.6" r="2" fill="#f5c842" stroke="none"/></g>'})}</g>`;
+ return s+`</g>`};
 function ground5(){const NS_='stroke="none"';
  let s=`<defs><pattern id="plank5" width="12" height="40" patternUnits="userSpaceOnUse"><rect width="12" height="40" fill="${WOOD2}"/><path d="M0,0 V40" stroke="${WOOD}" stroke-width="1.2"/></pattern></defs>`;
  // 天空、遠方小島、深海
@@ -170,6 +195,7 @@ function ground5(){const NS_='stroke="none"';
  let tf='',fl='';for(let i=0;i<520;i++){const x=sr(540,2200),y=sr(380,2560);const I=ISL.find(I=>inBlob(I,x,y,I.rx<200?-44:-70));if(!I)continue;if(((x-PLZ.cx)/PLZ.rx)**2+((y-PLZ.cy)/PLZ.ry)**2<1.15)continue;
   if(i%8===0)fl+=`<circle cx="${f(x)}" cy="${f(y)}" r="2.6" fill="${pk(['#f5c842','#fbf6ea','#e86a6a','#f0a8c8'])}" stroke-width="1"/>`;else tf+=`M${f(x)},${f(y)} l-3,-6 M${f(x)},${f(y)} l3,-6 `}
  s+=`<path d="${tf}" fill="none" stroke="#7f8f48" stroke-width="1.3"/>`+fl;
+ s+=salvage5(); /* 南邊外海的打撈船（海底世界入口佈景） */
  return s}
 
 /* ================= 道具 ================= */
@@ -422,4 +448,10 @@ H.STORIES[5]={title:'纏住的小海豹',giver:()=>act(0,0,1,{view:'fq',pose:'re
 /* 點碼頭的旅客：聊到櫻花（第 6 關伏筆，不算點錯） */
 {const t0=TAPHOOKS[5];let tt=0;TAPHOOKS[5]=(x,y)=>{if(Math.abs(x-SKTRAV.x)<36&&y<=SKTRAV.y+8&&y>=SKTRAV.y-80){const t=performance.now();if(t-tt>800){tt=t;
  H.toast('要去賞櫻的旅客：聽說小鎮西邊的山上，櫻花全開了！\n從小鎮港口換搭小火車就到得了，我們要去看看！',4200)}return true}return t0?t0(x,y):false}}
+})();
+
+/* ===== 物件的合理位置（2026-11-12）：SPOTS 合理的地方（佔 55～65%）、BLEND 顏色相近的東西（其餘的至少一半）。說明在 core.js 的 placeItems ===== */
+(function(){const H=window.TH;if(!H||!H.SPOTS)return;
+H.SPOTS[5]={"compass":[["boat5",0.3,0.3],["crate",0.9],["fishCrate",0.05,0.6],["warehouse",0.03,0.3],["stall5",0.4,0.3]],"key":[["house5",0.03,0.25],["bungalow",0.03,0.25],["beachHut",0.03,0.25],["crate",0.9],["warehouse",0.03,0.3]],"starfish":[["reefRock",0.7,0.25],["shells",0.2,0.3],["sandcastle",0.05,0.6],["palm",0.03,0.6]],"hermit":[["shells",0.2,0.4],["reefRock",0.05,0.6],["palm",0.03,0.6],["sandcastle",0.05,0.6]],"bottle":[["reefRock",0.05,0.6],["shells",0.2,0.4],["boat5",0.05,0.6],["floatPile",0.05,0.6],["palm",0.03,0.6]],"ring":[["lifeguard",0.05,0.6],["boat5",0.3,0.3],["floatPile",0.05,0.6],["beachHut",0.03,0.4],["warehouse",0.03,0.4]],"anchor":[["boat5",0.05,0.6],["warehouse",0.03,0.4],["fishCrate",0.05,0.6],["floatPile",0.05,0.6],["crate",0.05,0.6]],"pearl":[["reefRock",0.7,0.25],["shells",0.2,0.3],["stall5",0.4,0.3],["fishCrate",0.9,0.3]],"coconut":[["palm",0.03,0.6],["stall5",0.4,0.3],["beachHut",0.03,0.4]],"sailorhat":[["boat5",0.3,0.3],["crate",0.9],["fishCrate",0.9,0.3],["stall5",0.4,0.3],["house5",0.03,0.3]],"duck":[["sandcastle",0.05,0.6],["floatPile",0.05,0.6],["boat5",0.3,0.3],["beachHut",0.03,0.4],["kayak",0.3,0.3]],"spyglass":[["lighthouse5",0.03,0.35],["boat5",0.3,0.3],["crate",0.9],["warehouse",0.03,0.4],["house5",0.03,0.3]]};
+H.BLEND[5]={"compass":["clamShut","shells"],"key":["harpoon","shells"],"starfish":["starCookie","crab"],"hermit":["shellEmpty","crab","shells"],"bottle":["bottleEmpty"],"ring":["floatPink","buoy"],"anchor":["harpoon"],"pearl":["clamShut","shells"],"coconut":["yarnBall","lemon"],"sailorhat":["chefHat","paperRoll"],"duck":["lemon"],"spyglass":["paperRoll","harpoon"]};
 })();

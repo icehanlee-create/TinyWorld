@@ -322,9 +322,11 @@ function renderItems(){
 
 /* ================= view ================= */
 const stage=$('#stage'),world=$('#world');
-let SW=1,SH=1,base=.6,minS=.3,maxS=2,view={s:.6,tx:0,ty:0};
-function measure(){const r_=stage.getBoundingClientRect();SW=r_.width;SH=r_.height;base=Math.min(SW,SH*.8)/640*1.2;minS=base;maxS=base*2.8;{const S=SEC();if(S&&(S.pano()||(S.cine&&S.cine())))minS=base*.28}} /* 開場比原本大 1.2 倍；最多只能縮回開場大小，不能拉遠看全圖 */
+let PANO=false;let SW=1,SH=1,base=.6,minS=.3,maxS=2,view={s:.6,tx:0,ty:0};
+function measure(){const r_=stage.getBoundingClientRect();SW=r_.width;SH=r_.height;base=Math.min(SW,SH*.8)/640*1.2;minS=base;maxS=base*2.8;{const S=SEC();if(S&&(S.pano()||(S.cine&&S.cine())))minS=base*.28}if(PANO){const SC=SCENES[scene]||SCENES[1],fit=Math.min(SW/(SC.x1-SC.x0+2*EX),SH/((SC.y1||H)+2*EX))*.96;minS=Math.min(minS,fit)}} /* 開場比原本大 1.2 倍；最多只能縮回開場大小，不能拉遠看全圖 */
 function clampV(){view.s=Math.max(minS,Math.min(maxS,view.s));const s_=view.s,SC=SCENES[scene]||SCENES[1];
+ if(PANO){const X0=(SC.x0-EX)*s_,X1=(SC.x1+EX)*s_,Y0=-EX*s_,Y1=((SC.y1||H)+EX)*s_,cl=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+  view.tx=X1-X0<SW?(SW-(X1-X0))/2-X0:cl(view.tx,SW-X1,-X0);view.ty=Y1-Y0<SH?(SH-(Y1-Y0))/2-Y0:cl(view.ty,SH-Y1,-Y0);return}
  view.tx=Math.min(-(SC.x0-EX)*s_,Math.max(SW-(SC.x1+EX)*s_,view.tx));const P=pads();view.ty=Math.min(EX*s_+P.t,Math.max(SH-((SC.y1||H)+EX)*s_-P.b,view.ty))}
 function pads(){const hd=document.getElementById('hud'),tr=document.getElementById('tray');return{t:hd?hd.offsetTop+hd.offsetHeight+6:0,b:tr?tr.offsetHeight:0}}
 let crispT;
@@ -332,7 +334,7 @@ let spEls=[],animT;
 function updateAnim(){const m=80,x0=-view.tx/view.s-m,y0=-view.ty/view.s-m,x1=(SW-view.tx)/view.s+m,y1=(SH-view.ty)/view.s+m;
  for(const o of spEls){const v=o.x>x0&&o.x<x1&&o.y>y0&&o.y<y1+60;if(v!==o.on){o.on=v;o.el.classList.toggle('on',v)}}}
 const fogW=document.getElementById('fogWorld');
-function apply(){world.style.transform=fogW.style.transform=`translate(${view.tx}px,${view.ty}px) scale(${view.s})`;reveal();clearTimeout(crispT);crispT=setTimeout(crisp,260);clearTimeout(animT);animT=setTimeout(updateAnim,120)}
+function apply(){world.style.transform=fogW.style.transform=`translate(${view.tx}px,${view.ty}px) scale(${view.s})`;if(PANO)panoSize();reveal();clearTimeout(crispT);crispT=setTimeout(crisp,260);clearTimeout(animT);animT=setTimeout(updateAnim,120)}
 let lastCrispS=0;function crisp(){if(Math.abs(view.s-lastCrispS)<.02)return;lastCrispS=view.s;world.style.willChange='auto';requestAnimationFrame(()=>requestAnimationFrame(()=>world.style.willChange='transform'))}
 function anim(dur,fn,done){const t0=performance.now();function step(t){const k=Math.min(1,(t-t0)/dur);fn(k);if(k<1)requestAnimationFrame(step);else if(done)done()}requestAnimationFrame(step)}
 function tweenTo(ns,cx,cy,dur=450,done){
@@ -347,7 +349,7 @@ const loc=e=>({x:e.clientX-rect.left,y:e.clientY-rect.top});
    1. 新的一次觸碰是「第一根手指」（isPrimary）時，清掉舊的；2. lostpointercapture 也算抬起；
    3. 觸控事件 touchend／touchcancel 時，螢幕上已經沒有手指就全部清掉；切到背景也清掉。 */
 const clearPts=()=>{pts.clear();pinch=null;tap=null};
-stage.addEventListener('pointerdown',e=>{if(e.target.closest('.zpill'))return;rect=stage.getBoundingClientRect();try{stage.setPointerCapture(e.pointerId)}catch(_){}
+stage.addEventListener('pointerdown',e=>{if(e.target.closest('.zpill,#panoBar'))return;rect=stage.getBoundingClientRect();try{stage.setPointerCapture(e.pointerId)}catch(_){}
  if(e.isPrimary&&pts.size)clearPts();
  pts.set(e.pointerId,loc(e));if(pts.size===1){const p=loc(e);tap={id:e.pointerId,x:p.x,y:p.y,t:performance.now(),moved:false}}else{tap=null;startPinch()}});
 function startPinch(){const[a,b]=[...pts.values()];const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2};pinch={d0:Math.hypot(a.x-b.x,a.y-b.y)||1,s0:view.s,wx:(m.x-view.tx)/view.s,wy:(m.y-view.ty)/view.s}}
@@ -420,7 +422,7 @@ const isOpen=n=>{const L=LEVELS[n];if(!L||L.secret)return false;return L.find?is
 const openMain=()=>{const a=[];for(let n=1;n<=prog.unlocked;n++)if(LEVELS[n]&&!LEVELS[n].find)a.push(n);prog.found.forEach(n=>{if(LEVELS[n]&&!a.includes(n))a.push(n)});return a};
 const linNext=n=>{const L=LEVELS[n+1];return L&&!L.find&&!L.secret?n+1:0};
 const SEC=()=>LEVELS[level]&&LEVELS[level].secret&&scene===level&&SECRETS[level]?SECRETS[level]:null;
-const CAMLOCK=()=>{const S=SEC();return !!(S&&!S.pano())};
+const CAMLOCK=()=>{const S=SEC();return !!(S&&!S.pano()&&!PANO)};
 const PER=()=>(LEVELS[level]&&LEVELS[level].per)||4;
 /* 過場只在第一次前往時播放；記錄已看過的過場（第一次更新時，先把原本已解鎖的關卡記成看過） */
 let RODE=[];try{const v=localStorage.getItem('townhunt-rode');RODE=v?JSON.parse(v):[...Array(prog.unlocked)].map((_,i)=>i+1);if(!v)localStorage.setItem('townhunt-rode',JSON.stringify(RODE))}catch(_){}
@@ -461,8 +463,8 @@ function clockHold(){clearInterval(timer);if(st.running)$('#time').textContent=f
 function clockRun(reset){if(!st.running)return;if(reset)st.t0=performance.now();clearInterval(timer);timer=setInterval(tick,250);tick()}
 let testMode=false;try{testMode=localStorage.getItem('townhunt-test')==='1'}catch(_){}if(location.hash==='#test')testMode=true;
 function setHintUI(){const b=$('#hintBtn');$('#hintN').textContent=testMode?'∞':st.hintsLeft;b.disabled=(!testMode&&st.hintsLeft<=0)||hintLock}
-function applyTestUI(){document.querySelectorAll('.tbtn').forEach(b=>b.style.display=testMode?'':'none');$('#testBadge').style.display=testMode?'':'none';$('#winBtn').style.display=testMode?'':'none';$('#resetBtn').style.display=testMode?'':'none';setHintUI()}
-function newGame(keepView){WINGO=0;const S=SEC();
+function applyTestUI(){document.querySelectorAll('.tbtn').forEach(b=>b.style.display=testMode?'':'none');$('#testBadge').style.display=testMode?'':'none';$('#winBtn').style.display=testMode?'':'none';{const pb=$('#panoBtn');if(pb)pb.style.display=testMode?'':'none';if(!testMode&&PANO)panoSet(false)}$('#resetBtn').style.display=testMode?'':'none';setHintUI()}
+function newGame(keepView){if(PANO)panoSet(false);WINGO=0;const S=SEC();
  if(S){items=S.items();clovers={story:null,bonus:null};itemsL.innerHTML='';marks.innerHTML='';fx.innerHTML=''}else{placeItems();placeClover();renderItems()}
  story={step:0,done:false};storyBubble();renderTray();updateCounts();
  st={running:true,t0:performance.now(),hintsLeft:HINTS,misses:0,clover:false,bonus:false};setHintUI();
@@ -495,7 +497,7 @@ function askExit(n){const E=EXITS[n],A=E.ask||{},ov=$('#exitOv')||(()=>{const d=
  ov.classList.remove('hide');
  ov.querySelector('#exitGo').onclick=()=>{ov.classList.add('hide');exitPaused=0;if(!isFound(n)){prog.found.push(n);saveProg()}ensureFull(n,()=>goLevel(n,1))};
  ov.querySelector('#exitWait').onclick=()=>{ov.classList.add('hide');resume();if(A.waitMsg)toast(A.waitMsg,3600)}}
-function onTap(sx,sy){if(!st.running)return;const wx=(sx-view.tx)/view.s,wy=(sy-view.ty)/view.s;{const S=SEC();if(S){S.tap(wx,wy);return}}if(!isRevealed(wx,wy))return;let best=null,bd=1e9,near=false;
+function onTap(sx,sy){if(!st.running||PANO)return;const wx=(sx-view.tx)/view.s,wy=(sy-view.ty)/view.s;{const S=SEC();if(S){S.tap(wx,wy);return}}if(!isRevealed(wx,wy))return;let best=null,bd=1e9,near=false;
  for(const c of [clovers.story,clovers.bonus])if(c&&c.revealed&&!c.found&&Math.hypot(c.x-wx,c.y-wy)<Math.max(14,13/view.s)){foundClover(c);return}
  for(const it of items){if(!isRevealed(it.x,it.y))continue;const d=Math.hypot(it.x-wx,it.y-wy),lim=Math.max(it.r*it.sc+3,13/view.s);if(d<lim){if(it.found)near=true;else if(d<bd){best=it;bd=d}}}
  if(best)found(best);else if(!near)miss(wx,wy)}
@@ -505,7 +507,9 @@ function found(it){it.found=true;colAdd(it.t.id);it.el.classList.add('got');cons
  const el=it.el;setTimeout(()=>{el.style.display='none'},600);
  burst(it.x,it.y);const n=leftOf(it.t.id);floatText(it.x,it.y-rr-4,n?`${it.t.short} 還有 ${n}`:`${it.t.short} 全部找到！`);updateCounts(it.t.id);
  if(n===0)sfx.typeDone();else sfx.found();if(leftOf()===0)win()}
-function miss(wx,wy){if(tapSecretHint(wx,wy))return;if(tapExit(wx,wy))return;if(TAPHOOKS[scene]&&TAPHOOKS[scene](wx,wy))return; /* 場景裡的小互動（例如第 4 關圖騰眨眼），不算點錯 */
+function miss(wx,wy){if(tapSecretHint(wx,wy))return;if(tapExit(wx,wy))return;
+ const onStory=[storySp.target,storySp.giver,storySp.helper].some(sp=>sp&&Math.abs(wx-sp.x)<Math.max(sp.w*.6,14)&&wy<=sp.y+6&&wy>=sp.y-sp.h-4); /* 2026-11-18 修：故事角色站在彩蛋範圍裡（例如滑沙場的斜坡）時，先算點到故事角色 */
+ if(!onStory&&TAPHOOKS[scene]&&TAPHOOKS[scene](wx,wy))return; /* 場景裡的小互動（例如第 4 關圖騰眨眼），不算點錯 */
  st.misses++;sfx.miss();
  let hit=null;for(let i=sprites.length-1;i>=0;i--){const sp=sprites[i],sc=(sp.s||1);if(['bird','balloon'].includes(sp.kind))continue;if(Math.abs(wx-sp.x)<sp.w*.5&&wy<=sp.y+4&&wy>=sp.y-sp.h){hit=i;break}}
  /* 故事角色、走失的動物、藏幸運草的東西優先判定（就算前面有別人擋著） */
@@ -557,7 +561,7 @@ function advCeremony(then){try{localStorage.setItem(ADVK,'1')}catch(_){}const ov
  <button class="pbtn" id="advGo">🔍 接下任務</button></div>`;
  ov.classList.remove('hide');[523,659,784,1047,1319,1568].forEach((q,i)=>tone(q,.22,'triangle',.12,.5+i*.1));
  ov.querySelector('#advGo').onclick=()=>{ov.classList.add('hide');then&&then()}}
-function win(){st.running=false;clearInterval(timer);const total=elapsed();$('#time').textContent=fmt(total);
+function win(){if(PANO)panoSet(false);st.running=false;clearInterval(timer);const total=elapsed();$('#time').textContent=fmt(total);
  const BK='townhunt-best-L'+level;let best=null;try{best=parseFloat(localStorage.getItem(BK))}catch(_){}
  const isBest=!best||total<best;if(isBest){best=total;try{localStorage.setItem(BK,String(total))}catch(_){}}
  const crit=[['全部找到',true],['提示 1 次內',(st.hintsUsed||0)<=1],['故事幸運草',!!st.clover]],ns=crit.filter(c=>c[1]).length;
@@ -608,7 +612,9 @@ $('#nextBtn').onclick=()=>{WINGO=0;$('#winOv').classList.add('hide');const a=$('
  rodeAdd(n);ensureFull(n,()=>ride(()=>{loadScene(n);setLevel(n);newGame();clockHold();$('#time').textContent='0:00'},()=>{clockRun(true);toast(`${LEVELS[n].title}，開始！`,2200)},NEXTINFO[n]&&NEXTINFO[n].ride))};
 
 let FOGV=1;/* 雲：0 舊版、1 變薄（使用者選 B）、2 中間 */
+const FOGFN={};/* 2026-11-18：場地外不想用雲的關卡（例如地底洞窟）自己設 FOGFN[關卡]=({X0,X1,Y1,R})=>SVG */
 function buildFog(sc){const SC=SCENES[sc],X0=SC.x0,X1=SC.x1,Y1=SC.y1||H;
+ if(FOGFN[sc]){let g='';try{g=FOGFN[sc]({X0,X1,Y1,R:mulberry32(5+sc)})}catch(e){console.error(e)}document.getElementById('fogG').innerHTML=g;document.getElementById('lockWall').innerHTML='';return}
  const LT=(window.FOGV??FOGV)===1;
  const puff=(x,y,k,d)=>`<g class="drift" style="--d:${d}s;animation-delay:-${f(Math.random()*d)}s"><g transform="translate(${f(x)},${f(y)}) scale(${f(k)})" fill="#fbf7ef" opacity="${LT?.82:.92}"><circle cx="-60" cy="0" r="40"/><circle cx="-10" cy="-26" r="54"/><circle cx="50" cy="-8" r="44"/><circle cx="96" cy="8" r="30"/><rect x="-100" y="0" width="226" height="38" rx="19"/></g></g>`;
  const FV=[[[0,1],[.38,.93],[1,0]],[[0,.92],[.36,.5],[.6,.12],[.7,0]],[[0,1],[.36,.78],[.55,.35],[.72,0]]][window.FOGV??FOGV],
@@ -736,7 +742,7 @@ function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,
 }
 /* 2026-11-18 使用者：從場景出口出發（找路關卡），就算已經去過也要播過場；在冒險地圖上點地點直接前往，維持第一次才播。
    2026-11-18e：剛過關打開地圖、點的是「下一站」（WINGO），也跟按下一站按鈕一樣播過場 */
-function goLevel(n,viaExit){if(WINGO&&WINGO===n)viaExit=true;WINGO=0;if(LEVELS[n]&&LEVELS[n].file&&!LEVELS[n].types){ensureFull(n,()=>goLevel(n,viaExit));return}
+function goLevel(n,viaExit){if(PANO)panoSet(false);if(WINGO&&WINGO===n)viaExit=true;WINGO=0;if(LEVELS[n]&&LEVELS[n].file&&!LEVELS[n].types){ensureFull(n,()=>goLevel(n,viaExit));return}
  if((viaExit||!rodeHas(n))&&NEXTINFO[n]){$('#mapOv').classList.add('hide');mapUnder=[];st.running=false;clearInterval(timer);['winOv','startOv'].forEach(id=>$('#'+id).classList.add('hide'));rodeAdd(n);
   ride(()=>{loadScene(n);setLevel(n);newGame();clockHold();$('#time').textContent='0:00'},()=>{clockRun(true);toast(`${LEVELS[n].title}，開始！`,2200)},NEXTINFO[n].ride);return}
  $('#mapOv').classList.add('hide');const under=mapUnder;mapUnder=[];if(n===level&&scene===n&&!st.running&&under.includes('startOv')){$('#startOv').classList.remove('hide');return}if(n===level&&scene===n&&st.running)return;st.running=false;clearInterval(timer);$('#winOv').classList.add('hide');
@@ -812,7 +818,7 @@ function colStory(n){if(!COL.s[n]){COL.s[n]=1;saveCol()}}
  const mb=document.createElement('button');mb.id='colBtn';mb.innerHTML=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/><path d="M9 8h6"/></svg><span>收集冊</span>`;
  const mapB=document.getElementById('mapBtn');mapB.parentNode.insertBefore(mb,mapB.nextSibling);
  /* 測試模式專用：快速找到提問的人、目標物、幸運草 */
- [['tPano','🧪 全景（秘境：看整張、檢查破圖）'],['tBonus','🧪 找隱藏幸運草'],['tClover','🧪 找故事幸運草'],['tHelper','🧪 找幫手'],['tTarget','🧪 找走失的目標'],['tGiver','🧪 找提問的人']].forEach(([id,t])=>{const b=document.createElement('button');b.id=id;b.className='tbtn';b.style.display='none';b.innerHTML=`<span>${t}</span>`;mb.parentNode.insertBefore(b,mb.nextSibling.nextSibling)})})();
+ [['tPano','🧪 全景（看整張、檢查破圖）'],['tBonus','🧪 找隱藏幸運草'],['tClover','🧪 找故事幸運草'],['tHelper','🧪 找幫手'],['tTarget','🧪 找走失的目標'],['tGiver','🧪 找提問的人']].forEach(([id,t])=>{const b=document.createElement('button');b.id=id;b.className='tbtn';b.style.display='none';b.innerHTML=`<span>${t}</span>`;mb.parentNode.insertBefore(b,mb.nextSibling.nextSibling)})})();
 function testGo(p,label){closeMenu();if(!p){toast('這一關沒有'+label,1600);return}const s2=Math.max(view.s,base*1.5);tweenTo(s2,p[0],p[1],600);
  setTimeout(()=>{const g=svgEl('g',{},fx),c=svgEl('circle',{cx:p[0],cy:p[1],r:10,fill:'none',stroke:'#d8413a','stroke-width':4},g);anim(1600,k=>{c.setAttribute('r',10+30*(k*3%1));g.setAttribute('opacity',1-k*.7)},()=>g.remove())},620);toast('🧪 '+label,1400)}
 document.getElementById('tGiver').onclick=()=>{const g=storySp.giver;testGo(g&&[g.x,g.y-30],'提問的人')};
@@ -820,7 +826,70 @@ document.getElementById('tHelper').onclick=()=>{const t=storySp.helper;testGo(t&
 document.getElementById('tTarget').onclick=()=>{const t=storySp.target;testGo(t&&[t.x,t.y-t.h*.4],'走失的目標')};
 const cloverGo=(c,nm)=>{if(!c){testGo(null,nm);return}if(c.found){toast(nm+'已經找到了',1400);return}const h=c.host;
  testGo(c.revealed?[c.x,c.y]:[h.x,h.y-h.h*.4],c.revealed?nm:nm+'藏在這個東西後面'+(c.kind==='story'&&!(story&&story.done)?'（要先完成小故事才點得出來）':'（點它）'))};
-document.getElementById('tPano').onclick=()=>{closeMenu();const S=SEC();if(!S){toast('全景只在秘境裡使用',1600);return}S.pano(!S.pano())};
+document.getElementById('tPano').onclick=()=>{closeMenu();panoSet(!PANO)};
+/* ---- 測試模式：全景（2026-11-18 使用者要求，主線、找路關卡、秘境都能用） ----
+   上方 ✓ 旁的按鈕（#panoBtn）或選單「🧪 全景」開關。全景時：
+   - 解開「不能縮小超過開場」的限制，一開始縮到整張剛好放進畫面，可以拖曳、兩指縮放；點畫面不算找東西、計時暫停。
+   - 藏起上方列和下方清單，只留上方小工具列（#panoBar）：標記開關、存成圖片、結束。
+   - 標記（#panoL，畫在 fgSvg 最上層，大小跟著縮放換算成固定的螢幕大小）：
+     橘圈＝還沒找到的物件（拉近才顯示名字）、藍＝提問的人、紅＝走失的目標、綠＝幫手、
+     深綠＝幸運草（還沒冒出來時圈它躲的東西）、紫＝新關卡出口；秘境的故事角色也是紫。
+   - 存成圖片：把 bgSvg＋fgSvg＋fogSvg 合成一張 SVG 畫到 canvas，跳出圖片（iPhone 長按存到照片）＋下載按鈕。 */
+let panoMk=true,panoT=null;
+const PANOCSS=document.createElement('style');PANOCSS.textContent=`body.panoOn #hud,body.panoOn #tray,body.panoOn #trayTip,body.panoOn #joy,body.panoOn .zpill{display:none!important}
+#panoBar{position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 10px);transform:translateX(-50%);z-index:8;display:none;gap:6px;align-items:center;background:var(--paper,#fffaf0);border:2.5px solid #2b2420;border-radius:16px;padding:6px 8px;box-shadow:0 3px 0 rgba(0,0,0,.18);font-size:14px;white-space:nowrap}
+body.panoOn #panoBar{display:flex}#panoBar button{height:36px;border:2px solid #2b2420;border-radius:11px;background:#fffaf0;color:#2b2420;font-size:14px;padding:0 10px}#panoBar button.on{background:#f5c842}
+#panoLg{position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 62px);transform:translateX(-50%);z-index:8;display:none;background:rgba(255,250,240,.92);border:2px solid #2b2420;border-radius:12px;padding:3px 10px;font-size:12px;white-space:nowrap}
+body.panoOn.panoMk #panoLg{display:block}#panoLg i{display:inline-block;width:10px;height:10px;border-radius:50%;border:2.5px solid;margin:0 3px 0 8px;vertical-align:-1px}
+#panoImgOv .pcard{max-width:min(92vw,560px);max-height:88dvh;overflow:auto;text-align:center}#panoImgOv img{width:100%;border:2px solid #2b2420;border-radius:10px;-webkit-touch-callout:default;user-select:auto}`;
+document.head.appendChild(PANOCSS);
+(()=>{const b=document.createElement('button');b.id='panoBtn';b.className='hb';b.style.display='none';b.style.background='#d6e6f2';b.setAttribute('aria-label','全景（測試）');
+ b.innerHTML=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/><path d="M9 9l-5-5M15 9l5-5M9 15l-5 5M15 15l5 5"/></svg>`;
+ b.onclick=()=>panoSet(!PANO);const w=$('#winBtn');w.parentNode.insertBefore(b,w);
+ const bar=document.createElement('div');bar.id='panoBar';bar.innerHTML=`<b style="margin:0 2px">🧪 全景</b><button id="panoMkB" class="on">標記</button><button id="panoSaveB">📷 存圖</button><button id="panoExitB">✕ 結束</button>`;
+ const lg=document.createElement('div');lg.id='panoLg';lg.innerHTML=`<i style="border-color:#f08a2a"></i>物件<i style="border-color:#2f6fd0"></i>提問<i style="border-color:#d8413a"></i>目標<i style="border-color:#3f9a3a"></i>幫手<i style="border-color:#1f6a3a;background:#bfe6a8"></i>幸運草<i style="border-color:#8a4fc0"></i>出口`;
+ stage.appendChild(bar);stage.appendChild(lg);
+ $('#panoMkB').onclick=()=>{panoMk=!panoMk;$('#panoMkB').classList.toggle('on',panoMk);document.body.classList.toggle('panoMk',panoMk);panoDraw()};
+ $('#panoSaveB').onclick=()=>panoSave();$('#panoExitB').onclick=()=>panoSet(false)})();
+function panoSet(on){if(on===PANO)return;const S=SEC();
+ if(on&&!st.running){toast('開始這一關之後才能用全景',1600);return}
+ PANO=on;document.body.classList.toggle('panoOn',on);document.body.classList.toggle('panoMk',on&&panoMk);
+ if(S){S.pano(on)}else if(on)clockHold();else clockRun(false);
+ measure();
+ if(on){const SC=SCENES[scene]||SCENES[1];if(!S){view.s=minS;view.tx=0;view.ty=0;clampV();apply()}panoDraw();toast('🧪 全景：可以拖曳、縮放看整張\n點畫面不會找東西，計時暫停',2600)}
+ else{const g=document.getElementById('panoL');if(g)g.remove();if(!S){clampV();apply()}}}
+function panoPts(){const S=SEC(),P=[];
+ const its=S?(S.all?S.all():items).filter(o=>!o.decoy):items;
+ its.forEach(o=>{if(!o.found&&o.x!=null)P.push({x:o.x,y:o.y-10,c:'#f08a2a',t:o.t&&o.t.name,item:1})});
+ if(S){const E=S.ent||{};const NM={giver:['#2f6fd0','提問的人'],target:['#d8413a','走失的目標'],helper:['#3f9a3a','幫手']};Object.keys(E).forEach(k=>{const e=E[k],m=NM[k]||['#8a4fc0',k];if(e&&e.x!=null)P.push({x:e.x,y:e.y-30,c:m[0],t:m[1],big:1})});
+  const cl=S.clovers?S.clovers():{};['story','bonus'].forEach(k=>{const c=cl[k];if(c&&!c.found&&c.x!=null)P.push({x:c.x,y:c.y,c:'#1f6a3a',fill:'#bfe6a8',t:k==='story'?'故事幸運草':'隱藏幸運草',big:1})})}
+ else{[['giver','#2f6fd0','提問的人'],['target','#d8413a','走失的目標'],['helper','#3f9a3a','幫手']].forEach(([k,c,t])=>{const sp=storySp[k];if(sp)P.push({x:sp.x,y:sp.y-(sp.h||50)*.45,c,t,big:1})});
+  ['story','bonus'].forEach(k=>{const c=clovers[k];if(!c||c.found)return;const h=c.host,p=c.revealed||!h?[c.x,c.y]:[h.x,h.y-h.h*.4];P.push({x:p[0],y:p[1],c:'#1f6a3a',fill:'#bfe6a8',t:(k==='story'?'故事幸運草':'隱藏幸運草')+(c.revealed?'':'（躲在這裡）'),big:1})});
+  for(const n of FIND_IDS){if(!exitOn(n))continue;const E=EXITS[n];P.push({x:E.x,y:E.y-30,c:'#8a4fc0',t:'出口：'+((LEVELS[n]&&LEVELS[n].title)||n),big:1})}}
+ return P}
+function panoDraw(){let g=document.getElementById('panoL');if(g)g.remove();if(!PANO||!panoMk)return;
+ g=svgEl('g',{id:'panoL'},document.getElementById('fgSvg'));g.style.pointerEvents='none';
+ let h='';for(const p of panoPts())h+=`<g class="pm" data-x="${p.x}" data-y="${p.y}"${p.item?' data-i="1"':''}><circle fill="${p.fill||'none'}" fill-opacity=".55" stroke="${p.c}"/>${p.t?`<text fill="${p.c}" stroke="#fffaf0" paint-order="stroke" font-weight="700">${String(p.t).replace(/</g,'&lt;')}</text>`:''}</g>`;
+ g.innerHTML=h;panoSize()}
+function panoSize(){const g=document.getElementById('panoL');if(!g)return;const k=1/view.s,show=view.s>=base*.75;
+ g.querySelectorAll('.pm').forEach(m=>{const x=+m.dataset.x,y=+m.dataset.y,it=m.dataset.i,c=m.firstChild,t=m.children[1];
+  c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',(it?11:16)*k);c.setAttribute('stroke-width',(it?3:4)*k);
+  if(t){t.setAttribute('x',x+(it?13:19)*k);t.setAttribute('y',y+5*k);t.setAttribute('font-size',(it?12:14)*k);t.setAttribute('stroke-width',3*k);t.style.display=it&&!show?'none':''}})}
+function panoSave(){const SC=SCENES[scene]||SCENES[1],x0=SC.x0-EX,y0=-EX,w=SC.x1-SC.x0+2*EX,h=(SC.y1||H)+2*EX;
+ const k=Math.min(1.5,Math.sqrt(14e6/(w*h)));
+ const part=id=>{const el=document.getElementById(id);if(!el)return '';const c=el.cloneNode(true);c.querySelectorAll('#lockWall.gone2,#fogCells,.fc.gone').forEach(e=>e.remove());
+  let a='';for(const at of el.attributes)if(!/^(id|viewBox|width|height|class|style|xmlns)$/.test(at.name))a+=` ${at.name}="${at.value}"`;return `<g${a}>${c.innerHTML}</g>`};
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${x0} ${y0} ${w} ${h}" width="${Math.round(w*k)}" height="${Math.round(h*k)}"><rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="#f4ede0"/>${part('bgSvg')}${part('fgSvg')}${part('fogSvg')}</svg>`;
+ toast('🧪 正在合成圖片⋯',1500);
+ const img=new Image();img.onload=()=>{try{const cv=document.createElement('canvas');cv.width=Math.round(w*k);cv.height=Math.round(h*k);cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+   cv.toBlob(bl=>{if(!bl){toast('圖片太大，存不了',2000);return}const url=URL.createObjectURL(bl);panoShow(url)},'image/png')}catch(e){console.error(e);toast('存圖失敗：'+e.message,2600)}};
+ img.onerror=()=>toast('存圖失敗（圖片合成錯誤）',2600);
+ img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)}
+function panoShow(url){let ov=document.getElementById('panoImgOv');if(!ov){ov=document.createElement('div');ov.className='overlay hide';ov.id='panoImgOv';document.body.appendChild(ov)}
+ const nm=`全景-${(LEVELS[level]&&LEVELS[level].title)||level}.png`;
+ ov.innerHTML=`<div class="pcard"><p style="margin:4px 0 8px">iPhone：長按圖片 →「加入照片」<br>電腦：按下面的「下載」</p><img src="${url}" alt="全景圖"><div style="display:flex;gap:8px;justify-content:center;margin-top:10px"><a class="pbtn" style="text-decoration:none;display:inline-block;padding:10px 18px" href="${url}" download="${nm}">下載</a><button class="sbtn" id="panoImgClose">關閉</button></div></div>`;
+ ov.classList.remove('hide');document.getElementById('panoImgClose').onclick=()=>{ov.classList.add('hide');URL.revokeObjectURL(url)}}
+
 document.getElementById('tClover').onclick=()=>cloverGo(clovers.story,'故事幸運草');
 document.getElementById('tBonus').onclick=()=>cloverGo(clovers.bonus,'隱藏幸運草');
 let colUnder=[];
@@ -868,8 +937,8 @@ level=Math.min(prog.unlocked,LEVELS.length-1);
 window.TH={NSPOT,NLAKE,NPEAK,EDGELAND,ROADS,T,f,r,sr,pk,ri,rnd,shuffle,limb,shade,wob,OL,SNOW,SKIN,HAIR,SHIRT,PANTS,HATS,kid,chibi,act,wrapAn,heart,bubble,noteM,peekHead,faceHead,headOnly,
  cat,frog,owl,sheep,chicken,anyDog,dog,swan,pine,roundTree,bush,rock,barrel,crate,pot,lamp,bench,sign,fence,reeds,lily,well,tent,campfire,swirl,signpost,signIcon,stall,
  add,mark,canPlace,scatter,SCATREG,SCATOK,skyBirds,chaikin,bow,qBubble,qThink,qMark,QHEART,GC,GR,CELL,occ,mulberry32,DK,balloon,castle,fountain,house,kayak,lighthouse,mushHouse,rowboat,sailboat,tower,windmill,pig,barn,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,HEAVY,ANIM,ALWAYS,DUR,
- ANIMX,ALWAYSX,HEAVYX,SPOTS,BLEND,SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,mapHook,mapRoute,TAPHOOKS,NGHOOKS,MAPTOP,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,SECRETS,STORIES,SEQ,SKYC,SKYY,EDGEM,EDGED,EDGEDECO,EDGEMY,EDGEFILL,FRINGE,FRINGEX,RESERVE,ROADK,RESETKEYS,icon,starSvg,EXITS,FIND_IDS,isOpen,isFound,canFind,prog:()=>prog,
- typeOf:id=>LEVELS.slice(1).flatMap(L_=>L_.types||[]).find(t=>t.id===id),colAdd,colClover,colBonus,colStory,updateCounts,win:()=>win(),goLevel:n=>goLevel(n),level:()=>level,rodeHas,pads:()=>pads(),scr:()=>({w:SW,h:SH,base}),apply:()=>apply(),clampV:()=>clampV(),rezoom:()=>{measure();clampV();apply()},updAnim:()=>updateAnim(),tweenTo:(s,x,y,d,cb)=>tweenTo(s,x,y,d,cb),curtain,pickView,walkPose,DENS,sprites,ride,toast,clockHold,clockRun,burst,floatText,sfx,items:()=>items,game:()=>st,scene:()=>scene,view:()=>view,testOn:()=>testMode,dbg:{clover:()=>clovers,hint:()=>({sp:hintSp,msg:hintMsg}),step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG};
+ ANIMX,ALWAYSX,HEAVYX,SPOTS,BLEND,SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,mapHook,mapRoute,TAPHOOKS,NGHOOKS,MAPTOP,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,SECRETS,STORIES,SEQ,SKYC,SKYY,FOGFN,EDGEM,EDGED,EDGEDECO,EDGEMY,EDGEFILL,FRINGE,FRINGEX,RESERVE,ROADK,RESETKEYS,icon,starSvg,EXITS,FIND_IDS,isOpen,isFound,canFind,prog:()=>prog,
+ typeOf:id=>LEVELS.slice(1).flatMap(L_=>L_.types||[]).find(t=>t.id===id),colAdd,colClover,colBonus,colStory,updateCounts,win:()=>win(),goLevel:(n,viaExit)=>goLevel(n,viaExit),level:()=>level,rodeHas,pads:()=>pads(),scr:()=>({w:SW,h:SH,base}),apply:()=>apply(),clampV:()=>clampV(),rezoom:()=>{measure();clampV();apply()},updAnim:()=>updateAnim(),tweenTo:(s,x,y,d,cb)=>tweenTo(s,x,y,d,cb),curtain,pickView,walkPose,DENS,sprites,ride,toast,clockHold,clockRun,burst,floatText,sfx,items:()=>items,game:()=>st,scene:()=>scene,view:()=>view,testOn:()=>testMode,dbg:{clover:()=>clovers,hint:()=>({sp:hintSp,msg:hintMsg}),step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG};
 /* 測試模式：選單列出測試中的關卡（編號 900 以上、還沒接上主線的主線關卡），在 Claude 作品裡也能直接玩（2026-11-12） */
 LEVELS.forEach((L_,n)=>{if(!L_||n<900||L_.secret||document.getElementById('tLv'+n))return;const b=document.createElement('button');b.id='tLv'+n;b.className='tbtn';b.style.display='none';b.innerHTML=`<span>🧪 測試中的關卡：${L_.title}</span>`;
  b.onclick=()=>{closeMenu();toast('🧪 載入測試中的關卡⋯',1400);ensureUpTo(899,()=>goLevel(n))};const a=document.getElementById('tGiver');a.parentNode.insertBefore(b,a);

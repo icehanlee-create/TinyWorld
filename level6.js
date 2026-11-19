@@ -50,7 +50,8 @@ Object.assign(ART,{
  sk_orizuru:`<path d="M-16,3 L-6,6 L-6,0Z" fill="#f08cb0"/><path d="M-6,0 L2,-4 L8,4 L-1,10Z" fill="#f4b6c8"/><path d="M8,4 L13,-8 L15,-6 L11,6Z" fill="#fbf6ea"/><path d="M13,-8 L18,-6 L14,-5Z" fill="#f08cb0" stroke-width="1.2"/><path d="M-1,-2 L-9,-17 L5,-5Z" fill="#fbf6ea"/><path d="M2,-3 L12,-15 L9,2Z" fill="#f08cb0"/><g fill="#d8413a" stroke="none"><circle cx="0" cy="3" r="1.2"/><circle cx="3" cy="6" r="1.1"/><circle cx="-4" cy="2" r="1"/></g>`});
 Object.assign(DECOY,{
  skBallStr:stick+`<circle cx="-6" cy="6" r="5.6" fill="#d8413a"/><circle cx="0" cy="0" r="5.6" fill="#f5c842"/><circle cx="6" cy="-6" r="5.6" fill="#4f86c8"/>`+gloss(-6,6)+gloss(0,0)+gloss(6,-6),
- skUmbrella:`<path d="M-15,3 Q-15,-12 0,-14 Q15,-12 15,3 Q8,-1 0,3 Q-8,-1 -15,3Z" fill="#6f86b0"/><path d="M0,3 V13 Q0,18 5,17" fill="none" stroke="${OL}" stroke-width="4"/><path d="M0,3 V13 Q0,18 5,17" fill="none" stroke="#7a7f88" stroke-width="1.8"/>`,
+ /* skUmbrella（2026-11-11 使用者選 C：原本藍灰洋傘太突兀，改成紅色圓團扇；名字沿用 skUmbrella，第 7 關也用） */
+ skUmbrella:`<path d="M0,10 L0,20" stroke="${OL}" stroke-width="4.4"/><path d="M0,10 L0,20" stroke="#c99a5b" stroke-width="2.2"/><path d="M-13,-1 Q-13,-14 0,-14 Q13,-14 13,-1 Q13,11 0,11 Q-13,11 -13,-1Z" fill="#d8413a"/><path d="M-9,-1 Q-9,-10 0,-10 Q9,-10 9,-1 Q9,7 0,7 Q-9,7 -9,-1Z" fill="#fbf6ea" stroke-width="1.1"/><path d="M-6,0 Q-3,-6 0,0 Q3,-6 6,0" fill="none" stroke="#f08aa8" stroke-width="2"/>`,
  skClip:`<g transform="rotate(-25)"><rect x="-14" y="-5" width="28" height="10" rx="5" fill="#f08cb0"/><path d="M-9,0 H9" fill="none" stroke="#fff" stroke-width="1.6" opacity=".7"/><rect x="-14" y="-1.5" width="9" height="3" rx="1.5" fill="#d8688a" stroke-width="1"/></g>`,
  skBento1:`<rect x="-14" y="-8" width="28" height="19" rx="4.5" fill="#9fd0e8"/><path d="M-14,-1 H14" fill="none" stroke-width="1.4"/><rect x="-4" y="-3" width="8" height="5" rx="1.5" fill="#fff" stroke-width="1.1"/><path d="M-10,-8 Q0,-14 10,-8" fill="none" stroke-width="1.4"/>`,
  skDogMask:`<path d="M-13,-4 Q-12,-14 0,-14 Q12,-14 13,-4 Q12,8 0,13 Q-12,8 -13,-4Z" fill="#d9b07a"/><path d="M-13,-6 Q-20,-2 -17,9 Q-10,8 -10,-5Z M13,-6 Q20,-2 17,9 Q10,8 10,-5Z" fill="#6a4a32"/><circle cx="-5" cy="-3" r="1.8" fill="${OL}" stroke="none"/><circle cx="5" cy="-3" r="1.8" fill="${OL}" stroke="none"/><ellipse cx="0" cy="4" rx="4.4" ry="3.2" fill="${OL}" stroke="none"/><path d="M0,7 V10 M-3,10 Q0,12 3,10" fill="none" stroke-width="1.2"/>`,
@@ -426,19 +427,24 @@ RIDES.train=(()=>{
 
 /* ================= 10. 冒險地圖：櫻花山、小火車線、第 6 關節點（座標用加寬後的地圖，西邊是負的 x） =================
    地圖向西加寬 120（viewBox -120 0 462 430）要主帳號改 core.js：見 notes-sakura.md「需要引擎新增」。這裡只畫自己的東西。 */
-HERE[N]=[-78,262];
+HERE[N]=[-40,196];
 MAPHOOKS.push(({U,P,ink,FN})=>{if(U<N)return '';
- const route='M98,297 Q36,296 -22,291 Q-56,288 -78,284';
+ const route='M98,297 Q40,288 4,258 Q-22,236 -36,228';
  let m=H.mapRoute(route,'rail',ink);
  /* 小鎮港口的月台 */
  m+=P('M92,293 h12 v6 h-12Z','#c99a5b',1.1);
  /* 櫻花山（縮小版）：淡粉的圓團樹冠蓋在山上 */
- m+=P('M-108,214 L-84,176 L-66,198 L-44,160 L-18,214Z','#b9c6a0',1.5)+`<path d="M-44,160 L-18,214 L-36,214Z" fill="#9fae86" opacity=".9"/>`;
- m+=[[-96,206],[-78,196],[-60,206],[-44,184],[-28,204],[-70,180],[-52,170]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="7" fill="#f7c4d3" stroke="${ink}" stroke-width="1.1"/><circle cx="${x-2}" cy="${y-2}" r="2.2" fill="#fde4ec" stroke="none"/>`).join('');
+ m+=P('M-134,238 L-108,170 L-90,188 L-66,122 L-6,238Z','#b9c6a0',1.5)+`<path d="M-66,122 L-6,238 L-30,238Z" fill="#9fae86" opacity=".9"/>`;
+ m+=[[-124,230],[-114,208],[-70,232],[-18,230],[-26,206],[-64,140],[-72,186],[-58,160]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="7" fill="#f7c4d3" stroke="${ink}" stroke-width="1.1"/><circle cx="${x-2}" cy="${y-2}" r="2.2" fill="#fde4ec" stroke="none"/>`).join('');
  /* 第 6 關節點：小鳥居＋短名牌 */
- m+=`<g class="mnode" data-n="${N}"><circle cx="-78" cy="284" r="26" fill="transparent"/><ellipse cx="-78" cy="288" rx="20" ry="7" fill="#d4e8ad" stroke="${ink}" stroke-width="1.3"/>`+
+ m+=`<g class="mnode" data-n="${N}"><g transform="translate(38,-66)"><circle cx="-78" cy="284" r="26" fill="transparent"/><ellipse cx="-78" cy="288" rx="20" ry="7" fill="#d4e8ad" stroke="${ink}" stroke-width="1.3"/>`+
   P('M-86,286 V272 M-70,286 V272','none',2.4)+`<path d="M-88,274 H-68 M-90,270 Q-78,267 -66,270" fill="none" stroke="#d8413a" stroke-width="2.6" stroke-linecap="round"/>`+
-  `<g transform="translate(-34,284)"><rect x="-26" y="-10" width="52" height="19" rx="9.5" fill="#fffaf0" stroke="${ink}" stroke-width="1.6"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">櫻花參道</text></g></g>`;
+  `</g><g transform="translate(10,218)"><rect x="-26" y="-10" width="52" height="19" rx="9.5" fill="#fffaf0" stroke="${ink}" stroke-width="1.6"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">櫻花參道</text></g></g>`;
  return m});
 })();
 
+/* ===== 物件的合理位置（2026-11-12）：SPOTS 合理的地方（佔 55～65%）、BLEND 顏色相近的東西（其餘的至少一半）。說明在 core.js 的 placeItems ===== */
+(function(){const H=window.TH;if(!H||!H.SPOTS)return;
+H.SPOTS[6]={"compass":[["skBench",0.4,0.25],["crate",0.9],["skYatai",0.4,0.3],["skStation",0.03,0.3],["barrel",0.95]],"key":[["skStation",0.03,0.3],["skBench",0.4,0.25],["crate",0.9],["barrel",0.95],["skYatai",0.05,0.6]],"sk_dango":[["skYatai",0.4,0.3],["skDangoStall",0.4,0.3],["skHanami",0.2,0.3],["skMat",0.3,0.3],["skBench",0.4,0.25]],"sk_wagasa":[["skTea",0.05,0.5],["skBench",0.05,0.6],["skSakura",0.03,0.6],["skLantern",0.05,0.6],["skHanami",0.05,0.6]],"sk_kanzashi":[["skBench",0.4,0.25],["skMat",0.3,0.3],["skHanami",0.2,0.3],["skYatai",0.4,0.3]],"sk_jubako":[["skHanami",0.2,0.3],["skMat",0.3,0.3],["skBench",0.4,0.25],["skYatai",0.4,0.3]],"sk_kitsune":[["skYatai",0.5,0.3],["skLantern",0.6,0.2],["skToriiLamp",0.05,0.5],["skBench",0.4,0.25]],"sk_chochin":[["skSakura",0.6,0.25],["skSakuraHalf",0.6,0.25],["skYatai",0.6,0.3],["skLantern",0.05,0.6]],"sk_sakuramochi":[["skYatai",0.4,0.3],["skHanami",0.2,0.3],["skMat",0.3,0.3],["skDangoStall",0.4,0.3]],"sk_matcha":[["skTea",0.3,0.3],["skHanami",0.2,0.3],["skMat",0.3,0.3],["skBench",0.4,0.25]],"sk_temari":[["skBench",0.4,0.25],["skMat",0.3,0.3],["skPetalPile",0.3,0.3],["skSakura",0.03,0.6]],"sk_orizuru":[["skBench",0.4,0.25],["skLantern",0.6,0.2],["skSakura",0.6,0.25],["skMat",0.3,0.3]]};
+H.BLEND[6]={"sk_dango":["skBallStr","skPetalPile"],"sk_wagasa":["skUmbrella"],"sk_kanzashi":["skClip","skPetalPile"],"sk_jubako":["skBento1"],"sk_kitsune":["skDogMask"],"sk_chochin":["skPumpkin","skLantern"],"sk_sakuramochi":["skBun","skPetalPile"],"sk_matcha":["skCup"],"sk_temari":["skYarn","skBallStr"],"sk_orizuru":["skPlane","skPetalPile"],"compass":["crate"],"key":["crate"]};
+})();

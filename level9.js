@@ -127,6 +127,11 @@ function ground(){
  g+=`<rect x="${X0}" y="-420" width="${WW}" height="${640+420}" fill="url(#sk9Sky)" stroke="none"/>`;
  g+=`<path d="M${X0},150 L420,96 L560,128 L700,62 L830,118 L960,84 L1120,132 L1500,140 L1640,70 L1780,120 L1920,58 L2080,112 L${XR},92 V200 H${X0}Z" fill="#c4d6e4" stroke="none"/>`;
  g+=`<path d="M690,66 L700,62 L712,70 L704,74Z M1630,74 L1640,70 L1652,78 L1642,80Z M1910,62 L1920,58 L1932,66 L1922,69Z" fill="#fff" stroke="none"/>`;
+ /* 第 10 關伏筆（2026-11-12）：東北遠方一座比較高的雪山，看得到細細的滑雪道和吊椅線（不用亂數） */
+ g+=`<path d="M1600,150 L1700,86 L1760,56 L1820,24 L1880,54 L1960,94 L2060,150Z" fill="#eef3f6" stroke="#9fb1c4" stroke-width="1.4"/><path d="M1820,24 L1880,54 L1960,94 L2060,150 L1900,150 L1860,78Z" fill="#cfdbe6" stroke="none"/>`;
+ g+=`<path d="M1816,32 Q1802,50 1814,64 Q1828,80 1808,98 Q1796,110 1808,128 M1772,60 Q1760,76 1772,90 Q1786,104 1768,124" fill="none" stroke="#a9bccb" stroke-width="2" stroke-dasharray="5 3"/><path d="M1842,132 L1834,40" fill="none" stroke="#7d8a99" stroke-width="1.2"/>`;
+ g+=[[1838,84],[1836,58],[1840,110]].map(([x,y])=>`<path d="M${x-3},${y} H${x+3}" stroke="#7d8a99" stroke-width="1.6"/>`).join('');
+ g+=[[1712,120],[1726,128],[1742,118],[1878,118],[1894,128],[1910,120],[1926,132]].map(([x,y])=>`<path d="M${x},${y} c4,-4 5,-10 0,-14 c-5,4 -4,10 0,14Z" fill="#f4f7f8" stroke="#9fb1c4" stroke-width="1"/>`).join('');
  for(let i=0;i<30;i++)g+=`<g opacity="${f(sr(.75,1))}">${cloudBlob(sr(X0,XR),sr(150,215),sr(.6,1.2))}</g>`;
  /* 底色（下段一開始就是白砂，草地只在畫面外） */
  g+=`<rect x="${X0}" y="226" width="${WW}" height="${Sc.y1+200}" fill="#a9c47e" stroke="none"/>`;
@@ -423,13 +428,13 @@ RIDES.castle=(()=>{
    `<g class="skWalk9"><g transform="translate(200,500)">${walker()}</g></g></g></svg>`}})();
 
 /* ================= 12. 冒險地圖：第 9 關節點（接在第 8 關上方） ================= */
-HERE[N]=[-76,134];
+HERE[N]=[-96,123];
 MAPHOOKS.push(({U,P,ink,FN})=>{if(U<N)return '';
- const road='M-82,188 Q-92,180 -84,174 Q-77,169 -76,166';
+ const road='M-54,168 Q-68,162 -80,158';
  let m=H.mapRoute(road,'road',ink);
- m+=`<g class="mnode" data-n="${N}"><circle cx="-76" cy="156" r="24" fill="transparent"/><ellipse cx="-76" cy="165" rx="20" ry="6" fill="#b9d490" stroke="${ink}" stroke-width="1.3"/>`+
+ m+=`<g class="mnode" data-n="${N}"><g transform="translate(-20,-11)"><circle cx="-76" cy="156" r="24" fill="transparent"/><ellipse cx="-76" cy="165" rx="20" ry="6" fill="#b9d490" stroke="${ink}" stroke-width="1.3"/>`+
   `<g stroke="${ink}" stroke-width="1.2" stroke-linejoin="round"><path d="M-88,165 L-85,158 H-67 L-64,165Z" fill="#a9a79c"/><rect x="-83" y="150" width="14" height="8" fill="#fbf6ea"/><path d="M-87,151 Q-76,146 -65,151 L-67,153 H-85Z" fill="#454a5a"/><rect x="-80" y="143" width="8" height="7" fill="#fbf6ea"/><path d="M-84,144 Q-76,139 -68,144 L-70,146 H-82Z" fill="#454a5a"/><path d="M-79,139 L-76,133 L-73,139Z" fill="#454a5a"/><path d="M-80,134 q-2,-2 -1,-4 M-72,134 q2,-2 1,-4" fill="none" stroke="#f0c040" stroke-width="1.6"/></g>`+
-  `<g transform="translate(-30,160)"><rect x="-26" y="-10" width="52" height="19" rx="9.5" fill="#fffaf0" stroke="${ink}" stroke-width="1.6"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">天守閣</text></g></g>`;
+  `</g><g transform="translate(-147,150)"><rect x="-26" y="-10" width="52" height="19" rx="9.5" fill="#fffaf0" stroke="${ink}" stroke-width="1.6"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">天守閣</text></g></g>`;
  return m});
 })();
 
