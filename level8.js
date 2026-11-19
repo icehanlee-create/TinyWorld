@@ -334,32 +334,53 @@ TAPHOOKS[N]=(x,y)=>{if(festTap8(x,y))return true;
  requestAnimationFrame(step);return true};
 
 /* ================= 12. 過場：走過朱紅鳥居，走進竹林步道（竹子越來越密、霧越來越濃） ================= */
+/* 透視過場小工具（2026-11-20，第 2～16 關的過場共用同一份，H.PV 只建一次；改的時候每個檔案都要一起改）：
+   kf(名,消失點x,y) 產生「從消失點往鏡頭靠近」的 keyframes——縮放 = 1/距離，越近越快；消失點放在畫面外，就變成斜斜往左／往右走。
+   fly(名,秒,i,n,圖) 把一個東西放上軌道，n 個平均錯開。圖以消失點為原點畫：地上的東西底部在 y=+地面高度、x=左右偏移。
+   lane(K,d,dx,dy,圖) 一層無限捲動的景（整層往 dx,dy 移，接一份在後面）；遠的層慢、近的層快＝視差。
+   hrows(K,…) 地面的紋路：和移動方向平行的橫線（越遠越密），上面的虛線紋路照遠近速度往後流（dir=-1 往左、1 往右）。
+   box(c,…) 用消失點 c={vx,vy} 畫一個立體方塊（看得到的面才畫）。線條用 .pvf（不隨縮放變粗），遠的東西淡入。 */
+const PV=H.PV||(H.PV={
+ kf:(nm,vx,vy,z0=22,z1=.28,N=28,fi=.14)=>{let s=`@keyframes ${nm}{`;for(let i=0;i<=N;i++){const p=i/N,sc=1/(z0+(z1-z0)*p);s+=`${(p*100).toFixed(2)}%{transform:translate(${vx}px,${vy}px) scale(${sc.toFixed(4)});opacity:${p<fi?(p/fi).toFixed(2):1}}`}return s+'}.pvf *{vector-effect:non-scaling-stroke}'},
+ fly:(nm,d,i,n,inner)=>`<g class="pvf" style="animation:${nm} ${d}s linear infinite;animation-delay:-${(d*i/n).toFixed(2)}s;opacity:0">${inner}</g>`,
+ grow:(nm,vx,vy,a,b)=>`@keyframes ${nm}{from{transform:translate(${vx}px,${vy}px) scale(${a})}to{transform:translate(${vx}px,${vy}px) scale(${b})}}`,
+ lane:(K,d,dx,dy,inner)=>{const nm='pvl'+(PV.n=(PV.n||0)+1);K.push(`@keyframes ${nm}{to{transform:translate(${dx}px,${dy}px)}}`);return `<g style="animation:${nm} ${d}s linear infinite"><g>${inner}</g><g transform="translate(${-dx},${-dy})">${inner}</g></g>`},
+ hrows:(K,VY,HC,V,dir,col,o={})=>{const zs=o.zs||[9,6,4.4,3.3,2.5,1.95,1.55,1.25,1,.82,.67,.55,.46,.38,.32,.27];let t='';zs.forEach((z,i)=>{const y=(VY+HC/z).toFixed(1),a=(o.dash||[46,22]).map(v=>(v/z).toFixed(1)),per=(+a[0]+ +a[1]),d=(per/(V/z)).toFixed(2),nm='pvr'+(PV.n=(PV.n||0)+1),o0=(i*37)%per;K.push(`@keyframes ${nm}{from{stroke-dashoffset:${o0.toFixed(1)}}to{stroke-dashoffset:${(o0-dir*per).toFixed(1)}}}`);t+=`<path d="M-20,${y} H420" fill="none" stroke="${col}" stroke-width="${Math.min(o.w||3,(o.w||3)*.5/z+.8).toFixed(1)}" stroke-dasharray="${a.join(' ')}" opacity="${o.op||.7}" style="animation:${nm} ${d}s linear infinite"/>`});return t},
+ P:(c,X,Y,z)=>[+(c.vx+X/z).toFixed(1),+(c.vy+Y/z).toFixed(1)],
+ poly:(c,pts,fill,ex='')=>`<path d="M${pts.map(([X,Y,z])=>PV.P(c,X,Y,z).join(',')).join(' L')}Z" fill="${fill}" ${ex}/>`,
+ box:(c,x0,x1,y0,y1,z0,z1,fr,sd,tp)=>{const q=PV.poly;let s='';
+  if(x0>0)s+=q(c,[[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]],sd);else if(x1<0)s+=q(c,[[x1,y0,z0],[x1,y0,z1],[x1,y1,z1],[x1,y1,z0]],sd);
+  if(y0>0)s+=q(c,[[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]],tp);
+  return s+q(c,[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0]],fr)}
+});
 RIDES.bamboo=(()=>{
- const strip=()=>{
-  let w=`<defs><linearGradient id="skBmSky" x1="0" x2="1"><stop offset="0" stop-color="#dcebf6"/><stop offset="1" stop-color="#e6eeea"/></linearGradient><linearGradient id="skBmGnd" x1="0" x2="1"><stop offset="0" stop-color="#9fbd72"/><stop offset="1" stop-color="#b6d98f"/></linearGradient></defs>`;
-  w+=`<rect x="-10" y="0" width="1220" height="800" fill="url(#skBmSky)" stroke="none"/>`;
-  /* 右（起點）：溫泉街的屋頂和朱紅鳥居；越往左竹子越密 */
-  w+=[[1130,350,.8],[1050,346,.7]].map(([x,y,k])=>T(x,y,k,S.shop({noren:pk(['#a8322e','#3e5e8a'])}),false)).join('');
-  w+=`<rect x="-10" y="430" width="1220" height="400" fill="url(#skBmGnd)" stroke="none"/><path d="M-10,430 H1210" fill="none"/>`;
-  const far=[],mid=[],near=[];
-  for(let x=-20;x<1210;x+=sr(26,46)){const p=1-x/1200;if(r()<.25+.75*p)far.push(x)}
-  far.forEach(x=>{w+=`<g opacity=".55">${T(x,sr(330,380),sr(.45,.6),S.bamboo(),false)}</g>`});
-  for(let x=0;x<1210;x+=sr(40,70)){const p=1-x/1200;if(r()<.2+.8*p)mid.push(x)}
-  mid.forEach(x=>{w+=T(x,sr(420,460),sr(.75,.95),S.bamboo(),false)});
-  w+=T(1000,470,.62,S.torii({}),false);
-  /* 土徑＋踏石 */
-  w+=`<rect x="-10" y="500" width="1220" height="220" fill="#d9c79a" stroke="none"/><path d="M-10,500 H1210" stroke="#b8a370" stroke-width="3" fill="none"/>`;
-  for(let x=10;x<1210;x+=88)w+=`<rect x="${x}" y="${ri(530,560)}" width="${ri(30,44)}" height="14" rx="5" fill="#cfc9b9" stroke-width="1.6"/>`;
-  /* 近景大竹子（左側多） */
-  for(let x=0;x<1210;x+=sr(120,210)){const p=1-x/1200;if(r()<.15+.7*p)w+=T(x,sr(560,620),sr(1.3,1.7),S.bamboo(),false)}
-  /* 霧：雲朵狀（不是橢圓），左邊（深處）比較多 */
-  for(let i=0;i<14;i++){const x=sr(-20,1200),p=1-x/1200;if(r()<.3+.6*p)w+=`<g transform="translate(${f(x)},${f(sr(380,560))}) scale(${f(sr(1.3,2.4))})">${mistSvg()}</g>`}
-  return `<g transform="translate(0,-85)">${w}</g>`};
+ /* 2026-11-20 第三版：保留原本的側面路人（往左走進竹林）；立體感：踏石小徑的紋路和前進方向平行（越遠越密）、照遠近速度往後流，
+    竹子分好幾層（越近越粗越快、越遠越細越淡，最遠的被霧吃掉），一開始先走過朱紅鳥居 */
+ const VY=300,HC=100,V=100;
+ const yz=z=>VY+HC/z;
+ const stalk=(x,z,c)=>{const w=(14/z),y=yz(z),h=900;let g=`<rect x="${(x-w/2).toFixed(1)}" y="${(y-h).toFixed(1)}" width="${w.toFixed(1)}" height="${h}" fill="${c}" stroke-width="${Math.min(2,.6+.8/z).toFixed(1)}"/>`;
+  for(let k=1;k<9;k++){const yy=y-k*(70/z);if(yy<-10)break;g+=`<path d="M${(x-w/2).toFixed(1)},${yy.toFixed(1)} h${w.toFixed(1)}" fill="none" stroke-width="${Math.min(1.6,.5+.6/z).toFixed(1)}"/>`}
+  return g+`<ellipse cx="${(x+w/2+10/z).toFixed(1)}" cy="${(y-150/z).toFixed(1)}" rx="${(12/z).toFixed(1)}" ry="${(3.4/z).toFixed(1)}" fill="#7fae52" stroke-width="1"/>`};
  const walker=()=>`<ellipse cx="0" cy="2" rx="26" ry="5" fill="#000" opacity=".18" stroke="none"/>`+act(0,0,-1,{view:'side',pose:'stand',s:1,hat:-1,shirt:'#f4b6c2',pants:'#4a4a5a'});
  return {text:'走過朱紅鳥居，進到霧氣淡淡的竹林步道⋯',every:420,tick:k=>tone(k%2?330:260,.04,'triangle',.04),
-  svg:()=>`<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><style>@keyframes skBmPan{from{transform:translateX(-800px)}to{transform:translateX(0)}}.skWalk{animation:skBmBob .32s ease-in-out infinite alternate}@keyframes skBmBob{to{transform:translateY(-4px)}}</style>`+
-   `<g style="animation:skBmPan 4.2s cubic-bezier(.35,0,.65,1) forwards;transform:translateX(-800px)">${strip()}</g>`+
-   `<g class="skWalk"><g transform="translate(205,472)">${walker()}</g></g></g></svg>`}})();
+  svg:()=>{const K=[],L=PV.lane;const lane=(z,W,inner,o=1)=>`<g opacity="${o}">${L(K,(W/(V/z)).toFixed(2),W,0,inner)}</g>`;
+   const band=(z,W,n,c,o)=>{let t='';for(let i=0;i<n;i++)t+=stalk((i*W/n+((i*41)%23)).toFixed(0)*1,z*(1+((i*7)%5-2)*.05),c);return lane(z,W,t,o)};
+   let s=`<rect width="400" height="600" fill="url(#sk8)" stroke="none"/>`;
+   s+=`<rect x="0" y="${VY}" width="400" height="320" fill="#9fbd72" stroke="none"/>`;
+   s+=band(9,400,16,'#a9c78a',.35)+band(5,420,12,'#8fb36a',.5);
+   s+=`<rect x="0" y="${VY-120}" width="400" height="160" fill="url(#mi8)" stroke="none"/>`;
+   s+=band(2.6,460,8,'#7fae52',.8);
+   s+=PV.hrows(K,VY,HC,V,1,'#86a85c',{w:2.4,zs:[6,4,3,2.3,1.8]});
+   const ry0=yz(1.4),ry1=yz(.42);
+   s+=`<rect x="0" y="${ry0}" width="400" height="${ry1-ry0}" fill="#d9c79a" stroke="none"/><rect x="0" y="${ry0}" width="400" height="6" fill="#b8a370" opacity=".5" stroke="none"/>`;
+   s+=PV.hrows(K,VY,HC,V,1,'#c4b07c',{w:2.6,zs:[1.3,1,.8,.66,.55,.47],dash:[30,40]});
+   s+=lane(.62,440,[20,110,200,290,380].map(x=>`<rect x="${x}" y="${yz(.62)-8}" width="${ri(52,68)}" height="16" rx="7" fill="#cfc9b9" stroke-width="1.6"/>`).join(''));
+   s+=band(1.5,500,5,'#6f9e48',1);
+   s+=`<g style="animation:to8 4.3s linear forwards"><g transform="translate(150,${yz(1)}) scale(1.15)">${S.torii({})}</g></g>`;
+   K.push(`@keyframes to8{to{transform:translateX(${(4.3*V/1).toFixed(0)}px)}}`);
+   s+=`<g class="skWalk"><g transform="translate(205,${yz(.56).toFixed(0)})">${walker()}</g></g>`;
+   s+=lane(.4,420,[20,100,170,260,330].map(x=>`<path d="M${x},${yz(.4)} l-6,-16 M${x},${yz(.4)} v-20 M${x},${yz(.4)} l6,-16" fill="none" stroke="#5f8e3e" stroke-width="2.4"/>`).join(''))+band(.8,620,3,'#5f8e3e',1)+band(.36,900,2,'#4f7e34',1);
+   return `<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><style>${K.join('')}.skWalk{animation:skBmBob .32s ease-in-out infinite alternate}@keyframes skBmBob{to{transform:translateY(-4px)}}</style><defs><linearGradient id="sk8" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcebf0"/><stop offset=".6" stop-color="#eef2ea"/></linearGradient><linearGradient id="mi8" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2f5ee" stop-opacity="0"/><stop offset=".6" stop-color="#f2f5ee" stop-opacity=".85"/><stop offset="1" stop-color="#f2f5ee" stop-opacity="0"/></linearGradient></defs><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${s}</g></svg>`}}})();
 
 /* ================= 13. 冒險地圖：第 8 關節點（接在第 7 關上方、在櫻花山前面；座標是加寬後地圖的西邊） ================= */
 HERE[N]=[-40,150];

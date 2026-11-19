@@ -403,18 +403,46 @@ function scatter5(){
 SCENE_IMPL[5]={ground:ground5,structures:structures5,scatter:scatter5};
 
 /* ================= 過場：從小鎮港口搭小渡輪 ================= */
+/* 透視過場小工具（2026-11-20，第 2～16 關的過場共用同一份，H.PV 只建一次；改的時候每個檔案都要一起改）：
+   kf(名,消失點x,y) 產生「從消失點往鏡頭靠近」的 keyframes——縮放 = 1/距離，越近越快；消失點放在畫面外，就變成斜斜往左／往右走。
+   fly(名,秒,i,n,圖) 把一個東西放上軌道，n 個平均錯開。圖以消失點為原點畫：地上的東西底部在 y=+地面高度、x=左右偏移。
+   lane(K,d,dx,dy,圖) 一層無限捲動的景（整層往 dx,dy 移，接一份在後面）；遠的層慢、近的層快＝視差。
+   hrows(K,…) 地面的紋路：和移動方向平行的橫線（越遠越密），上面的虛線紋路照遠近速度往後流（dir=-1 往左、1 往右）。
+   box(c,…) 用消失點 c={vx,vy} 畫一個立體方塊（看得到的面才畫）。線條用 .pvf（不隨縮放變粗），遠的東西淡入。 */
+const PV=H.PV||(H.PV={
+ kf:(nm,vx,vy,z0=22,z1=.28,N=28,fi=.14)=>{let s=`@keyframes ${nm}{`;for(let i=0;i<=N;i++){const p=i/N,sc=1/(z0+(z1-z0)*p);s+=`${(p*100).toFixed(2)}%{transform:translate(${vx}px,${vy}px) scale(${sc.toFixed(4)});opacity:${p<fi?(p/fi).toFixed(2):1}}`}return s+'}.pvf *{vector-effect:non-scaling-stroke}'},
+ fly:(nm,d,i,n,inner)=>`<g class="pvf" style="animation:${nm} ${d}s linear infinite;animation-delay:-${(d*i/n).toFixed(2)}s;opacity:0">${inner}</g>`,
+ grow:(nm,vx,vy,a,b)=>`@keyframes ${nm}{from{transform:translate(${vx}px,${vy}px) scale(${a})}to{transform:translate(${vx}px,${vy}px) scale(${b})}}`,
+ lane:(K,d,dx,dy,inner)=>{const nm='pvl'+(PV.n=(PV.n||0)+1);K.push(`@keyframes ${nm}{to{transform:translate(${dx}px,${dy}px)}}`);return `<g style="animation:${nm} ${d}s linear infinite"><g>${inner}</g><g transform="translate(${-dx},${-dy})">${inner}</g></g>`},
+ hrows:(K,VY,HC,V,dir,col,o={})=>{const zs=o.zs||[9,6,4.4,3.3,2.5,1.95,1.55,1.25,1,.82,.67,.55,.46,.38,.32,.27];let t='';zs.forEach((z,i)=>{const y=(VY+HC/z).toFixed(1),a=(o.dash||[46,22]).map(v=>(v/z).toFixed(1)),per=(+a[0]+ +a[1]),d=(per/(V/z)).toFixed(2),nm='pvr'+(PV.n=(PV.n||0)+1),o0=(i*37)%per;K.push(`@keyframes ${nm}{from{stroke-dashoffset:${o0.toFixed(1)}}to{stroke-dashoffset:${(o0-dir*per).toFixed(1)}}}`);t+=`<path d="M-20,${y} H420" fill="none" stroke="${col}" stroke-width="${Math.min(o.w||3,(o.w||3)*.5/z+.8).toFixed(1)}" stroke-dasharray="${a.join(' ')}" opacity="${o.op||.7}" style="animation:${nm} ${d}s linear infinite"/>`});return t},
+ P:(c,X,Y,z)=>[+(c.vx+X/z).toFixed(1),+(c.vy+Y/z).toFixed(1)],
+ poly:(c,pts,fill,ex='')=>`<path d="M${pts.map(([X,Y,z])=>PV.P(c,X,Y,z).join(',')).join(' L')}Z" fill="${fill}" ${ex}/>`,
+ box:(c,x0,x1,y0,y1,z0,z1,fr,sd,tp)=>{const q=PV.poly;let s='';
+  if(x0>0)s+=q(c,[[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]],sd);else if(x1<0)s+=q(c,[[x1,y0,z0],[x1,y0,z1],[x1,y1,z1],[x1,y1,z0]],sd);
+  if(y0>0)s+=q(c,[[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]],tp);
+  return s+q(c,[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0]],fr)}
+});
 RIDES.ferry={text:'往東南走到小鎮港口，搭小渡輪往東南方的海島⋯',every:520,tick:k=>tone(k%2?180:150,.12,'sine',.05),svg:()=>{
- const loop=(inner,dur)=>`<g class="rl" style="--d:${dur}s"><g>${inner}</g><g transform="translate(399,0)">${inner}</g></g>`;
- let s=`<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">`;
- s+=`<rect width="400" height="600" fill="#dcecef" stroke="none"/>`;
- s+=loop(`<path d="M40,300 Q80,262 130,280 Q170,262 200,300Z" fill="#a9c6c0" stroke-width="1.6"/><g transform="translate(300,300)"><path d="M-30,0 Q0,-40 30,0Z" fill="#b3c48a" stroke-width="1.6"/><path d="M-4,-22 L-2,-62 L4,-62 L6,-22Z" fill="#fbf9f3" stroke-width="1.4"/><path d="M-4,-36 h9 M-3,-50 h7" stroke="#d8413a" stroke-width="3"/><circle cx="1" cy="-66" r="4" fill="#f6e08a" stroke-width="1.2"/></g>`,40);
- s+=`<rect x="0" y="300" width="400" height="300" fill="${SEA}" stroke="none"/><path d="M0,300 H400" fill="none" stroke-width="1.6"/>`;
- s+=loop([[30,340],[150,330],[260,350],[360,336]].map(([x,y])=>`<path d="M${x},${y} q8,-5 16,0 q8,5 16,0" fill="none" stroke="#d8f0f2" stroke-width="2"/>`).join(''),12);
- s+=loop([[20,420],[120,460],[230,430],[330,470],[60,520],[280,540]].map(([x,y])=>`<path d="M${x},${y} q10,-6 20,0 q10,6 20,0" fill="none" stroke="#e8f6f6" stroke-width="2.4"/>`).join(''),4);
- s+=`<g class="an a-rock" style="--d:2.4s"><g transform="translate(200,438) scale(1.25)">${ferry(true)}</g></g>`;
- s+=loop(`<g transform="translate(80,200)"><path d="M-10,0 q5,-7 10,0 q5,-7 10,0" fill="none" stroke-width="2"/></g><g transform="translate(260,170)"><path d="M-8,0 q4,-6 8,0 q4,-6 8,0" fill="none" stroke-width="1.8"/></g>`,9);
- s+=loop([[40,590],[220,598],[340,585]].map(([x,y])=>`<path d="M${x},${y} q12,-8 24,0 q12,8 24,0" fill="none" stroke="#e8f6f6" stroke-width="3"/>`).join(''),1.8);
- return s+`</g></svg>`}};
+ /* 2026-11-20 第三版：保留原本的小渡輪（側面往右開）；立體感：海面的波紋從遠方散開、一面掃過去，
+    浪花分好幾層（越近越大越快、越遠越淡），遠方的海島和燈塔慢慢靠近 */
+ const VX=200,VY=300,HC=100,V=100,K=[],L=PV.lane;
+ const yz=z=>VY+HC/z;
+ const wv=(x,z,w)=>{const y=yz(z),k=1/z;return `<path d="M${x},${y.toFixed(1)} q${(w*k/4).toFixed(1)},-${(w*k/6).toFixed(1)} ${(w*k/2).toFixed(1)},0 q${(w*k/4).toFixed(1)},${(w*k/6).toFixed(1)} ${(w*k/2).toFixed(1)},0" fill="none" stroke="#e8f6f6" stroke-width="${Math.min(3.2,1.2+k*.6).toFixed(1)}"/>`};
+ const lane=(z,W,items)=>L(K,(W/(V/z)).toFixed(2),-W,0,items);
+ let s=`<rect width="400" height="600" fill="url(#sk5)" stroke="none"/><circle cx="320" cy="130" r="28" fill="#f5d27a" stroke="none"/>`;
+ s+=`<g class="rl" style="--d:40s"><g>${T(80,170,.8,swirl())+T(280,110,.6,swirl())}</g><g transform="translate(399,0)">${T(80,170,.8,swirl())+T(280,110,.6,swirl())}</g></g>`;
+ s+=`<g style="animation:is5 4.3s ease-out forwards"><g transform="translate(250,${VY}) scale(.8)"><path d="M-70,0 Q-40,-36 0,-28 Q30,-46 70,0Z" fill="#b3c48a" stroke-width="1.6"/><path d="M28,-28 L30,-66 L36,-66 L38,-28Z" fill="#fbf9f3" stroke-width="1.4"/><path d="M29,-40 h9 M30,-54 h7" stroke="#d8413a" stroke-width="3"/><circle cx="33" cy="-70" r="4" fill="#f6e08a" stroke-width="1.2"/></g></g>`;
+ K.push(`@keyframes is5{from{transform:translateX(60px)}to{transform:translateX(-30px)}}`);
+ s+=lane(14,600,`<path d="M40,${VY} Q80,${VY-30} 130,${VY-16} Q170,${VY-28} 200,${VY}Z" fill="#a9c6c0" stroke-width="1.4"/>`);
+ s+=`<rect x="0" y="${VY}" width="400" height="320" fill="url(#se5)" stroke="none"/><path d="M0,${VY} H400" fill="none" stroke-width="1.4"/>`;
+ s+=PV.hrows(K,VY,HC,V,-1,'#c3e6e8',{w:2.4,op:.6,dash:[34,40]});
+
+ [[7,500,10],[3.6,520,8],[2,560,6],[1.2,600,5],[.75,640,4]].forEach(([z,W,n])=>{let t='';for(let i=0;i<n;i++)t+=wv(((i*W/n)+((i*37)%29)).toFixed(0),z*(1+((i*13)%5-2)*.05),26);s+=lane(z,W,t)});
+ s+=lane(2.4,700,`<g transform="translate(120,${yz(2.4)}) scale(.45)">${H.sailboat?H.sailboat():''}</g>`);
+ s+=`<g class="an a-rock" style="--d:2.4s"><g transform="translate(200,${yz(.56).toFixed(0)}) scale(1.2)">${ferry(true)}</g></g>`;
+ s+=lane(.4,700,[0,1,2,3].map(i=>wv(i*175+20,.4*(1+i%2*.08),30)).join(''));
+ s+=lane(9,500,`<g transform="translate(80,200)"><path d="M-10,0 q5,-7 10,0 q5,-7 10,0" fill="none" stroke-width="2"/></g><g transform="translate(330,170)"><path d="M-6,0 q3,-5 6,0 q3,-5 6,0" fill="none" stroke-width="1.6"/></g>`);
+ return `<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><style>${K.join('')}</style><defs><linearGradient id="sk5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe6ee"/><stop offset="1" stop-color="#eef6f4"/></linearGradient><linearGradient id="se5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9d6d8"/><stop offset=".5" stop-color="${SEA}"/></linearGradient></defs><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${s}</g></svg>`}};
 
 /* 復活島（海上秘境）的入口寫在 level101.js（2026-11-09 搬過去）：擱淺帆船、船長、摩艾剪影、海圖碎片、出航過場、地圖航線。 */
 

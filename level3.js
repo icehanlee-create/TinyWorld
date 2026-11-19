@@ -304,20 +304,48 @@ H.mapHook(1,({U,P,ink,FN,f})=>{let g='';const on=U>=2;
   sv+=`<g transform="translate(236,108)"><rect x="-38" y="-11" width="76" height="20" rx="10" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4.5" text-anchor="middle" font-size="12" fill="${ink}" font-family="${FN}">雪山溫泉村</text></g></g>`;
   g+=sv}
  return g});
-/* ================= 過場：纜車（從農莊往北上山） ================= */
 {const {T,OL,limb,pk,chibi,kid,swirl,roundTree,barn,pineS,cabinSVG,tone}=H;
+/* 透視過場小工具（2026-11-20，第 2～16 關的過場共用同一份，H.PV 只建一次；改的時候每個檔案都要一起改）：
+   kf(名,消失點x,y) 產生「從消失點往鏡頭靠近」的 keyframes——縮放 = 1/距離，越近越快；消失點放在畫面外，就變成斜斜往左／往右走。
+   fly(名,秒,i,n,圖) 把一個東西放上軌道，n 個平均錯開。圖以消失點為原點畫：地上的東西底部在 y=+地面高度、x=左右偏移。
+   lane(K,d,dx,dy,圖) 一層無限捲動的景（整層往 dx,dy 移，接一份在後面）；遠的層慢、近的層快＝視差。
+   hrows(K,…) 地面的紋路：和移動方向平行的橫線（越遠越密），上面的虛線紋路照遠近速度往後流（dir=-1 往左、1 往右）。
+   box(c,…) 用消失點 c={vx,vy} 畫一個立體方塊（看得到的面才畫）。線條用 .pvf（不隨縮放變粗），遠的東西淡入。 */
+const PV=H.PV||(H.PV={
+ kf:(nm,vx,vy,z0=22,z1=.28,N=28,fi=.14)=>{let s=`@keyframes ${nm}{`;for(let i=0;i<=N;i++){const p=i/N,sc=1/(z0+(z1-z0)*p);s+=`${(p*100).toFixed(2)}%{transform:translate(${vx}px,${vy}px) scale(${sc.toFixed(4)});opacity:${p<fi?(p/fi).toFixed(2):1}}`}return s+'}.pvf *{vector-effect:non-scaling-stroke}'},
+ fly:(nm,d,i,n,inner)=>`<g class="pvf" style="animation:${nm} ${d}s linear infinite;animation-delay:-${(d*i/n).toFixed(2)}s;opacity:0">${inner}</g>`,
+ grow:(nm,vx,vy,a,b)=>`@keyframes ${nm}{from{transform:translate(${vx}px,${vy}px) scale(${a})}to{transform:translate(${vx}px,${vy}px) scale(${b})}}`,
+ lane:(K,d,dx,dy,inner)=>{const nm='pvl'+(PV.n=(PV.n||0)+1);K.push(`@keyframes ${nm}{to{transform:translate(${dx}px,${dy}px)}}`);return `<g style="animation:${nm} ${d}s linear infinite"><g>${inner}</g><g transform="translate(${-dx},${-dy})">${inner}</g></g>`},
+ hrows:(K,VY,HC,V,dir,col,o={})=>{const zs=o.zs||[9,6,4.4,3.3,2.5,1.95,1.55,1.25,1,.82,.67,.55,.46,.38,.32,.27];let t='';zs.forEach((z,i)=>{const y=(VY+HC/z).toFixed(1),a=(o.dash||[46,22]).map(v=>(v/z).toFixed(1)),per=(+a[0]+ +a[1]),d=(per/(V/z)).toFixed(2),nm='pvr'+(PV.n=(PV.n||0)+1),o0=(i*37)%per;K.push(`@keyframes ${nm}{from{stroke-dashoffset:${o0.toFixed(1)}}to{stroke-dashoffset:${(o0-dir*per).toFixed(1)}}}`);t+=`<path d="M-20,${y} H420" fill="none" stroke="${col}" stroke-width="${Math.min(o.w||3,(o.w||3)*.5/z+.8).toFixed(1)}" stroke-dasharray="${a.join(' ')}" opacity="${o.op||.7}" style="animation:${nm} ${d}s linear infinite"/>`});return t},
+ P:(c,X,Y,z)=>[+(c.vx+X/z).toFixed(1),+(c.vy+Y/z).toFixed(1)],
+ poly:(c,pts,fill,ex='')=>`<path d="M${pts.map(([X,Y,z])=>PV.P(c,X,Y,z).join(',')).join(' L')}Z" fill="${fill}" ${ex}/>`,
+ box:(c,x0,x1,y0,y1,z0,z1,fr,sd,tp)=>{const q=PV.poly;let s='';
+  if(x0>0)s+=q(c,[[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]],sd);else if(x1<0)s+=q(c,[[x1,y0,z0],[x1,y0,z1],[x1,y1,z1],[x1,y1,z0]],sd);
+  if(y0>0)s+=q(c,[[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]],tp);
+  return s+q(c,[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0]],fr)}
+});
+/* ================= 過場：纜車（2026-11-20 第三版：保留原本的紅色纜車和斜斜往右上的纜繩；
+   立體感：雪坡上的滑雪軌跡從遠方散開、一面掃過去，雪松分成遠近好幾層（越近越大越快、越遠越淡），整片地面慢慢往下沉＝越爬越高） ================= */
 function cableRideSVG(){
- const loop=(inner,dur)=>`<g class="rl" style="--d:${dur}s"><g>${inner}</g><g transform="translate(399,0)">${inner}</g></g>`;
- const tree=(x,y,k)=>`<g transform="translate(${x},${y}) scale(${k})">${pineS()}</g>`;
- let s=`<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">`;
- s+=`<rect width="400" height="600" fill="#e6eef0" stroke="none"/><circle cx="70" cy="100" r="30" fill="#f5d27a" stroke="none"/>`;
- s+=loop(T(90,150,.9,swirl())+T(300,80,.7,swirl()),40);
- s+=loop(`<path d="M0,330 L0,250 L60,160 L110,220 L170,110 L240,210 L300,140 L360,230 L400,250 L400,330Z" fill="#dfe7ea"/><path d="M48,178 L60,160 L72,178 L66,174 L60,180 L54,174Z M156,134 L170,110 L184,134 L176,128 L170,138 L164,128Z M288,160 L300,140 L312,160 L306,156 L300,164 L294,156Z" fill="#fbf9f3" stroke-width="1.4"/>`,30);
- s+=loop(`<path d="M0,600 L0,380 Q100,340 200,372 Q300,334 400,380 L400,600Z" fill="#f7f5ef"/>`+[[30,400,.5],[120,382,.45],[230,392,.5],[330,388,.45],[80,470,.6],[190,500,.65],[300,470,.6]].map(([x,y,k])=>tree(x,y,k)).join(''),14);
- s+=loop([[20,600,1],[150,610,1.1],[270,596,.95],[370,612,1.05]].map(([x,y,k])=>tree(x,y,k)).join(''),5);
+ const VX=200,VY=280,HC=90,V=110,K=[],L=PV.lane;
+ const yz=z=>VY+HC/z;
+ const pine=(x,z,k=1)=>`<g transform="translate(${x},${yz(z).toFixed(1)}) scale(${(k*.5/z).toFixed(3)})">${pineS()}</g>`;
+ const lane=(z,W,n,k=1,o=1)=>{let t='';for(let i=0;i<n;i++)t+=pine(((i*W/n)+((i*53)%37)).toFixed(0),z*(1+((i*17)%5-2)*.04),k);return `<g opacity="${o}">${L(K,(W/(V/z)).toFixed(2),-W,0,t)}</g>`};
+ let s=`<rect width="400" height="600" fill="url(#sk3)" stroke="none"/><circle cx="70" cy="100" r="30" fill="#f5d27a" stroke="none"/>`;
+ s+=`<g class="rl" style="--d:40s"><g>${T(90,150,.9,swirl())+T(300,80,.7,swirl())}</g><g transform="translate(399,0)">${T(90,150,.9,swirl())+T(300,80,.7,swirl())}</g></g>`;
+ s+=`<g style="animation:up3 4.3s ease-in-out forwards">`;
+ s+=L(K,30,-400,0,`<g transform="translate(0,-50)"><path d="M0,330 L0,250 L60,160 L110,220 L170,110 L240,210 L300,140 L360,230 L400,250 V330Z" fill="#dfe7ea"/><path d="M48,178 L60,160 L72,178 L66,174 L60,180 L54,174Z M156,134 L170,110 L184,134 L176,128 L170,138 L164,128Z M288,160 L300,140 L312,160 L306,156 L300,164 L294,156Z" fill="#fbf9f3" stroke-width="1.4"/></g>`);
+ s+=`<rect x="-20" y="${VY}" width="440" height="500" fill="#f7f5ef" stroke="none"/><path d="M-20,${VY} H420" fill="none" stroke-width="1.6"/>`;
+ K.push(`@keyframes up3{from{transform:translateY(-10px)}to{transform:translateY(50px)}}`);
+ s+=PV.hrows(K,VY,HC,V,-1,'#d6e2e8',{w:3.4,op:.9,dash:[60,30]});
+
+ s+=lane(7,500,10,1,.6)+L(K,(500/(V/7)).toFixed(2),-500,0,`<g transform="translate(330,${yz(7)}) scale(.16)">${cabinSVG?'' :''}<rect x="-30" y="-40" width="60" height="40" fill="#c9a77a"/><path d="M-38,-38 L0,-66 L38,-38Z" fill="#7a4a3a"/></g>`);
+ s+=lane(3.2,560,8,1,.8)+lane(1.7,620,6)+lane(.95,700,4)+lane(.55,800,3);
+ s+=`</g>`;
  s+=`<path d="M-20,470 L420,170" fill="none" stroke-width="2.4"/><path d="M-20,484 L420,184" fill="none" stroke-width="1.4" opacity=".6"/>`;
  s+=`<g transform="translate(200,320) scale(2.3)" stroke-width="1">${cabinSVG('#c4473c',true)}</g>`;
- return s+`</g></svg>`}
+ s+=`<g opacity=".95">${L(K,(900/(V/.32)).toFixed(2),-900,0,pine(120,.32,1.1)+pine(560,.3,1.2))}</g>`;
+ return `<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><style>${K.join('')}</style><defs><linearGradient id="sk3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe2ec"/><stop offset="1" stop-color="#eef3f2"/></linearGradient></defs><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${s}</g></svg>`}
 H.RIDES.cable={text:'搭纜車上山，前往雪山溫泉村⋯',every:420,tick:k=>tone(k%3?300:360,.09,'sine',.05),svg:cableRideSVG};}
 })();
 

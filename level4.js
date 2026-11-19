@@ -297,33 +297,52 @@ function scatter4(){
 SCENE_IMPL[4]={ground:ground4,structures:()=>{structures4();mark(MX(745),MY(884),(1010-480)*K,(884-584)*K,1)},/* 直立的崖面不要長植物 */scatter:scatter4};
 
 /* ================= 過場：森林步道 ================= */
+/* 透視過場小工具（2026-11-20，第 2～16 關的過場共用同一份，H.PV 只建一次；改的時候每個檔案都要一起改）：
+   kf(名,消失點x,y) 產生「從消失點往鏡頭靠近」的 keyframes——縮放 = 1/距離，越近越快；消失點放在畫面外，就變成斜斜往左／往右走。
+   fly(名,秒,i,n,圖) 把一個東西放上軌道，n 個平均錯開。圖以消失點為原點畫：地上的東西底部在 y=+地面高度、x=左右偏移。
+   lane(K,d,dx,dy,圖) 一層無限捲動的景（整層往 dx,dy 移，接一份在後面）；遠的層慢、近的層快＝視差。
+   hrows(K,…) 地面的紋路：和移動方向平行的橫線（越遠越密），上面的虛線紋路照遠近速度往後流（dir=-1 往左、1 往右）。
+   box(c,…) 用消失點 c={vx,vy} 畫一個立體方塊（看得到的面才畫）。線條用 .pvf（不隨縮放變粗），遠的東西淡入。 */
+const PV=H.PV||(H.PV={
+ kf:(nm,vx,vy,z0=22,z1=.28,N=28,fi=.14)=>{let s=`@keyframes ${nm}{`;for(let i=0;i<=N;i++){const p=i/N,sc=1/(z0+(z1-z0)*p);s+=`${(p*100).toFixed(2)}%{transform:translate(${vx}px,${vy}px) scale(${sc.toFixed(4)});opacity:${p<fi?(p/fi).toFixed(2):1}}`}return s+'}.pvf *{vector-effect:non-scaling-stroke}'},
+ fly:(nm,d,i,n,inner)=>`<g class="pvf" style="animation:${nm} ${d}s linear infinite;animation-delay:-${(d*i/n).toFixed(2)}s;opacity:0">${inner}</g>`,
+ grow:(nm,vx,vy,a,b)=>`@keyframes ${nm}{from{transform:translate(${vx}px,${vy}px) scale(${a})}to{transform:translate(${vx}px,${vy}px) scale(${b})}}`,
+ lane:(K,d,dx,dy,inner)=>{const nm='pvl'+(PV.n=(PV.n||0)+1);K.push(`@keyframes ${nm}{to{transform:translate(${dx}px,${dy}px)}}`);return `<g style="animation:${nm} ${d}s linear infinite"><g>${inner}</g><g transform="translate(${-dx},${-dy})">${inner}</g></g>`},
+ hrows:(K,VY,HC,V,dir,col,o={})=>{const zs=o.zs||[9,6,4.4,3.3,2.5,1.95,1.55,1.25,1,.82,.67,.55,.46,.38,.32,.27];let t='';zs.forEach((z,i)=>{const y=(VY+HC/z).toFixed(1),a=(o.dash||[46,22]).map(v=>(v/z).toFixed(1)),per=(+a[0]+ +a[1]),d=(per/(V/z)).toFixed(2),nm='pvr'+(PV.n=(PV.n||0)+1),o0=(i*37)%per;K.push(`@keyframes ${nm}{from{stroke-dashoffset:${o0.toFixed(1)}}to{stroke-dashoffset:${(o0-dir*per).toFixed(1)}}}`);t+=`<path d="M-20,${y} H420" fill="none" stroke="${col}" stroke-width="${Math.min(o.w||3,(o.w||3)*.5/z+.8).toFixed(1)}" stroke-dasharray="${a.join(' ')}" opacity="${o.op||.7}" style="animation:${nm} ${d}s linear infinite"/>`});return t},
+ P:(c,X,Y,z)=>[+(c.vx+X/z).toFixed(1),+(c.vy+Y/z).toFixed(1)],
+ poly:(c,pts,fill,ex='')=>`<path d="M${pts.map(([X,Y,z])=>PV.P(c,X,Y,z).join(',')).join(' L')}Z" fill="${fill}" ${ex}/>`,
+ box:(c,x0,x1,y0,y1,z0,z1,fr,sd,tp)=>{const q=PV.poly;let s='';
+  if(x0>0)s+=q(c,[[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]],sd);else if(x1<0)s+=q(c,[[x1,y0,z0],[x1,y0,z1],[x1,y1,z1],[x1,y1,z0]],sd);
+  if(y0>0)s+=q(c,[[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]],tp);
+  return s+q(c,[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0]],fr)}
+});
 RIDES.trail={text:'從雪山往西走，穿過叢林，前往森林古代遺跡⋯',every:330,tick:k=>tone(k%2?240:200,.05,'triangle',.05),svg:()=>{
- /* 一整條 1200 寬的風景（右：雪地 → 中：叢林 → 左：遺跡），從右往左看過去；人物往左走 */
- let w=`<defs><linearGradient id="trSky" x1="0" x2="1"><stop offset="0" stop-color="#e3e8d8"/><stop offset=".55" stop-color="#e3e8d8"/><stop offset=".8" stop-color="#e6eef0"/></linearGradient>
-  <linearGradient id="trGround" x1="0" x2="1"><stop offset=".22" stop-color="${FLOOR}"/><stop offset=".42" stop-color="#6f8a48"/><stop offset=".6" stop-color="#7f9d58"/><stop offset=".74" stop-color="#f7f5ef"/></linearGradient>
-  <linearGradient id="trRoad" x1="0" x2="1"><stop offset=".24" stop-color="#c6b99a"/><stop offset=".4" stop-color="#c9a979"/><stop offset=".62" stop-color="#c9a979"/><stop offset=".76" stop-color="#ffffff"/></linearGradient></defs>`;
- w+=`<rect x="-10" y="0" width="1220" height="600" fill="url(#trSky)" stroke="none"/>`;
- // 遠山：右邊雪峰，中間叢林丘陵，左邊遺跡金字塔
- w+=`<path d="M820,330 L880,200 L940,280 L1010,170 L1080,270 L1140,210 L1210,330Z" fill="#dfe7ea"/><path d="M864,236 L880,200 L896,236 L888,232 L880,240 L872,232Z M994,206 L1010,170 L1026,206 L1018,200 L1010,210 L1002,200Z M1126,240 L1140,210 L1154,240Z" fill="#fbf9f3" stroke-width="1.4"/>`;
- w+=`<path d="M380,330 Q440,250 520,290 Q600,240 680,286 Q760,250 840,330Z" fill="#8f9d58"/>`;
- w+=`<path d="M60,330 L90,300 L230,300 L260,330Z M100,300 L116,272 L204,272 L220,300Z M126,272 L138,250 L182,250 L194,272Z" fill="#b9ab8c"/><rect x="152" y="314" width="16" height="16" fill="#3d3833"/>`;
- // 地面與道路
- w+=`<rect x="-10" y="330" width="1220" height="270" fill="url(#trGround)" stroke="none"/><path d="M-10,330 H1210" fill="none"/>`;
- w+=`<path d="M-10,450 Q300,436 600,452 T1210,446 L1210,520 Q900,512 600,522 T-10,516Z" fill="url(#trRoad)"/>`;
- // 右：雪松、雪堆
- w+=[[860,410,.8],[960,396,.7],[1060,412,.85],[1160,400,.75],[920,580,1],[1120,590,1.1]].map(([x,y,k])=>`<g transform="translate(${x},${y}) scale(${k})">${pine()}<path d="M-14,-30 Q0,-40 14,-30 Q0,-34 -14,-30Z M-10,-56 Q0,-64 10,-56 Q0,-58 -10,-56Z" fill="#fbf9f3" stroke-width="1.2"/></g>`).join('');
- w+=[[900,470],[1010,480],[1150,474]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="18" ry="6" fill="#fbf9f3" stroke-width="1.4"/>`).join('');
- // 中：叢林（圓樹、蕨類、藤蔓）
- w+=[[430,410,.75],[520,396,.7],[610,412,.8],[700,400,.72],[790,414,.6]].map(([x,y,k])=>`<g transform="translate(${x},${y}) scale(${k})">${roundTree()}</g>`).join('');
- w+=[[460,560],[560,590],[660,566],[760,584],[480,470],[640,476]].map(([x,y])=>T(x,y,1.1,fern())).join('')+[470,560,650,740].map(x=>vine(x,340,ri(4,7),.9)).join('');
- // 左：遺跡（石柱、碑、苔蘚）
- w+=[[40,420,0],[120,406,1],[280,414,0],[340,404,1]].map(([x,y,b])=>T(x,y,1,pillar(!!b))).join('')+T(200,404,1,stele())+[[60,560],[240,584],[360,566]].map(([x,y])=>T(x,y,1.2,rubble())).join('');
- // 右邊飄雪
- let sn='';for(let i=0;i<40;i++)sn+=`<circle cx="${f(sr(820,1200))}" cy="${f(sr(20,560))}" r="${f(sr(1.6,3))}" fill="#fff" stroke="none"/>`;w+=sn;
- let s=`<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">`;
- s+=`<style>@keyframes trPan{from{transform:translateX(-800px)}to{transform:translateX(0)}}</style><g style="animation:trPan 4.2s cubic-bezier(.35,0,.65,1) forwards;transform:translateX(-800px)">${w}</g>`;
- s+=`<g transform="translate(176,488)">${act(0,0,-1,ex({pose:'walk',hat:HELMET,pack:true}),'bob')}</g><g transform="translate(228,494)">${act(0,0,-1,ex({pose:'walk',hat:HELMET,pack:true}),'bob')}</g>`;
- return s+`</g></svg>`}};
+ /* 2026-11-20 第三版：保留原本的探險隊（側面往左走）；立體感：林地上的落葉紋從遠方散開、一面掃過去，
+    樹、蕨類、石柱分好幾層（越近越大越快、越遠越淡），遠方的遺跡金字塔慢慢出現 */
+ const VX=200,VY=300,HC=100,V=110,K=[],L=PV.lane;
+ const yz=z=>VY+HC/z;
+ const at=(x,z,k,g)=>`<g transform="translate(${x},${yz(z).toFixed(1)}) scale(${(k/z).toFixed(3)})">${g}</g>`;
+ const lane=(z,W,items)=>L(K,(W/(V/z)).toFixed(2),W,0,items);
+ let s=`<rect width="400" height="600" fill="url(#sk4)" stroke="none"/>`;
+ s+=`<path d="M0,${VY} L0,250 L60,206 L120,240 L190,190 L260,236 L330,200 L400,240 V${VY}Z" fill="#c9d3c0" stroke="none"/>`;
+ s+=lane(16,800,`<path d="M0,${VY} Q100,${VY-24} 200,${VY-8} Q300,${VY-26} 400,${VY-6} Q500,${VY-22} 600,${VY-10} Q700,${VY-24} 800,${VY}Z" fill="#9fb07a" stroke="none"/>`);
+ s+=`<g style="animation:py4 4.3s ease-in both"><g transform="translate(110,${VY}) scale(.55)"><path d="M-46,0 L-40,-12 L40,-12 L46,0Z M-36,-12 L-31,-24 L31,-24 L36,-12Z M-26,-24 L-22,-36 L22,-36 L26,-24Z M-16,-36 L-13,-46 L13,-46 L16,-36Z" fill="${STONE}" stroke-width="1.4"/><rect x="-5" y="-9" width="10" height="9" fill="#3d3833" stroke-width="1.2"/></g></g>`;
+ K.push(`@keyframes py4{0%,25%{opacity:0;transform:translateX(-60px)}100%{opacity:1;transform:translateX(30px)}}`);
+ s+=`<rect x="0" y="${VY}" width="400" height="320" fill="${FLOOR}" stroke="none"/><path d="M0,${VY} H400" fill="none" stroke-width="1.4"/>`;
+ s+=PV.hrows(K,VY,HC,V,1,'#7a8648',{w:2.6,dash:[30,26]});
+
+ s+=`<g opacity=".7">${lane(6,600,[10,50,95,140,190,240,290,330,380,425,470,520,560].map((x,i)=>at(x,6,1.2,i%4?roundTree():pillar(1))).join(''))}</g>`;
+ s+=`<g opacity=".88">${lane(3,600,[20,90,150,210,260,340,400,460,520,580].map((x,i)=>at(x,3,1.2,roundTree())).join('')+at(330,3,1,pillar(0))+[90,210,470].map(x=>at(x,3,1,fern())).join(''))}</g>`;
+ s+=lane(1.6,640,[20,140,260,400,480,580].map(x=>at(x,1.6,1.2,roundTree())).join('')+at(380,1.6,.9,stele())+[10,160,330,560].map(x=>at(x,1.6,1,fern())).join('')+at(600,1.7,1,rubble()));
+ const ry0=yz(.66),ry1=yz(.4);
+ s+=`<rect x="0" y="${ry0}" width="400" height="${ry1-ry0}" fill="#c9a979" stroke="none"/><rect x="0" y="${ry0}" width="400" height="8" fill="#a8925f" opacity=".45" stroke="none"/><rect x="0" y="${ry1}" width="400" height="${600-ry1}" fill="#5f7a3f" stroke="none"/>`;
+ s+=lane(.75,420,[0,60,130,200,270,340].map(x=>at(x,.75,.8,fern())).join(''));
+ s+=lane(.55,420,[40,190,330].map(x=>`<ellipse cx="${x}" cy="${yz(.55)}" rx="9" ry="3.6" fill="${STONE2}" stroke-width="1.2"/><path d="M${x+60},${yz(.52)} q4,-3 8,0 q-4,3 -8,0Z" fill="#7a9a4a" stroke="none"/>`).join(''));
+ s+=`<g transform="translate(176,${yz(.5)-6})">${act(0,0,-1,ex({pose:'walk',hat:HELMET,pack:true}),'bob')}</g><g transform="translate(232,${yz(.47)-4})">${act(0,0,-1,ex({pose:'walk',hat:HELMET,pack:true}),'bob')}</g>`;
+ s+=lane(.34,500,[30,200,370].map(x=>at(x,.34,.5,fern())).join(''));
+ /* 上方的樹冠和垂下的藤蔓（近的一層，跟著捲） */
+ s+=lane(.6,400,`<path d="M0,0 H400 V34 Q370,70 330,56 Q300,86 260,64 Q230,78 200,60 Q170,80 140,64 Q100,90 70,60 Q30,78 0,34Z" fill="#4f7a3a"/>`+vine(60,56,8,1)+vine(150,62,5,1)+vine(270,62,7,1)+vine(340,56,9,1));
+ return `<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><style>${K.join('')}</style><defs><linearGradient id="sk4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dfe8d6"/><stop offset="1" stop-color="#eef0dc"/></linearGradient></defs><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${s}</g></svg>`}};
 
 /* ================= 冒險地圖節點 ================= */
 HERE[4]=[96,70];

@@ -110,15 +110,34 @@ H.mapHook(4,({U,P,ink,FN,f})=>{let g='';const on=U>=2;
   m+=`<g transform="translate(268,${f(240+56*FK-6)})"><rect x="-32" y="-11" width="64" height="20" rx="10" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4.5" text-anchor="middle" font-size="12" fill="${ink}" font-family="${FN}">東方農莊</text></g></g>`;
   g+=m}
  return g});
-/* ================= 過場：乾草車（從小鎮往東到農莊） ================= */
 {const {T,OL,limb,pk,chibi,kid,swirl,roundTree,barn,pineS,cabinSVG,tone}=H;
+/* 透視過場小工具（2026-11-20，第 2～16 關的過場共用同一份，H.PV 只建一次；改的時候每個檔案都要一起改）：
+   kf(名,消失點x,y) 產生「從消失點往鏡頭靠近」的 keyframes——縮放 = 1/距離，越近越快；消失點放在畫面外，就變成斜斜往左／往右走。
+   fly(名,秒,i,n,圖) 把一個東西放上軌道，n 個平均錯開。圖以消失點為原點畫：地上的東西底部在 y=+地面高度、x=左右偏移。
+   lane(K,d,dx,dy,圖) 一層無限捲動的景（整層往 dx,dy 移，接一份在後面）；遠的層慢、近的層快＝視差。
+   hrows(K,…) 地面的紋路：和移動方向平行的橫線（越遠越密），上面的虛線紋路照遠近速度往後流（dir=-1 往左、1 往右）。
+   box(c,…) 用消失點 c={vx,vy} 畫一個立體方塊（看得到的面才畫）。線條用 .pvf（不隨縮放變粗），遠的東西淡入。 */
+const PV=H.PV||(H.PV={
+ kf:(nm,vx,vy,z0=22,z1=.28,N=28,fi=.14)=>{let s=`@keyframes ${nm}{`;for(let i=0;i<=N;i++){const p=i/N,sc=1/(z0+(z1-z0)*p);s+=`${(p*100).toFixed(2)}%{transform:translate(${vx}px,${vy}px) scale(${sc.toFixed(4)});opacity:${p<fi?(p/fi).toFixed(2):1}}`}return s+'}.pvf *{vector-effect:non-scaling-stroke}'},
+ fly:(nm,d,i,n,inner)=>`<g class="pvf" style="animation:${nm} ${d}s linear infinite;animation-delay:-${(d*i/n).toFixed(2)}s;opacity:0">${inner}</g>`,
+ grow:(nm,vx,vy,a,b)=>`@keyframes ${nm}{from{transform:translate(${vx}px,${vy}px) scale(${a})}to{transform:translate(${vx}px,${vy}px) scale(${b})}}`,
+ lane:(K,d,dx,dy,inner)=>{const nm='pvl'+(PV.n=(PV.n||0)+1);K.push(`@keyframes ${nm}{to{transform:translate(${dx}px,${dy}px)}}`);return `<g style="animation:${nm} ${d}s linear infinite"><g>${inner}</g><g transform="translate(${-dx},${-dy})">${inner}</g></g>`},
+ hrows:(K,VY,HC,V,dir,col,o={})=>{const zs=o.zs||[9,6,4.4,3.3,2.5,1.95,1.55,1.25,1,.82,.67,.55,.46,.38,.32,.27];let t='';zs.forEach((z,i)=>{const y=(VY+HC/z).toFixed(1),a=(o.dash||[46,22]).map(v=>(v/z).toFixed(1)),per=(+a[0]+ +a[1]),d=(per/(V/z)).toFixed(2),nm='pvr'+(PV.n=(PV.n||0)+1),o0=(i*37)%per;K.push(`@keyframes ${nm}{from{stroke-dashoffset:${o0.toFixed(1)}}to{stroke-dashoffset:${(o0-dir*per).toFixed(1)}}}`);t+=`<path d="M-20,${y} H420" fill="none" stroke="${col}" stroke-width="${Math.min(o.w||3,(o.w||3)*.5/z+.8).toFixed(1)}" stroke-dasharray="${a.join(' ')}" opacity="${o.op||.7}" style="animation:${nm} ${d}s linear infinite"/>`});return t},
+ P:(c,X,Y,z)=>[+(c.vx+X/z).toFixed(1),+(c.vy+Y/z).toFixed(1)],
+ poly:(c,pts,fill,ex='')=>`<path d="M${pts.map(([X,Y,z])=>PV.P(c,X,Y,z).join(',')).join(' L')}Z" fill="${fill}" ${ex}/>`,
+ box:(c,x0,x1,y0,y1,z0,z1,fr,sd,tp)=>{const q=PV.poly;let s='';
+  if(x0>0)s+=q(c,[[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]],sd);else if(x1<0)s+=q(c,[[x1,y0,z0],[x1,y0,z1],[x1,y1,z1],[x1,y1,z0]],sd);
+  if(y0>0)s+=q(c,[[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]],tp);
+  return s+q(c,[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0]],fr)}
+});
+/* ================= 過場：乾草車（2026-11-19 改成透視：坐在車夫座往前看，馬的背影、車轅、田間小路一路往地平線收） ================= */
 function horseCart(){
  const legs=[[52,0],[60,.2],[80,.1],[88,.3]].map(([x,d])=>`<g class="gallop" style="animation-delay:-${d}s">${limb(`M${x},-34 L${x+2},-17 L${x},0`,'#8a4e2e',4.5)}</g>`).join('');
  let g=`<g class="cbob">`;
  g+=`<path d="M-72,-2 Q0,6 110,-2" fill="none" stroke="#000" stroke-width="10" opacity=".12"/>`;
  g+=limb('M8,-30 L48,-38','#7a5235',2.6);
  g+=legs+`<path d="M44,-44 Q30,-40 34,-26 Q38,-34 46,-36" fill="#3a2a22"/><ellipse cx="70" cy="-44" rx="27" ry="13" fill="#a0623a"/>`;
- g+=`<path d="M86,-50 Q94,-74 104,-82 L116,-74 Q104,-62 98,-40Z" fill="#a0623a"/><ellipse cx="114" cy="-76" rx="13" ry="8.5" fill="#a0623a" transform="rotate(28 114 -76)"/><path d="M104,-86 l-2,-9 l7,6Z" fill="#a0623a"/>`;
+ g+=`<path d="M84,-48 Q94,-74 104,-82 L116,-74 Q104,-62 99,-40 Q92,-38 84,-48Z" fill="#a0623a" stroke="none"/><path d="M86,-50 Q94,-74 104,-82 M116,-74 Q104,-62 98,-40" fill="none"/><ellipse cx="114" cy="-76" rx="13" ry="8.5" fill="#a0623a" transform="rotate(28 114 -76)"/><path d="M104,-86 l-2,-9 l7,6Z" fill="#a0623a"/>`;
  g+=`<path d="M100,-86 Q90,-74 86,-52 Q92,-66 98,-72 Q94,-62 92,-50" fill="#3a2a22"/><circle cx="112" cy="-80" r="1.6" fill="${OL}" stroke="none"/><ellipse cx="121" cy="-71" rx="1.4" ry="1" fill="${OL}" stroke="none"/>`;
  g+=`<path d="M60,-56 Q72,-60 84,-55 M92,-58 L104,-74" fill="none" stroke="#c4473c" stroke-width="2.2"/>`;
  g+=`<path d="M-70,-42 Q-62,-74 -32,-70 Q-6,-76 8,-42Z" fill="#e8c46a"/><path d="M-56,-50 l4,-12 M-40,-48 l2,-16 M-22,-50 l3,-14 M-6,-48 l-2,-10" fill="none" stroke-width="1.2"/>`;
@@ -129,17 +148,47 @@ function horseCart(){
  return g+`</g>`+[0,1,2].map(i=>`<circle class="dust" cx="-78" cy="-8" r="${5+i*2}" fill="#e2d2a8" stroke-width="1.3" style="animation-delay:-${i*.25}s"/>`).join('');
 }
 function rideSVG(){
- const loop=(inner,dur)=>`<g class="rl" style="--d:${dur}s"><g>${inner}</g><g transform="translate(399,0)">${inner}</g></g>`;
- let s=`<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">`;
- s+=`<rect width="400" height="600" fill="#f6efe0" stroke="none"/><circle cx="320" cy="120" r="34" fill="#f5d27a" stroke="none"/>`;
- s+=loop(T(70,150,.9,swirl())+T(270,90,.7,swirl()),40);
- s+=loop(`<path d="M0,300 L0,250 Q50,190 100,240 Q150,170 210,235 Q270,180 320,240 Q360,200 400,250 L400,300Z" fill="#cdd3b4" stroke="none"/><path d="M0,250 Q50,190 100,240 Q150,170 210,235 Q270,180 320,240 Q360,200 400,250" fill="none" stroke="#8f9a7c" stroke-width="1.6"/>`,26);
- s+=loop(`<path d="M0,360 L0,300 Q70,262 140,296 Q210,258 280,294 Q340,266 400,300 L400,360Z" fill="#8f9d58" stroke="none"/><path d="M0,300 Q70,262 140,296 Q210,258 280,294 Q340,266 400,300" fill="none"/>`+[40,130,250,330].map(x=>`<g transform="translate(${x},${300-((x*7)%14)}) scale(.45)">${roundTree()}</g>`).join('')+`<g transform="translate(190,292) scale(.35)">${barn()}</g>`,12);
- s+=loop(`<rect x="0" y="352" width="400" height="80" fill="url(#wheat)" stroke="none"/><path d="M0,352 H400" fill="none" stroke-width="1.6"/>`+[...Array(9)].map((_,i)=>`<rect x="${i*45+6}" y="404" width="6" height="28" rx="2" fill="#f1ead8"/>`).join('')+`<path d="M0,412 H400 M0,422 H400" fill="none" stroke="#f1ead8" stroke-width="3"/>`,5);
- s+=loop(`<rect x="0" y="430" width="400" height="100" fill="#e2c896" stroke="none"/><path d="M0,430 H400" fill="none" stroke-width="2"/><path d="M10,486 h40 M110,486 h40 M210,486 h40 M310,486 h40" fill="none" stroke="#c9b083" stroke-width="4"/>`+[30,140,260,350].map(x=>`<ellipse cx="${x}" cy="${455+(x%30)}" rx="5" ry="3" fill="#b0a996" stroke-width="1.2"/>`).join(''),1.4);
- s+=`<g transform="translate(150,512)">${horseCart()}</g>`;
- s+=loop(`<rect x="0" y="528" width="400" height="80" fill="#a3ad66" stroke="none"/><path d="M0,528 H400" fill="none" stroke-width="2"/>`+[20,70,120,190,240,300,360].map(x=>`<path d="M${x},560 l-4,-12 M${x},560 l0,-15 M${x},560 l4,-12" fill="none" stroke="#56603a" stroke-width="2"/>`).join('')+[95,215,330].map(x=>`<circle cx="${x}" cy="575" r="4" fill="${pk(['#e3a89e','#f1ead8','#d4ac52'])}" stroke-width="1.2"/>`).join(''),.9);
- return s+`</g></svg>`;
+ /* 2026-11-20 第三版：乾草車保留原本側面造型、往右（往東）走；立體感改用「真的透視」——
+    每一層離鏡頭的距離 z 決定大小（1/z）、高度（地平線下 HC/z）、捲動速度（越近越快），
+    麥田的田壟是和前進方向平行的橫線（越遠越密），上面的紋路照遠近速度往後流，路邊不畫硬框線。 */
+ const VX=200,VY=246,HC=110,V=120,K=[];
+ const lane=(z,L,inner)=>{const sp=V/z,d=(L/sp).toFixed(2),nm='ln2'+K.length;K.push(`@keyframes ${nm}{to{transform:translateX(-${L}px)}}`);
+  return `<g style="animation:${nm} ${d}s linear infinite"><g>${inner}</g><g transform="translate(${L},0)">${inner}</g></g>`};
+ const at=(x,z,k,svg)=>{const y=VY+HC/z;return `<g transform="translate(${x},${y.toFixed(1)}) scale(${(k/z).toFixed(3)})">${svg}</g>`};
+ const yz=z=>(VY+HC/z).toFixed(1);
+ let b='';
+ b+=`<rect width="400" height="600" fill="url(#sk2)" stroke="none"/><circle cx="310" cy="130" r="30" fill="#f5d27a" stroke="none"/>`;
+ b+=`<g class="rl" style="--d:40s"><g>${T(70,150,.9,swirl())+T(270,96,.7,swirl())}</g><g transform="translate(399,0)">${T(70,150,.9,swirl())+T(270,96,.7,swirl())}</g></g>`;
+ b+=`<path d="M0,${VY} L0,212 Q60,180 120,204 Q190,170 250,202 Q320,174 400,204 V${VY}Z" fill="#d3d8c0" stroke="none"/><path d="M0,212 Q60,180 120,204 Q190,170 250,202 Q320,174 400,204" fill="none" stroke="#a9b096" stroke-width="1.4"/>`;
+ /* 麥田：底色＋田壟（skew 掃） */
+ const fy0=VY,fy1=+yz(.82);
+ b+=`<rect x="0" y="${fy0}" width="400" height="${fy1-fy0+4}" fill="#e2c25e" stroke="none"/><path d="M0,${VY} H400" fill="none" stroke-width="1.4"/>`;
+ b+=`<clipPath id="fc2"><rect x="0" y="${fy0}" width="400" height="${fy1-fy0}"/></clipPath><g clip-path="url(#fc2)">${PV.hrows(K,VY,HC,V,-1,'#c49a44',{w:2.6})}</g>`;
+ /* 遠處：小丘、樹、農舍（很慢） */
+ b+=lane(14,800,`<path d="M0,${VY} Q100,${VY-22} 200,${VY-6} Q300,${VY-26} 400,${VY-4} Q500,${VY-20} 600,${VY-8} Q700,${VY-24} 800,${VY}Z" fill="#b3bf86" stroke="none"/>`+[40,130,330,470,620,730].map((x,i)=>at(x,9,2.6,roundTree())).join('')+at(240,9,3,barn())+at(560,9,2.6,barn()));
+ 
+ /* 麥田裡的樹、稻草人、麥穗（不同距離） */
+ b+=lane(4,700,[60,300,520].map(x=>at(x,4,1,roundTree())).join('')+at(420,4,.9,`<path d="M0,0 V-40 M-14,-30 H14" fill="none" stroke="#7a5235" stroke-width="3"/><circle cx="0" cy="-46" r="8" fill="#e8c46a"/><path d="M-12,-50 H12 L6,-58 H-6Z" fill="#c4473c"/>`));
+ b+=lane(2,600,[30,110,190,270,350,430,510].map(x=>at(x,2,1,`<path d="M0,0 l-5,-16 M0,0 v-19 M0,0 l5,-16" fill="none" stroke="#b48a34" stroke-width="2.4"/>`)).join('')+at(250,2.2,.9,roundTree()));
+ b+=lane(1.2,500,[20,90,160,230,300,370,440].map(x=>at(x+((x*7)%30),1.2,1,`<path d="M0,0 l-5,-16 M0,0 v-19 M0,0 l5,-16" fill="none" stroke="#a97c2c" stroke-width="2.4"/>`)).join(''));
+ /* 路邊籬笆（路的遠側） */
+ b+=lane(.86,420,[0,70,140,210,280,350].map(x=>at(x,.86,1,`<path d="M0,0 V-30" fill="none" stroke="#f1ead8" stroke-width="5"/><path d="M0,0 V-30" fill="none" stroke-width="1"/><path d="M-70,-22 H0 M-70,-11 H0" fill="none" stroke="#f1ead8" stroke-width="3.4"/>`)).join(''));
+ /* 土路：上下緣用草叢收邊，不畫硬框線 */
+ const ry0=+yz(.8),ry1=+yz(.4);
+ b+=`<rect x="0" y="${ry0}" width="400" height="${ry1-ry0}" fill="#e2c896" stroke="none"/><rect x="0" y="${ry1}" width="400" height="${600-ry1}" fill="#a3ad66" stroke="none"/>`;
+ b+=`<rect x="0" y="${ry0}" width="400" height="10" fill="#d3b77e" stroke="none" opacity=".6"/>`;
+ b+=lane(.62,400,[20,120,220,320].map(x=>`<path d="M${x},${yz(.62)} h44" fill="none" stroke="#c9b083" stroke-width="4"/>`).join('')+[70,260].map(x=>at(x,.6,1,`<ellipse cx="0" cy="-1" rx="5" ry="2.6" fill="#b0a996" stroke-width="1"/>`)).join(''));
+ b+=lane(.52,400,[60,180,300].map(x=>`<path d="M${x},${yz(.52)} h50" fill="none" stroke="#c9b083" stroke-width="4"/>`).join(''));
+ b+=lane(.8,360,[0,40,90,150,200,250,300,330].map(x=>at(x,.8,1,`<path d="M0,4 l-4,-10 M0,4 v-12 M0,4 l4,-10" fill="none" stroke="#7d8a48" stroke-width="2"/>`)).join(''));
+ b+=lane(.41,400,[10,70,150,210,290,350].map(x=>at(x,.41,.7,`<path d="M0,6 l-4,-12 M0,6 v-14 M0,6 l4,-12" fill="none" stroke="#56603a" stroke-width="2"/>`)).join(''));
+ /* 乾草車：原本造型，加一點影子和後面兩個輪子，比較有厚度 */
+ const cy=+yz(.47);
+ b+=`<ellipse cx="200" cy="${cy+2}" rx="130" ry="11" fill="#7a6a40" opacity=".18" stroke="none"/>`;
+ b+=`<g transform="translate(160,${cy})">`+[[-46,-22],[-6,-22]].map(([x,y])=>`<g transform="translate(${x},${y})"><g class="wheel"><circle r="15" fill="#a87a45"/><path d="M0,-14 V14 M-14,0 H14" fill="none" stroke-width="1.4"/></g></g>`).join('')+`${horseCart()}</g>`;
+ /* 最近的草和花（最快） */
+ b+=lane(.33,400,[30,110,190,270,350].map(x=>at(x,.33,.5,`<path d="M0,0 l-5,-14 M0,0 v-18 M0,0 l5,-14" fill="none" stroke="#56603a" stroke-width="2.2"/>`)).join('')+[70,230].map(x=>at(x,.32,.45,`<circle cx="0" cy="-4" r="4" fill="#e3a89e" stroke-width="1.2"/>`)).join(''));
+ b+=lane(.26,420,at(140,.26,.5,`<path d="M0,0 Q-6,-40 -14,-60 M0,0 Q4,-46 10,-70 M0,0 Q10,-30 22,-46" fill="none" stroke="#6f8a40" stroke-width="3"/>`));
+ return `<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><style>${K.join('')}</style><defs><linearGradient id="sk2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6e6ea"/><stop offset="1" stop-color="#f6efe0"/></linearGradient></defs><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${b}</g></svg>`;
 }
 H.RIDES.cart={text:'乾草車出發，前往東方農莊⋯',every:230,tick:k=>tone(k%2?520:420,.06,'triangle',.06),svg:rideSVG};}
 })();

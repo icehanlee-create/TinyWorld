@@ -378,52 +378,67 @@ TAPHOOKS[N]=(x,y)=>{if(festTap(x,y))return true;
  requestAnimationFrame(step);return true};
 
 /* ================= 9. 過場：渡輪回小鎮港口 → 換小火車 → 沿海岸往西 → 轉進山裡（櫻花一路變多）→ 山腳小車站 ================= */
+/* 透視過場小工具（2026-11-20，第 2～16 關的過場共用同一份，H.PV 只建一次；改的時候每個檔案都要一起改）：
+   kf(名,消失點x,y) 產生「從消失點往鏡頭靠近」的 keyframes——縮放 = 1/距離，越近越快；消失點放在畫面外，就變成斜斜往左／往右走。
+   fly(名,秒,i,n,圖) 把一個東西放上軌道，n 個平均錯開。圖以消失點為原點畫：地上的東西底部在 y=+地面高度、x=左右偏移。
+   lane(K,d,dx,dy,圖) 一層無限捲動的景（整層往 dx,dy 移，接一份在後面）；遠的層慢、近的層快＝視差。
+   hrows(K,…) 地面的紋路：和移動方向平行的橫線（越遠越密），上面的虛線紋路照遠近速度往後流（dir=-1 往左、1 往右）。
+   box(c,…) 用消失點 c={vx,vy} 畫一個立體方塊（看得到的面才畫）。線條用 .pvf（不隨縮放變粗），遠的東西淡入。 */
+const PV=H.PV||(H.PV={
+ kf:(nm,vx,vy,z0=22,z1=.28,N=28,fi=.14)=>{let s=`@keyframes ${nm}{`;for(let i=0;i<=N;i++){const p=i/N,sc=1/(z0+(z1-z0)*p);s+=`${(p*100).toFixed(2)}%{transform:translate(${vx}px,${vy}px) scale(${sc.toFixed(4)});opacity:${p<fi?(p/fi).toFixed(2):1}}`}return s+'}.pvf *{vector-effect:non-scaling-stroke}'},
+ fly:(nm,d,i,n,inner)=>`<g class="pvf" style="animation:${nm} ${d}s linear infinite;animation-delay:-${(d*i/n).toFixed(2)}s;opacity:0">${inner}</g>`,
+ grow:(nm,vx,vy,a,b)=>`@keyframes ${nm}{from{transform:translate(${vx}px,${vy}px) scale(${a})}to{transform:translate(${vx}px,${vy}px) scale(${b})}}`,
+ lane:(K,d,dx,dy,inner)=>{const nm='pvl'+(PV.n=(PV.n||0)+1);K.push(`@keyframes ${nm}{to{transform:translate(${dx}px,${dy}px)}}`);return `<g style="animation:${nm} ${d}s linear infinite"><g>${inner}</g><g transform="translate(${-dx},${-dy})">${inner}</g></g>`},
+ hrows:(K,VY,HC,V,dir,col,o={})=>{const zs=o.zs||[9,6,4.4,3.3,2.5,1.95,1.55,1.25,1,.82,.67,.55,.46,.38,.32,.27];let t='';zs.forEach((z,i)=>{const y=(VY+HC/z).toFixed(1),a=(o.dash||[46,22]).map(v=>(v/z).toFixed(1)),per=(+a[0]+ +a[1]),d=(per/(V/z)).toFixed(2),nm='pvr'+(PV.n=(PV.n||0)+1),o0=(i*37)%per;K.push(`@keyframes ${nm}{from{stroke-dashoffset:${o0.toFixed(1)}}to{stroke-dashoffset:${(o0-dir*per).toFixed(1)}}}`);t+=`<path d="M-20,${y} H420" fill="none" stroke="${col}" stroke-width="${Math.min(o.w||3,(o.w||3)*.5/z+.8).toFixed(1)}" stroke-dasharray="${a.join(' ')}" opacity="${o.op||.7}" style="animation:${nm} ${d}s linear infinite"/>`});return t},
+ P:(c,X,Y,z)=>[+(c.vx+X/z).toFixed(1),+(c.vy+Y/z).toFixed(1)],
+ poly:(c,pts,fill,ex='')=>`<path d="M${pts.map(([X,Y,z])=>PV.P(c,X,Y,z).join(',')).join(' L')}Z" fill="${fill}" ${ex}/>`,
+ box:(c,x0,x1,y0,y1,z0,z1,fr,sd,tp)=>{const q=PV.poly;let s='';
+  if(x0>0)s+=q(c,[[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]],sd);else if(x1<0)s+=q(c,[[x1,y0,z0],[x1,y0,z1],[x1,y1,z1],[x1,y1,z0]],sd);
+  if(y0>0)s+=q(c,[[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]],tp);
+  return s+q(c,[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0]],fr)}
+});
 RIDES.train=(()=>{
- const strip=()=>{ /* 一整條 1200 寬的風景（右：海與小鎮港口 → 中：海岸與草原 → 左：山腳，櫻花最多）；火車固定在畫面中央，風景往右滑 */
-  let w=`<defs><linearGradient id="skTrSky" x1="0" x2="1"><stop offset="0" stop-color="#e9eef6"/><stop offset=".55" stop-color="#eee4ee"/><stop offset="1" stop-color="#e6eef4"/></linearGradient>
-   <linearGradient id="skTrGnd" x1="0" x2="1"><stop offset="0" stop-color="#b6d98f"/><stop offset=".45" stop-color="#bddb98"/><stop offset=".62" stop-color="#e8d9a4"/><stop offset="1" stop-color="#7cc0cc"/></linearGradient></defs>`;
-  w+=`<rect x="-10" y="0" width="1220" height="800" fill="url(#skTrSky)" stroke="none"/>`;
-  /* 遠山：左邊櫻花山，右邊淡淡的小鎮屋頂 */
-  w+=`<path d="M-10,340 L60,230 L130,300 L210,200 L290,300 L360,250 L430,340Z" fill="#c9cfc0"/><path d="M-10,340 Q80,280 170,320 Q250,270 340,330 Q400,300 440,340Z" fill="#b9d49a"/>`;
-  w+=[[40,300,1.1],[120,318,1],[210,296,1.2],[290,318,1],[360,306,.9]].map(([x,y,k])=>T(x,y,k*.7,S.sakuraTree(pk(['full','half'])))).join('');
-  w+=`<g opacity=".9">`+[[760,336],[830,330],[900,338]].map(([x,y])=>T(x,y,.6,S.tileRoof(110,20))).join('')+`</g>`;
-  /* 地面 */
-  w+=`<rect x="-10" y="340" width="1220" height="460" fill="url(#skTrGnd)" stroke="none"/><path d="M-10,340 H1210" fill="none"/>`;
-  /* 右邊：海與渡輪 */
-  w+=`<rect x="900" y="340" width="310" height="110" fill="#7cc0cc" stroke="none"/><path d="M900,340 H1210" fill="none"/>`;
-  w+=[[930,380],[1020,400],[1110,374],[1160,420]].map(([x,y])=>`<path d="M${x},${y} q8,-5 16,0 q8,5 16,0" fill="none" stroke="#d8f0f2" stroke-width="2"/>`).join('');
-  w+=T(1090,420,.5,H.ferry(true));
-  /* 櫻花由右（少）往左（多） */
-  const xs=[];for(let i=0;i<30;i++){const x=sr(10,880),p=1-x/880;if(r()<.15+.85*p*p)xs.push(x)}
-  xs.sort((a,b)=>a-b).forEach(x=>{const y=sr(420,470);w+=T(x,y,sr(.5,.8),S.sakuraTree(r()<.5?'full':pk(['half','full'])))});
-  /* 鳥居與山腳站房出現在最左邊 */
-  w+=T(70,450,.5,S.torii({lamps:true}))+T(270,452,.5,S.torii({lamps:true}));
-  /* 鐵軌（整條） */
-  w+=`<rect x="-10" y="500" width="1220" height="200" fill="#cdbf9a" stroke="none"/>`;
-  for(let x=0;x<1210;x+=26)w+=`<rect x="${x}" y="514" width="12" height="38" fill="#8a6a4a" stroke="none"/>`;
-  w+=`<path d="M-10,526 H1210 M-10,546 H1210" stroke="#6f6a60" stroke-width="4" fill="none"/>`;
-  /* 近景：路邊的花瓣 */
-  let pt='';for(let i=0;i<46;i++)pt+=`<ellipse cx="${f(sr(-5,1200))}" cy="${f(sr(380,590))}" rx="3.2" ry="1.8" fill="${pk(['#f7c4d3','#fde4ec','#eea6bb'])}" stroke="none" opacity="${f(sr(.5,.9))}"/>`;
-  return `<g transform="translate(0,-85)">${w+pt}</g>`};
-
- /* 第一段（2026-11-11 主帳號加，使用者說直接搭火車很怪）：渡輪從海島往西開回小鎮港口 */
- const sea=()=>{let w=`<rect x="0" y="0" width="400" height="600" fill="#e6eef4" stroke="none"/>`;
-  /* 遠方的小鎮：城堡、屋頂、碼頭（左邊） */
-  w+=`<g transform="translate(96,300)"><path d="M-110,0 Q-20,-30 40,-14 Q90,-26 130,0Z" fill="#b9d49a"/>`+
-   `<path d="M-6,-14 V-46 H26 V-14Z" fill="#ece2cb"/><path d="M-10,-46 L10,-66 L30,-46Z" fill="#5c6f96"/><path d="M-24,-14 V-34 H-8 V-14Z" fill="#ece2cb"/><path d="M-28,-34 L-16,-48 L-4,-34Z" fill="#b14d27"/>`+
-   `<path d="M34,-12 V-26 H52 V-12Z" fill="#f3e8cf"/><path d="M30,-26 L43,-36 L56,-26Z" fill="#c98a3a"/><path d="M60,-10 V-22 H76 V-10Z" fill="#f3e8cf"/><path d="M56,-22 L68,-31 L80,-22Z" fill="#b14d27"/>`+
-   `<rect x="80" y="-6" width="60" height="7" fill="#a8703f"/></g>`;
-  /* 右邊漸漸遠去的海島 */
-  w+=`<g transform="translate(360,296)"><path d="M-36,0 Q0,-18 40,0Z" fill="#ecd9a8"/><path d="M14,-4 L16,-28 H20 L22,-4Z" fill="#fbf9f3"/><path d="M13,-28 L18,-35 L23,-28Z" fill="#d8413a"/></g>`;
-  w+=`<rect x="0" y="300" width="400" height="300" fill="#7cc0cc" stroke="none"/><path d="M0,300 H400" fill="none"/>`;
-  w+=[[30,350],[150,380],[270,345],[80,450],[220,470],[330,420],[120,540],[300,560]].map(([x,y])=>`<path d="M${x},${y} q8,-5 16,0 q8,5 16,0" fill="none" stroke="#d8f0f2" stroke-width="2"/>`).join('');
+ /* 2026-11-19 改成透視（兩段都從背後往前看）：
+    第一段：站在渡輪船頭，小鎮港口越來越近；第二段：坐在小火車司機室，鍋爐冒煙，鐵軌一路往櫻花山收，枕木往下捲，櫻花樹和鳥居迎面而來。 */
+ const VX=200,VY=262,A=PV.fly;
+ const sea=()=>{const HC=96;let w=`<rect width="400" height="600" fill="url(#sk6a)" stroke="none"/><circle cx="300" cy="130" r="24" fill="#f5d27a" stroke="none"/>`;
+  w+=`<g style="animation:pt6 2.2s ease-in forwards"><path d="M-150,0 Q-60,-34 20,-18 Q90,-30 160,0Z" fill="#b9d49a"/>`+
+   `<path d="M-16,-18 V-58 H20 V-18Z" fill="#ece2cb"/><path d="M-20,-58 L2,-80 L24,-58Z" fill="#5c6f96"/><path d="M-40,-14 V-36 H-22 V-14Z" fill="#ece2cb"/><path d="M-44,-36 L-31,-50 L-18,-36Z" fill="#b14d27"/>`+
+   `<path d="M30,-12 V-28 H50 V-12Z" fill="#f3e8cf"/><path d="M26,-28 L40,-39 L54,-28Z" fill="#c98a3a"/><path d="M-80,-8 V-22 H-62 V-8Z" fill="#f3e8cf"/><path d="M-84,-22 L-71,-32 L-58,-22Z" fill="#b14d27"/><rect x="-30" y="-4" width="70" height="6" fill="#a8703f"/></g>`;
+  w+=`<path d="M0,${VY} H400 V600 H0Z" fill="#7cc0cc" stroke="none"/><path d="M0,${VY} H400" fill="none" stroke-width="1.4"/>`;
+  for(let i=0;i<20;i++)w+=A('pc6',3,i,20,`<path d="M${((i*53)%240)-200},${HC} q8,-5 16,0 q8,5 16,0" fill="none" stroke="#d8f0f2" stroke-width="2.2"/><path d="M${((i*71)%200)+10},${HC} q8,-5 16,0 q8,5 16,0" fill="none" stroke="#e8f6f6" stroke-width="2.2"/>`);
+  w+=`<path d="M-40,600 L200,446 L440,600Z" fill="#fbf9f3"/><path d="M-20,600 L200,460 L420,600Z" fill="#c99a5b"/>`+[-170,-80,0,80,170].map(x=>`<path d="M200,460 L${200+x*1.2},600" fill="none" stroke="#a8784a" stroke-width="1.4"/>`).join('')+`<path d="M-40,600 L200,446 L440,600" fill="none" stroke="#c4473c" stroke-width="6"/>`;
+  w+=`<g transform="translate(200,590) scale(1.4)">${kid({view:'back',pose:'stand',hat:-1})}</g>`;
   return w};
- const ferryG=()=>`<g class="skFerry">${sea()}<g class="skFerryBoat"><g transform="translate(250,410) scale(.9)">${H.ferry(true)}</g></g></g>`;
+ const rail=()=>{const HC=220,c={vx:100,vy:244};let w=`<rect width="400" height="600" fill="url(#sk6b)" stroke="none"/>`;
+  /* 第二段斜斜往左：消失點在左邊，火車在前面往左上的山裡開，櫻花樹從左上往右下流過 */
+  w+=`<g style="animation:pm6 2.4s 1.9s ease-in both"><path d="M-200,0 L-100,-90 L-30,-50 L40,-130 L130,-50 L210,-96 L330,0Z" fill="#c9cfc0"/><path d="M-200,0 Q-90,-40 20,-14 Q120,-44 330,0Z" fill="#b9d49a"/>`+
+   [[-60,-8],[60,-14],[140,-10],[220,-4]].map(([x,y])=>T(x,y,.35,S.sakuraTree('full'))).join('')+T(10,-2,.3,S.torii({lamps:true}))+`</g>`;
+  w+=`<path d="M0,${c.vy} H400 V600 H0Z" fill="#bddb98" stroke="none"/><path d="M0,${c.vy} H400" fill="none" stroke-width="1.4"/>`;
+  w+=PV.poly(c,[[50,HC,40],[190,HC,40],[190,HC,.3],[50,HC,.3]],'#cdbf9a','stroke="none"');
+  for(let i=0;i<16;i++)w+=A('pc6r',2.4,i,16,`<rect x="62" y="${HC-5}" width="116" height="10" fill="#8a6a4a" stroke="none"/>`);
+  w+=PV.poly(c,[[84,HC,40],[84,HC,.3]],'none','stroke="#6f6a60" stroke-width="4"')+PV.poly(c,[[156,HC,40],[156,HC,.3]],'none','stroke="#6f6a60" stroke-width="4"');
+  for(let i=0;i<12;i++)w+=A('pc6r',2.4,i,12,T(i%2?300:420,HC,1.6,S.sakuraTree(i%3?'full':'half'))+T(i%2?620:-90,HC,1.9,S.sakuraTree('full')));
+  for(let i=0;i<4;i++)w+=A('pc6r',2.4,i+.5,4,`<path d="M230,${HC} V${HC-150}" fill="none" stroke="#8a6a4a" stroke-width="3"/><path d="M214,${HC-144} H246" fill="none" stroke="#8a6a4a" stroke-width="2"/>`);
+  /* 火車（立體車廂，跟著我們一起動，所以固定） */
+  let tr='';const cars=[[5.6,7.6,'#4f7fb0'],[3.6,5.4,'#f4ecd8'],[2.0,3.4,'#f4ecd8'],[1.12,1.9,'#f4ecd8']];
+  cars.forEach(([z0,z1,col],k)=>{[[80,z0+.25],[160,z0+.25],[80,z1-.25],[160,z1-.25]].forEach(([X,z])=>{const [x,y]=PV.P(c,X,HC-10,z);tr+=`<ellipse cx="${x}" cy="${y}" rx="${(9/z).toFixed(1)}" ry="${(14/z).toFixed(1)}" fill="#3a3a44"/>`});const top=k?HC-150:HC-130;tr+=PV.box(c,64,176,top,HC-22,z0,z1,col,col==='#4f7fb0'?'#3f6a96':'#e2d6bc',k?'#c4573a':'#3a3a44');
+   if(k){tr+=PV.poly(c,[[64,top+30,z0+.08],[64,top+30,z1-.08],[64,top+70,z1-.08],[64,top+70,z0+.08]],'#cfe6ef','stroke-width="1.2"')+PV.poly(c,[[64,HC-46,z0],[64,HC-46,z1]],'none','stroke="#4f7fb0" stroke-width="3"')}
+   if(k===3){tr+=PV.poly(c,[[90,top+30,z0],[150,top+30,z0],[150,top+70,z0],[90,top+70,z0]],'#cfe6ef','stroke-width="1.4"')+PV.box(c,70,170,HC-46,HC-30,z0-.22,z0,'#a8703f','#8a5a32','#c99a5b')+PV.poly(c,[[70,HC-46,z0-.22],[70,HC-96,z0-.22],[170,HC-96,z0-.22],[170,HC-46,z0-.22]],'none','stroke-width="2.4"')}
+   else if(!k)tr+=PV.box(c,100,140,HC-200,HC-130,z0+.2,z0+.6,'#3a3a44','#2a2a33','#55555f')});
+  const [sx,sy]=PV.P(c,120,HC-206,5.8);
+  w+=`<g class="skTrain">${tr}${[0,1,2].map(i=>`<circle class="sm6" style="animation-delay:-${i*.4}s" cx="${sx}" cy="${sy}" r="${8+i*3}" fill="#f4f1ea" stroke-width="1.4"/>`).join('')}`;
+  const [kx,ky]=PV.P(c,100,HC-46,1.0);
+  w+=`<g transform="translate(${kx},${ky}) scale(1.1)">${kid({view:'bq',pose:'up',hat:-1})}</g></g>`;
+  let pt='';for(let i=0;i<26;i++)pt+=`<ellipse class="pt6" style="animation-delay:-${f(sr(0,2))}s" cx="${f(sr(20,380))}" cy="${f(sr(120,560))}" rx="3.2" ry="1.8" fill="${pk(['#f7c4d3','#fde4ec','#eea6bb'])}" stroke="none"/>`;w+=pt;
+  return w};
  return {text:'搭渡輪回小鎮港口，換小火車往西進櫻花山⋯',every:380,tick:k=>tone(k%2?210:170,.06,'triangle',.05),
-  svg:()=>`<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><style>@keyframes skTrPan{from{transform:translateX(-800px)}to{transform:translateX(0)}}.skTrain{animation:skTrBob .26s ease-in-out infinite alternate}@keyframes skTrBob{to{transform:translateY(-2px)}}</style>`+
-   `<style>.skTrSeg{opacity:0;animation:skTrIn .4s 1.9s forwards}@keyframes skTrIn{to{opacity:1}}.skFerry{animation:skFeOut .4s 1.9s forwards}@keyframes skFeOut{to{opacity:0}}.skFerryBoat{animation:skFeGo 2.3s cubic-bezier(.3,0,.6,1) forwards}@keyframes skFeGo{from{transform:translateX(60px)}to{transform:translateX(-70px)}}</style>`+
-   `<g class="skTrSeg"><g style="animation:skTrPan 2.4s 1.9s cubic-bezier(.35,0,.65,1) forwards;transform:translateX(-800px)">${strip()}</g>`+
-   `<g class="skTrain"><g transform="translate(200,462) scale(-.9,.9)">${train('#4f7fb0')}</g></g></g>`+ferryG()+`</g></svg>`}})();
+  svg:()=>`<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="sk6a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe2ec"/><stop offset="1" stop-color="#eef3f4"/></linearGradient><linearGradient id="sk6b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3e6f2"/><stop offset="1" stop-color="#f3e8ee"/></linearGradient></defs>`+
+   `<g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><style>${PV.kf('pc6',VX,VY,20,.3)}${PV.kf('pc6r',100,244,20,.3)}${PV.grow('pt6g',VX,VY,.5,1)}@keyframes pt6{from{transform:translate(${VX}px,${VY}px) scale(.55)}to{transform:translate(${VX}px,${VY}px) scale(1.05)}}@keyframes pm6{from{transform:translate(100px,244px) scale(.7)}to{transform:translate(100px,244px) scale(1.1)}}`+
+   `.skTrain{animation:skTrBob .26s ease-in-out infinite alternate}@keyframes skTrBob{to{transform:translateY(-2px)}}.sm6{transform-box:fill-box;transform-origin:center;animation:sm6 1.2s ease-out infinite}@keyframes sm6{from{transform:translate(0,0) scale(.6);opacity:.95}to{transform:translate(-30px,60px) scale(2.2);opacity:0}}`+
+   `.pt6{animation:pf6 1.6s linear infinite}@keyframes pf6{from{transform:translate(0,-30px)}to{transform:translate(-40px,60px)}}`+
+   `.skTrSeg{opacity:0;animation:skTrIn .4s 1.9s forwards}@keyframes skTrIn{to{opacity:1}}.skFerry{animation:skFeOut .4s 1.9s forwards}@keyframes skFeOut{to{opacity:0}}</style>`+
+   `<g class="skTrSeg">${rail()}</g><g class="skFerry">${sea()}</g></g></svg>`}})();
 
 /* ================= 10. 冒險地圖：櫻花山、小火車線、第 6 關節點（座標用加寬後的地圖，西邊是負的 x） =================
    地圖向西加寬 120（viewBox -120 0 462 430）要主帳號改 core.js：見 notes-sakura.md「需要引擎新增」。這裡只畫自己的東西。 */

@@ -280,19 +280,42 @@ H.mapHook(2,({P,ink,FN,open})=>{if(!open(N))return '';
  m+=P('M-30,386 L-22,376 L-14,386Z','#c4573a',1.3)+P('M-98,386 L-90,378 L-82,386Z','#2f6f73',1.3);
  m+=`</g></g><g transform="translate(-38,388)"><rect x="-40" y="-10" width="80" height="18" rx="9" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">沙漠綠洲市集</text></g></g>`;
  return g+m});
+/* 透視過場小工具（2026-11-20，第 2～16 關的過場共用同一份，H.PV 只建一次；改的時候每個檔案都要一起改）：
+   kf(名,消失點x,y) 產生「從消失點往鏡頭靠近」的 keyframes——縮放 = 1/距離，越近越快；消失點放在畫面外，就變成斜斜往左／往右走。
+   fly(名,秒,i,n,圖) 把一個東西放上軌道，n 個平均錯開。圖以消失點為原點畫：地上的東西底部在 y=+地面高度、x=左右偏移。
+   lane(K,d,dx,dy,圖) 一層無限捲動的景（整層往 dx,dy 移，接一份在後面）；遠的層慢、近的層快＝視差。
+   hrows(K,…) 地面的紋路：和移動方向平行的橫線（越遠越密），上面的虛線紋路照遠近速度往後流（dir=-1 往左、1 往右）。
+   box(c,…) 用消失點 c={vx,vy} 畫一個立體方塊（看得到的面才畫）。線條用 .pvf（不隨縮放變粗），遠的東西淡入。 */
+const PV=H.PV||(H.PV={
+ kf:(nm,vx,vy,z0=22,z1=.28,N=28,fi=.14)=>{let s=`@keyframes ${nm}{`;for(let i=0;i<=N;i++){const p=i/N,sc=1/(z0+(z1-z0)*p);s+=`${(p*100).toFixed(2)}%{transform:translate(${vx}px,${vy}px) scale(${sc.toFixed(4)});opacity:${p<fi?(p/fi).toFixed(2):1}}`}return s+'}.pvf *{vector-effect:non-scaling-stroke}'},
+ fly:(nm,d,i,n,inner)=>`<g class="pvf" style="animation:${nm} ${d}s linear infinite;animation-delay:-${(d*i/n).toFixed(2)}s;opacity:0">${inner}</g>`,
+ grow:(nm,vx,vy,a,b)=>`@keyframes ${nm}{from{transform:translate(${vx}px,${vy}px) scale(${a})}to{transform:translate(${vx}px,${vy}px) scale(${b})}}`,
+ lane:(K,d,dx,dy,inner)=>{const nm='pvl'+(PV.n=(PV.n||0)+1);K.push(`@keyframes ${nm}{to{transform:translate(${dx}px,${dy}px)}}`);return `<g style="animation:${nm} ${d}s linear infinite"><g>${inner}</g><g transform="translate(${-dx},${-dy})">${inner}</g></g>`},
+ hrows:(K,VY,HC,V,dir,col,o={})=>{const zs=o.zs||[9,6,4.4,3.3,2.5,1.95,1.55,1.25,1,.82,.67,.55,.46,.38,.32,.27];let t='';zs.forEach((z,i)=>{const y=(VY+HC/z).toFixed(1),a=(o.dash||[46,22]).map(v=>(v/z).toFixed(1)),per=(+a[0]+ +a[1]),d=(per/(V/z)).toFixed(2),nm='pvr'+(PV.n=(PV.n||0)+1),o0=(i*37)%per;K.push(`@keyframes ${nm}{from{stroke-dashoffset:${o0.toFixed(1)}}to{stroke-dashoffset:${(o0-dir*per).toFixed(1)}}}`);t+=`<path d="M-20,${y} H420" fill="none" stroke="${col}" stroke-width="${Math.min(o.w||3,(o.w||3)*.5/z+.8).toFixed(1)}" stroke-dasharray="${a.join(' ')}" opacity="${o.op||.7}" style="animation:${nm} ${d}s linear infinite"/>`});return t},
+ P:(c,X,Y,z)=>[+(c.vx+X/z).toFixed(1),+(c.vy+Y/z).toFixed(1)],
+ poly:(c,pts,fill,ex='')=>`<path d="M${pts.map(([X,Y,z])=>PV.P(c,X,Y,z).join(',')).join(' L')}Z" fill="${fill}" ${ex}/>`,
+ box:(c,x0,x1,y0,y1,z0,z1,fr,sd,tp)=>{const q=PV.poly;let s='';
+  if(x0>0)s+=q(c,[[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]],sd);else if(x1<0)s+=q(c,[[x1,y0,z0],[x1,y0,z1],[x1,y1,z1],[x1,y1,z0]],sd);
+  if(y0>0)s+=q(c,[[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]],tp);
+  return s+q(c,[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0]],fr)}
+});
 RIDES.caravan11={text:'跟著商隊走進沙漠⋯',every:420,tick:k=>tone(k%2?262:233,.1,'triangle',.05),
- svg:()=>{const loop=(inner,dur)=>`<g class="rr11" style="--d:${dur}s"><g>${inner}</g><g transform="translate(-399,0)">${inner}</g></g>`;
-  const dune=(y,c,h)=>`<path d="M0,${y} Q60,${y-h} 130,${y-h*.3} Q210,${y-h*1.1} 290,${y-h*.4} Q350,${y-h*.9} 399,${y} V600 H0Z" fill="${c}"/>`;
-  let s=`<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><style>.rr11{animation:rr11 var(--d) linear infinite}@keyframes rr11{to{transform:translateX(399px)}}.cw11{animation:cw11 .5s ease-in-out infinite alternate}@keyframes cw11{to{transform:translateY(-3px)}}</style>`;
-  s+=`<g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><rect width="400" height="600" fill="#f8e6bd" stroke="none"/><circle cx="300" cy="120" r="46" fill="#fdf0c0" stroke="none"/><circle cx="300" cy="120" r="70" fill="#fbeab0" stroke="none" opacity=".4"/>`;
-  s+=loop(`<g stroke="none"><path d="M60,300 L112,232 L164,300Z" fill="#e3c68a"/><path d="M112,232 L164,300 H128Z" fill="#d3b274"/></g>`+dune(318,'#efd7a0',22),60);
-  s+=loop(dune(372,'#e8cb92',30)+`<path d="M0,372 Q60,342 130,364 Q210,336 290,360 Q350,342 399,372" fill="none" stroke="#cfa860" stroke-width="1.4"/>`,34);
-  s+=loop(dune(430,'#e4c78a',38)+[40,200,330].map(x=>`<g transform="translate(${x},424)">${dryBush()}</g>`).join(''),20);
-  s+=`<rect y="470" width="400" height="130" fill="#ecd29c" stroke="none"/><path d="M0,470 Q100,454 200,468 T400,468" fill="none" stroke="#cfa860" stroke-width="2"/>`;
-  s+=loop(`<path d="M10,520 q14,-5 28,0 q14,5 28,0 M150,540 q14,-5 28,0 M270,516 q14,-5 28,0 q14,5 28,0 M90,566 q14,-5 28,0" fill="none" stroke="#d9bb7e" stroke-width="2"/>`,8);
-  [[70,498,1,'#d6aa66'],[196,486,.92,'#c99a58'],[316,496,1,'#dcb878']].forEach(([x,y,sc,c],i)=>{s+=`<g transform="translate(${x},${y}) scale(${sc},${sc})"><g class="cw11" style="animation-delay:-${i*.17}s">${CAMEL.stand(c,'#b98a4a',true)}</g></g>`});
-  s+=`<g transform="translate(250,536) scale(-1.1,1.1)" class="cw11">${kid({view:'side',pose:'walk',hat:HAT_T,skin:'#c98d5e',shirt:'#2f6f73',top:'long',bottom:'pants',pants:'#e8d9b4'})}</g>`;
-  return s+`</g></svg>`}};
+ svg:()=>{
+  /* 2026-11-20 第三版：保留原本的駱駝商隊（側面往左走）；立體感：沙丘分好幾層（越遠越淡越慢），
+     沙紋是和前進方向平行的橫線（越遠越密）、照遠近速度往後流，近的枯草和小石頭大又快 */
+  const VY=310,HC=100,V=90,K=[],L=PV.lane,yz=z=>VY+HC/z;
+  const lane=(z,W,inner)=>L(K,(W/(V/z)).toFixed(2),W,0,inner);
+  const dune=(z,c,h,W)=>{const y=yz(z),k=1/z;let d=`M0,${y}`;for(let x=0;x<W;x+=200)d+=` Q${x+60},${(y-h*k).toFixed(1)} ${x+130},${(y-h*.3*k).toFixed(1)} Q${x+170},${(y-h*.7*k).toFixed(1)} ${x+200},${y}`;return `<path d="${d} V700 H0Z" fill="${c}" stroke="none"/><path d="${d}" fill="none" stroke-width="1.6"/>`};
+  let s=`<rect width="400" height="600" fill="#f8e6bd" stroke="none"/><circle cx="300" cy="120" r="70" fill="#fbeab0" stroke="none"/><circle cx="300" cy="120" r="46" fill="#fdf0c0" stroke="none"/>`;
+  s+=lane(30,800,`<g stroke="none"><path d="M60,${VY} L112,${VY-62} L164,${VY}Z" fill="#e8cf9a"/><path d="M112,${VY-62} L164,${VY} H128Z" fill="#d9bb84"/><path d="M500,${VY} L530,${VY-32} L560,${VY}Z" fill="#e8cf9a"/></g>`);
+  s+=`<g opacity=".75">${lane(8,800,dune(8,'#f1dcaa',160,800))}</g>`+lane(3.4,800,dune(3.4,'#ecd29c',150,800)+[90,330,560].map(x=>`<g transform="translate(${x},${yz(3.2)}) scale(${(1/3.2).toFixed(2)})">${dryBush()}</g>`).join(''));
+  s+=lane(1.6,800,dune(1.6,'#e8cb92',120,800)+[40,250,470,690].map(x=>`<g transform="translate(${x},${yz(1.5)}) scale(.62)">${dryBush()}</g>`).join(''));
+  s+=`<rect y="${yz(.95)}" width="400" height="400" fill="#ecd29c" stroke="none"/>`;
+  s+=PV.hrows(K,VY,HC,V,1,'#d6b878',{w:2.4,zs:[.92,.8,.7,.62,.55,.49,.44,.39,.35,.31,.28],dash:[40,30]});
+  [[150,1.2,.5,'#d6aa66'],[70,.6,1,'#d6aa66'],[205,.72,.82,'#c99a58'],[320,.6,1,'#dcb878']].forEach(([x,z,sc,c],i)=>{s+=`<g transform="translate(${x},${yz(z).toFixed(0)}) scale(${sc},${sc})"><g class="cw11" style="animation-delay:-${i*.17}s">${CAMEL.stand(c,'#b98a4a',true)}</g></g>`});
+  s+=`<g transform="translate(262,${yz(.5).toFixed(0)}) scale(-.78,.78)"><g class="cw11">${kid({view:'side',pose:'walk',hat:HAT_T,skin:'#c98d5e',shirt:'#2f6f73',top:'long',bottom:'pants',pants:'#e8d9b4'})}</g></g>`;
+  s+=lane(.34,700,[60,300,520].map(x=>`<g transform="translate(${x},${yz(.34)}) scale(1.2)">${dryBush()}</g>`).join('')+[180,420].map(x=>`<ellipse cx="${x}" cy="${yz(.32)}" rx="16" ry="6" fill="#c9ab76" stroke-width="1.6"/>`).join(''));
+  return `<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><style>${K.join('')}.cw11{animation:cw11 .5s ease-in-out infinite alternate}@keyframes cw11{to{transform:translateY(-3px)}}</style><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${s}</g></svg>`}};
 
 /* ================= 9. 場景彩蛋：點綠洲的水 ================= */
 H.TAPHOOKS[N]=(x,y)=>{if(!inPond(x,y))return false;

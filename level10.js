@@ -556,32 +556,39 @@ const cloudR=(x,y,k)=>{const C=[[-30,0,18],[-8,-12,24],[20,-6,20],[40,4,14],[6,6
  return `<g transform="translate(${f(x)},${f(y)}) scale(${f(k)})">`+C.map(([a,b,r])=>`<circle cx="${a}" cy="${b}" r="${r}" fill="#fff" stroke="#b9c8d0" stroke-width="2"/>`).join('')+C.map(([a,b,r])=>`<circle cx="${a}" cy="${b}" r="${r-2}" fill="#fff" stroke="none"/>`).join('')+`</g>`};
 const houseR=(x,y,k,w,r)=>T(x,y,k,`<rect x="-22" y="-26" width="44" height="26" fill="${w}"/><rect x="-6" y="-16" width="12" height="16" fill="#5a4030"/><rect x="-18" y="-20" width="8" height="7" fill="#f6d27a"/><path d="M-28,-24 L0,-44 L28,-24Z" fill="${r}"/><path d="M-28,-26 L0,-46 L28,-26 L22,-26 L0,-40 L-22,-26Z" fill="${SNOW}"/>`);
 const puffR=(x,y,k)=>T(x,y,k,`<g fill="#fff" opacity=".85" stroke="none"><circle cx="-8" cy="-10" r="9"/><circle cx="4" cy="-17" r="11"/><circle cx="13" cy="-8" r="7"/></g>`);
-/* 一整條往上的世界：y 越小越高。纜線 (40,1600)→(360,60)，車廂固定在畫面 (200,260)，世界沿纜線往右下捲 */
-let WORLD='';
-function world(){if(WORLD)return WORLD;s0=11;
- let s=`<defs><linearGradient id="gw10Sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fc1e6"/><stop offset=".22" stop-color="#cfe6f3"/><stop offset=".4" stop-color="#eef3f4"/><stop offset="1" stop-color="#e6eef0"/></linearGradient></defs>`;
- s+=`<rect x="-200" y="-300" width="800" height="2100" fill="url(#gw10Sky)" stroke="none"/><circle cx="320" cy="-10" r="34" fill="#f5d27a" stroke="none"/>`;
- s+=`<path d="M-200,330 L-60,170 L20,240 L120,110 L220,220 L320,120 L420,240 L520,160 L600,250 V600 H-200Z" fill="#dfe7ea"/>`;
- s+=`<path d="M108,126 L120,110 L132,126 L126,122 L120,130 L114,122Z M308,136 L320,120 L332,136 L326,132 L320,140 L314,132Z" fill="${SNOW}" stroke-width="1.4"/>`;
- s+=`<path d="M-200,360 Q0,280 200,320 Q400,270 600,330 V700 H-200Z" fill="${SNOW}"/>`;
- for(let i=0;i<30;i++)s+=T(SR(-160,560),SR(320,560),SR(.6,.95),rimeR(1));
- s+=`<rect x="-200" y="560" width="800" height="1200" fill="${SNOW}" stroke="none"/>`;
- for(let i=0;i<64;i++){const y=SR(600,1330),x=SR(-160,560),p=y<760?.9:y<960?.9-(y-760)/200*.9:0;s+=T(x,y,SR(.75,1),R()<p?rimeR(.9):pineR(1.1,['#4f6a4a','#56703f','#5f7a4a'][i%3]))}
- s+=`<path d="M-200,1380 Q100,1350 200,1370 Q330,1390 600,1360 V1800 H-200Z" fill="#f2eee6"/>`;
- [[-40,1450,'#c9a77a','#7a4a3a'],[60,1500,'#e3ddd0','#5a6a80'],[250,1470,'#c9a77a','#8a3a32'],[360,1520,'#e3ddd0','#7a4a3a'],[150,1600,'#c9a77a','#5a6a80'],[-80,1610,'#e3ddd0','#8a3a32']].forEach(([x,y,w,r])=>s+=houseR(x,y,1.3,w,r)+puffR(x+20,y-70,1.1));
- s+=`<ellipse cx="300" cy="1640" rx="60" ry="22" fill="#a9d4dc"/>`+puffR(290,1610,1.3)+puffR(320,1600,1);
- /* 雲海：樹冰和松林的交界 */
- for(let y=600;y<900;y+=34)for(let x=-180;x<600;x+=70)s+=cloudR(x+SR(-20,20),y+SR(-10,10),SR(1,1.5));
- s+=`<path d="M40,1600 L360,60 M60,1606 L380,66" fill="none" stroke-width="2.2"/>`;
- [.28,.62].forEach(p=>{const x=40+320*p,y=1600-1540*p;s+=`<path d="M${f(x)},${f(y)} V${f(y+170)} M${f(x+20)},${f(y+6)} V${f(y+170)}" fill="none" stroke="#5a5f64" stroke-width="5"/><path d="M${f(x-6)},${f(y+2)} H${f(x+26)}" stroke="#5a5f64" stroke-width="5"/>`});
- [[.45,'#5a86b0'],[.8,'#c4473c']].forEach(([p,c])=>s+=T(60+320*p,1606-1540*p,1.1,gond(c,0)));
- return WORLD=s}
-/* p＝纜線上的位置（0 山腳、1 山頂）；開始 .06、結束 .9 */
-const tr=p=>[f(200-(40+320*p)),f(260-(1600-1540*p))];
-function gondolaRideSVG(){const a=tr(.06),b=tr(.9);
- return `<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><style>@keyframes gw10up{from{transform:translate(${a[0]}px,${a[1]}px)}to{transform:translate(${b[0]}px,${b[1]}px)}}.gw10{animation:gw10up 4.1s ease-in-out forwards}
-@keyframes gw10sway{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}.gw10s{transform-box:fill-box;transform-origin:50% 0;animation:gw10sway 2.4s ease-in-out infinite}</style>
-<g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><g class="gw10">${world()}</g><g transform="translate(200,260) scale(2)" stroke-width="1"><g class="gw10s">${gond('#c4473c',1)}</g></g></g></svg>`}
+/* 2026-11-20 改成「直直往上」：包廂纜車往上升，腳下的溫泉村越縮越小往下沉，穿過一層層遠近不同的雲，最後山頂的樹冰從上面降下來 */
+function gondolaRideSVG(){
+ const cl=(k,o)=>`<g opacity="${o}">${cloudR(0,0,k)}</g>`;
+ let s=`<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><style>`+
+  `@keyframes gs10{from{transform:translateY(0)}to{transform:translateY(900px)}}`+
+  `@keyframes gd10{from{transform:translate(200px,820px) scale(1)}to{transform:translate(200px,820px) scale(.22)}}`+
+  `@keyframes gc10{from{transform:translateY(-260px)}to{transform:translateY(760px)}}`+
+  `@keyframes gt10{0%,55%{transform:translate(200px,-200px) scale(.7)}100%{transform:translate(200px,120px) scale(1)}}`+
+  `@keyframes go10{from{transform:translate(318px,-60px) scale(.75)}to{transform:translate(318px,700px) scale(.75)}}`+
+  `.gw10s{transform-box:fill-box;transform-origin:50% 0;animation:gw10sway 2.4s ease-in-out infinite}@keyframes gw10sway{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}`+
+  `.cl10{animation:gc10 var(--d) linear infinite}</style>`;
+ s+=`<defs><linearGradient id="gs10g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fa8d8"/><stop offset=".5" stop-color="#b4d6ec"/><stop offset="1" stop-color="#dcebf2"/></linearGradient></defs>`;
+ s+=`<g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><rect y="-900" width="400" height="1500" fill="url(#gs10g)" stroke="none" style="animation:gs10 4.3s ease-in-out forwards"/>`;
+ /* 腳下的溫泉村和松林：以畫面下方外面為中心縮小，看起來越來越遠 */
+ let g=`<path d="M-500,-360 Q-200,-460 0,-430 Q200,-470 500,-360 V200 H-500Z" fill="${SNOW}"/>`;
+ [[-150,-300,'#c9a77a','#7a4a3a'],[-60,-270,'#e3ddd0','#5a6a80'],[60,-290,'#c9a77a','#8a3a32'],[150,-260,'#e3ddd0','#7a4a3a'],[0,-220,'#c9a77a','#5a6a80'],[-130,-190,'#e3ddd0','#8a3a32'],[120,-180,'#c9a77a','#7a4a3a']].forEach(([x,y,w,r])=>g+=houseR(x,y,1.2,w,r)+puffR(x+20,y-62,1));
+ g+=`<ellipse cx="20" cy="-360" rx="60" ry="20" fill="#a9d4dc"/>`+puffR(10,-380,1.3);
+ for(let i=0;i<22;i++){const x=-380+i*36,y=-410-((i*37)%40);g+=T(x,y,.9,pineR(1,['#4f6a4a','#56703f','#5f7a4a'][i%3]))}
+ s+=`<g style="animation:gd10 4.3s ease-out forwards">${g}</g>`;
+ /* 遠的雲（小、慢、淡）→ 近的雲（大、快，蓋過車廂） */
+ const layer=(n,k,o,d,xs)=>{let t='';for(let i=0;i<n;i++)t+=`<g class="cl10" style="--d:${d}s;animation-delay:-${(d*i/n).toFixed(2)}s"><g transform="translate(${xs[i%xs.length]},0)">${cl(k,o)}</g></g>`;return t};
+ s+=layer(8,.55,.75,3.6,[40,300,170,360,90,240,20,330]);
+ s+=`<g style="animation:go10 3.2s linear infinite">${gond('#5a86b0',0)}</g><path d="M${318},0 V600 M${330},0 V600" fill="none" stroke-width="1.2" opacity=".5"/>`;
+ s+=layer(6,1,.9,2.4,[60,330,190,0,260,120]);
+ /* 山頂：最後從上面降下來 */
+ let top=`<path d="M-260,40 L-120,-90 L-40,-20 L40,-120 L140,-30 L260,40 V900 H-260Z" fill="#dfe7ea"/><path d="M26,-104 L40,-120 L54,-104 L46,-108 L40,-100 L34,-108Z" fill="${SNOW}" stroke-width="1.4"/><path d="M-260,60 Q0,10 260,60 V900 H-260Z" fill="${SNOW}"/>`;
+ [[-150,70],[-90,60],[90,62],[160,74],[-40,90],[60,96]].forEach(([x,y])=>top+=T(x,y,.6,rimeR(1)));
+ s+=`<g style="animation:gt10 4.3s ease-out forwards">${top}</g>`;
+ /* 自己的車廂：纜線直直往上 */
+ s+=`<path d="M196,-10 V610 M206,-10 V610" fill="none" stroke-width="2"/>`;
+ s+=`<g transform="translate(201,250) scale(2.2)" stroke-width="1"><g class="gw10s">${gond('#c4473c',1)}</g></g>`;
+ s+=layer(3,2.4,.82,1.5,[-40,380,330]);
+ return s+`</g></svg>`}
 RIDES.gondola={text:'回到溫泉村，搭包廂纜車穿過雲⋯',every:520,tick:k=>tone(k%2?340:400,.08,'sine',.045),svg:gondolaRideSVG};
 })();
 
