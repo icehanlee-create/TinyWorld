@@ -304,6 +304,15 @@ RIDES.caravan11={text:'跟著商隊走進沙漠⋯',every:420,tick:k=>tone(k%2?2
   /* 2026-11-20 第三版：保留原本的駱駝商隊（側面往左走）；立體感：沙丘分好幾層（越遠越淡越慢），
      沙紋是和前進方向平行的橫線（越遠越密）、照遠近速度往後流，近的枯草和小石頭大又快 */
   const VY=310,HC=100,V=90,K=[],L=PV.lane,yz=z=>VY+HC/z;
+   const CM='C';/* 2026-11-20 使用者：駱駝的腳要動 → 四隻腳前後擺、膝蓋會彎（同側前後腳一起動，像駱駝的步伐） */
+   const walkLegs=(svg,ci)=>{if(!CM||CM==='A')return svg;const re=/<path d="(M-?[\d.]+,-[\d.]+ L-?[\d.]+,0(?: M-?[\d.]+,-[\d.]+ L-?[\d.]+,0){3})" fill="none" stroke="([^"]+)" stroke-width="([\d.]+)" stroke-linecap="round"\/><path d="\1" fill="none" stroke="([^"]+)" stroke-width="([\d.]+)" stroke-linecap="round"\/>/;
+    const m=svg.match(re);if(!m)return svg;const legs=[...m[1].matchAll(/M(-?[\d.]+),(-[\d.]+) L(-?[\d.]+),0/g)].map(q=>[+q[1],+q[2],+q[3]]);
+    const seg=d=>`<path d="${d}" fill="none" stroke="${m[2]}" stroke-width="${m[3]}" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${m[4]}" stroke-width="${m[5]}" stroke-linecap="round"/>`;
+    let out='';legs.forEach(([a,t,b],k)=>{const ph=((k%2)?.5:0)+ci*.13;
+     if(CM==='B')out+=`<g style="transform-origin:${a}px ${t}px;animation:cl11 1s ease-in-out infinite;animation-delay:-${ph.toFixed(2)}s">${seg(`M${a},${t} L${b},0`)}</g>`;
+     else{const kx=(a+b)/2,ky=t*.45;out+=`<g style="transform-origin:${a}px ${t}px;animation:cl11 1s ease-in-out infinite;animation-delay:-${ph.toFixed(2)}s">${seg(`M${a},${t} L${kx},${ky}`)}<g style="transform-origin:${kx}px ${ky}px;animation:ck11 1s ease-in-out infinite;animation-delay:-${ph.toFixed(2)}s">${seg(`M${kx},${ky} L${b},0`)}</g></g>`}});
+    const i0=svg.indexOf(m[0]);return svg.slice(0,i0)+out+svg.slice(i0+m[0].length)};
+   K.push('@keyframes cl11{0%{transform:rotate(-15deg)}50%{transform:rotate(15deg)}100%{transform:rotate(-15deg)}}@keyframes ck11{0%{transform:rotate(0)}15%{transform:rotate(-32deg)}38%{transform:rotate(0)}100%{transform:rotate(0)}}');
   const lane=(z,W,inner)=>L(K,(W/(V/z)).toFixed(2),W,0,inner);
   const dune=(z,c,h,W)=>{const y=yz(z),k=1/z;let d=`M0,${y}`;for(let x=0;x<W;x+=200)d+=` Q${x+60},${(y-h*k).toFixed(1)} ${x+130},${(y-h*.3*k).toFixed(1)} Q${x+170},${(y-h*.7*k).toFixed(1)} ${x+200},${y}`;return `<path d="${d} V700 H0Z" fill="${c}" stroke="none"/><path d="${d}" fill="none" stroke-width="1.6"/>`};
   let s=`<rect width="400" height="600" fill="#f8e6bd" stroke="none"/><circle cx="300" cy="120" r="70" fill="#fbeab0" stroke="none"/><circle cx="300" cy="120" r="46" fill="#fdf0c0" stroke="none"/>`;
@@ -312,7 +321,7 @@ RIDES.caravan11={text:'跟著商隊走進沙漠⋯',every:420,tick:k=>tone(k%2?2
   s+=lane(1.6,800,dune(1.6,'#e8cb92',120,800)+[40,250,470,690].map(x=>`<g transform="translate(${x},${yz(1.5)}) scale(.62)">${dryBush()}</g>`).join(''));
   s+=`<rect y="${yz(.95)}" width="400" height="400" fill="#ecd29c" stroke="none"/>`;
   s+=PV.hrows(K,VY,HC,V,1,'#d6b878',{w:2.4,zs:[.92,.8,.7,.62,.55,.49,.44,.39,.35,.31,.28],dash:[40,30]});
-  [[150,1.2,.5,'#d6aa66'],[70,.6,1,'#d6aa66'],[205,.72,.82,'#c99a58'],[320,.6,1,'#dcb878']].forEach(([x,z,sc,c],i)=>{s+=`<g transform="translate(${x},${yz(z).toFixed(0)}) scale(${sc},${sc})"><g class="cw11" style="animation-delay:-${i*.17}s">${CAMEL.stand(c,'#b98a4a',true)}</g></g>`});
+  [[150,1.2,.5,'#d6aa66'],[70,.6,1,'#d6aa66'],[205,.72,.82,'#c99a58'],[320,.6,1,'#dcb878']].forEach(([x,z,sc,c],i)=>{s+=`<g transform="translate(${x},${yz(z).toFixed(0)}) scale(${sc},${sc})"><g class="cw11" style="animation-delay:-${i*.17}s">${walkLegs(CAMEL.stand(c,'#b98a4a',true),i)}</g></g>`});
   s+=`<g transform="translate(262,${yz(.5).toFixed(0)}) scale(-.78,.78)"><g class="cw11">${kid({view:'side',pose:'walk',hat:HAT_T,skin:'#c98d5e',shirt:'#2f6f73',top:'long',bottom:'pants',pants:'#e8d9b4'})}</g></g>`;
   s+=lane(.34,700,[60,300,520].map(x=>`<g transform="translate(${x},${yz(.34)}) scale(1.2)">${dryBush()}</g>`).join('')+[180,420].map(x=>`<ellipse cx="${x}" cy="${yz(.32)}" rx="16" ry="6" fill="#c9ab76" stroke-width="1.6"/>`).join(''));
   return `<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><style>${K.join('')}.cw11{animation:cw11 .5s ease-in-out infinite alternate}@keyframes cw11{to{transform:translateY(-3px)}}</style><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${s}</g></svg>`}};

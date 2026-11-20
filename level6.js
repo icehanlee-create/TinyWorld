@@ -447,7 +447,7 @@ MAPHOOKS.push(({U,P,ink,FN})=>{if(U<N)return '';
  const route='M98,297 Q40,288 4,258 Q-22,236 -36,228';
  let m=H.mapRoute(route,'rail',ink);
  /* 小鎮港口的月台 */
- m+=P('M92,293 h12 v6 h-12Z','#c99a5b',1.1);
+ /* 2026-11-20 月台拿掉，小鎮港口改畫在第 1 關的地圖圖案 */
  /* 櫻花山（縮小版）：淡粉的圓團樹冠蓋在山上 */
  m+=P('M-134,238 L-108,170 L-90,188 L-66,122 L-6,238Z','#b9c6a0',1.5)+`<path d="M-66,122 L-6,238 L-30,238Z" fill="#9fae86" opacity=".9"/>`;
  m+=[[-124,230],[-114,208],[-70,232],[-18,230],[-26,206],[-64,140],[-72,186],[-58,160]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="7" fill="#f7c4d3" stroke="${ink}" stroke-width="1.1"/><circle cx="${x-2}" cy="${y-2}" r="2.2" fill="#fde4ec" stroke="none"/>`).join('');

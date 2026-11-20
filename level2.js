@@ -3,8 +3,21 @@
    場景座標：x 1760～2800。 */
 (function(){
 const H=window.TH;if(!H)return;
-const {KIND,LEVELS,POOL,REG,SCATOK,SCATREG,SCENE_IMPL,SNOW,STORIES,VPLAN:VPLANX,WATERFN,act,add,balloon,barn,bow,cabinSVG,canPlace,house,pig,pk,r,
+const {KIND,LEVELS,POOL,REG,SCATOK,SCATREG,SCENE_IMPL,SNOW,STORIES,VPLAN:VPLANX,WATERFN,act,add,balloon,barn,bow,cabinSVG,canPlace,house,pk,r,
  roundTree,rowboat,scatter,signpost,skyBirds,sr,stall,swan,tower,well,windmill}=H;
+/* 2026-11-20 使用者選 B：豬重新畫（圓胖粉紅、側面鼻盤、垂耳、捲尾、有蹄），只有第 2 關用，所以在這裡蓋掉 art.js 的 pig */
+const OL=H.OL;const pig=()=>{const c='#f4b5aa',d='#e2938a';let s=`<ellipse cx="0" cy="0.5" rx="17" ry="3" fill="#000" opacity=".12" stroke="none"/>`;
+ s+=`<path d="M-11,-8 V-1 M8,-8 V-1" stroke="${OL}" stroke-width="5.2" stroke-linecap="round"/><path d="M-11,-8 V-1 M8,-8 V-1" stroke="${d}" stroke-width="2.8" stroke-linecap="round"/>`;
+ s+=`<path d="M-16,-15 q-6,-1 -5,-5 q2,-3 4,0 q1,3 -3,4" fill="none" stroke-width="1.4"/>`;
+ s+=`<path d="M-16,-12 Q-17,-23 -3,-23 Q10,-24 14,-16 Q16,-6 6,-4 L-10,-4 Q-16,-5 -16,-12Z" fill="${c}" stroke-width="1.6"/>`;
+ if(0)s+=`<path d="M-11,-18 q4,-3 7,1 q-1,4 -5,3 q-3,0 -2,-4Z M1,-10 q4,-2 6,1 q-1,3 -4,3 q-3,-1 -2,-4Z" fill="#4a3530" stroke="none"/>`;
+ s+=`<path d="M-7,-8 V-1 M12,-9 V-1" stroke="${OL}" stroke-width="5.6" stroke-linecap="round"/><path d="M-7,-8 V-1 M12,-9 V-1" stroke="${c}" stroke-width="3.2" stroke-linecap="round"/><path d="M-9.5,0 h5 M9.5,0 h5" stroke="#5a3e36" stroke-width="2.2" stroke-linecap="round"/>`;
+ s+=`<circle cx="13" cy="-16" r="7.6" fill="${c}" stroke-width="1.6"/>`;
+ s+=`<ellipse cx="20" cy="-14" rx="3.2" ry="4.2" fill="${d}" stroke-width="1.4"/><ellipse cx="20.6" cy="-15.6" rx=".7" ry="1.1" fill="${OL}" stroke="none"/><ellipse cx="20.6" cy="-12.4" rx=".7" ry="1.1" fill="${OL}" stroke="none"/>`;
+ s+=`<path d="M9,-22 Q11,-29 16,-24 Q15,-20 11,-19Z" fill="${c}" stroke-width="1.3"/><path d="M10.5,-23 Q12,-25 14,-23.5" fill="none" stroke="${d}" stroke-width="1.2"/>`;
+ s+=`<circle cx="14.5" cy="-18" r="1.3" fill="${OL}" stroke="none"/><circle cx="15" cy="-12.5" r="2" fill="#f08a8a" opacity=".55" stroke="none"/><path d="M16,-10 q2,1 3,-0.5" fill="none" stroke-width="1"/>`;
+ return s};
+KIND.pig={...KIND.pig,w:40,h:30,fn:pig};
 const W12=H.W12;
 
 const TYPES1=LEVELS[1].types;
@@ -59,7 +72,7 @@ function scatter2(){
 }
 /* 小故事 */
 STORIES[2]={title:'陷在泥巴裡的小豬',giver:()=>act(0,0,1,{view:'fq',pose:'reach',hat:1,mood:2}),who:'農夫',
-    target:()=>`<ellipse cx="0" cy="-2" rx="22" ry="6" fill="#7a5a3a" stroke-width="1.4"/>`+pig()+bow(-15,-13,'#5a86b0')+`<path d="M-18,-2 q4,-4 8,0 M6,-1 q4,-4 8,0" fill="none" stroke="#5a3e28" stroke-width="1.6"/>`,tw:40,th:28,
+    target:()=>`<ellipse cx="0" cy="-2" rx="22" ry="6" fill="#7a5a3a" stroke-width="1.4"/>`+pig()+bow(-20,-15,'#5a86b0')+`<path d="M-18,-2 q4,-4 8,0 M6,-1 q4,-4 8,0" fill="none" stroke="#5a3e28" stroke-width="1.6"/>`,tw:40,th:28,
     helper:()=>act(0,0,1,{view:'fq',pose:'hold',hat:3,extra:`<circle cx="15" cy="-18" r="8" fill="none" stroke="#c99a5b" stroke-width="3"/><circle cx="15" cy="-18" r="4.5" fill="none" stroke="#c99a5b" stroke-width="2.4"/>`}),hw:40,hh:62,
     ask:'農夫：我的小豬跑出圍欄了！牠尾巴上綁著藍色蝴蝶結。',
     need:'小豬陷在泥巴裡出不來⋯要找條繩子！好像有個牧童帶著一捆繩子。',
@@ -132,18 +145,37 @@ const PV=H.PV||(H.PV={
 });
 /* ================= 過場：乾草車（2026-11-19 改成透視：坐在車夫座往前看，馬的背影、車轅、田間小路一路往地平線收） ================= */
 function horseCart(){
- const legs=[[52,0],[60,.2],[80,.1],[88,.3]].map(([x,d])=>`<g class="gallop" style="animation-delay:-${d}s">${limb(`M${x},-34 L${x+2},-17 L${x},0`,'#8a4e2e',4.5)}</g>`).join('');
  let g=`<g class="cbob">`;
  g+=`<path d="M-72,-2 Q0,6 110,-2" fill="none" stroke="#000" stroke-width="10" opacity=".12"/>`;
- g+=limb('M8,-30 L48,-38','#7a5235',2.6);
- g+=legs+`<path d="M44,-44 Q30,-40 34,-26 Q38,-34 46,-36" fill="#3a2a22"/><ellipse cx="70" cy="-44" rx="27" ry="13" fill="#a0623a"/>`;
- g+=`<path d="M84,-48 Q94,-74 104,-82 L116,-74 Q104,-62 99,-40 Q92,-38 84,-48Z" fill="#a0623a" stroke="none"/><path d="M86,-50 Q94,-74 104,-82 M116,-74 Q104,-62 98,-40" fill="none"/><ellipse cx="114" cy="-76" rx="13" ry="8.5" fill="#a0623a" transform="rotate(28 114 -76)"/><path d="M104,-86 l-2,-9 l7,6Z" fill="#a0623a"/>`;
- g+=`<path d="M100,-86 Q90,-74 86,-52 Q92,-66 98,-72 Q94,-62 92,-50" fill="#3a2a22"/><circle cx="112" cy="-80" r="1.6" fill="${OL}" stroke="none"/><ellipse cx="121" cy="-71" rx="1.4" ry="1" fill="${OL}" stroke="none"/>`;
- g+=`<path d="M60,-56 Q72,-60 84,-55 M92,-58 L104,-74" fill="none" stroke="#c4473c" stroke-width="2.2"/>`;
+ /* 2026-11-20 使用者選 D：拉車用的粗壯挽馬（寫實比例、有關節、蹄上白毛、頸圈馬具），原本的馬太卡通 */
+ {
+  const D=true,C=true,coat='#7a4a2c',mane='#2a1d16',dk='#5e3820',OLc=OL;
+  const leg=(x,front,d,far)=>{const c=far?dk:coat,w=D?7:5.4,p=front?`M${x},-40 Q${x+3},-25 ${x+1},-15 L${x+1},-5`:`M${x},-42 Q${x-7},-27 ${x-6},-17 L${x-1},-5`,hx=front?x+1:x-1;
+   let l=`<path d="${p}" fill="none" stroke="${OLc}" stroke-width="${w+2.6}" stroke-linecap="round"/><path d="${p}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
+   if(C&&!far)l+=`<path d="M${hx},-12 L${hx},-5" stroke="#fbf7ef" stroke-width="${w}" stroke-linecap="round"/>`;
+   if(D)l+=`<path d="M${hx-6},-2 Q${hx-7},-12 ${hx},-12 Q${hx+7},-12 ${hx+6},-2Z" fill="#f3ead8" stroke-width="1.2"/>`;
+   l+=`<path d="M${hx-4},-5 h8 l1,5 h-10Z" fill="#3a2a22" stroke-width="1.2"/>`;
+   return `<g class="gallop" style="animation-delay:-${d}s">${l}</g>`};
+  g+=limb('M8,-30 L44,-38','#7a5235',2.6);
+  g+=leg(56,0,.2,1)+leg(94,1,.3,1);
+  g+=`<path d="M38,-58 C26,-54 24,-36 30,-20 C34,-30 36,-42 42,-50Z" fill="${mane}" stroke-width="1.4"/>`;
+  g+=`<path d="M40,-60 C48,-70 78,-69 90,-64 C102,-60 106,-46 100,-36 C94,-29 82,-29 74,-31 C62,-29 50,-30 44,-36 C35,-42 34,-55 40,-60Z" fill="${coat}" stroke-width="1.8"/>`;
+  g+=`<path d="M50,-38 C62,-34 80,-34 94,-38" fill="none" stroke="${dk}" stroke-width="1.6" opacity=".55"/><path d="M48,-60 C46,-52 46,-44 52,-38" fill="none" stroke="${dk}" stroke-width="1.4" opacity=".5"/>`;
+  g+=leg(48,0,0,0)+leg(88,1,.1,0);
+  g+=`<path d="M80,-64 C86,-82 96,-94 106,-98 L118,-88 C112,-76 106,-62 102,-46 C94,-46 86,-52 80,-64Z" fill="${coat}" stroke="none"/><path d="M80,-62 C86,-82 96,-94 106,-98 M118,-88 C112,-76 106,-62 102,-48" fill="none" stroke-width="1.8"/>`;
+  g+=`<path d="M103,-97 C109,-104 118,-100 122,-92 L133,-77 C136,-70 130,-65 123,-67 L114,-77 C108,-81 103,-88 103,-97Z" fill="${coat}" stroke-width="1.8"/>`;
+  g+=`<path d="M106,-100 l-1,-9 l7,6Z" fill="${coat}" stroke-width="1.4"/><path d="M110,-99 l2,-8 l4,7Z" fill="${coat}" stroke-width="1.2"/>`;
+  if(C)g+=`<path d="M117,-93 Q124,-86 130,-76 Q128,-72 125,-74 Q120,-84 115,-90Z" fill="#fbf7ef" stroke="none"/>`;
+  g+=`<circle cx="114" cy="-91" r="1.9" fill="${OLc}" stroke="none"/><path d="M128,-73 q2,-1 3,1" fill="none" stroke-width="1.2"/><path d="M126,-68 q3,1 6,-2" fill="none" stroke-width="1" opacity=".6"/>`;
+  g+=`<path d="M104,-100 C94,-94 86,-80 79,-62 C86,-70 89,-74 92,-77 C90,-70 86,-64 84,-58 C92,-68 96,-78 100,-84 C100,-80 98,-74 97,-70 C102,-80 104,-90 107,-96Z" fill="${mane}" stroke-width="1.2"/><path d="M106,-101 q4,2 6,6 q-6,-1 -9,-3Z" fill="${mane}" stroke="none"/>`;
+  if(C)g+=`<path d="M108,-96 L126,-72 M114,-80 L130,-79 M116,-92 Q112,-86 114,-80" fill="none" stroke="#5a3a24" stroke-width="1.6"/><path d="M84,-62 Q92,-46 104,-50" fill="none" stroke="#5a3a24" stroke-width="4.5"/><path d="M84,-62 Q92,-46 104,-50" fill="none" stroke="#c4473c" stroke-width="2.4"/>`;
+  else g+=`<path d="M108,-96 L126,-72 M114,-80 L130,-79" fill="none" stroke="#c4473c" stroke-width="1.8"/><path d="M58,-64 Q72,-68 86,-62" fill="none" stroke="#c4473c" stroke-width="2.2"/>`;
+
+ }
  g+=`<path d="M-70,-42 Q-62,-74 -32,-70 Q-6,-76 8,-42Z" fill="#e8c46a"/><path d="M-56,-50 l4,-12 M-40,-48 l2,-16 M-22,-50 l3,-14 M-6,-48 l-2,-10" fill="none" stroke-width="1.2"/>`;
  g+=`<g transform="translate(-34,-60) scale(.62)">${chibi({arm:1,sit:true,hat:1,mood:1})}</g>`;
  g+=`<path d="M-72,-42 L12,-42 L8,-22 L-68,-22Z" fill="#a8703f"/><path d="M-70,-34 H10" fill="none" stroke-width="1.2"/>`;
- g+=`<g transform="translate(-2,-42) scale(.62)">${kid({pose:'reach',hat:pk([1,4])})}</g><path d="M6,-55 Q60,-70 104,-74" fill="none" stroke="#7a5235" stroke-width="1.2"/>`;
+ g+=`<g transform="translate(-2,-42) scale(.62)">${kid({pose:'reach',hat:pk([1,4])})}</g><path d="M6,-55 Q66,-80 118,-80" fill="none" stroke="#7a5235" stroke-width="1.2"/>`;
  [[-52,-16],[-12,-16]].forEach(([x,y])=>g+=`<g transform="translate(${x},${y})"><g class="wheel"><circle r="16" fill="#c99a5b"/><circle r="4" fill="#7a5235"/><path d="M0,-15 V15 M-15,0 H15 M-10.6,-10.6 L10.6,10.6 M10.6,-10.6 L-10.6,10.6" fill="none" stroke-width="1.6"/></g></g>`);
  return g+`</g>`+[0,1,2].map(i=>`<circle class="dust" cx="-78" cy="-8" r="${5+i*2}" fill="#e2d2a8" stroke-width="1.3" style="animation-delay:-${i*.25}s"/>`).join('');
 }

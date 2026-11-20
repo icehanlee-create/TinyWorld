@@ -451,7 +451,7 @@ HERE[5]=[293,340];
 MAPHOOKS.push(({U,P,ink,FN})=>{if(U<5)return '';
  const land='M40,138 C30,196 42,256 70,288 Q86,302 104,306',sea_='M108,312 Q166,336 222,360';
  let m=H.mapRoute(land,'road',ink);
- m+=`<path d="M98,300 h16 v4 h-16Z" fill="#c99a5b" stroke="${ink}" stroke-width="1.1"/>`+H.mapRoute(sea_,'sea',ink);
+ m+=H.mapRoute(sea_,'sea',ink); /* 2026-11-20 小鎮港口改畫在第 1 關的地圖圖案（木棧橋＋港口小屋＋漁船） */
  m+=`<g transform="translate(160,334) scale(.16)" stroke="${ink}" stroke-width="7">${ferry()}</g>`;
  m+=`<g class="mnode" data-n="5"><circle cx="250" cy="364" r="38" fill="transparent"/><ellipse cx="250" cy="372" rx="40" ry="13" fill="#ecd9a8" stroke="${ink}" stroke-width="1.4"/><ellipse cx="250" cy="370" rx="28" ry="8" fill="#a9b768" stroke="none"/>`;
  m+=P('M264,370 L266,340 L272,340 L274,370Z','#fbf9f3',1.3)+`<path d="M265,352 h9 M266,362 h8" stroke="#d8413a" stroke-width="3"/>`+P('M264,340 L269,332 L274,340Z','#d8413a',1.2);

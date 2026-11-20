@@ -285,6 +285,13 @@ H.EDGELAND[1]=(x,y)=>x<0?(y>352&&y<1684):undefined;
 H.HERE[1]=[122,160];
 /* 冒險地圖：小鎮（城堡和房子） */
 H.mapHook(3,({U,P,ink,FN,f})=>{let g='';const on=U>=2;
+ /* 2026-11-20 使用者選 D：小鎮南邊的港口（木棧橋＋港口小屋＋漁船），原本第 5、6 關各畫一個灰色長方形 */
+ {const boat=(x,y,c,sl)=>P(`M${x-8},${y-3} L${x+8},${y-3} L${x+5},${y+2} L${x-5},${y+2}Z`,c,1.1)+(sl?`<path d="M${x},${y-3} V${y-17}" stroke="${ink}" stroke-width="1.1"/>`+P(`M${x+1},${y-16} L${x+8},${y-5} L${x+1},${y-5}Z`,'#fbf7ef',1):'');
+  g+=P('M70,292 V282 H84 V292Z','#f3e8cf',1.2)+P('M68,283 L77,275 L86,283Z','#b14d27',1.2)+`<rect x="75" y="286" width="4" height="6" fill="${ink}"/>`;
+  g+=`<path d="M92,288 V318 M100,288 V318 M86,316 V323 M106,316 V323" stroke="${ink}" stroke-width="1.6"/>`+P('M91,286 H101 V316 H107 V321 H85 V316 H91Z','#c99a5b',1.2);
+  {let l='';for(let y=290;y<316;y+=4)l+=`M91,${y} H101 `;g+=`<path d="${l}M88,318.5 H104" stroke="#8a6338" stroke-width=".7"/>`}
+  g+=boat(116,314,'#b14d27',1)+boat(78,312,'#5f7a9a',0)+P('M104,290 h5 v4 h-5Z','#c99a5b',1)}
+
  // ---- town ----
  const house=(x,y,c)=>P(`M${x-7},${y} V${y-8} H${x+7} V${y}Z`,'#f3e8cf',1.3)+P(`M${x-9},${y-8} L${x},${y-16} L${x+9},${y-8}Z`,c,1.3)+`<rect x="${x-2}" y="${y-5}" width="4" height="5" fill="${ink}"/>`;
  let t=`<g class="mnode" data-n="1"><circle cx="100" cy="206" r="46" fill="transparent"/>`;

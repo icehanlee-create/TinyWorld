@@ -221,9 +221,29 @@ function ground(){
  const pyr=(cx,by,bw,h,c1,c2)=>{let s=`<path d="M${cx-bw/2},${by} L${cx},${by-h} L${cx+bw/2},${by}Z" fill="${c1}"/><path d="M${cx},${by-h} L${cx+bw/2},${by} H${cx+bw*.12}Z" fill="${c2}" stroke="none"/>`;
   const rows=Math.round(h/22);for(let i=1;i<rows;i++){const y=by-h*i/rows,hw=bw/2*(1-i/rows);s+=`<path d="M${f(cx-hw)},${f(y)} H${f(cx+hw)}" fill="none" stroke="#b99a58" stroke-width="1.2" opacity=".55"/>`}
   return s};
- g+=pyr(790,700,320,190,'#e8cf98','#d6b77a');g+=pyr(1720,700,300,180,'#e8cf98','#d6b77a');
- g+=pyr(1250,700,580,400,'#ecd49e','#d3b274');
- g+=`<path d="M1250,300 L1275,336 H1225Z" fill="#e4b53e" stroke-width="1.6"/>`;
+ /* 2026-11-20 使用者選 C（再修三次；左右兩座小金字塔往外挪到 750、1765，側面深度改 0.1 倍，三座才不會互相蓋到）：金字塔立體化——正面＋右側面（背光）、錯縫石塊（側面也有）、階梯狀邊緣；
+    石塊一層比一層矮、越往上越密（漸進，沒有疏密交界），鋸齒邊也跟著越往上越小，金色塔頂才貼合。右邊沙地有陰影、底部有落石。畫在地面層、不用亂數。 */
+ const pyr3=(cx,by,bw,h,c1,c2,c3)=>{const sd=bw*.1,sr=bw*.045,hw0=bw/2,N=Math.max(8,Math.round(h/11)),K=1.6;let s='';
+  const A=[cx,by-h],L=[cx-hw0,by],R=[cx+hw0,by],R2=[cx+hw0+sd,by-sr];
+  const sideAt=t=>[cx+(hw0+sd)*(1-t),by-sr*(1-t)-h*t];
+  const T=[];for(let i=0;i<=N;i++)T.push(1-Math.pow(1-i/N,K));
+  s+=`<path d="M${f(R[0])},${by} L${f(R2[0])},${f(R2[1])} L${f(R2[0]+sd*1.6)},${f(by+sd*.25)} L${f(R[0]+sd*.9)},${f(by+sd*.35)}Z" fill="#b8935a" opacity=".28" stroke="none"/>`;
+  s+=`<path d="M${A[0]},${A[1]} L${f(R[0])},${by} L${f(R2[0])},${f(R2[1])}Z" fill="${c2}"/>`;
+  let lp=`M${f(L[0])},${by}`,rp='';
+  for(let i=0;i<N;i++){const y0=by-h*T[i],y1=by-h*T[i+1],hwa=hw0*(1-T[i]),hwb=hw0*(1-T[i+1]),o=(y0-y1)*.14;lp+=` L${f(cx-hwa+o)},${f(y0)} L${f(cx-hwa+o)},${f(y1)} L${f(cx-hwb)},${f(y1)}`}
+  for(let i=N-1;i>=0;i--){const y0=by-h*T[i],y1=by-h*T[i+1],hwa=hw0*(1-T[i]),hwb=hw0*(1-T[i+1]),o=(y0-y1)*.14;rp+=` L${f(cx+hwb)},${f(y1)} L${f(cx+hwa-o)},${f(y1)} L${f(cx+hwa-o)},${f(y0)}`}
+  s+=`<path d="${lp}${rp} L${f(R[0])},${by}Z" fill="${c1}"/>`;
+  for(let i=1;i<N;i++){const t=T[i],tn=T[i+1],y=by-h*t,hw=hw0*(1-t),b=sideAt(t),bn=sideAt(tn),rh=h*(tn-t),k=Math.min(1,rh/12);
+   s+=`<path d="M${f(cx-hw+2)},${f(y)} H${f(cx+hw-2)}" fill="none" stroke="${c3}" stroke-width="${f(.7+.6*k)}" opacity=".7"/><path d="M${f(cx-hw+3)},${f(y-1.4*k)} H${f(cx+hw-3)}" fill="none" stroke="#fbeec8" stroke-width="${f(.5+.5*k)}" opacity=".7"/>`;
+   s+=`<path d="M${f(cx+hw)},${f(y)} L${f(b[0])},${f(b[1])}" fill="none" stroke="#9c7a44" stroke-width="${f(.6+.5*k)}" opacity=".6"/>`;
+   const bw_=Math.max(8,rh*2.2),n=Math.max(1,Math.floor(hw*2/bw_));for(let j=1;j<n;j++){const x=cx-hw+j*(hw*2/n)+((i%2)?bw_*.25:-bw_*.25);s+=`<path d="M${f(x)},${f(y)} v${f(-rh)}" stroke="${c3}" stroke-width="${f(.5+.5*k)}" opacity=".45"/>`}
+   const sl=b[0]-cx-hw,sn=Math.max(1,Math.round(sl/Math.max(4,rh)));for(let j=1;j<sn;j++){const u=(j+((i%2)?.5:0))/sn;if(u>=1)continue;const x0=cx+hw+sl*u,y0=y+(b[1]-y)*u,hn=hw0*(1-tn),x1=cx+hn+(bn[0]-cx-hn)*u,y1=by-h*tn+(bn[1]-(by-h*tn))*u;s+=`<path d="M${f(x0)},${f(y0)} L${f(x1)},${f(y1)}" stroke="#9c7a44" stroke-width="${f(.4+.5*k)}" opacity=".4"/>`}}
+  const ct=.1,cA=[cx,by-h],cl=[cx-hw0*ct,by-h*(1-ct)],cr=[cx+hw0*ct,by-h*(1-ct)],cs=sideAt(1-ct);
+  s+=`<path d="M${cA[0]},${cA[1]} L${f(cr[0])},${f(cr[1])} L${f(cs[0])},${f(cs[1])}Z" fill="#c9952e" stroke-width="1.4"/><path d="M${f(cl[0])},${f(cl[1])} L${cA[0]},${cA[1]} L${f(cr[0])},${f(cr[1])}Z" fill="#e8b93e" stroke-width="1.4"/><path d="M${cA[0]},${cA[1]+3} L${f(cl[0]+4)},${f(cl[1]-1)}" stroke="#fde7a0" stroke-width="1.2"/>`;
+  s+=`<path d="${lp}${rp}" fill="none" stroke-width="2"/><path d="M${A[0]},${A[1]} L${f(R2[0])},${f(R2[1])} L${f(R[0])},${by}" fill="none" stroke-width="2"/>`;
+  [[L[0]+bw*.12,by+4,1],[R[0]+sd*.3,by+2,.8],[L[0]+bw*.3,by+8,.7]].forEach(([x,y,k])=>{s+=`<g transform="translate(${f(x)},${f(y)}) scale(${k})"><path d="M-14,0 v-9 h12 v9Z" fill="${c1}"/><path d="M-2,0 v-9 l5,-3 v9Z" fill="${c2}"/><path d="M-14,-9 l5,-3 h12 l-5,3Z" fill="#f6e2b0"/><path d="M4,2 v-6 h9 v6Z" fill="${c1}"/></g>`});
+  return s};
+ g+=pyr3(750,700,320,190,'#ead3a0','#c9a46a','#b99a58');g+=pyr3(1765,700,300,180,'#ead3a0','#c9a46a','#b99a58');g+=pyr3(1250,700,580,400,'#efd8a4','#c99f62','#b48f50');
  /* 入口門洞：石框、黑洞、石階 */
  g+=`<path d="M${GATE.x-62},${GATE.y+8} H${GATE.x+62} V${GATE.y+16} H${GATE.x-62}Z M${GATE.x-52},${GATE.y+16} H${GATE.x+52} V${GATE.y+24} H${GATE.x-52}Z" fill="#d6c59e"/>`;
  g+=`<path d="M${GATE.x-34},${GATE.y+8} V${GATE.y-48} Q${GATE.x},${GATE.y-66} ${GATE.x+34},${GATE.y-48} V${GATE.y+8}Z" fill="#2a1e16"/>`;
@@ -253,6 +273,9 @@ Object.assign(POOL,{
  decor13:[['bush13',1.6],['rock13',1],['pebbles',1],['cactus13',.4],['jar13',.3]]});
 function structures(){
  skyBirds(N);
+
+ /* 2026-11-20 使用者：金字塔斜面上不能長仙人掌、椰棗樹、擺陶罐碎石；門口不要被擋住 → 金字塔範圍（含右側面）和門口佔掉 */
+ [[750,700,320,190],[1765,700,300,180],[1250,700,580,400]].forEach(([cx,by,bw,h])=>{const sd=bw*.1;for(let y=by-h;y<by-2;y+=16){const t=(by-y)/h,hw=bw/2*(1-t);for(let x=cx-hw-24;x<=cx+hw+sd*(1-t)+16;x+=16)mark(x,y,16,16,1)}});mark(GATE.x,GATE.y+56,170,90,1);for(let x=620;x<1900;x+=40)mark(x,690,40,170,1); /* 金字塔之間的山谷也不放東西 */
  /* 門洞兩側的守護像、參道兩邊的方尖碑 */
  add(GATE.x-96,GATE.y+30,36,100,'statue13',statue(),{sh:.9,s:1.4,fl:true});add(GATE.x+96,GATE.y+30,36,100,'statue13',statue(),{sh:.9,s:1.4});/* 2026-11-18f 放大 1.4 倍、兩隻面對門口 */
  [[1096,820],[1404,820],[1096,970],[1404,970]].forEach(([x,y])=>add(x,y,30,114,'obelisk13',obelisk(),{sh:.8}));
@@ -261,8 +284,8 @@ function structures(){
  [[880,860],[780,960],[940,1010]].forEach(([x,y])=>add(x,y,70,76,'column13',column(),{sh:.8}));
  [[1580,820],[760,790],[1690,930]].forEach(([x,y])=>add(x,y,60,28,'rubble13',rubble(),{sh:.6}));
  /* 北邊兩側：棕櫚、仙人掌 */
- [[700,560,1],[800,640,-1],[1800,570,-1],[1740,650,1]].forEach(([x,y,l])=>add(x,y,50,92,'palm13',palm(l,1),{sh:.8}));
- [[1010,630],[1500,640]].forEach(([x,y])=>add(x,y,44,60,'cactus13',cactusBig(),{sh:.6}));
+ /* 2026-11-20 金字塔挪開後椰棗樹只留兩邊外側 */[[625,700,1],[1900,700,-1]].forEach(([x,y,l])=>add(x,y,50,92,'palm13',palm(l,1),{sh:.8}));
+ /* 2026-11-20 金字塔中間的兩棵仙人掌拿掉（使用者：金字塔上長仙人掌不合理） */
  /* 挖掘場：兩個坑、篩沙架、木樁繩子、手推車、碎石堆 */
  add(960,1260,170,50,'pit13',pit(),{sh:.8});add(1560,1250,170,50,'pit13',pit(),{sh:.8});add(1380,1390,170,50,'pit13',pit(),{sh:.8});
  add(840,1380,60,56,'sieve13',sieve(),{sh:.7});add(1130,1160,60,56,'sieve13',sieve(),{sh:.7});add(1720,1130,60,56,'sieve13',sieve(),{sh:.7});
