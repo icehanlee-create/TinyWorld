@@ -75,8 +75,14 @@ addLevel({n:17,title:'城門廣場',file:'level17.js',c:[1250,1820],
  find:{after:10,from:1,hint:['路人：小鎮北邊城堡的大門口，站著兩位衛兵，好像在等客人進城！','路人：聽說城堡裡面今天有市集，城門口的衛兵會帶人走過吊橋喔。','路人：沿著小鎮中間的石階一直往北走上去，就是城堡大門了，衛兵說旅人都可以進去看看。']},
  map:{x:100,y:198,ic:'🏰',name:'城門廣場'},next:{pv:()=>gatePreview(),btn:'跟衛兵進城堡',had:'衛兵隨時可以帶你進城',fresh:'小鎮城堡大門前的衛兵在等你',ride:'bridge17'},
  desc:'走過吊橋進城門：4 種老朋友加上 <b>8 種城門廣場新東西</b>。'});
+const hallPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#3a2c25"/><g stroke="#2b2420" stroke-width="1.5" stroke-linejoin="round"><rect x="0" y="0" width="120" height="40" fill="#76604f" stroke="none"/>${[22,48,72,98].map(x=>`<path d="M${x-7},36 V16 Q${x},8 ${x+7},16 V36Z" fill="#363a78"/>`).join('')}<circle cx="74" cy="18" r="3" fill="#fbf1c8" stroke="none"/><rect x="0" y="40" width="120" height="44" fill="#c4a67a" stroke="none"/>${[24,60,96].map(x=>`<path d="M${x-6},44 H${x+6} L${x+12},84 H${x-12}Z" fill="#f3ead6"/>`).join('')}${[[16,36],[40,30],[60,38],[84,30],[104,36],[30,54],[90,52]].map(([x,y])=>`<circle cx="${x}" cy="${y-6}" r="5" fill="#ffd98a" opacity=".35" stroke="none"/><rect x="${x-1.5}" y="${y-4}" width="3" height="7" fill="#f8f1dc" stroke-width="1"/><path d="M${x},${y-5} q-2,-3 0,-6 q2,3 0,6Z" fill="#f5b03a" stroke="none"/>`).join('')}</g></svg>`;
+/* 2026-11-20 城堡系列第二關：奇幻大餐廳。入口是城門廣場主堡大門前的管家；城門廣場拿 2 星後才出現（after 是另一個 find 關卡）。冒險地圖不另外放節點 */
+addLevel({n:18,title:'奇幻大餐廳',file:'level18.js',c:[1520,1880],
+ find:{after:17,from:17,hint:['路人：城門廣場最北邊的主堡大門，今晚終於要打開了！聽說門口站著一位管家。','路人：從城門廣場的水井一直往北走，走上主堡大門前的石階，管家會帶你去參加國王的宴會。','路人：國王在城堡的大餐廳辦慶功宴，主堡大門口的管家正在招呼客人呢。']},
+ map:{x:100,y:198,ic:'🕯️',name:'奇幻大餐廳'},next:{pv:()=>hallPreview(),btn:'跟管家進大餐廳',had:'管家隨時可以帶你進大餐廳',fresh:'城門廣場主堡大門前的管家在等你',ride:'hall18'},
+ desc:'跟著管家走進國王的慶功宴：2 種老朋友加上 <b>10 種大餐廳新東西</b>。'});
 /* 冒險地圖的大區（2026-11-18）：遠看只顯示大區名，放大才顯示各關名字。x,y 是大區名牌的位置 */
 addRegion({name:'櫻花山城',ids:[6,7,8,9],x:-68,y:250});
 addRegion({name:'沙漠',ids:[11,12,13],x:-85,y:392});
 /* 2026-11-19 城堡系列（第 17 關起）隸屬於奇幻小鎮：發現城門廣場之後，遠看只顯示大區名「奇幻小鎮」，放大才看得到「奇幻小鎮」「城堡」兩個名牌；還沒發現時完全不變 */
-addRegion({name:'奇幻小鎮',get ids(){return window.TH&&window.TH.isOpen(17)?[1,17]:[17]},x:100,y:244});
+addRegion({name:'奇幻小鎮',get ids(){const T_=window.TH;return T_&&T_.isOpen(17)?(T_.isOpen(18)?[1,17,18]:[1,17]):[17]},x:100,y:244});
