@@ -35,7 +35,7 @@ addLevel({n:8,title:'第 8 關．竹林神社',file:'level8.js',pre:'sakura_comm
 addLevel({n:9,title:'第 9 關．天守閣山城',file:'level9.js',pre:'sakura_common.js',c:[1250,2050],map:{x:-96,y:154,ic:'🏯',name:'天守閣'},next:{pv:()=>castlePreview(),btn:'走上登城石階',had:'登城石階隨時可以走上去',fresh:'登城石階就在竹林神社的盡頭等你',ride:'castle'},
  desc:'沿著石階登上山頂的天守閣：2 種老朋友加上 <b>10 種山城的新東西</b>，還有一群表演的武士。'});
 addLevel({n:101,secret:true,home:5,per:3,title:'海上秘境．復活島',pre:'secret.js',file:'level101.js',c:[1380,330],
- hint:['路人：聽說海島港口外的海上，有時候會冒出一排黑黑的巨人影子⋯','路人：海島港口那個拿望遠鏡的孩子說，東南邊的海上有座住著石頭巨人的島！','路人：聽說有艘帆船擱淺在海島港口，船長在找被風吹走的海圖碎片。']});
+ hint:['路人：聽說海島港口外的海上，有時候會冒出一排黑黑的巨人影子⋯','路人：海島港口那個拿望遠鏡的孩子說，東南邊的海上有座住著石頭巨人的島！','路人：老漁夫說，海島港口東南的海平線上，偶爾會浮出一排巨人的黑影。只要有人在它們消失前看清楚，海上就會為他指出一條路⋯']});
 
 /* ---- 下一站預告圖（120×84） ---- */
 const farmPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#f6efe0"/><path d="M0,52 Q30,38 60,48 Q90,36 120,46 V84 H0Z" fill="#a3ad66"/><rect y="60" width="120" height="24" fill="#d9c06a"/><path d="M0,60 H120" stroke="#2b2420" stroke-width="1.6"/><g transform="translate(44,58)"><path d="M-20,0 V-20 L-12,-30 L0,-35 L12,-30 L20,-20 V0Z" fill="#b14d27" stroke="#2b2420" stroke-width="2"/><path d="M-7,0 V-15 H7 V0 M-7,-15 L7,0 M7,-15 L-7,0" stroke="#fffaf0" stroke-width="1.6" fill="#7a3e2a"/></g><g transform="translate(78,58)"><path d="M-7,0 V-34 Q0,-42 7,-34 V0Z" fill="#c6ccc2" stroke="#2b2420" stroke-width="2"/></g><g transform="translate(98,58)"><path d="M-6,0 L-4,-26 L4,-26 L6,0Z" fill="#e2dccb" stroke="#2b2420" stroke-width="1.6"/><path d="M0,-28 l-12,-9 M0,-28 l12,-9 M0,-28 l-9,12 M0,-28 l9,12" stroke="#2b2420" stroke-width="2.4"/></g></svg>`;
