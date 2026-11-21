@@ -216,6 +216,12 @@ body.secret .chip .ok{width:17px;height:17px;font-size:9px;right:-4px;top:-4px}
 /* 沒找到的：灰色剪影＋虛線輪廓（使用者選 D 的樣子） */
 #colOv .colgrid .no .ic svg *{stroke:#b3a88c!important;stroke-dasharray:2.6 2.2;stroke-width:1.6px}
 #colOv .colgrid .no .ic svg [fill]:not([fill="none"]),#colOv .colgrid .no .ic svg path:not([fill]),#colOv .colgrid .no .ic svg circle:not([fill]),#colOv .colgrid .no .ic svg ellipse:not([fill]),#colOv .colgrid .no .ic svg rect:not([fill]),#colOv .colgrid .no .ic svg polygon:not([fill]){fill:#e4dccb!important}
+/* 2026-11-22b 收集冊：卡片大小固定；表頭＋區域標籤列凍結，只有下面的關卡列表捲動 */
+#colOv .pcard.colc{height:min(calc(100dvh - 32px),760px);max-height:none;overflow:hidden}
+#colOv .colc .mhead{flex:none}
+#colBody{flex:1;min-height:0;overflow:hidden;gap:8px}
+#colOv .ctabs{flex:none}
+#colBody .colscroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;gap:14px;padding:2px 4px 8px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 #colOv .storyrow{font-size:13px;transform:rotate(-.8deg);margin-top:12px}
 #colOv .clvrow .clv4{background:#fffaf0}
 

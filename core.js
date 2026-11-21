@@ -1024,9 +1024,9 @@ function openCol(){if(BGBUSY){whenReady(openCol);return}let got=0,tot=0;const se
  const GL=[];rows.forEach(r=>{if(!GL.includes(r.g))GL.push(r.g)});GL.sort((a,b)=>(a===SECGRP)-(b===SECGRP)||(a===OTHGRP)-(b===OTHGRP));
 if(COLTAB!=='全部'&&!GL.some(g=>g.name===COLTAB))COLTAB='全部';
  const tabs=['全部',...GL.map(g=>g.name)].map(t=>`<button class="ctab${t===COLTAB?' on':''}" data-t="${t}">${t}</button>`).join('');
- $('#colBody').innerHTML=`<div class="ctabs">${tabs}</div>`+rows.map(r=>r.html.replace('<section ',`<section data-g="${r.g.name}"${COLTAB==='全部'||r.g.name===COLTAB?'':' hidden'} `)).join('');
+ $('#colBody').innerHTML=`<div class="ctabs">${tabs}</div><div class="colscroll">`+rows.map(r=>r.html.replace('<section ',`<section data-g="${r.g.name}"${COLTAB==='全部'||r.g.name===COLTAB?'':' hidden'} `)).join('')+`</div>`;   /* 2026-11-22b 使用者：收集冊大小固定、表頭＋標籤列凍結，只有 .colscroll 捲動 */
  $('#colSub').textContent=`已收集 ${got} / ${tot} 種東西（每種只記一次）`;
- document.querySelectorAll('#colBody .ctab').forEach(b=>b.onclick=()=>{COLTAB=b.dataset.t;document.querySelectorAll('#colBody .ctab').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('#colBody .colsec').forEach(x=>x.hidden=!(COLTAB==='全部'||x.dataset.g===COLTAB))});
+ document.querySelectorAll('#colBody .ctab').forEach(b=>b.onclick=()=>{COLTAB=b.dataset.t;document.querySelectorAll('#colBody .ctab').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('#colBody .colsec').forEach(x=>x.hidden=!(COLTAB==='全部'||x.dataset.g===COLTAB));const sc=$('#colBody .colscroll');if(sc)sc.scrollTop=0});
  document.querySelectorAll('#colBody .colsec h4').forEach(h=>h.onclick=()=>{const sec=h.parentNode,n=+sec.dataset.n,on=sec.classList.toggle('open');h.setAttribute('aria-expanded',on);on?COLOPEN.add(n):COLOPEN.delete(n)});
  if(!$('#colOv').classList.contains('hide'))return;
  colUnder=['startOv','winOv'].filter(id=>!$('#'+id).classList.contains('hide'));colUnder.forEach(id=>$('#'+id).classList.add('hide'));$('#colOv').classList.remove('hide')}
