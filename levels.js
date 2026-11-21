@@ -12,7 +12,7 @@
    要開放某一關：把編號從清單拿掉，並把那一關的 level{n}.js 上傳到 GitHub。
    注意：系列關卡要一起處理（例：18 要靠 17 才進得去，開放 18 之前 17 也要開放）。
    自己測試完整版時，改成 const HIDE_LEVELS=[]; 就好。 */
-const HIDE_LEVELS=[14,15,16,17,18];
+const HIDE_LEVELS=[14,15,16,17,18,20];
 {const add0=addLevel;addLevel=L=>{if(!HIDE_LEVELS.includes(L.n))add0(L)}}
 
 addLevel({n:1,title:'第 1 關．奇幻小鎮',file:'level1.js',c:[900,760],map:{x:120,y:170,ic:'🏰',name:'奇幻小鎮'},
@@ -85,13 +85,20 @@ addLevel({n:17,title:'城門廣場',file:'level17.js',c:[1250,1820],
  map:{x:100,y:198,ic:'🏰',name:'城門廣場'},next:{pv:()=>gatePreview(),btn:'跟衛兵進城堡',had:'衛兵隨時可以帶你進城',fresh:'小鎮城堡大門前的衛兵在等你',ride:'bridge17'},
  desc:'走過吊橋進城門：4 種老朋友加上 <b>8 種城門廣場新東西</b>。'});
 const hallPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#3a2c25"/><g stroke="#2b2420" stroke-width="1.5" stroke-linejoin="round"><rect x="0" y="0" width="120" height="40" fill="#76604f" stroke="none"/>${[22,48,72,98].map(x=>`<path d="M${x-7},36 V16 Q${x},8 ${x+7},16 V36Z" fill="#363a78"/>`).join('')}<circle cx="74" cy="18" r="3" fill="#fbf1c8" stroke="none"/><rect x="0" y="40" width="120" height="44" fill="#c4a67a" stroke="none"/>${[24,60,96].map(x=>`<path d="M${x-6},44 H${x+6} L${x+12},84 H${x-12}Z" fill="#f3ead6"/>`).join('')}${[[16,36],[40,30],[60,38],[84,30],[104,36],[30,54],[90,52]].map(([x,y])=>`<circle cx="${x}" cy="${y-6}" r="5" fill="#ffd98a" opacity=".35" stroke="none"/><rect x="${x-1.5}" y="${y-4}" width="3" height="7" fill="#f8f1dc" stroke-width="1"/><path d="M${x},${y-5} q-2,-3 0,-6 q2,3 0,6Z" fill="#f5b03a" stroke="none"/>`).join('')}</g></svg>`;
-/* 2026-11-20 城堡系列第二關：奇幻晚宴（原名奇幻大餐廳，使用者 2026-11-20 改名）。入口是城門廣場主堡大門前的管家；城門廣場拿 2 星後才出現（after 是另一個 find 關卡）。冒險地圖不另外放節點 */
-addLevel({n:18,title:'奇幻晚宴',file:'level18.js',c:[1520,1880],
- find:{after:17,from:17,hint:['路人：城門廣場最北邊的主堡大門，今晚終於要打開了！聽說門口站著一位管家。','路人：從城門廣場的水井一直往北走，走上主堡大門前的石階，管家會帶你去參加國王的宴會。','路人：國王在城堡的大餐廳辦慶功宴，主堡大門口的管家正在招呼客人呢。']},
- map:{x:100,y:198,ic:'🕯️',name:'奇幻晚宴'},next:{pv:()=>hallPreview(),btn:'跟管家去參加晚宴',had:'管家隨時可以帶你去參加晚宴',fresh:'城門廣場主堡大門前的管家在等你',ride:'hall18'},
+const courtPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#d6ebf5"/><circle cx="100" cy="14" r="8" fill="#fdf0c0"/><g stroke="#2b2420" stroke-width="1.5" stroke-linejoin="round"><path d="M14,44 V20 H106 V44Z" fill="#ece4d0"/><path d="M10,20 L18,13 H102 L110,20Z" fill="#5c6f96"/><path d="M48,44 V10 H72 V44Z" fill="#f2ead8"/><path d="M45,10 L60,0 L75,10Z" fill="#5c6f96"/><path d="M54,44 V34 Q60,28 66,34 V44Z" fill="#7a4e32"/><rect x="0" y="44" width="120" height="40" fill="#9fc060" stroke="none"/><path d="M52,44 H68 L82,84 H38Z" fill="#ebe1c6" stroke="none"/><rect x="8" y="52" width="30" height="16" rx="5" fill="#3c6e30"/><rect x="82" y="52" width="30" height="16" rx="5" fill="#3c6e30"/><ellipse cx="60" cy="66" rx="18" ry="5" fill="#ece6d8"/><ellipse cx="60" cy="65" rx="14" ry="3" fill="#8cc4d4" stroke="none"/><path d="M58,64 V52 H62 V64Z" fill="#ece6d8"/><path d="M60,51 Q60,42 54,46 M60,51 Q60,42 66,46" fill="none" stroke="#a8d4e4" stroke-width="2"/></g><g stroke="none">${[[16,58,'#d8413a'],[24,62,'#f5d34a'],[32,58,'#f0a8b8'],[90,62,'#f0a8b8'],[98,58,'#d8413a'],[106,62,'#f5d34a']].map(([x,y,c])=>`<circle cx="${x}" cy="${y}" r="2.4" fill="${c}"/>`).join('')}</g></svg>`;
+/* 2026-11-21 城堡系列第二關：宮廷院（午後陽光花園）。入口是城門廣場主堡大門前的管家；城門廣場拿 2 星後才出現。冒險地圖不另外放節點。
+   之後從宮廷院再分出去：北邊主殿大門 → 奇幻晚宴（20）、東邊塔樓側門 → 圖書館（19，還沒做）、西邊綠籬拱門 → 樹籬迷宮（秘境，還沒做） */
+addLevel({n:18,title:'宮廷院',file:'level18.js',c:[1250,1700],
+ find:{after:17,from:17,hint:['路人：城門廣場最北邊的主堡大門，今天終於打開了！聽說門口站著一位管家。','路人：從城門廣場的水井一直往北走，走上主堡大門前的石階，管家會帶你去宮廷院的花園。','路人：主堡裡面有一座漂亮的宮廷院，噴水池和樹籬雕塑都好可愛，主堡大門口的管家正在招呼客人呢。']},
+ map:{x:100,y:198,ic:'⛲',name:'宮廷院'},next:{pv:()=>courtPreview(),btn:'跟管家進宮廷院',had:'管家隨時可以帶你進宮廷院',fresh:'城門廣場主堡大門前的管家在等你',ride:'court18c'},
+ desc:'穿過主堡的拱道，走進陽光下的宮廷院：1 種老朋友加上 <b>11 種宮廷院新東西</b>。'});
+/* 2026-11-20 城堡系列：奇幻晚宴（原名奇幻大餐廳）。2026-11-21 使用者：改成第 20 關，入口改成宮廷院北邊主殿大門前的侍從；宮廷院拿 2 星後才出現。冒險地圖不另外放節點 */
+addLevel({n:20,title:'奇幻晚宴',file:'level20.js',c:[1520,1880],
+ find:{after:18,from:18,hint:['路人：宮廷院最北邊的主殿大門，天快黑的時候會打開喔！門口站著一位拿燭台的侍從。','路人：從宮廷院的噴水池一直往北走，走上主殿大門前的石階，侍從會帶你去參加國王的宴會。','路人：國王在主殿的大餐廳辦慶功宴，宮廷院北邊的大門口有侍從在招呼客人呢。']},
+ map:{x:100,y:198,ic:'🕯️',name:'奇幻晚宴'},next:{pv:()=>hallPreview(),btn:'跟侍從去參加晚宴',had:'侍從隨時可以帶你去參加晚宴',fresh:'宮廷院主殿大門前的侍從在等你',ride:'hall18'},
  desc:'跟著管家走進國王的慶功宴：2 種老朋友加上 <b>10 種晚宴新東西</b>。'});
 /* 冒險地圖的大區（2026-11-18）：遠看只顯示大區名，放大才顯示各關名字。x,y 是大區名牌的位置 */
 addRegion({name:'櫻花山城',ids:[6,7,8,9],x:-68,y:250});
 addRegion({name:'沙漠',ids:[11,12,13],x:-85,y:392});
 /* 2026-11-19 城堡系列（第 17 關起）隸屬於奇幻小鎮：發現城門廣場之後，遠看只顯示大區名「奇幻小鎮」，放大才看得到「奇幻小鎮」「城堡」兩個名牌；還沒發現時完全不變 */
-addRegion({name:'奇幻小鎮',get ids(){const T_=window.TH;return T_&&T_.isOpen(17)?(T_.isOpen(18)?[1,17,18]:[1,17]):[17]},x:100,y:244});
+addRegion({name:'奇幻小鎮',get ids(){const T_=window.TH;if(!T_||!T_.isOpen(17))return [17];return [1,17,18,20].filter(n=>n===1||T_.isOpen(n))},x:100,y:244});

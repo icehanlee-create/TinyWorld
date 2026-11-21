@@ -382,7 +382,20 @@ muteBtn.onclick=()=>{muted=!muted;setMuteUI();try{localStorage.setItem('townhunt
 
 /* ================= UI ================= */
 const toastEl=$('#toast');let toastT;function toast(m,ms=1500){toastEl.textContent=m;toastEl.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('show'),ms)}
-const icon=id=>`<svg viewBox="-21 -21 42 42"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${ART[id]}</g></svg>`;
+/* 2026-11-21 使用者：很多關卡的物件圖示上下左右被切到 → 圖示框自動配合每個物件的實際範圍（量一次記起來）。
+   沒超出 ±19（留 2 給外框線）的照舊用 -21 -21 42 42；超出的以物件中心為準、框放大到剛好裝得下（圖示等於縮小一點），場景裡的物件大小不變。 */
+const ICONVB={};
+function iconVB(id){if(ICONVB[id])return ICONVB[id];let vb='-21 -21 42 42';
+ try{const ns='http://www.w3.org/2000/svg',sv=document.createElementNS(ns,'svg');sv.setAttribute('width','200');sv.setAttribute('height','200');
+  sv.style.cssText='position:fixed;left:-9999px;top:0;visibility:hidden;pointer-events:none';
+  const g=document.createElementNS(ns,'g');g.setAttribute('stroke-width','2');g.innerHTML=ART[id]||'';sv.appendChild(g);document.body.appendChild(sv);
+  const b=g.getBBox();sv.remove();
+  if(b.width>0&&b.height>0){const P=2.6,x0=b.x-P,y0=b.y-P,x1=b.x+b.width+P,y1=b.y+b.height+P;
+   if(x0<-21||y0<-21||x1>21||y1>21){const cx=(x0+x1)/2,cy=(y0+y1)/2,h=Math.max(21,(x1-x0)/2,(y1-y0)/2);
+    const r=v=>Math.round(v*10)/10;vb=`${r(cx-h)} ${r(cy-h)} ${r(h*2)} ${r(h*2)}`}
+   ICONVB[id]=vb}}catch(e){}
+ return vb}
+const icon=id=>`<svg viewBox="${iconVB(id)}"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${ART[id]}</g></svg>`;
 const leftOf=id=>items.filter(it=>!it.found&&(!id||it.t.id===id)).length;
 function renderTray(){$('#chips').innerHTML=TYPES.map(t=>`<button class="chip" data-t="${t.id}" aria-label="${t.name}"><span class="ic">${icon(t.id)}<span class="ok">✓</span></span><span class="dots">${'<i></i>'.repeat(PER())}</span></button>`).join('');
  $('#chips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{const t=TYPES.find(x=>x.id===b.dataset.t),n=leftOf(t.id);trayTip(b,SEC()?(n?`${t.name}：找到 ${PER()-n} / ${PER()}`:`${t.name}：找齊了 ✓`):n?`${t.name}：還有 ${n} 個`:`${t.name}：全部找到了 ✓`)})}
@@ -415,6 +428,16 @@ const SECRET_IDS=[],SECRETS={};
 const FIND_IDS=[],EXITS={};
 function addLevel(L){const {map,next,...o}=L;LEVELS[o.n]={types:null,...o};if(map)MAPNODES.push({n:o.n,...map});if(next)NEXTINFO[o.n]=next;if(o.secret)SECRET_IDS.push(o.n);if(o.find)FIND_IDS.push(o.n)}
 const isFound=n=>prog.found.includes(n);
+/* 2026-11-21 每日新發現上限：非測試模式下，一天最多新發現 DAYMAX 個地方（第 11 關之後的 find 關卡＋秘境）。
+   townhunt-day={d:'本地日期',n:[今天新發現的編號]}；秘境「去過了」記在 townhunt-been（各秘境也可以用 BEENF[n]() 告訴引擎，例如復活島 RP.went） */
+const DAYMAX=2,BEENF={};
+const dayKey=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+function dayLog(){try{const o=JSON.parse(localStorage.getItem('townhunt-day')||'null');if(o&&o.d===dayKey()&&Array.isArray(o.n))return o}catch(_){}return {d:dayKey(),n:[]}}
+function beenList(){try{return JSON.parse(localStorage.getItem('townhunt-been')||'[]')}catch(_){return []}}
+function isNewPlace(n){const L_=LEVELS[n];if(!L_)return false;if(L_.find)return !isFound(n);if(L_.secret)return !(beenList().includes(n)||(BEENF[n]&&BEENF[n]())||(L_.seen&&L_.seen()));return false}
+function canDiscover(n){if(testMode||!isNewPlace(n))return true;const o=dayLog();return o.n.includes(n)||o.n.length<DAYMAX}
+function noteDiscover(n){if(!isNewPlace(n))return;try{const o=dayLog();if(!o.n.includes(n))o.n.push(n);localStorage.setItem('townhunt-day',JSON.stringify(o));if(LEVELS[n].secret){const b=beenList();if(!b.includes(n)){b.push(n);localStorage.setItem('townhunt-been',JSON.stringify(b))}}}catch(_){}}
+const DAYMSG='今天已經發現兩個新地方了，腳有點痠⋯<br>新的冒險明天再出發吧！走過的地方隨時都能回去玩。';
 const findAfter=n=>(LEVELS[n]&&LEVELS[n].find&&LEVELS[n].find.after)||10;
 const canFind=n=>{const L=LEVELS[n];if(!L||!L.find||isFound(n))return false;const a=findAfter(n);return (LEVELS[a]&&LEVELS[a].find?isFound(a):prog.unlocked>=a)&&starsOf(a)>=NEED_STARS}; /* after 可以是另一個 find 關卡（例如滑沙場：綠洲市集拿 2 星後） */
 const isOpen=n=>{const L=LEVELS[n];if(!L||L.secret)return false;return L.find?isFound(n):n<=prog.unlocked};
@@ -493,9 +516,10 @@ let exitPaused=0;
 function askExit(n){const E=EXITS[n],A=E.ask||{},ov=$('#exitOv')||(()=>{const d=document.createElement('div');d.className='overlay hide';d.id='exitOv';document.body.appendChild(d);return d})();
  if(!exitPaused&&st.running){exitPaused=performance.now();clockHold()}
  const resume=()=>{if(exitPaused&&st.running){st.t0+=performance.now()-exitPaused;clockRun(false)}exitPaused=0};
+ if(!canDiscover(n)){ov.innerHTML=`<div class="pcard" style="padding:20px 18px 18px;text-align:center">${A.pv?`<div style="margin:0 auto 6px;width:220px">${A.pv()}</div>`:''}<b style="font-size:21px;display:block;margin-bottom:6px">明天再出發吧</b><p style="margin:0 0 14px;font-size:15px;line-height:1.6">${DAYMSG}</p><button class="pbtn" id="exitWait">好</button></div>`;ov.classList.remove('hide');ov.querySelector('#exitWait').onclick=()=>{ov.classList.add('hide');resume()};return}
  ov.innerHTML=`<div class="pcard" style="padding:20px 18px 18px;text-align:center">${A.pv?`<div style="margin:0 auto 6px;width:220px">${A.pv()}</div>`:''}<b style="font-size:21px;display:block;margin-bottom:6px">${A.title||'要出發嗎？'}</b><p style="margin:0 0 14px;font-size:15px;line-height:1.6">${(isFound(n)&&A.again)||A.text||''}</p><button class="pbtn" id="exitGo">${A.go||'出發'}</button><div style="display:flex;margin-top:10px"><button class="sbtn" id="exitWait">${A.wait||'之後再說'}</button></div></div>`;
  ov.classList.remove('hide');
- ov.querySelector('#exitGo').onclick=()=>{ov.classList.add('hide');exitPaused=0;if(!isFound(n)){prog.found.push(n);saveProg()}ensureFull(n,()=>goLevel(n,1))};
+ ov.querySelector('#exitGo').onclick=()=>{ov.classList.add('hide');exitPaused=0;if(!isFound(n)){noteDiscover(n);prog.found.push(n);saveProg()}ensureFull(n,()=>goLevel(n,1))};
  ov.querySelector('#exitWait').onclick=()=>{ov.classList.add('hide');resume();if(A.waitMsg)toast(A.waitMsg,3600)}}
 function onTap(sx,sy){if(!st.running||PANO)return;const wx=(sx-view.tx)/view.s,wy=(sy-view.ty)/view.s;{const S=SEC();if(S){S.tap(wx,wy);return}}if(!isRevealed(wx,wy))return;let best=null,bd=1e9,near=false;
  for(const c of [clovers.story,clovers.bonus])if(c&&c.revealed&&!c.found&&Math.hypot(c.x-wx,c.y-wy)<Math.max(14,13/view.s)){foundClover(c);return}
@@ -743,7 +767,7 @@ function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,
 }
 /* 2026-11-18 使用者：從場景出口出發（找路關卡），就算已經去過也要播過場；在冒險地圖上點地點直接前往，維持第一次才播。
    2026-11-18e：剛過關打開地圖、點的是「下一站」（WINGO），也跟按下一站按鈕一樣播過場 */
-function goLevel(n,viaExit){if(PANO)panoSet(false);if(WINGO&&WINGO===n)viaExit=true;WINGO=0;if(LEVELS[n]&&LEVELS[n].file&&!LEVELS[n].types){ensureFull(n,()=>goLevel(n,viaExit));return}
+function goLevel(n,viaExit){if(PANO)panoSet(false);if(LEVELS[n]&&LEVELS[n].secret&&isNewPlace(n)){if(!canDiscover(n)){toast(DAYMSG.replace('<br>',''),4200);return}noteDiscover(n)}if(WINGO&&WINGO===n)viaExit=true;WINGO=0;if(LEVELS[n]&&LEVELS[n].file&&!LEVELS[n].types){ensureFull(n,()=>goLevel(n,viaExit));return}
  if((viaExit||!rodeHas(n))&&NEXTINFO[n]){$('#mapOv').classList.add('hide');mapUnder=[];st.running=false;clearInterval(timer);['winOv','startOv'].forEach(id=>$('#'+id).classList.add('hide'));rodeAdd(n);
   ride(()=>{loadScene(n);setLevel(n);newGame();clockHold();$('#time').textContent='0:00'},()=>{clockRun(true);toast(`${LEVELS[n].title}，開始！`,2200)},NEXTINFO[n].ride);return}
  $('#mapOv').classList.add('hide');const under=mapUnder;mapUnder=[];if(n===level&&scene===n&&!st.running&&under.includes('startOv')){$('#startOv').classList.remove('hide');return}if(n===level&&scene===n&&st.running)return;st.running=false;clearInterval(timer);$('#winOv').classList.add('hide');
@@ -938,7 +962,7 @@ level=Math.min(prog.unlocked,LEVELS.length-1);
 window.TH={NSPOT,NLAKE,NPEAK,EDGELAND,ROADS,T,f,r,sr,pk,ri,rnd,shuffle,limb,shade,wob,OL,SNOW,SKIN,HAIR,SHIRT,PANTS,HATS,kid,chibi,act,wrapAn,heart,bubble,noteM,peekHead,faceHead,headOnly,
  cat,frog,owl,sheep,chicken,anyDog,dog,swan,pine,roundTree,bush,rock,barrel,crate,pot,lamp,bench,sign,fence,reeds,lily,well,tent,campfire,swirl,signpost,signIcon,stall,
  add,mark,canPlace,scatter,SCATREG,SCATOK,skyBirds,chaikin,bow,qBubble,qThink,qMark,QHEART,GC,GR,CELL,occ,mulberry32,DK,balloon,castle,fountain,house,kayak,lighthouse,mushHouse,rowboat,sailboat,tower,windmill,pig,barn,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,HEAVY,ANIM,ALWAYS,DUR,
- ANIMX,ALWAYSX,HEAVYX,SPOTS,BLEND,SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,mapHook,mapRoute,TAPHOOKS,NGHOOKS,MAPTOP,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,SECRETS,STORIES,SEQ,SKYC,SKYY,FOGFN,EDGEM,EDGED,EDGEDECO,EDGEMY,EDGEFILL,FRINGE,FRINGEX,RESERVE,ROADK,RESETKEYS,icon,starSvg,EXITS,FIND_IDS,isOpen,isFound,canFind,prog:()=>prog,
+ ANIMX,ALWAYSX,HEAVYX,SPOTS,BLEND,SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,mapHook,mapRoute,TAPHOOKS,NGHOOKS,MAPTOP,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,SECRETS,STORIES,SEQ,SKYC,SKYY,FOGFN,EDGEM,EDGED,EDGEDECO,EDGEMY,EDGEFILL,FRINGE,FRINGEX,RESERVE,ROADK,RESETKEYS,BEENF,canDiscover,dayLog,icon,starSvg,EXITS,FIND_IDS,isOpen,isFound,canFind,prog:()=>prog,
  typeOf:id=>LEVELS.slice(1).flatMap(L_=>L_.types||[]).find(t=>t.id===id),colAdd,colClover,colBonus,colStory,updateCounts,win:()=>win(),goLevel:(n,viaExit)=>goLevel(n,viaExit),level:()=>level,rodeHas,pads:()=>pads(),scr:()=>({w:SW,h:SH,base}),apply:()=>apply(),clampV:()=>clampV(),rezoom:()=>{measure();clampV();apply()},updAnim:()=>updateAnim(),tweenTo:(s,x,y,d,cb)=>tweenTo(s,x,y,d,cb),curtain,pickView,walkPose,DENS,sprites,ride,toast,clockHold,clockRun,burst,floatText,sfx,items:()=>items,game:()=>st,scene:()=>scene,view:()=>view,testOn:()=>testMode,dbg:{clover:()=>clovers,hint:()=>({sp:hintSp,msg:hintMsg}),step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG};
 /* 測試模式：選單列出測試中的關卡（編號 900 以上、還沒接上主線的主線關卡），在 Claude 作品裡也能直接玩（2026-11-12） */
 LEVELS.forEach((L_,n)=>{if(!L_||n<900||L_.secret||document.getElementById('tLv'+n))return;const b=document.createElement('button');b.id='tLv'+n;b.className='tbtn';b.style.display='none';b.innerHTML=`<span>🧪 測試中的關卡：${L_.title}</span>`;
