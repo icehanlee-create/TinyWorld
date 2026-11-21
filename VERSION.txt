@@ -1,4 +1,6 @@
-奇幻小鎮大搜查 引擎版本：2026-11-21a（11-21a：①每日新發現上限——非測試模式下，一天最多新發現 2 個地方（第 11 關之後的找路關卡＋秘境）：core.js canDiscover／noteDiscover，記在 townhunt-day（本地日期＋今天發現的編號）、秘境去過記在 townhunt-been；第 3 個出口的對話框改成「明天再出發吧」，秘境（復活島）出航改跳提示；已發現的地方、測試模式都不受限；②城堡系列改成 17 城門廣場 → 18 宮廷院（新，level18.js）→ 20 奇幻晚宴（原 level18.js 改名 level20.js，入口搬到宮廷院主殿大門）；19 圖書館、樹籬迷宮秘境之後做。改：core.js、levels.js、level18.js、level20.js（新）、VERSION.txt、GUIDE.md）
+奇幻小鎮大搜查 引擎版本：2026-11-21t（11-21t：秘境「樹籬迷宮」level102.js（入口：第 18 關宮廷院西邊綠籬牆的小缺口）。secret.js：①C.goal——找齊後還要走到終點才過關，提示箭頭指向終點；②好幾個秘境同時載入時圖層不互相清掉（data-sn）。core.js：①秘境 needStars（出發地幾顆星才有路人提示）；②秘境找齊後、還沒走到終點時提示按鈕仍可用。level18.js：西北迷宮頂視圖和拱門拿掉、改成一般綠籬牆。另外：擋住角色時站在前面的人一起重畫、翻開過的東西可以跨過去、C.canReach（隔著牆拿不到）。改：core.js、secret.js、levels.js、level18.js、GUIDE.md、VERSION.txt；新增 level102.js）
+之前：2026-11-21s（11-21s：①物件類型可以加 nofl:true——有字的物件（例：圖書館的字母積木）不會被隨機左右翻面（core.js 物件的 sx）；②11-21m 物件圖示自動配合範圍、11-21n 故事完成愛心置中；③第 19 關圖書館（level19.js 新檔，入口在宮廷院東北塔樓側門的書僮）。改：core.js、levels.js、level19.js（新）、VERSION.txt、GUIDE.md）
+之前：2026-11-21a（11-21a：①每日新發現上限——非測試模式下，一天最多新發現 2 個地方（第 11 關之後的找路關卡＋秘境）：core.js canDiscover／noteDiscover，記在 townhunt-day（本地日期＋今天發現的編號）、秘境去過記在 townhunt-been；第 3 個出口的對話框改成「明天再出發吧」，秘境（復活島）出航改跳提示；已發現的地方、測試模式都不受限；②城堡系列改成 17 城門廣場 → 18 宮廷院（新，level18.js）→ 20 奇幻晚宴（原 level18.js 改名 level20.js，入口搬到宮廷院主殿大門）；19 圖書館、樹籬迷宮秘境之後做。改：core.js、levels.js、level18.js、level20.js（新）、VERSION.txt、GUIDE.md）
 之前：2026-11-20b（11-20b：①角色不會動——電腦關了「動畫效果」時 index.html 的 prefers-reduced-motion 規則把人物動畫全停，拿掉；②冒險地圖：打開時縮到看得到整張；一開始只到森林（西）和一點海（南），約略正方形，第 5 關後南邊海變多、櫻花山城後才長出西邊空地、沙漠之前西南角是海；河流拿掉黑框、河口伸進海裡蓋住海岸線；小鎮港口改畫木棧橋＋港口小屋＋漁船（level1.js），第 5、6 關的灰色長方形拿掉；③過場：乾草車改粗壯挽馬（level2）、雪山頂積雪貼齊稜線＋右側陰影（level3）、駱駝腳會走（level11）、飛魚重畫（level14）；④第 2 關豬重畫；第 13 關金字塔立體化（錯縫、階梯邊越往上越密、金色塔頂；左右小金字塔往外挪，三座不互相蓋到），斜面和門口不再放東西；第 17 關旗桿、牆上掛旗、塔頂小旗會飄。改：index.html、core.js、level1～3.js、level5～6.js、level11.js、level13～14.js、level17.js、VERSION.txt）
 之前：2026-11-20a（11-20a：「重置進度」修正——秘境、找路關卡的記錄（復活島海圖 townhunt-rapa 等）在那一關檔案還沒載入時不會被清掉，玩家重置後冒險地圖上復活島還在；改成一律清掉 townhunt- 開頭的記錄（保留 townhunt-muted、townhunt-test），清完 1.8 秒後重新整理頁面。改：core.js、VERSION.txt）
 之前：2026-11-18w（11-18w：藍鯨照使用者選的 D——前半身加高（背隆起）、整隻頭抬高 15°，噴水柱轉回直直往上；整隻往上移，現在完全在遠方岩石上面。改：level16.js、VERSION.txt）
@@ -15,8 +17,8 @@
 之前：2026-11-17d（2026-11-17 深夜：沙漠第 3 關「金字塔」level13.js 接上；引擎 11-17d 冒險地圖往西加寬：addLevel 的 map 加 west:true 的關卡（滑沙場、金字塔）去得了之後，地圖往西加寬 200、沙地往西延伸，沙漠節點一路往西排；滑沙場節點從沙洲移到西邊陸地；11-17c：2026-11-17 晚：沙漠綠洲市集 level11.js 接上，引擎沒改——levels.js 加 addLevel({n:11,find:{after:10,from:1,…}}) 和 desertPreview；駱駝商隊出口併進 level11.js，drafts/level11-caravan.js 已刪除；11-17b「找路發現新關卡」：第 10 關之後的新關卡 addLevel 加 find:{after,from,hint}，不自動解鎖；玩家在過關過的關卡聽「…」路人提示（和秘境提示同一個籤筒），到出發地找出口 H.EXITS[n]、點了問「要⋯出發嗎？」才算發現（townhunt-prog.found）；地圖、卡片、收集冊發現後才出現，用 open(n)；北方雪國改成 map.north:true 的關卡去得了才長高；第 10 關過關畫面有可發現的新關卡時改成「到處問問看」；草稿 drafts/level11-caravan.js 沙漠的駱駝商隊出口；11-17a 冒險地圖往北加高：解鎖第 11 關後 viewBox 變成 -120 -170 462 600，北方雪國 northMap（使用者選 A 往西北斜上），預留 TH.NSPOT 第 11～13 關位置、TH.NLAKE 冰湖、TH.NPEAK 極光山頂；U<=10 地圖和原本一樣；11-12f 高山滑雪場 902 接成第 10 關 level10.js（引擎沒改；levels.js 拿掉 902、加第 10 關＋skiPreview，第 3、9 關加伏筆）；11-12e 修「幽靈手指」：iPhone 沒送手指抬起時，單指滑動會被當成兩指縮放、點不到東西 → core.js 新觸碰 isPrimary 清掉舊的、lostpointercapture、touchend 沒手指就清空；11-12d 合併第 9 關天守閣山城 level9.js，引擎沒改，levels.js 加第 9 關；開始畫面說明改短：拿掉「小心假貨」、改成「這裡可能藏著一段小故事⋯」；11-12b 物件擺放：每種 55～65% 放在合理的位置 H.SPOTS[n]，其餘至少一半混在顏色相近的東西旁邊 H.BLEND[n]，第 1～8 關、902 都已設定；11-12a 測試模式的開始畫面和選單會列出「測試中的關卡」（編號 900 以上的主線關卡），在 Claude 作品裡也能直接玩；11-11m 秘境提示：過關過的關卡裡一位「…」路人會說還沒完成的秘境提示，秘境 addLevel 加 hint；11-11l 復活島看全島改成顯示預先畫好的 rapa_island.jpg；望遠鏡小孩改問號徽章 H.qMark(y,'?')；11-11k 故事角色頭上改成金色驚嘆號徽章 H.qMark，不畫要找的東西；秘境鏡頭拉遠（看全島、日出、全景）時拿掉 will-change 並暫停動畫，修 iPhone 點巨人摩艾後網頁重新載入；11-11j 合併第 8 關竹林神社 level8.js；11-11i 6→7 關過場改成走石階 RIDES.stairs；11-11h 故事角色頭上改成想念泡泡 H.qThink；11-11g 場景看板不寫字，改用 H.signIcon 圖示，路標點了才跳出名稱；11-11f 地圖路線統一用 H.mapRoute；11-11e 合併第 7 關；11-11d 人物動作依活動；11-11c 手機藏縮放按鈕；11-11b 頭髮對齊；11-11 和服、冒險地圖加寬）
 （2026-11-17 深夜：沙丘滑沙場 level12.js 接上；core.js 小改：find.after 可以是另一個 find 關卡（canFind／過關畫面「almost」／單關測試 ?test=12 會連綠洲市集一起設好）；levels.js 加 addLevel({n:12,find:{after:11,from:11,…}}) 和 slidePreview；level11.js 路人人數 ×2。）
 合併前比對：下面任何一個檔案的指紋和主帳號目前的不一樣，就要把全部關卡重測一次。
-index.html  e434c841b13a
-core.js     693088f89684
-art.js      c5aa8601a186
-secret.js   1bae3ed011a4
-levels.js   0062c6a9271c
+index.html  d893459900da
+core.js     b3251515d790
+art.js      b50938d5e76f
+secret.js   33fd7d8c0e2f
+levels.js   f86f516925fe

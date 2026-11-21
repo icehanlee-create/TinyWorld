@@ -61,15 +61,16 @@ function make(C){
  const E={C,how:C.how,rule:C.rule,homeBtn:C.homeBtn,homeNote:C.homeNote};SECRETS[C.n]=E;
  let on=false,raf=0,last=0,pano=false,card=null,cut=0,pausedAt=0,tipShown=false,cine=0;
  const P={x:C.start.x,y:C.start.y,dir:2,walk:false,ph:0,frame:-1,view:''};
- let all=[],real=[],FL=[],ent={},story=null,clv={story:null,bonus:null},arrowUntil=0,arrowT=null,occT=0,occKey='',farT=0;
+ let goalOn=false,all=[],real=[],FL=[],ent={},story=null,clv={story:null,bonus:null},arrowUntil=0,arrowT=null,occT=0,occKey='',farT=0;
  const LIDS=['secW','secF','secI','secD','secO','secS','secA'],L=()=>['secF','secI','secD','secO','secA'].map(id=>document.getElementById(id));
- function layers(){let a=document.getElementById('secF');if(a)return L();const fg=document.getElementById('fgSvg'),mk=document.getElementById('marks');
-  LIDS.forEach(id=>{const g=document.createElementNS(NSv,'g');g.id=id;if(id==='secW'||id==='secS')g.setAttribute('class','on');[['stroke',OL],['stroke-width','2'],['stroke-linejoin','round'],['stroke-linecap','round']].forEach(([k,v])=>g.setAttribute(k,v));fg.insertBefore(g,mk)});return L()}
- function clearLayers(){C.movers&&C.movers.forEach(m=>m.el=null);LIDS.forEach(id=>{const e=document.getElementById(id);if(e)e.remove()})}
+ /* 2026-11-21：好幾個秘境同時載入時（例：測試模式），圖層記上是哪個秘境的，別的秘境的 NGHOOKS 不會把它清掉 */
+ function layers(){let a=document.getElementById('secF');if(a&&a.dataset.sn==C.n)return L();if(a)LIDS.forEach(id=>{const e=document.getElementById(id);if(e)e.remove()});const fg=document.getElementById('fgSvg'),mk=document.getElementById('marks');
+  LIDS.forEach(id=>{const g=document.createElementNS(NSv,'g');g.id=id;g.dataset.sn=C.n;if(id==='secW'||id==='secS')g.setAttribute('class','on');[['stroke',OL],['stroke-width','2'],['stroke-linejoin','round'],['stroke-linecap','round']].forEach(([k,v])=>g.setAttribute(k,v));fg.insertBefore(g,mk)});return L()}
+ function clearLayers(){C.movers&&C.movers.forEach(m=>m.el=null);const a=document.getElementById('secF');if(a&&a.dataset.sn!=C.n)return;LIDS.forEach(id=>{const e=document.getElementById(id);if(e)e.remove()})}
  const spEl=sp=>document.querySelector(`#bg [data-n="${sp.n}"]`);
 
  /* ---- 能不能走：地形（海、湖）＋不能穿過的東西（摩艾、石台、房子…） ---- */
- const solid=(x,y,pad=9)=>{for(const s of C.solids){const dx=(x-s.x)/(s.rx+pad),dy=(y-s.y)/(s.ry+pad*.6);if(dx*dx+dy*dy<1)return true}return false};
+ const solid=(x,y,pad=9)=>{for(const s of C.solids){if(s.flip&&s.flip.open)continue;/* 2026-11-21：翻開過的東西可以跨過去 */const dx=(x-s.x)/(s.rx+pad),dy=(y-s.y)/(s.ry+pad*.6);if(dx*dx+dy*dy<1)return true}return false};
  const walkable=(x,y)=>C.terrain(x,y)&&!solid(x,y)&&!Object.values(ent).some(e=>e.block&&!e.gone&&Math.hypot((x-e.x)/1.6,y-e.y)<12);
  E.walkable=walkable;
 
@@ -89,7 +90,7 @@ function make(C){
   placeClovers();return real};
 
  function reset(){stop(false);all=[];real=[];FL=C.flips;FL.forEach(h=>{h.open=false;h.hold=null;h.clover=null;const el=spEl(h.sp);if(el)el.style.display=''});
-  clv={story:null,bonus:null};story={step:0,done:false};Object.keys(ent).forEach(k=>delete ent[k]);arrowUntil=0;P.x=C.start.x;P.y=C.start.y;P.dir=C.startDir??2;P.frame=-1;P.view='';
+  goalOn=false;clv={story:null,bonus:null};story={step:0,done:false};Object.keys(ent).forEach(k=>delete ent[k]);arrowUntil=0;P.x=C.start.x;P.y=C.start.y;P.dir=C.startDir??2;P.frame=-1;P.view='';
   C.story&&C.story.reset&&C.story.reset(E)}
 
  /* ---- 幸運草：每局各藏一株在可翻開的東西底下（故事幸運草要完成小故事才翻得出來） ---- */
@@ -124,7 +125,10 @@ function make(C){
 
  /* 角色被高的東西（摩艾、房子、樹）擋住時，把那個東西再畫一次在角色上面 */
  function occlude(){const [,,,lO]=L();const hit=H.sprites.filter(sp=>C.tall.has(sp.kind)&&sp.y>P.y+2&&P.y>sp.y-sp.h*.95&&Math.abs(P.x-sp.x)<sp.w*.5+12);
-  const key=hit.map(s=>s.n).join(',');if(key!==occKey){occKey=key;lO.innerHTML=hit.sort((a,b)=>a.y-b.y).map(s=>s.svg.replace(/data-n="\d+"/,'')).join('')+'<g id="secGhost" opacity=".38"></g>'}
+  const key=hit.map(s=>s.n).join(',');if(key!==occKey){occKey=key;
+   /* 2026-11-21：擋住角色的東西重畫在上面時，站在它「前面」的東西（人、長椅⋯）也要一起重畫，不然頭會被切掉 */
+   const front=hit.length?H.sprites.filter(sp=>!hit.includes(sp)&&!C.thin.has(sp.kind)&&hit.some(h=>sp.y>h.y&&sp.y-sp.h-20<h.y&&Math.abs(sp.x-h.x)<(sp.w+h.w)/2)):[];
+   lO.innerHTML=hit.concat(front).sort((a,b)=>a.y-b.y).map(s=>s.svg.replace(/data-n="\d+"/,'')).join('')+'<g id="secGhost" opacity=".38"></g>'}
   /* 被擋住時，在上面淡淡畫出角色的輪廓，才找得到自己 */
   const gh=document.getElementById('secGhost'),pe=document.getElementById('secP');if(!gh)return;
   if(hit.length&&pe){if(gh.dataset.v!==P.view){gh.dataset.v=P.view;gh.innerHTML=pe.innerHTML}gh.setAttribute('transform',pe.getAttribute('transform'))}else if(gh.innerHTML){gh.innerHTML='';gh.dataset.v=''}}
@@ -162,17 +166,18 @@ function make(C){
   for(const e of Object.values(ent))if(e.tick)e.tick(dt,P);
   moveMovers(dt);
   if(C.tick&&!busy())C.tick(dt,P,E);
+  if(goalOn&&!busy())goalTick();
   drawDyn();if(!pano&&!cine)cam(false);
   if(t-occT>90||(P.walk&&occKey)){occT=t;occlude()}
   if(t-(P.animT||0)>400){P.animT=t;H.updAnim()}
   if(arrowUntil)arrow(t)}
  function arrow(t){const [,,,,lA]=L();let g=document.getElementById('secArr');
-  const rest=real.filter(o=>!o.found);if(t>arrowUntil||!rest.length){arrowUntil=0;if(g)g.remove();return}
+  const rest=goalOn?[{x:C.goal.x,y:C.goal.y}]:real.filter(o=>!o.found);if(t>arrowUntil||!rest.length){arrowUntil=0;if(g)g.remove();return}
   let best=null,bd=1e9;for(const o of rest){const d=Math.hypot(o.x-P.x,o.y-P.y);if(d<bd){bd=d;best=o}}
   if(!g){g=document.createElementNS(NSv,'g');g.id='secArr';lA.appendChild(g);g.innerHTML=`<g class="secHi"><circle r="17" fill="#fffaf0" stroke-width="2.2"/><path d="M-9,-4 H3 V-10 L12,0 L3,10 V4 H-9Z" fill="#f5c842" stroke-width="2"/></g>`}
   const a=Math.atan2(best.y-P.y,best.x-P.x)*180/Math.PI;g.setAttribute('transform',`translate(${f(P.x)},${f(P.y-100)}) rotate(${f(a)})`);
   if(bd<REACH*.8&&!g.dataset.near){g.dataset.near=1;arrowUntil=Math.min(arrowUntil,t+1200)}}
- E.hint=()=>{const left=real.filter(o=>!o.found).length;if(!left)return false;arrowUntil=performance.now()+(left<=3?15000:9000);/* 剩 3 個以下箭頭顯示 15 秒 */const g=document.getElementById('secArr');if(g)g.remove();return true};
+ E.hint=()=>{const left=real.filter(o=>!o.found).length;if(!left&&goalOn){arrowUntil=performance.now()+15000;const g=document.getElementById('secArr');if(g)g.remove();return true}if(!left)return false;arrowUntil=performance.now()+(left<=3?15000:9000);/* 剩 3 個以下箭頭顯示 15 秒 */const g=document.getElementById('secArr');if(g)g.remove();return true};
 
  E.start=()=>{layers();on=true;placeJoy();E.resetMovers();drawMovers();drawFlips();drawItems();sparks();drawDyn();occKey='';cam(true);
   if(!tipShown){tipShown=true;let seen=false;try{seen=!!localStorage.getItem('townhunt-secret-tip')}catch(_){}if(!seen&&!joy.querySelector('.jt'))joy.insertAdjacentHTML('beforeend','<div class="jt">按住拖曳，走路</div>')}
@@ -194,19 +199,22 @@ function make(C){
  E.cineEnd=(done)=>{const sc=H.scr(),Pd=H.pads();H.tweenTo(sc.base*ZOOM,P.x,P.y-40,700,()=>{cine=Math.max(0,cine-1);if(!cine){document.body.classList.remove('cine');liteLayer(false)}H.rezoom();cam(true);if(done)done()})};
 
  /* ---- 點擊 ---- */
- const near=(x,y)=>Math.hypot(x-P.x,y-P.y)<=REACH;
- const tooFar=()=>{const t=performance.now();if(t-farT>1400){farT=t;H.toast('再走近一點才拿得到',1300)}};
+ /* 2026-11-21：C.canReach(px,py,x,y)＝中間有沒有擋住（樹籬迷宮：隔著牆拿不到） */
+ const blocked=(x,y)=>!!(C.canReach&&!C.canReach(P.x,P.y,x,y));
+ const near=(x,y)=>Math.hypot(x-P.x,y-P.y)<=REACH&&!blocked(x,y);
+ let farX=0,farY=0;
+ const tooFar=()=>{const t=performance.now();if(t-farT>1400){farT=t;H.toast(Math.hypot(farX-P.x,farY-P.y)<=REACH&&blocked(farX,farY)?(C.blockMsg||'中間被擋住了，要繞過去才拿得到'):'再走近一點才拿得到',1600)}};
  E.tap=(wx,wy)=>{if(busy())return;const s=H.view().s,tol=Math.max(0,14/s-10);
   /* 2. 幸運草 */
-  for(const c of [clv.story,clv.bonus]){if(c&&c.revealed&&!c.found&&Math.hypot(wx-c.host.x,wy-(c.host.y-6))<16+tol){if(!near(c.host.x,c.host.y))return tooFar();gotClover(c);return}}
+  for(const c of [clv.story,clv.bonus]){if(c&&c.revealed&&!c.found&&Math.hypot(wx-c.host.x,wy-(c.host.y-6))<16+tol){if(!near(c.host.x,c.host.y)){farX=c.host.x;farY=c.host.y;return tooFar()}gotClover(c);return}}
   /* 3. 物件（含干擾物） */
   let best=null,bd=1e9;for(const o of all){if(o.found||o.hidden||o.held)continue;const d=Math.hypot(o.x-wx,o.y-(wy+2));if(d<o.r*o.sc+6+tol&&d<bd){best=o;bd=d}}
-  if(best){if(!near(best.x,best.y))return tooFar();if(C.quick&&C.quick.has(best.id)){quickTake(best);return}openCard(best);return}
+  if(best){if(!near(best.x,best.y)){farX=best.x;farY=best.y;return tooFar()}if(C.quick&&C.quick.has(best.id)){quickTake(best);return}openCard(best);return}
   /* 3.5 故事人物（看得到就能點；物件優先，免得藏在人旁邊的東西點不到） */
   for(const [id,e] of Object.entries(ent)){if(e.gone||!e.role)continue;if(Math.abs(wx-e.x)<e.w*.6+tol&&wy<=e.y+8+tol&&wy>=e.y-e.h-10-tol){roleTap(e.role);return}}
   /* 4. 可以翻開的東西 */
   {let hb=null,hd=1e9;for(const h of FL){if(Math.abs(wx-h.x)<h.w*.55+tol&&wy<=h.y+6+tol&&wy>=h.y-h.h-6-tol){const d=Math.hypot(wx-h.x,wy-(h.y-h.h*.4));if(d<hd){hd=d;hb=h}}}
-   if(hb){if(!near(hb.x,hb.y))return tooFar();flip(hb);return}}
+   if(hb){if(!near(hb.x,hb.y)){farX=hb.x;farY=hb.y;return tooFar()}flip(hb);return}}
   /* 5. 場景小互動 */
   if(C.tapScene&&C.tapScene(wx,wy,E))return;
   ripple(wx,wy)};
@@ -262,7 +270,10 @@ function make(C){
  /* ---- 找到 ---- */
  function found(o){o.found=true;H.colAdd(o.id);drawItems();H.burst(o.x,o.y);const left=real.filter(x=>x.id===o.id&&!x.found).length;
   H.floatText(o.x,o.y-26,left?o.t.short+'！':o.t.short+' 找齊了！');H.updateCounts(o.id);if(left)H.sfx.found();else H.sfx.typeDone();
-  if(!real.some(x=>!x.found))setTimeout(()=>H.win(),500)}
+  if(!real.some(x=>!x.found)){if(C.goal&&!atGoal()){goalOn=true;arrowUntil=0;setTimeout(()=>H.toast(C.goal.msg,4200),600)}else setTimeout(()=>H.win(),500)}}
+ /* 2026-11-21 樹籬迷宮：C.goal={x,y,r,msg,arrive}＝東西找齊後，還要走到這個地方才過關（沒有 C.goal 的秘境照舊：找齊就過關） */
+ const atGoal=()=>C.goal&&Math.hypot(P.x-C.goal.x,(P.y-C.goal.y)*1.3)<C.goal.r;
+ function goalTick(){if(!goalOn||!atGoal())return;goalOn=false;arrowUntil=0;if(C.goal.arrive)H.toast(C.goal.arrive,2400);H.burst(C.goal.x,C.goal.y-60);setTimeout(()=>H.win(),900)}
 
  /* ---- 連環小故事（5 步：提問的人 → 目標 → 幫手 → 目標 → 提問的人） ---- */
  function roleTap(role){const S=STORIES[C.n];if(!S)return;
@@ -282,7 +293,7 @@ function make(C){
   const c=clv.story;sparks();
   if(c&&!c.found)H.toast(`📖 ${S.title}：完成！\n${S.who}：謝謝你！我看到 🍀 幸運草藏在${C.where(g||P,c.host)}，去翻翻看！`,6500);
   else if(!c){H.game().clover=true;H.colClover(C.n);H.toast(`📖 故事完成：${S.title}！送你一株幸運草 🍀`,3200)}}
- E.storyState=()=>story;E.clovers=()=>clv;E.P=P;E.all=()=>all;E.flips=()=>FL;E.near=near;E.REACH=REACH;
+ E.storyState=()=>story;E.goalOn=()=>goalOn;E.clovers=()=>clv;E.P=P;E.all=()=>all;E.flips=()=>FL;E.near=near;E.REACH=REACH;
  E.cut=v=>{cut+=v};E.busy=busy;
 
  /* 測試用 */

@@ -309,7 +309,7 @@ function foundClover(c){c.found=true;if(c.kind==='story'){st.clover=true;colClov
  burst(c.x,c.y);floatText(c.x,c.y-20,c.kind==='bonus'?'隱藏幸運草！':'幸運草！');toast(c.kind==='bonus'?'✨ 找到隱藏的幸運草！過關時會多一顆隱藏星星':'🍀 拿到這一關的幸運草了！',2600);sfx.typeDone()}
 function renderItems(){
  itemsL.innerHTML=items.map((it,i)=>{
-  const sx=it.fl&&it.t.id!=='letter'?-it.sc:it.sc;
+  const sx=it.fl&&it.t.id!=='letter'&&!it.t.nofl?-it.sc:it.sc; /* 2026-11-21 使用者：有字的物件（例：字母積木）不要左右顛倒 → 物件類型加 nofl:true 就不會隨機翻面 */
   let s=`<g class="item" data-i="${i}" transform="translate(${f(it.x)},${f(it.y)}) rotate(${f(it.rot)}) scale(${f(sx)},${f(it.sc)})"><g class="inner">${it.t.id==='fish'?'':it.float?`<ellipse cx="0" cy="${f(it.r*.55)}" rx="${f(it.r*1.25)}" ry="4" fill="#e6faf6" opacity=".85" stroke="#fff" stroke-width="1.2"/><path d="M${f(-it.r*1.6)},${f(it.r*.7)} q4,-3 8,0 M${f(it.r*1.0)},${f(it.r*.8)} q4,-3 8,0" fill="none" stroke="#fff" stroke-width="1.4"/>`:`<ellipse cx="2" cy="${f(it.r*.75)}" rx="${f(it.r*.9)}" ry="3" fill="#000" opacity=".18" stroke="none"/>`}${ART[it.t.id]}</g></g>`;
   if(it.occ)s+=`<g class="still">${it.occ.svg}</g>`;
   return s}).join('');
@@ -499,7 +499,7 @@ function newGame(keepView){if(PANO)panoSet(false);WINGO=0;const S=SEC();
    條件：這一關過關過（有 best）、秘境的出發地過關過、秘境還沒過關。挑人在 newGame 最後做，不影響物件和場景的亂數。 */
 const DOTSIG='cx="-6" cy="-1" r="1.7"';let hintSp=null,hintMsg='';
 function pickSecretHint(){hintSp=null;hintMsg='';if(SEC())return;if(!(bestOf(level)>0))return;
- const cand=SECRET_IDS.filter(n=>{const L=LEVELS[n];return L&&L.hint&&L.hint.length&&!(bestOf(n)>0)&&bestOf(L.home)>0})
+ const cand=SECRET_IDS.filter(n=>{const L=LEVELS[n];return L&&L.hint&&L.hint.length&&!(bestOf(n)>0)&&(L.needStars?starsOf(L.home)>=L.needStars:bestOf(L.home)>0)}) /* 2026-11-21 needStars：出發地要幾顆星才開始有路人提這個秘境（樹籬迷宮＝宮廷院 2 星） */
   .concat(FIND_IDS.filter(n=>canFind(n)&&LEVELS[n].find.hint&&LEVELS[n].find.hint.length));if(!cand.length)return; /* 新關卡（find）和秘境的提示放在同一個籤筒輪流 */
  const ppl=sprites.filter(s=>s.svg&&s.svg.includes(DOTSIG)&&s!==storySp.giver&&s!==storySp.helper);if(!ppl.length)return;
  const R=Math.random;hintSp=ppl[Math.floor(R()*ppl.length)];const L=LEVELS[cand[Math.floor(R()*cand.length)]],hs=L.find?L.find.hint:L.hint;hintMsg=hs[Math.floor(R()*hs.length)]}
@@ -547,7 +547,7 @@ function burst(x,y){const g=svgEl('g',{},fx),ps=[];for(let i=0;i<12;i++)ps.push(
  anim(650,k=>{const e=1-Math.pow(1-k,3);ps.forEach(p=>{p.c.setAttribute('cx',x+Math.cos(p.a)*p.d*e);p.c.setAttribute('cy',y+Math.sin(p.a)*p.d*e);p.c.setAttribute('opacity',1-k)});ring.setAttribute('r',10+32*e);ring.setAttribute('opacity',1-k)},()=>g.remove())}
 function floatText(x,y,txt){const fs=Math.min(36,15/view.s);const t=svgEl('text',{x,y,'text-anchor':'middle','font-size':fs,'font-weight':800,fill:OL,stroke:'#fff','stroke-width':fs*.28,'paint-order':'stroke','font-family':'PingFang TC, Noto Sans TC, sans-serif'},fx);t.textContent=txt;
  anim(1200,k=>{t.setAttribute('y',y-k*fs*1.4);t.setAttribute('opacity',k<.6?1:1-(k-.6)/.4)},()=>t.remove())}
-$('#hintBtn').onclick=()=>{if(!st.running||hintLock||(!testMode&&st.hintsLeft<=0))return;const rest=items.filter(it=>!it.found);if(!rest.length)return;
+$('#hintBtn').onclick=()=>{if(!st.running||hintLock||(!testMode&&st.hintsLeft<=0))return;const rest=items.filter(it=>!it.found);if(!rest.length&&!(SEC()&&SEC().goalOn&&SEC().goalOn()))return; /* 2026-11-21 秘境找齊後還要走到終點（C.goal）時，提示箭頭指向終點 */
  {const S=SEC();if(S){if(!S.hint())return;st.hintsUsed=(st.hintsUsed||0)+1;if(!testMode)st.hintsLeft--;hintLock=true;setHintUI();sfx.hint();
   toast(testMode?'提示：跟著頭上的箭頭走':st.hintsLeft?`提示：跟著頭上的箭頭走（剩 ${st.hintsLeft} 次）`:'提示：跟著頭上的箭頭走（提示用完了）',2600);setTimeout(()=>{hintLock=false;setHintUI()},testMode?900:2600);return}}
  const it=rest[Math.floor(Math.random()*rest.length)];revealAround(it.x,it.y,1);st.hintsUsed=(st.hintsUsed||0)+1;if(!testMode)st.hintsLeft--;hintLock=true;setHintUI();sfx.hint();

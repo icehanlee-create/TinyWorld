@@ -12,7 +12,7 @@
    要開放某一關：把編號從清單拿掉，並把那一關的 level{n}.js 上傳到 GitHub。
    注意：系列關卡要一起處理（例：18 要靠 17 才進得去，開放 18 之前 17 也要開放）。
    自己測試完整版時，改成 const HIDE_LEVELS=[]; 就好。 */
-const HIDE_LEVELS=[14,15,16,17,18,20];
+const HIDE_LEVELS=[];
 {const add0=addLevel;addLevel=L=>{if(!HIDE_LEVELS.includes(L.n))add0(L)}}
 
 addLevel({n:1,title:'第 1 關．奇幻小鎮',file:'level1.js',c:[900,760],map:{x:120,y:170,ic:'🏰',name:'奇幻小鎮'},
@@ -36,6 +36,9 @@ addLevel({n:9,title:'第 9 關．天守閣山城',file:'level9.js',pre:'sakura_c
  desc:'沿著石階登上山頂的天守閣：2 種老朋友加上 <b>10 種山城的新東西</b>，還有一群表演的武士。'});
 addLevel({n:101,secret:true,home:5,per:3,title:'海上秘境．復活島',pre:'secret.js',file:'level101.js',c:[1380,330],
  hint:['路人：聽說海島港口外的海上，有時候會冒出一排黑黑的巨人影子⋯','路人：海島港口那個拿望遠鏡的孩子說，東南邊的海上有座住著石頭巨人的島！','路人：老漁夫說，海島港口東南的海平線上，偶爾會浮出一排巨人的黑影。只要有人在它們消失前看清楚，海上就會為他指出一條路⋯']});
+/* 2026-11-21 秘境：樹籬迷宮（入口在第 18 關宮廷院西邊高綠籬牆的小缺口，宮廷院 2 星後小男孩會探頭；過場 RIDES.maze102；全部寫在 level102.js） */
+addLevel({n:102,secret:true,home:18,needStars:2,per:3,title:'秘境．樹籬迷宮',pre:'secret.js',file:'level102.js',c:[1390,2170],map:{x:100,y:198,ic:'🌿',name:'樹籬迷宮'},next:{btn:'鑽進樹籬迷宮',had:'綠籬牆的小缺口隨時可以鑽進去',fresh:'小男孩在綠籬的小缺口等你',ride:'maze102'},
+ hint:['路人：宮廷院西邊那面高高的綠籬牆，偶爾會沙沙作響⋯好像有人躲在裡面？','路人：聽說宮廷院西邊的綠籬牆後面，藏著一座走不出來的迷宮！','園丁：宮廷院西邊的綠籬，底下好像被誰鑽出一個小洞⋯我還沒空補呢。']});
 
 /* ---- 下一站預告圖（120×84） ---- */
 const farmPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#f6efe0"/><path d="M0,52 Q30,38 60,48 Q90,36 120,46 V84 H0Z" fill="#a3ad66"/><rect y="60" width="120" height="24" fill="#d9c06a"/><path d="M0,60 H120" stroke="#2b2420" stroke-width="1.6"/><g transform="translate(44,58)"><path d="M-20,0 V-20 L-12,-30 L0,-35 L12,-30 L20,-20 V0Z" fill="#b14d27" stroke="#2b2420" stroke-width="2"/><path d="M-7,0 V-15 H7 V0 M-7,-15 L7,0 M7,-15 L-7,0" stroke="#fffaf0" stroke-width="1.6" fill="#7a3e2a"/></g><g transform="translate(78,58)"><path d="M-7,0 V-34 Q0,-42 7,-34 V0Z" fill="#c6ccc2" stroke="#2b2420" stroke-width="2"/></g><g transform="translate(98,58)"><path d="M-6,0 L-4,-26 L4,-26 L6,0Z" fill="#e2dccb" stroke="#2b2420" stroke-width="1.6"/><path d="M0,-28 l-12,-9 M0,-28 l12,-9 M0,-28 l-9,12 M0,-28 l9,12" stroke="#2b2420" stroke-width="2.4"/></g></svg>`;
@@ -92,6 +95,12 @@ addLevel({n:18,title:'宮廷院',file:'level18.js',c:[1250,1700],
  find:{after:17,from:17,hint:['路人：城門廣場最北邊的主堡大門，今天終於打開了！聽說門口站著一位管家。','路人：從城門廣場的水井一直往北走，走上主堡大門前的石階，管家會帶你去宮廷院的花園。','路人：主堡裡面有一座漂亮的宮廷院，噴水池和樹籬雕塑都好可愛，主堡大門口的管家正在招呼客人呢。']},
  map:{x:100,y:198,ic:'⛲',name:'宮廷院'},next:{pv:()=>courtPreview(),btn:'跟管家進宮廷院',had:'管家隨時可以帶你進宮廷院',fresh:'城門廣場主堡大門前的管家在等你',ride:'court18c'},
  desc:'穿過主堡的拱道，走進陽光下的宮廷院：1 種老朋友加上 <b>11 種宮廷院新東西</b>。'});
+/* 2026-11-21 城堡系列：圖書館（第 19 關，午後陽光）。入口是宮廷院東北塔樓小側門旁的書僮；宮廷院拿 2 星後才出現。冒險地圖不另外放節點 */
+const libPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#e2d6ba"/><g stroke="#2b2420" stroke-width="1.5" stroke-linejoin="round"><path d="M10,34 V14 Q10,5 18,5 Q26,5 26,14 V34Z M94,34 V14 Q94,5 102,5 Q110,5 110,14 V34Z" fill="#cfe6f2"/><path d="M26,16 L66,70 H86 L36,16Z" fill="#fff6d0" opacity=".6" stroke="none"/><rect x="0" y="36" width="120" height="8" fill="#8a5a34"/><rect x="0" y="44" width="120" height="40" fill="#caa070" stroke="none"/>${[34,42,50,58,66,74,82].map((x,i)=>`<rect x="${x}" y="${24-(i%3)*3}" width="7" height="${12+(i%3)*3}" fill="${['#8e2630','#2f4f8a','#3f6a4a','#c99a3a','#6a3f8a','#a8502e','#1f5f6a'][i]}" stroke-width="1"/>`).join('')}<path d="M57,80 V44 H63 V80Z" fill="#8a5a34"/>${[0,1,2,3].map(i=>`<path d="M60,${76-i*9} L${i%2?44:76},${72-i*9}" fill="none" stroke="#a8703f" stroke-width="3"/>`).join('')}<ellipse cx="60" cy="44" rx="16" ry="4" fill="#c48a52"/></g></svg>`;
+addLevel({n:19,title:'圖書館',file:'level19.js',c:[1250,1880],
+ find:{after:18,from:18,hint:['路人：宮廷院東北角那座紫色屋頂的塔樓，小側門口站著一位書僮，好像在等人。','路人：從宮廷院的玫瑰拱門一直往北走，走到東北邊塔樓的小側門，書僮會帶你上樓。','路人：聽說宮廷院東北邊的塔樓裡藏著一座好大的圖書館，塔樓側門的書僮手上拿著一串鑰匙呢。']},
+ map:{x:100,y:198,ic:'📚',name:'圖書館'},next:{pv:()=>libPreview(),btn:'跟書僮上樓',had:'書僮隨時可以帶你上塔樓',fresh:'宮廷院東北塔樓側門的書僮在等你',ride:'stairs19'},
+ desc:'爬上塔樓，走進陽光灑落的圖書館：1 種老朋友加上 <b>11 種圖書館新東西</b>。'});
 /* 2026-11-20 城堡系列：奇幻晚宴（原名奇幻大餐廳）。2026-11-21 使用者：改成第 20 關，入口改成宮廷院北邊主殿大門前的侍從；宮廷院拿 2 星後才出現。冒險地圖不另外放節點 */
 addLevel({n:20,title:'奇幻晚宴',file:'level20.js',c:[1520,1880],
  find:{after:18,from:18,hint:['路人：宮廷院最北邊的主殿大門，天快黑的時候會打開喔！門口站著一位拿燭台的侍從。','路人：從宮廷院的噴水池一直往北走，走上主殿大門前的石階，侍從會帶你去參加國王的宴會。','路人：國王在主殿的大餐廳辦慶功宴，宮廷院北邊的大門口有侍從在招呼客人呢。']},
@@ -101,4 +110,4 @@ addLevel({n:20,title:'奇幻晚宴',file:'level20.js',c:[1520,1880],
 addRegion({name:'櫻花山城',ids:[6,7,8,9],x:-68,y:250});
 addRegion({name:'沙漠',ids:[11,12,13],x:-85,y:392});
 /* 2026-11-19 城堡系列（第 17 關起）隸屬於奇幻小鎮：發現城門廣場之後，遠看只顯示大區名「奇幻小鎮」，放大才看得到「奇幻小鎮」「城堡」兩個名牌；還沒發現時完全不變 */
-addRegion({name:'奇幻小鎮',get ids(){const T_=window.TH;if(!T_||!T_.isOpen(17))return [17];return [1,17,18,20].filter(n=>n===1||T_.isOpen(n))},x:100,y:244});
+addRegion({name:'奇幻小鎮',get ids(){const T_=window.TH;if(!T_||!T_.isOpen(17))return [17];return [1,17,18,19,20].filter(n=>n===1||T_.isOpen(n))},x:100,y:244});
