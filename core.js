@@ -247,7 +247,8 @@ const QGLYPH={'!':`<path d="M-3,-11 Q0,-13 3,-11 L1.6,2 Q0,3.2 -1.6,2Z" fill="#f
 /* qMark(y, ch)：ch 是 '!'（故事角色，預設）或 '?'（第 5 關望遠鏡小孩等「有事想問」的角色，2026-11-11 使用者要求同樣式） */
 const qMark=(y=-80,ch='!')=>`<g class="sq"><g class="qbob"><circle cy="${y-12}" r="12.5" fill="#f5c842" stroke-width="1.8"/><circle cy="${y-12}" r="9.6" fill="none" stroke="#fff3b0" stroke-width="1.2"/><g transform="translate(0,${y-12}) scale(.9)">${QGLYPH[ch]||QGLYPH['!']}</g><path d="M-3,${y+1} L0,${y+6} L3,${y+1}" fill="#f5c842" stroke-width="1.4"/></g></g>`;
 /* 故事角色頭上：還沒完成時是驚嘆號徽章（不畫出要找的東西），完成後是愛心泡泡 */
-const storyThink=S=>{if(!S)return '';if(story&&story.done)return qThink(QHEART,16,16);return qMark()};
+/* 2026-11-21 使用者：完成後的愛心跑出雲朵外面 → 愛心移到雲朵正中間（雲朵中心約在 (4, y-21.5)） */
+const storyThink=S=>{if(!S)return '';if(story&&story.done)return qThink(`<g transform="translate(1.3,-13.7)">${QHEART}</g>`,16,16);return qMark()};
 const bow=(x,y,c)=>`<path d="M${x},${y} l-5,-3 v6Z M${x},${y} l5,-3 v6Z" fill="${c}" stroke-width="1.1"/><circle cx="${x}" cy="${y}" r="1.6" fill="${c}" stroke-width="1"/>`;
 const STORIES={};/* 連環小故事：各關檔案自己設 STORIES[關卡] */
 const SEQ=['giver','target','helper','target','giver'];
