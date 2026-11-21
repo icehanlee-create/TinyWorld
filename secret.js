@@ -81,7 +81,8 @@ function make(C){
    if(C.inReg&&!C.inReg(reg,x,y))continue;if(!walkable(x,y)||solid(x,y,22))continue;if(covered(x,y))continue;
    if(all.some(o=>Math.hypot(o.x-x,o.y-y)<(t<600?90:50)))continue;if(Math.hypot(x-C.start.x,y-C.start.y)<120)continue;return{x,y}}return null}
  function hostIn(reg,kind){const g=H.REG[reg],c=FL.filter(h=>!h.hold&&h.kind===kind&&inRect(g,h.x,h.y));return c.length?c[Math.floor(Math.random()*c.length)]:null}
- function placeOne(t,reg,host,decoy){const o={t,id:t.id,decoy,r:t.r||13,rot:(Math.random()-.5)*2*(t.rot||15),sc:.9+Math.random()*.12,found:false,hidden:false,host:null,fl:Math.random()<.5};
+ function placeOne(t,reg,host,decoy){const o={t,id:t.id,decoy,r:t.r||13,rot:(Math.random()-.5)*2*(t.rot||15),sc:(C.itemSc||1)*(.9+Math.random()*.12),   /* 2026-11-21w C.itemSc：物件整體縮放（樹籬迷宮 .8） */
+ found:false,hidden:false,host:null,fl:Math.random()<.5};
   if(host){const h=hostIn(reg,host);if(h){h.hold=o;o.host=h;o.hidden=true;o.x=h.x+(Math.random()-.5)*h.w*.3;o.y=h.y-4;all.push(o);return o}}
   const p=spot(reg)||spot(C.anyReg);if(!p)return null;o.x=p.x;o.y=p.y;all.push(o);return o}
  E.items=()=>{reset();

@@ -432,9 +432,10 @@ HERE[N]=[-96,123];
 MAPHOOKS.push(({U,P,ink,FN})=>{if(U<N)return '';
  const road='M-54,168 Q-68,162 -80,158';
  let m=H.mapRoute(road,'road',ink);
- m+=`<g class="mnode" data-n="${N}"><g transform="translate(-20,-11)"><circle cx="-76" cy="156" r="24" fill="transparent"/><ellipse cx="-76" cy="165" rx="20" ry="6" fill="#b9d490" stroke="${ink}" stroke-width="1.3"/>`+
+ m+=`<g class="mnode" data-n="${N}"><g transform="translate(-20,-11)"><circle cx="-76" cy="156" r="24" fill="transparent"/>`+H.MAPC.round(-100,165,.72,'#f2b4c6')+H.MAPC.round(-52,166,.62,'#f2b4c6')+H.MAPC.tufts(-76,168,34)+`<g transform="translate(-76,165) scale(1.15) translate(76,-165)">`;   /* 2026-11-21w 繪本風：拿掉底座、兩旁小樹、放大 */
+ m+=``+
   `<g stroke="${ink}" stroke-width="1.2" stroke-linejoin="round"><path d="M-88,165 L-85,158 H-67 L-64,165Z" fill="#a9a79c"/><rect x="-83" y="150" width="14" height="8" fill="#fbf6ea"/><path d="M-87,151 Q-76,146 -65,151 L-67,153 H-85Z" fill="#454a5a"/><rect x="-80" y="143" width="8" height="7" fill="#fbf6ea"/><path d="M-84,144 Q-76,139 -68,144 L-70,146 H-82Z" fill="#454a5a"/><path d="M-79,139 L-76,133 L-73,139Z" fill="#454a5a"/><path d="M-80,134 q-2,-2 -1,-4 M-72,134 q2,-2 1,-4" fill="none" stroke="#f0c040" stroke-width="1.6"/></g>`+
-  `</g><g transform="translate(-147,150)"><rect x="-26" y="-10" width="52" height="19" rx="9.5" fill="#fffaf0" stroke="${ink}" stroke-width="1.6"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">天守閣</text></g></g>`;
+  `</g></g><g transform="translate(-147,150)"><rect x="-26" y="-10" width="52" height="19" rx="9.5" fill="#fffaf0" stroke="${ink}" stroke-width="1.6"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">天守閣</text></g></g>`;
  return m});
 })();
 

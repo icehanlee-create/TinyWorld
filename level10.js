@@ -535,7 +535,7 @@ NGHOOKS.push(sc=>{if(sc===N)setTimeout(nxReset,0);else{cancelAnimationFrame(NXS.
 H.mapHook(1,({U,P,ink,FN})=>{if(U<N)return'';let g='';
  g+=`<path d="M258,74 L249,50" fill="none" stroke="${ink}" stroke-width="1.4"/><path d="M262,73 L253,49" fill="none" stroke="${ink}" stroke-width="1" opacity=".6"/>`;
  let sv=`<g class="mnode" data-n="${N}"><circle cx="240" cy="42" r="22" fill="transparent"/>`;
- sv+=`<ellipse cx="240" cy="58" rx="34" ry="8" fill="#f7f5ef" stroke="${ink}" stroke-width="1.4"/>`+P('M214,58 L228,36 L240,24 L252,34 L266,58Z','#fbf9f3',1.4)+`<path d="M240,24 L252,34 L266,58 L254,58 L246,40Z" fill="#c9d6dc" stroke="none"/>`;
+ sv+=H.MAPC.birds(204,24,.8)+P('M214,58 L228,36 L240,24 L252,34 L266,58Z','#fbf9f3',1.4)+`<path d="M240,24 L252,34 L266,58 L254,58 L246,40Z" fill="#c9d6dc" stroke="none"/>`;
  sv+=`<path d="M239,27 Q231,35 237,41 Q244,47 234,53 Q229,56 232,58" fill="none" stroke="#9fb1b8" stroke-width="1.6" stroke-dasharray="3 2"/><path d="M226,40 Q220,48 226,57" fill="none" stroke="#9fb1b8" stroke-width="1.4" stroke-dasharray="3 2"/>`;
  [[216,57],[222,54],[262,57]].forEach(([x,y])=>sv+=P(`M${x-3},${y} L${x},${y-7} L${x+3},${y}Z`,'#5f7a4a',1));
  sv+=`<g transform="translate(255,60)"><path d="M0,-3 v3" stroke="${ink}" stroke-width="1"/>`+P('M-5,0 H5 Q6,0 6,2 V8 Q0,10 -6,8 V2 Q-6,0 -5,0Z','#c4473c',1.1)+`<rect x="-4" y="2" width="8" height="3" rx="1" fill="#d6ecf0"/></g>`;

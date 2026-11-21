@@ -298,9 +298,10 @@ H.mapHook(1,({U,P,ink,FN,f})=>{let g='';const on=U>=2;
  if(U>=3){g+=`<path d="M288,206 L246,84" fill="none" stroke="${ink}" stroke-width="1.6"/><path d="M293,204 L251,82" fill="none" stroke="${ink}" stroke-width="1.1" opacity=".6"/>`;
   [[279,180],[262,130]].forEach(([x,y])=>g+=`<path d="M${x},${y} v14 M${x-4},${y} h8" stroke="#6a7488" stroke-width="2.4" fill="none"/>`);
   g+=`<g transform="translate(271,153)"><path d="M0,0 v4" stroke="${ink}" stroke-width="1"/>`+P('M-6,4 H6 L7,13 Q0,15 -7,13Z','#c4473c',1.3)+`<rect x="-4" y="6" width="3" height="3" fill="#d6ecf0"/><rect x="1" y="6" width="3" height="3" fill="#d6ecf0"/></g>`;
-  let sv=`<g class="mnode" data-n="3"><circle cx="236" cy="78" r="38" fill="transparent"/><ellipse cx="236" cy="84" rx="38" ry="12" fill="#f7f5ef" stroke="${ink}" stroke-width="1.4"/>`;
+  let sv=`<g class="mnode" data-n="3"><circle cx="236" cy="78" r="38" fill="transparent"/>`+H.MAPC.pine(204,88,.85,'#4f7a4a')+H.MAPC.pine(270,90,.95,'#4f7a4a')+`<path d="M199,74 l5,-8 l5,8Z M265,75 l5,-9 l5,9Z" fill="#fbf9f3" stroke="${ink}" stroke-width=".9"/>`+H.MAPC.birds(212,56,.8)+`<g transform="translate(236,84) scale(1.15) translate(-236,-84)">`;   /* 2026-11-21w 繪本風：拿掉雪地底座，兩側積雪松樹、雪堆線、小鳥，放大 */
   sv+=`<ellipse cx="252" cy="86" rx="9" ry="3.5" fill="#9fd3cf" stroke="${ink}" stroke-width="1.1"/><g fill="#fff" opacity=".9"><circle cx="249" cy="79" r="3.5"/><circle cx="255" cy="76" r="4"/></g>`;
   [[218,84,'#7f5a40'],[230,80,'#a85640'],[240,88,'#6a7488']].forEach(([x,y,c])=>sv+=P(`M${x-6},${y} V${y-7} H${x+6} V${y}Z`,'#e6d3b0',1.2)+P(`M${x-8},${y-7} L${x},${y-14} L${x+8},${y-7}Z`,c,1.2)+`<path d="M${x-6},${y-9} L${x},${y-13} L${x+6},${y-9}" fill="none" stroke="#fbf9f3" stroke-width="2"/>`);
+  sv+=`<path d="M224,84 V77 H230 V84Z M234,88 V81 H246 V88Z" fill="#000" opacity=".12"/></g>`;
   sv+=`<g transform="translate(236,108)"><rect x="-38" y="-11" width="76" height="20" rx="10" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4.5" text-anchor="middle" font-size="12" fill="${ink}" font-family="${FN}">雪山溫泉村</text></g></g>`;
   g+=sv}
  return g});

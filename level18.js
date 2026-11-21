@@ -22,8 +22,8 @@ H.SKYC[N]='#d6ebf5';H.SKYY[N]=300;
 H.EDGEM[N]='B';H.EDGED[N]='LRB';
 H.EDGEDECO[N]=[['round',2],['bush',2.4],['flowersY',1]];
 H.FRINGE[N]=[['bush',.8],['flowersY',.8],['pebbles',.6],['walker',.3]];
-H.FRINGEX[N]=[[0,0,2600,760],[0,0,730,840],[0,1800,2600,2600]];   /* 迷宮 11-21m 往北移，迷宮上面不長東西 */   /* 2026-11-21 使用者：南邊迴廊不長草長花 */
-if(H.EDGELAND)H.EDGELAND[N]=(x,y)=>(y>1640||(x<740&&y<850))?false:undefined;   /* 迴廊和南邊走道（場地外也是）不種樹、不長草叢 */
+H.FRINGEX[N]=[[0,0,2600,760],[0,0,690,770],[0,1800,2600,2600]];   /* 迷宮 11-21m 往北移，迷宮上面不長東西 */   /* 2026-11-21 使用者：南邊迴廊不長草長花 */
+if(H.EDGELAND)H.EDGELAND[N]=(x,y)=>(y>1640||(x<700&&y<780))?false:undefined;   /* 迴廊和南邊走道（場地外也是）不種樹、不長草叢 */
 H.DENS[N]=1;
 
 /* ================= 2. 當地人：宮廷貴族（華麗長袍、約 4 成禮服裙、小皇冠、羽毛扁帽）；園丁草帽綠圍裙；侍女白圍裙；衛兵 ================= */
@@ -242,7 +242,7 @@ const PART=[[1020,1040],[1480,1040],[1020,1470],[1480,1470]],PW=230,PHt=150;   /
 const ARC={y0:1838,y1:1996};         /* 南邊迴廊 */
 let towS='';
 const TOW={x:1880,y:950};           /* 東北塔樓（圖書館的伏筆） */
-const MAZE={x0:600,x1:720,y0:550,y1:828,ax:648};   /* 2026-11-21 使用者：迷宮再往北（入口拱門底部約在 y 834，整個比 11-21c 往上 140） */   /* 2026-11-21 使用者：迷宮、塔樓再往兩側、往上，不要佔太多空間 */   /* 西北綠籬迷宮 */
+const MAZE={x0:600,x1:680,y0:480,y1:758,ax:610};   /* 2026-11-21u 使用者選 B＋C：綠籬牆往左 40、往上 70（佔的地方變小），牆前種一排柏樹＋圓球灌木；小缺口跟著搬到 (610,758)（level102.js GAP） */   /* 2026-11-21 使用者：迷宮再往北（入口拱門底部約在 y 834，整個比 11-21c 往上 140） */   /* 2026-11-21 使用者：迷宮、塔樓再往兩側、往上，不要佔太多空間 */   /* 西北綠籬迷宮 */
 const SPOT={giver:[1590,1300],target:[760,1312],helper:[1430,1720]};   /* 故事角色固定位置 */
 
 /* ---- 花壇（原點在花壇下緣中央，寬 PW、高 PHt） ---- */
@@ -302,6 +302,9 @@ function ground(){
  /* ---- 主殿正面（2026-11-21 使用者：主殿改成兩層樓；中央高塔加高、比兩邊圓塔再高一點；兩邊圓塔往內收，右邊圓塔和圖書塔之間有空中廊道） ---- */
  const pl=DOOR.y,MW0=900,MW1=1600,F2=480,RT=330,CT=160,SX=[870,1630];
  g+=`<path d="M${X0},${pl-60} H${X1} V${pl+70} H${X0}Z" fill="#9fc060" stroke="none"/>`;
+ /* 2026-11-21w 使用者：兩側圓塔改放在主殿後面，看得到完整的主殿屋簷 → 先畫圓塔、再畫主殿 */
+ /* 2026-11-21w 使用者：圓塔底部的圓弧露在主殿牆腳前面很怪 → 塔底往後（往北）收 34，圓弧最低點剛好落在主殿牆腳；塔頂高度不變 */
+ g+=rTower(SX[0],pl-17,120,395,'#5c6f96')+rTower(SX[1],pl-17,120,395,'#5c6f96');   /* 11-21w 使用者：圓弧底部和主殿底部切齊（圓弧最低點＝by+w*.14） */
  g+=`<path d="M${MW0},${pl} V${RT} H${MW1} V${pl}Z" fill="#ece4d0"/>`+stn(MW0,MW1,RT,pl,22,46);
  g+=`<path d="M${MW0},${F2} H${MW1} V${F2+8} H${MW0}Z" fill="#e2d8c0"/>`;   /* 一樓、二樓之間的腰線 */
  {const RV='C',ex=0,ev=`M${MW0-16},${RT} Q1250,${RT+ex*2} ${MW1+16},${RT}`;
@@ -331,7 +334,6 @@ function ground(){
  g+=`<path d="M1196,${pl} V${pl-92} Q1250,${pl-150} 1304,${pl-92} V${pl}" fill="none" stroke="#d6cbb0" stroke-width="6"/>`;
  /* 兩側掛的藍色長旗 */
  [1176,1324].forEach(x=>g+=`<path d="M${x-12},${pl-210} H${x+12} V${pl-120} L${x},${pl-132} L${x-12},${pl-120}Z" fill="#3f6f9a" stroke-width="1.6"/><path d="M${x-6},${pl-180} L${x},${pl-190} L${x+6},${pl-180} L${x},${pl-170}Z" fill="#e0b44a" stroke-width="1.1"/>`);
- g+=rTower(SX[0],pl+8,120,420,'#5c6f96')+rTower(SX[1],pl+8,120,420,'#5c6f96');
  /* 大門前的石階（晚宴的侍從站在石階下） */
  for(let i=0;i<4;i++){const y=pl+i*15,w=130+i*30;g+=`<path d="M${DOOR.x-w/2},${y} H${DOOR.x+w/2} V${y+15} H${DOOR.x-w/2}Z" fill="${i%2?'#d6cbb0':'#e2d8c0'}"/>`}
  /* ---- 石子步道：南北主道、東西橫道、噴水池廣場、往塔樓和玫瑰步道的小徑 ---- */
@@ -366,7 +368,10 @@ function ground(){
   g+=`<rect x="${x0}" y="${yT}" width="${x1-x0}" height="${yB-yT}" fill="url(#hd18cT)" stroke="none"/>`;
   g+=`<rect x="${x0}" y="${yB}" width="${x1-x0}" height="${yG-yB}" fill="${HF[0]}" stroke="none"/><rect x="${x0}" y="${yB}" width="${x1-x0}" height="${yG-yB}" fill="url(#hd18cF)" stroke="none"/>`;
   g+=`<path d="M${x1},${yB} V${yG} H${x0}" fill="none" stroke-width="2"/>`;
-  g+=`<path d="M${x0},${yB-3}${bumps(x0,yB-3,x1,yB-3,0,1,9,7)} Z" fill="${HT[2]}" stroke="#2f5a26" stroke-width="1.2"/>`}
+  g+=`<path d="M${x0},${yB-3}${bumps(x0,yB-3,x1,yB-3,0,1,9,7)} Z" fill="${HT[2]}" stroke="#2f5a26" stroke-width="1.2"/>`;
+  /* 牆腳一排細高柏樹＋圓球灌木（11-21u 使用者選 C），讓方方的牆不突兀；小缺口 (MAZE.ax±25) 前面空著 */
+  for(const [x,k] of [[262,.95],[380,1],[500,1.05],[668,.95]])g+=`<g transform="translate(${x},${yG+6}) scale(${k})"><ellipse cx="0" cy="0" rx="16" ry="4" fill="#000" opacity=".15" stroke="none"/><path d="M0,0 Q-15,-30 -9,-62 Q0,-90 9,-62 Q15,-30 0,0Z" fill="#3f7030"/><path d="M-6,-12 Q-10,-40 -3,-70 M5,-16 Q8,-40 3,-62" fill="none" stroke="#548a3c" stroke-width="2.4"/></g>`;
+  for(const x of [320,440,548])g+=`<g transform="translate(${x},${yG+2})"><circle cx="0" cy="-14" r="15" fill="#4f8a3e"/><path d="M-7,-18 q4,-5 9,-2" fill="none" stroke="#78b85a" stroke-width="2"/></g>`}
  /* ---- 東北：塔樓（紫屋頂、爬藤、小側門＝圖書館的伏筆） ---- */
  /* 右邊圓塔 → 圖書塔的空中廊道（有屋頂、小拱窗、紅瓦），圖書塔加高，廊道接在它上面幾層 */
  {const corr=(x0,x1,by)=>{let c=`<path d="M${x0},${by} V${by-40} H${x1} V${by}Z" fill="#ece4d0"/>`+stn(x0,x1,by-40,by,13,30);for(let x=x0+24;x<x1-14;x+=46)c+=`<path d="M${x-6},${by-8} V${by-24} Q${x},${by-32} ${x+6},${by-24} V${by-8}Z" fill="#3a3040"/>`;
@@ -512,7 +517,7 @@ function structures(){
  /* 南：迴廊前摺餐巾的侍女 */
  grp(880,2070,110,70,'nap18c',napTable()+act(-30,0,1,{...maidO(),view:'side',pose:'reach',mood:1},'work')+act(32,0,-1,{...maidO({hat:-1,hs:3}),view:'fq',pose:'reach',mood:2},'work'),'侍女：餐巾要摺成天鵝的樣子⋯咦，怎麼摺成鴨子了？');
  /* 不能放東西的地方：主殿（侍從站的石階下留給晚宴入口）、迷宮、塔樓、花壇、迴廊、故事角色的固定位置 */
- mk(600,0,1900,DOOR.y+86);mk(MAZE.x0,MAZE.y0,MAZE.x1+4,MAZE.y1);mk(TOW.x-90,620,1900,TOW.y+14);
+ mk(600,0,1900,DOOR.y+86);mk(MAZE.x0,MAZE.y0,MAZE.x1+4,MAZE.y1+10);mk(TOW.x-90,620,1900,TOW.y+14);
  PART.forEach(([cx,cy])=>mk(cx-PW/2-6,cy-PHt/2-4,cx+PW/2+6,cy+PHt/2+12));
  mk(1636,1380,1846,1600);   /* 涼亭後面（圓頂擋住的地方）不放東西 */
  mk(600,ARC.y0-80,1900,ARC.y1+12);

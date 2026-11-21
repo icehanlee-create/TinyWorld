@@ -272,13 +272,12 @@ H.mapHook(1.5,({P,ink,open})=>{if(!open(N))return '';
  return g});
 H.mapHook(2,({P,ink,FN,open})=>{if(!open(N))return '';
  let g=H.mapRoute('M110,206 Q72,250 34,290 Q0,322 -30,344','road',ink);
- let m=`<g class="mnode" data-n="${N}"><g transform="translate(-38,362) scale(.75) translate(62,-354)"><g transform="translate(0,-18)"><circle cx="-62" cy="360" r="42" fill="transparent"/>`;
- m+=`<ellipse cx="-62" cy="372" rx="46" ry="26" fill="#ecd29c" stroke="${ink}" stroke-width="1.5"/>`;
- m+=P('M-104,376 Q-84,350 -62,364 Q-44,350 -22,372 Z','#f4dfa8',1.5)+`<path d="M-62,364 Q-44,350 -22,372 H-40Z" fill="#dcbc7e"/>`;
- m+=`<ellipse cx="-62" cy="378" rx="15" ry="7" fill="#79cdc6" stroke="${ink}" stroke-width="1.4"/>`;
- [[-82,370],[-44,372],[-62,392]].forEach(([x,y],i)=>m+=`<g transform="translate(${x},${y})"><path d="M0,0 Q${i%2?4:-4},-9 ${i%2?2:-2},-16" fill="none" stroke="#a8794a" stroke-width="2.6"/><path d="M${i%2?2:-2},-16 q-8,-4 -11,2 M${i%2?2:-2},-16 q8,-4 11,2 M${i%2?2:-2},-16 q-3,-8 1,-10" fill="none" stroke="#5f8e3e" stroke-width="2.4" stroke-linecap="round"/></g>`);
- m+=P('M-30,386 L-22,376 L-14,386Z','#c4573a',1.3)+P('M-98,386 L-90,378 L-82,386Z','#2f6f73',1.3);
- m+=`</g></g><g transform="translate(-38,388)"><rect x="-40" y="-10" width="80" height="18" rx="9" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">沙漠綠洲市集</text></g></g>`;
+ let m=`<g class="mnode" data-n="${N}"><g transform="translate(-38,362) scale(.85) translate(62,-354)"><g transform="translate(0,-18)"><circle cx="-62" cy="360" r="42" fill="transparent"/>`;
+ const palmA=(x,y,s=1)=>`<path d="M${x},${y} Q${x-2*s},${y-9*s} ${x+2*s},${y-17*s}" fill="none" stroke="#8a6a40" stroke-width="${2*s}"/>`+[[-9,-2],[9,-2],[-6,-8],[7,-8],[0,-10]].map(([a,b])=>`<path d="M${x+2*s},${y-17*s} q${a*.5*s},${(b-3)*s} ${a*s},${(-b*.3+3)*s}" fill="none" stroke="#4f8a3a" stroke-width="${2.6*s}" stroke-linecap="round"/>`).join('');
+ const tentA=(x,y,w,c)=>P(`M${x-w/2},${y} L${x},${y-w*.75} L${x+w/2},${y}Z`,c,1.4)+`<path d="M${x},${y-w*.75} L${x-w*.18},${y} M${x},${y-w*.75} L${x+w*.18},${y}" stroke="#fffaf0" stroke-width="2"/><path d="M${x},${y-w*.75} L${x+w/2},${y} L${x+w*.18},${y}Z" fill="#000" opacity=".14"/><path d="M${x},${y-w*.75} v-4" stroke="${ink}" stroke-width="1"/><path d="M${x-2},${y} V${y-5} H${x+2} V${y}Z" fill="${ink}"/>`;
+ /* 2026-11-22 使用者選 A：條紋帳篷圍著綠洲＋兩棵棕櫚 */
+ const ART=`<ellipse cx="-40" cy="358" rx="16" ry="6" fill="#79cdc6" stroke="${ink}" stroke-width="1.3"/><path d="M-46,357 q3,-2 6,0" stroke="#fff" stroke-width="1" fill="none"/>`+palmA(-58,356,.9)+palmA(-24,354,1)+tentA(-52,369,16,'#c4573a')+tentA(-34,371,18,'#2f6f73')+tentA(-18,367,14,'#d8a040')+H.MAPC.birds(-80,330,.9);
+ m+=`</g></g>`+ART+`<g transform="translate(-38,388)"><rect x="-40" y="-10" width="80" height="18" rx="9" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">沙漠綠洲市集</text></g></g>`;
  return g+m});
 /* 透視過場小工具（2026-11-20，第 2～16 關的過場共用同一份，H.PV 只建一次；改的時候每個檔案都要一起改）：
    kf(名,消失點x,y) 產生「從消失點往鏡頭靠近」的 keyframes——縮放 = 1/距離，越近越快；消失點放在畫面外，就變成斜斜往左／往右走。

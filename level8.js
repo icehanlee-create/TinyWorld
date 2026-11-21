@@ -387,10 +387,11 @@ HERE[N]=[-40,150];
 MAPHOOKS.push(({U,P,ink,FN})=>{if(U<N)return '';
  const road='M-80,190 Q-64,184 -54,180';
  let m=H.mapRoute(road,'road',ink);
- m+=`<g class="mnode" data-n="${N}"><g transform="translate(40,-34)"><circle cx="-80" cy="204" r="24" fill="transparent"/><ellipse cx="-80" cy="210" rx="19" ry="6" fill="#b9d490" stroke="${ink}" stroke-width="1.3"/>`+
+ m+=`<g class="mnode" data-n="${N}"><g transform="translate(40,-34)"><circle cx="-80" cy="204" r="24" fill="transparent"/>`+H.MAPC.round(-104,210,.72,'#7faa4e')+H.MAPC.round(-56,211,.62,'#7faa4e')+H.MAPC.tufts(-80,213,34)+`<g transform="translate(-80,210) scale(1.15) translate(80,-210)">`;   /* 2026-11-21w 繪本風：拿掉底座、兩旁小樹、放大 */
+ m+=``+
   `<g stroke="${ink}" stroke-width="1.2" fill="#8fb05a"><rect x="-96" y="190" width="4" height="20" rx="1.6"/><rect x="-90" y="186" width="4" height="24" rx="1.6"/><rect x="-66" y="188" width="4" height="22" rx="1.6"/><rect x="-60" y="193" width="4" height="17" rx="1.6"/></g>`+
   P('M-84,210 V196 M-74,210 V196','none',2.4)+`<path d="M-87,198 H-71 M-89,194 Q-79,191 -69,194" fill="none" stroke="#d8413a" stroke-width="2.6" stroke-linecap="round"/>`+
-  `</g><g transform="translate(10,172)"><rect x="-26" y="-10" width="52" height="19" rx="9.5" fill="#fffaf0" stroke="${ink}" stroke-width="1.6"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">竹林神社</text></g></g>`;
+  `</g></g><g transform="translate(10,172)"><rect x="-26" y="-10" width="52" height="19" rx="9.5" fill="#fffaf0" stroke="${ink}" stroke-width="1.6"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">竹林神社</text></g></g>`;
  return m});
 })();
 

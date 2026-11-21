@@ -82,6 +82,20 @@ addLevel({n:16,title:'海底世界',file:'level16.js',c:[1250,1820],
  find:{after:10,from:5,hint:['路人：海島港口的燈塔很神奇喔，聽說有人去點它一下，光就會轉向什麼地方⋯','路人：南邊外海那艘紅色打撈船的船長，只認燈塔的信號——燈塔的光沒照到他，他理都不理人。','路人：燈塔的光照到哪裡，哪裡就有新的冒險在等你。']},
  map:{x:150,y:410,ic:'🤿',name:'海底世界'},next:{pv:()=>seaPreview(),btn:'坐潛水鐘沉下去',had:'潛水鐘隨時可以再沉下去',fresh:'燈塔照到的打撈船船長在等你',ride:'bell16'},
  desc:'坐潛水鐘沉到海底：2 種老朋友加上 <b>10 種海底新東西</b>。'});
+/* 2026-11-21w 使用者：奇幻小鎮的明信片也畫一張，風格和其他預告圖一樣（遠山、北邊石階上的城堡、小鎮屋頂、河、廣場噴水池） */
+const townPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#e2eef0"/><g stroke="#2b2420" stroke-width="1.5" stroke-linejoin="round">`+
+ `<path d="M0,34 L18,16 L34,30 L50,12 L68,30 L86,14 L104,30 L120,20 V44 H0Z" fill="#b3b8b2"/><path d="M50,12 L44,18 L48,18 L50,15 L53,19 L56,18Z M86,14 L80,20 L84,20 L86,17 L89,21 L92,20Z" fill="#fbf7ef" stroke-width="1"/>`+
+ `<path d="M0,40 Q30,32 60,38 T120,36 V84 H0Z" fill="#a9c46a"/>`+
+ `<path d="M44,40 V22 H76 V40Z" fill="#ece2cb"/><path d="M66,40 V22 H76 V40Z" fill="#d3c6a8" stroke="none"/><path d="M44,22 v-3 h4 v3 h4 v-3 h4 v3 h4 v-3 h4 v3 h4 v-3 h4 v3 h4 v-3" fill="#ece2cb" stroke-width="1.1"/>`+
+ `<path d="M41,40 V18 H49 V40Z M71,40 V18 H79 V40Z" fill="#ece2cb"/><path d="M39,18 L45,7 L51,18Z M69,18 L75,7 L81,18Z" fill="#c4572f"/><path d="M54,40 V12 H66 V40Z" fill="#ece2cb"/><path d="M52,12 L60,-1 L68,12Z" fill="#5c6f96"/>`+
+ `<path d="M60,-1 v-6" stroke-width="1"/><path d="M60,-7 l6,2 l-6,2Z" fill="#f5c842" stroke-width=".8"/><path d="M56,40 V32 Q60,27 64,32 V40Z" fill="#7a4e32"/><rect x="58.6" y="17" width="2.8" height="4" rx="1.4" fill="#2b2420" stroke="none"/>`+
+ `<path d="M54,40 L50,52 H70 L66,40Z" fill="#d6cbb0"/><path d="M51,46 H69 M50.5,49 H69.5" stroke-width=".8"/>`+
+ `<path d="M98,84 Q92,66 102,52 Q108,44 104,38" fill="none" stroke="#7cb4bc" stroke-width="7" stroke-linecap="round"/>`+
+ [[12,62,'#c4572f'],[26,58,'#5c6f96'],[22,74,'#d8a040'],[38,68,'#c4572f'],[80,64,'#d8a040'],[88,76,'#5c6f96'],[8,80,'#5c6f96']].map(([x,y,c])=>`<path d="M${x-7},${y} V${y-8} H${x+7} V${y}Z" fill="#f3ead6"/><path d="M${x-9},${y-8} L${x},${y-15} L${x+9},${y-8}Z" fill="${c}"/><rect x="${x-1.5}" y="${y-5}" width="3" height="5" fill="#2b2420" stroke="none"/>`).join('')+
+ `<ellipse cx="60" cy="70" rx="13" ry="5" fill="#d6cbb0"/><ellipse cx="60" cy="68" rx="7" ry="2.6" fill="#9fd0e0"/><path d="M60,68 v-6 M60,62 q-3,-3 -5,1 M60,62 q3,-3 5,1" fill="none" stroke="#7cb4bc" stroke-width="1.2"/>`+
+ `<path d="M33,40 v4 M33,30 l-5,10 h10Z M110,52 v4 M110,42 l-5,10 h10Z" fill="#6f9a4a" stroke-width="1.1"/>`+
+ `</g></svg>`;
+CARDPV[1]=townPreview;
 const gatePreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#e2eef0"/><g stroke="#2b2420" stroke-width="1.5" stroke-linejoin="round"><path d="M0,58 V26 H120 V58Z" fill="#d6cbb0"/><path d="M40,58 V12 H80 V58Z" fill="#e8ddc2"/><path d="M36,12 L60,-2 L84,12Z" fill="#5c6f96"/><path d="M50,58 V42 Q60,32 70,42 V58Z" fill="#3a2e28"/><path d="M0,58 H120 V70 H0Z" fill="#7cb4bc" stroke="none"/><path d="M52,58 H68 L71,72 H49Z" fill="#b98a56"/><path d="M0,70 H120 V84 H0Z" fill="#a9b768" stroke="none"/><path d="M14,26 H30 L26,40 L30,54 H14Z M90,26 H106 L102,40 L106,54 H90Z" fill="#b8402e"/></g></svg>`;
 addLevel({n:17,title:'城門廣場',file:'level17.js',c:[1250,1820],
  find:{after:10,from:1,hint:['路人：小鎮北邊城堡的大門口，站著兩位衛兵，好像在等客人進城！','路人：聽說城堡裡面今天有市集，城門口的衛兵會帶人走過吊橋喔。','路人：沿著小鎮中間的石階一直往北走上去，就是城堡大門了，衛兵說旅人都可以進去看看。']},
@@ -111,3 +125,10 @@ addRegion({name:'櫻花山城',ids:[6,7,8,9],x:-68,y:250});
 addRegion({name:'沙漠',ids:[11,12,13],x:-85,y:392});
 /* 2026-11-19 城堡系列（第 17 關起）隸屬於奇幻小鎮：發現城門廣場之後，遠看只顯示大區名「奇幻小鎮」，放大才看得到「奇幻小鎮」「城堡」兩個名牌；還沒發現時完全不變 */
 addRegion({name:'奇幻小鎮',get ids(){const T_=window.TH;if(!T_||!T_.isOpen(17))return [17];return [1,17,18,19,20].filter(n=>n===1||T_.isOpen(n))},x:100,y:244});
+/* 2026-11-21w 地圖卡片、收集冊的分組（使用者選 B、b）。新關卡把編號加進某一組；秘境自動放「秘境」。 */
+addCardGroup({name:'奇幻小鎮',ic:'🏰',ids:[1,17,18,19,20]});
+addCardGroup({name:'農莊與森林',ic:'🌾',ids:[2,4]});
+addCardGroup({name:'雪山',ic:'❄️',ids:[3,10,15]});
+addCardGroup({name:'海島',ic:'⚓',ids:[5,14,16]});
+addCardGroup({name:'櫻花山城',ic:'🌸',ids:[6,7,8,9]});
+addCardGroup({name:'沙漠',ic:'🏜️',ids:[11,12,13]});

@@ -192,8 +192,10 @@ STORIES[N]={title:'迷宮裡的小狗',who:'小男孩',
  need:'小狗躲在落葉堆裡，怎麼叫都不肯出來⋯\n聽說迷宮西邊有個園丁爺爺，口袋裡總是放著餅乾。',
  got:'園丁爺爺：牠是餓了吧！拿這塊餅乾去，\n在牠面前搖一搖，牠就會自己跑出來囉。',
  ok:'小狗聞到餅乾的香味，搖著尾巴跑出來了！\n牠乖乖跟著你，快帶回去給入口的小男孩。'};
+/* 2026-11-21w 使用者：迷宮裡的角色要和主角一樣縮到 80% */
+const NPCS=.8,npc=svg=>`<g transform="scale(${NPCS})">${svg}</g>`;
 const KIDC={x:cx(5)-80,y:LAWN.y1-120},DOGC={x:cx(10)-6,y:MY+60},OLDC={x:cx(2)-4,y:cy(5)-14};
-const giverArt=()=>act(0,0,1,{view:'fq',pose:'reach',hat:HAT_KIDB,hs:0,hair:'#6a4428',shirt:'#3f6fa8',top:'long',bottom:'shorts',pants:'#5a4a3a',skin:SKIN[1],mood:2,plain:true});
+const giverArt=()=>npc(act(0,0,1,{view:'fq',pose:'reach',hat:HAT_KIDB,hs:0,hair:'#6a4428',shirt:'#3f6fa8',top:'long',bottom:'shorts',pants:'#5a4a3a',skin:SKIN[1],mood:2,plain:true}));
 const leafPile=(w=34)=>{let s='';const C_=['#c9862a','#d8a03a','#a8642a','#e0b44a','#b8762a'];for(let i=0;i<14;i++){const x=-w/2+((i*37)%100)/100*w,y=-((i*53)%100)/100*12;s+=`<path transform="translate(${f(x)},${f(y)}) rotate(${(i*47)%360})" d="M0,-5 Q4,-2 0,5 Q-4,-2 0,-5Z" fill="${C_[i%5]}" stroke-width=".9"/>`}return s};
 const dogBody=(peek)=>`<ellipse cx="0" cy="1" rx="12" ry="3" fill="#000" opacity=".14" stroke="none"/>`+
  `<path d="M-12,-2 Q-14,-14 -2,-15 Q10,-15 10,-6 Q10,0 4,0 H-8 Q-12,0 -12,-2Z" fill="#e8d6b0"/><path d="M-12,-10 Q-18,-14 -17,-6" fill="none" stroke-width="1.8"/>`+
@@ -202,20 +204,20 @@ const dogBody=(peek)=>`<ellipse cx="0" cy="1" rx="12" ry="3" fill="#000" opacity
  `<circle cx="7" cy="-18" r="1.2" fill="${OL}" stroke="none"/><circle cx="12" cy="-18" r="1.2" fill="${OL}" stroke="none"/><ellipse cx="10" cy="-14" rx="2" ry="1.4" fill="${OL}" stroke="none"/>`+
  `<path d="M3,-11 Q9,-8 15,-11" fill="none" stroke="#2f6fd0" stroke-width="2.6"/><circle cx="9" cy="-8.4" r="2.2" fill="#f5c842" stroke-width="1"/>`+
  (peek?`<g transform="translate(0,2)">${leafPile(36)}</g>`:'');
-const dogArt=()=>dogBody(true),dogFree=()=>dogBody(false);
+const dogArt=()=>npc(dogBody(true)),dogFree=()=>npc(dogBody(false));
 const cookie=`<g transform="translate(12,-22)"><circle r="4.4" fill="#d8a05a" stroke-width="1.1"/><circle cx="-1.4" cy="-1" r=".8" fill="#6a4428" stroke="none"/><circle cx="1.6" cy="1" r=".8" fill="#6a4428" stroke="none"/></g>`;
 const HAT_STRAW102=HATS.push(()=>`<ellipse cx="0" cy="-43" rx="21" ry="5" fill="#e8cf8a"/><path d="M-12,-44 Q-12,-57 0,-57 Q12,-57 12,-44Z" fill="#e8cf8a"/><path d="M-12,-46 Q0,-49 12,-46" fill="none" stroke="#5f8a4a" stroke-width="2.4"/>`)-1;
 const apron=`<path d="M-6,-14 Q0,-12 6,-14 L7,-3 Q0,-1 -7,-3Z" fill="#4f8a3e" stroke-width="1.1"/>`;
-const oldArt=()=>act(0,0,1,{view:'fq',pose:'hold',hat:HAT_STRAW102,hs:3,hair:'#e8e4dc',beard:true,shirt:'#e8dcc0',pants:'#5a4a3a',top:'long',bottom:'pants',skin:SKIN[1],mood:1,plain:true,extra:apron+cookie});
+const oldArt=()=>npc(act(0,0,1,{view:'fq',pose:'hold',hat:HAT_STRAW102,hs:3,hair:'#e8e4dc',beard:true,shirt:'#e8dcc0',pants:'#5a4a3a',top:'long',bottom:'pants',skin:SKIN[1],mood:1,plain:true,extra:apron+cookie}));
 const barrow=()=>`<path d="M-26,-6 L18,-6 L14,-20 L-22,-20Z" fill="#8a6a44"/><path d="M-22,-20 L14,-20" fill="none" stroke="#6a4a2a" stroke-width="2"/>${leafPile(30).replace(/<path/g,'<path')}<circle cx="-18" cy="-3" r="6" fill="#5a4a3a"/><circle cx="-18" cy="-3" r="2" fill="#a8a090" stroke="none"/><path d="M18,-6 L30,-2 M14,-20 L30,-14" fill="none" stroke="#6a4a2a" stroke-width="2.4"/><path d="M8,-6 V0" fill="none" stroke-width="2"/>`;
 const lerp=(a,b,k)=>a+(b-a)*k;
 function moveEnt(e,tx,ty,ms,done){const x0=e.x,y0=e.y,t0=performance.now();const st=t=>{const k=Math.min(1,(t-t0)/ms),q=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;e.x=lerp(x0,tx,q);e.y=lerp(y0,ty,q);if(k<1)requestAnimationFrame(st);else done&&done()};requestAnimationFrame(st)}
 const STORY={giver:KIDC,who0:'落葉堆裡露出一顆小狗的頭，戴著藍色項圈和小鈴鐺⋯好像有人在找牠。',busy:'園丁爺爺正在掃落葉⋯（也許之後會需要他幫忙）',
  thanks:{target:'小狗開心地「汪！」了一聲～',helper:'園丁爺爺：下次迷路了，就跟著牆上的白玫瑰走吧。'},
  reset(E){const ent=E.ent;Object.keys(ent).forEach(k=>delete ent[k]);
-  ent.giver={role:'giver',x:KIDC.x,y:KIDC.y,w:30,h:66,block:true,bub:'？',art:giverArt};
-  ent.target={role:'target',x:DOGC.x,y:DOGC.y,w:40,h:34,art:dogArt};
-  ent.helper={role:'helper',x:OLDC.x,y:OLDC.y,w:34,h:66,block:true,art:oldArt,bub:''}},
+  ent.giver={role:'giver',x:KIDC.x,y:KIDC.y,w:24,h:53,block:true,bub:'？',art:giverArt};
+  ent.target={role:'target',x:DOGC.x,y:DOGC.y,w:32,h:27,art:dogArt};
+  ent.helper={role:'helper',x:OLDC.x,y:OLDC.y,w:27,h:53,block:true,art:oldArt,bub:''}},
  on:{
   /* 第 4 步：點小狗 → 小狗從落葉堆跑出來，跟著主角走 */
   3:(E,done)=>{const c=E.ent.target,P=E.P;H.burst(c.x,c.y-12);c._a=null;c.art=dogFree;c.drawn=null;E.redraw();try{H.tone(880,.1,'triangle',.06);H.tone(1047,.1,'triangle',.05,.1)}catch(_){}
@@ -273,21 +275,34 @@ const robinArt=fr=>`<g><path d="M-10,0 Q-12,-8 -2,-9 Q8,-9 9,-2 Q8,4 -2,4 Q-8,4 
 const leafBits=k=>[0,1,2,3,4].map(i=>{const a=-Math.PI*(.15+i*.17),d=8+k*34;return `<path transform="translate(${f(Math.cos(a)*d)},${f(Math.sin(a)*d+k*k*20)}) rotate(${i*70+k*200})" d="M0,-3.6 Q2.6,0 0,3.6 Q-2.6,0 0,-3.6Z" fill="${i%2?G:GL}" stroke-width=".8" opacity="${f(1-k)}"/>`}).join('');
 const PET={wait:5,turn:0,a:null};
 function petLayer(){let g=document.getElementById('pet102');if(!g){const A=document.getElementById('secA');if(!A)return null;g=document.createElementNS('http://www.w3.org/2000/svg','g');g.id='pet102';A.appendChild(g)}return g}
+/* 2026-11-21w 使用者：小動物要從圍籬裡面鑽出來、再鑽進另一邊的圍籬（不是憑空出現、淡出）
+   做法：用 clipPath 把「躲在綠籬裡」的部分切掉——兔子只在兩面直牆中間的小路上看得到；知更鳥在牆頂葉子線以下看不到 */
+const PETS=NPCS;   /* 小動物也跟著縮到 80% */
+const IN_=CELL/2-WT/2;   /* 格子中心到直牆內側的距離 */
 function petStart(P){const near=[];
- if(PET.turn%2===0){/* 小野兔：找主角附近、兩側都有綠籬的格子（直的小路），從一側竄到另一側 */
-  for(let rr=0;rr<ROWS;rr++)for(let c=0;c<COLS;c++){const x=cx(c),y=MY+rr*CELL+60;if(Math.abs(x-P.x)>140||y<P.y-300||y>P.y+180||Math.hypot(x-P.x,y-P.y)<90)continue;
-   if(rr>=4&&rr<=8&&c>=3&&c<=7)continue;const wW=c===0||E_[rr][c-1],wE=E_[rr][c];if(wW||wE)near.push({x,y,dir:wW&&wE?(Math.random()<.5?1:-1):wW?1:-1})}
-  if(near.length){const q=near[Math.floor(Math.random()*near.length)],dir=q.dir;
-  return {kind:'rabbit',x0:q.x-dir*(CELL/2-14),x1:q.x+dir*(CELL/2-14),y:q.y,dir,t:0,T:1.3}}}
- /* 知更鳥：主角附近的一段橫的綠籬，從牆頂飛起來 */
- for(const w of WALLS){if(!w.h)continue;const x=Math.max(w.x0+20,Math.min(w.x1-20,P.x+(Math.random()-.5)*260)),y=w.y0-HH+4;if(Math.abs(x-P.x)>140||y<P.y-300||y>P.y+60||Math.hypot(x-P.x,y-P.y)<90)continue;near.push({x,y})}
- if(!near.length)return null;const q=near[Math.floor(Math.random()*near.length)],dir=Math.random()<.5?1:-1;
- return {kind:'robin',x0:q.x,y0:q.y,dir,t:0,T:2}}
+ if(PET.turn%2===0){/* 小野兔：主角附近、兩側都有直牆的格子，從一邊的綠籬鑽出來、跑過小路、鑽進另一邊 */
+  for(let rr=0;rr<ROWS;rr++)for(let c=0;c<COLS;c++){const x=cx(c),y=MY+rr*CELL+60;if(Math.abs(x-P.x)>150||y<P.y-300||y>P.y+180||Math.hypot(x-P.x,y-P.y)<90)continue;
+   if(rr>=4&&rr<=8&&c>=3&&c<=7)continue;const wW=c===0||E_[rr][c-1],wE=E_[rr][c];if(wW&&wE)near.push({x,y,dir:Math.random()<.5?1:-1})}
+  if(near.length){const q=near[Math.floor(Math.random()*near.length)],dir=q.dir,o=IN_+18;
+  return {kind:'rabbit',cx:q.x,x0:q.x-dir*o,x1:q.x+dir*o,y:q.y,dir,t:0,T:1.5}}}
+ /* 知更鳥：從主角附近一段橫牆的葉子裡鑽出來，飛一小段，再鑽進附近另一段橫牆（或同一段的另一頭） */
+ const HW=WALLS.filter(w=>w.h),top=w=>w.y0-HH+WT*.45;   /* 牆頂葉子線（頂面中間偏後）：鳥在這條線以下就藏在葉子裡 */
+ for(const w of HW){const x=Math.max(w.x0+24,Math.min(w.x1-24,P.x+(Math.random()-.5)*260)),y=top(w);if(Math.abs(x-P.x)>150||y<P.y-320||y>P.y+60||Math.hypot(x-P.x,y-P.y)<90)continue;
+  const ends=[];for(const v of HW){for(let t=0;t<6;t++){const xe=v.x0+24+Math.random()*Math.max(1,v.x1-v.x0-48),ye=top(v),d=Math.abs(xe-x);if(d<110||d>300||Math.abs(ye-y)>240)continue;if(Math.abs(xe-P.x)>220||ye<P.y-360||ye>P.y+80)continue;ends.push({w:v,x:xe,y:ye});break}}
+  if(ends.length)near.push({w,x,y,e:ends[Math.floor(Math.random()*ends.length)]})}
+ if(!near.length)return null;const q=near[Math.floor(Math.random()*near.length)];
+ return {kind:'robin',w0:q.w,w1:q.e.w,x0:q.x,y0:q.y,x1:q.e.x,y1:q.e.y,dir:q.e.x>q.x?1:-1,t:0,T:2.2}}
+/* 「綠籬以外都看得到」的 clipPath：大方塊挖掉一塊 */
+const holeClip=(id,x,y,w,h)=>`<clipPath id="${id}"><path clip-rule="evenodd" d="M${f(x-2000)},${f(y-2000)} h4000 v4000 h-4000Z M${f(x)},${f(y)} h${f(w)} v${f(h)} h${f(-w)}Z"/></clipPath>`;
 function petTick(dt,P){if(PET.a){const a=PET.a;a.t+=dt;const g=petLayer();if(!g)return;const k=Math.min(1,a.t/a.T);
-  if(a.kind==='rabbit'){const e=k<.12?0:k>.88?1:(k-.12)/.76;a.x=lerp(a.x0,a.x1,e);a.yy=a.y;const fr=Math.floor(a.t*8)%2,vis=k<.12?k/.12:k>.88?(1-k)/.12:1;
-   g.innerHTML=`<g transform="translate(${f(a.x)},${f(a.y)}) scale(${a.dir*1.2},1.2)" opacity="${f(vis)}">${rabbitArt(k>.12&&k<.88?fr:0)}</g>`+(k<.3?`<g transform="translate(${f(a.x0)},${f(a.y-16)})">${leafBits(k/.3)}</g>`:'')}
-  else{a.x=a.x0+a.dir*170*k;a.yy=a.y0-(Math.sin(k*Math.PI*.6)*220+k*60);const fr=Math.floor(a.t*10)%2,vis=k>.8?(1-k)/.2:1;
-   g.innerHTML=`<g transform="translate(${f(a.x)},${f(a.yy)}) scale(${f(a.dir*(1.3+k*.4))},${f(1.3+k*.4)})" opacity="${f(vis)}">${robinArt(fr)}</g>`+(k<.3?`<g transform="translate(${f(a.x0)},${f(a.y0)})">${leafBits(k/.3)}</g>`:'')}
+  if(a.kind==='rabbit'){a.x=lerp(a.x0,a.x1,k);a.yy=a.y;const fr=Math.floor(a.t*8)%2;
+   /* 只在兩面直牆中間的小路看得到 */
+   g.innerHTML=`<clipPath id="pc102"><rect x="${f(a.cx-IN_)}" y="${f(a.y-80)}" width="${f(IN_*2)}" height="120"/></clipPath><g clip-path="url(#pc102)"><g transform="translate(${f(a.x)},${f(a.y)}) scale(${f(a.dir*1.2*PETS)},${f(1.2*PETS)})">${rabbitArt(fr)}</g></g>`+
+    (k<.3?`<g transform="translate(${f(a.cx-a.dir*IN_)},${f(a.y-12)})">${leafBits(k/.3)}</g>`:'')+(k>.7?`<g transform="translate(${f(a.cx+a.dir*IN_)},${f(a.y-12)})">${leafBits((k-.7)/.3)}</g>`:'')}
+  else{a.x=lerp(a.x0,a.x1,k);a.yy=lerp(a.y0,a.y1,k)+18-Math.sin(k*Math.PI)*150;   /* 起點、終點都在葉子線下面 18 → 鑽出來、鑽進去 */
+   const fr=Math.floor(a.t*10)%2,w=k<.5?a.w0:a.w1,ly=k<.5?a.y0:a.y1,sc=1.3*PETS;
+   g.innerHTML=holeClip('pc102',w.x0-6,ly,w.x1-w.x0+12,w.y1-ly+8)+`<g clip-path="url(#pc102)"><g transform="translate(${f(a.x)},${f(a.yy)}) scale(${f(a.dir*sc)},${f(sc)})">${robinArt(fr)}</g></g>`+
+    (k<.25?`<g transform="translate(${f(a.x0)},${f(a.y0)})">${leafBits(k/.25)}</g>`:'')+(k>.75?`<g transform="translate(${f(a.x1)},${f(a.y1)})">${leafBits((k-.75)/.25)}</g>`:'')}
   if(k>=1){PET.a=null;g.innerHTML='';PET.wait=7+Math.random()*7}return}
  PET.wait-=dt;if(PET.wait>0)return;const a=petStart(P);if(!a){PET.wait=1.5;return}PET.turn++;PET.a=a;
  try{a.kind==='rabbit'?H.tone(1200,.05,'triangle',.03):(H.tone(1568,.06,'sine',.04),H.tone(1760,.06,'sine',.035,.08))}catch(_){}}
@@ -303,9 +318,10 @@ const C={n:N,movers:[],start:{x:cx(5),y:LAWN.y1-100},startDir:6,speed:190,terrai
  quick:new Set(['bow102','petal102','shut102','flow102','dand102','puff102']),
  thin:new Set(['tuft102','flw102','pet102','fly102']),
  tall:new Set(['hedge102','perg102','bench102','urn102','grp102','bath102','barrow102']),
- playerArt,story:STORY,
- clover:`<g transform="scale(.85)"><path d="M0,2 Q2,10 -2,16" fill="none" stroke="#4f7a3a" stroke-width="2"/>${[0,90,180,270].map(a=>`<g transform="rotate(${a})"><path d="M0,0 C-7,-3 -9,-12 -3,-13 C-1,-13 0,-11 0,-10 C0,-11 1,-13 3,-13 C9,-12 7,-3 0,0Z" fill="#6fae4a"/></g>`).join('')}<circle r="2" fill="#f5c842" stroke-width="1"/></g>`,
- openArt:h=>FK[h.kind].open(),flipName:h=>FK[h.kind].name,emptyMsg:h=>FK[h.kind].empty,
+ playerArt,story:STORY,itemSc:NPCS,   /* 2026-11-21w 使用者：圍籬以外的東西都跟主角一樣縮到 80% */
+ 
+ clover:`<g transform="scale(${f(.85*NPCS)})"><path d="M0,2 Q2,10 -2,16" fill="none" stroke="#4f7a3a" stroke-width="2"/>${[0,90,180,270].map(a=>`<g transform="rotate(${a})"><path d="M0,0 C-7,-3 -9,-12 -3,-13 C-1,-13 0,-11 0,-10 C0,-11 1,-13 3,-13 C9,-12 7,-3 0,0Z" fill="#6fae4a"/></g>`).join('')}<circle r="2" fill="#f5c842" stroke-width="1"/></g>`,
+ openArt:h=>npc(FK[h.kind].open()),flipName:h=>FK[h.kind].name,emptyMsg:h=>FK[h.kind].empty,
  where:(g,h)=>{const dx=h.x-g.x,dy=h.y-g.y,dirs=['東','東南','南','西南','西','西北','北','東北'],k=((Math.round(Math.atan2(dy,dx)/(Math.PI/4))%8)+8)%8;
   const reg=NAMES.find(([k_])=>{const g_=REG[k_];return h.x>=g_.x&&h.x<=g_.x+g_.w&&h.y>=g_.y&&h.y<=g_.y+g_.h});
   return `${reg?reg[1]:'迷宮裡'}的${FK[h.kind].name}底下（從這裡往${dirs[k]}走）`},
@@ -328,7 +344,7 @@ H.ANIMX[N]={grp102:['lean'],fly102:['bob']};
 H.HEAVYX[N]=new Set(['hedge102','perg102']);
 const put=(x,y,w,h,kind,svg,o={})=>{const sp=add(x,y,w,h,kind,svg,{sh:.7,...o});if(o.solid)C.solids.push({x:x+(o.solid[2]||0),y:y-(o.solid[3]||0),rx:o.solid[0],ry:o.solid[1]});return sp};
 const flipAt=(x,y,kind)=>{const K=FK[kind];if(!terrain(x,y)||inWall(x,y,30,20,14))return null;if(C.flips.some(h=>Math.hypot(h.x-x,h.y-y)<120))return null;if(!canPlace(x,y,K.w,K.h,false,.6))return null;
- const sp=put(x,y,K.w,K.h,kind,K.fn(),{fl:r()<.5});const h={sp,kind,x,y,w:K.w,h:K.h};C.flips.push(h);C.solids.push({x,y,rx:K.w*.3,ry:6,flip:h});return h};   /* solid 記住是哪個 flip：翻開後可以跨過去 */
+ const sp=put(x,y,K.w*NPCS,K.h*NPCS,kind,npc(K.fn()),{fl:r()<.5});const h={sp,kind,x,y,w:K.w*NPCS,h:K.h*NPCS};C.flips.push(h);C.solids.push({x,y,rx:K.w*.3*NPCS,ry:6*NPCS,flip:h});return h};   /* 落葉堆、矮樹叢、花盆也縮到 80% */   /* solid 記住是哪個 flip：翻開後可以跨過去 */
 /* 格子 (r,c) 裡的位置：fx 0～1（西→東）、fy 0～1（北→南）；牆的正面在格子北邊，人和東西站在格子北半部才不會被南邊的牆擋住 */
 const at=(rr,c,fx=.5,fy=.4)=>[MX+c*CELL+WT/2+(CELL-WT)*fx,MY+rr*CELL+WT/2+(CELL-WT)*fy];
 
@@ -359,27 +375,28 @@ function structures(){C.solids.length=0;C.flips.length=0;
  /* 草坪南邊：剛剛鑽進來的小缺口 */
  put(BACKGAP.x,BACKGAP.y+1,40,50,'gap102',`<path d="M-15,0 V-30 Q0,-46 15,-30 V0Z" fill="#1f3a18"/><path d="M-15,0 V-30 Q0,-46 15,-30 V0" fill="none" stroke="${GD}" stroke-width="3"/><circle cx="-17" cy="-6" r="6" fill="${G}"/><circle cx="17" cy="-10" r="6" fill="${G}"/>`,{mark:false});
  /* 中央：紫藤木棚架（點了花瓣飄） */
- put(GOAL.x,GOAL.y,200,170,'perg102',pergola(),{solid:[10,8,-76],mark:true});C.solids.push({x:GOAL.x-26,y:GOAL.y,rx:8,ry:6},{x:GOAL.x+26,y:GOAL.y,rx:8,ry:6},{x:GOAL.x+76,y:GOAL.y,rx:8,ry:6});
+ {const S=NPCS;put(GOAL.x,GOAL.y,200*S,170*S,'perg102',npc(pergola()),{solid:[10*S,8*S,-76*S],mark:true});C.solids.push({x:GOAL.x-26*S,y:GOAL.y,rx:8*S,ry:6*S},{x:GOAL.x+26*S,y:GOAL.y,rx:8*S,ry:6*S},{x:GOAL.x+76*S,y:GOAL.y,rx:8*S,ry:6*S})}
  /* 死路的小空地 */
  const grp=(rr,c,fx,fy,w,h,svg,say,kind='grp102',solid=[16,8])=>{const [x,y]=at(rr,c,fx,fy);const sp=put(x,y,w,h,kind,svg,{solid});sp.say=say;return sp};
- grp(0,3,.5,.38,60,70,grandma(),'老奶奶：腳好痠⋯先坐一下，等一下再繼續找出口。','bench102',[26,8]);
- grp(1,6,.5,.42,84,48,flowerBed(),'（圓圓的小花壇，開滿了各種顏色的小花）','bed102',[36,10]);
- grp(3,7,.5,.4,34,44,urn(),'（白色的石甕，裡面種滿了花）','urn102',[12,6]);
- grp(11,5,.5,.4,34,44,urn(),'（白色的石甕，裡面種滿了花）','urn102',[12,6]);
- grp(3,9,.45,.45,40,44,birdBath(),'（小鳥在石盆裡洗澡，水花噴到你的臉上了！）','bath102',[16,6]);
- grp(2,0,.5,.42,84,40,picnic(),'（不知道是誰忘了收的野餐墊，籃子裡還有一顆蘋果）','pic102',[34,10]);
- grp(6,9,.5,.42,56,72,couple(),'女生：我們剛剛是不是經過這裡了？——男生：沒有吧⋯這面牆長得不一樣啊。');
- grp(9,1,.5,.42,56,64,racers(),'小朋友：誰先找到中間誰就贏！——另一個：可是我們好像跑錯方向了！');
- grp(12,3,.5,.4,60,72,mapDad(),'媽媽：地圖給我看⋯你拿反了啦！——爸爸：咦？難怪一直走到死路。');
- grp(10,7,.5,.4,60,70,benchWith(sitter(-11,{hat:-1,hs:2,mood:2,shirt:'#7aa8c4'})+sitLegs('#3d3833',-11)+sitter(11,{hat:-1,hs:1,mood:1,shirt:'#a8502e'})+sitLegs('#3d3833',11)),'兩個人：走了好久，在這裡休息一下⋯聽說中間有一座開滿紫色花的棚架！','bench102',[26,8]);
- grp(12,8,.5,.4,60,40,bench(),'（白色長椅，坐下來歇歇腳吧）','bench102',[26,8]);
+ const pgrp=(rr,c,fx,fy,w,h,svg,say,kind,solid=[16,8])=>grp(rr,c,fx,fy,w*NPCS,h*NPCS,npc(svg),say,kind,solid.map(v=>v*NPCS));   /* 人（和人坐的長椅）縮到 80% */
+ pgrp(0,3,.5,.38,60,70,grandma(),'老奶奶：腳好痠⋯先坐一下，等一下再繼續找出口。','bench102',[26,8]);
+ pgrp(1,6,.5,.42,84,48,flowerBed(),'（圓圓的小花壇，開滿了各種顏色的小花）','bed102',[36,10]);
+ pgrp(3,7,.5,.4,34,44,urn(),'（白色的石甕，裡面種滿了花）','urn102',[12,6]);
+ pgrp(11,5,.5,.4,34,44,urn(),'（白色的石甕，裡面種滿了花）','urn102',[12,6]);
+ pgrp(3,9,.45,.45,40,44,birdBath(),'（小鳥在石盆裡洗澡，水花噴到你的臉上了！）','bath102',[16,6]);
+ pgrp(2,0,.5,.42,84,40,picnic(),'（不知道是誰忘了收的野餐墊，籃子裡還有一顆蘋果）','pic102',[34,10]);
+ pgrp(6,9,.5,.42,56,72,couple(),'女生：我們剛剛是不是經過這裡了？——男生：沒有吧⋯這面牆長得不一樣啊。');
+ pgrp(9,1,.5,.42,56,64,racers(),'小朋友：誰先找到中間誰就贏！——另一個：可是我們好像跑錯方向了！');
+ pgrp(12,3,.5,.4,60,72,mapDad(),'媽媽：地圖給我看⋯你拿反了啦！——爸爸：咦？難怪一直走到死路。');
+ pgrp(10,7,.5,.4,60,70,benchWith(sitter(-11,{hat:-1,hs:2,mood:2,shirt:'#7aa8c4'})+sitLegs('#3d3833',-11)+sitter(11,{hat:-1,hs:1,mood:1,shirt:'#a8502e'})+sitLegs('#3d3833',11)),'兩個人：走了好久，在這裡休息一下⋯聽說中間有一座開滿紫色花的棚架！','bench102',[26,8]);
+ pgrp(12,8,.5,.4,60,40,bench(),'（白色長椅，坐下來歇歇腳吧）','bench102',[26,8]);
  /* 環狀走道上一直繞圈圈的人（「摸牆走」的伏筆） */
- grp(8,3,.5,.35,30,66,act(0,0,1,{view:'side',pose:'reach',hat:-1,hs:0,mood:3,shirt:'#4a3a6a'},'nod'),'學者：我一直摸著右手邊的牆走，聽說這樣一定走得出去⋯怎麼又繞回這裡了？');
+ pgrp(8,3,.5,.35,30,66,act(0,0,1,{view:'side',pose:'reach',hat:-1,hs:0,mood:3,shirt:'#4a3a6a'},'nod'),'學者：我一直摸著右手邊的牆走，聽說這樣一定走得出去⋯怎麼又繞回這裡了？');
  /* 中央空地：拉小提琴的樂師、跳舞的人 */
- grp(5,4,.55,.5,40,70,violin(),'樂師：在紫藤花下拉琴，聲音特別好聽呢～');
- grp(7,6,.4,.25,56,70,dancers(),'跳舞的人：終於走到中間了！一起跳支舞吧！');
+ pgrp(5,4,.55,.5,40,70,violin(),'樂師：在紫藤花下拉琴，聲音特別好聽呢～');
+ pgrp(7,6,.4,.25,56,70,dancers(),'跳舞的人：終於走到中間了！一起跳支舞吧！');
  /* 園丁爺爺的推車（故事幫手旁邊） */
- {const [x,y]=at(5,2,.2,.3);put(x-6,y,60,36,'barrow102',barrow(),{solid:[22,8]})}
+ {const [x,y]=at(5,2,.2,.3);put(x-6,y,60*NPCS,36*NPCS,'barrow102',npc(barrow()),{solid:[22*NPCS,8*NPCS]})}
  /* 可以翻開的東西 */
   const try_=(rr,c,kind,fx,fy)=>{const [x,y]=at(rr,c,fx,fy);return flipAt(x,y,kind)};
  try_(0,10,'leafF',.25,.55);try_(10,2,'leafF',.5,.45);
@@ -392,7 +409,7 @@ function structures(){C.solids.length=0;C.flips.length=0;
 function deco(reg,pool,tries,cap){const g=REG[reg],tot=pool.reduce((a,b)=>a+b[1],0);let n=0;
  for(let t=0;t<tries&&n<cap;t++){let q=r()*tot,kind=pool[0][0];for(const [k,w] of pool){q-=w;if(q<=0){kind=k;break}}
   const K=KIND[kind],x=sr(g.x,g.x+g.w),y=sr(g.y,g.y+g.h);if(!terrain(x,y))continue;if(!canPlace(x,y,K.w,K.h,false,.6))continue;
-  add(x,y,K.w,K.h,kind,K.fn(),{fl:r()<.5,sh:.6});n++}}
+  add(x,y,K.w*NPCS,K.h*NPCS,kind,npc(K.fn()),{fl:r()<.5,sh:.6});n++}}   /* 小草、小花、花瓣、蝴蝶也縮 */
 function scatter102(){
  deco('any102',[['tuft102',2],['flw102',1.6],['pet102',1.2]],4000,190);
  deco('ctr102',[['pet102',3],['flw102',1]],500,30);
@@ -407,25 +424,29 @@ if(NEXTINFO[N]&&!NEXTINFO[N].pv)NEXTINFO[N].pv=mazePreview;
 H.mazePreview102=mazePreview;
 /* 過場：綠籬牆上的小缺口越來越近、放大，鑽過去之後是兩面高綠籬夾著的小路 */
 H.RIDES.maze102={text:'跟著小男孩，從綠籬的小缺口鑽進去⋯',every:520,tick:k=>H.tone(k%2?520:440,.08,'triangle',.04),svg:()=>{
- let s=`<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><style>
-@keyframes gz102{0%{transform:scale(1)}55%{transform:scale(3.2)}100%{transform:scale(9)}}
-@keyframes gf102{0%,45%{opacity:1}75%,100%{opacity:0}}
-@keyframes cr102{0%{transform:translate(0,0) scale(1)}100%{transform:translate(0,-60px) scale(1.6)}}
+ /* 2026-11-21w 過場卡頓：原本放大／淡出都做在 SVG 裡面的 g 上，滿畫面的葉子 pattern 每一格都要重畫（最大放大 9 倍），
+    而且 1.1 秒建迷宮場景時 SVG 裡的動畫會停住。→ 拆成三張疊在一起的 <svg>，放大、淡出做在 <svg> 元素本身（will-change），
+    瀏覽器把它當一張圖縮放，建場景時也能繼續動。 */
+ const VB='viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"',GS=`stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"`;
+ let s=`<style>
+@keyframes gz102{0%{transform:scale(1);opacity:1}25%{transform:scale(1.9);opacity:1}45%{transform:scale(3.2);opacity:1}75%{transform:scale(5.6);opacity:0}100%{transform:scale(9);opacity:0}}
+@keyframes cr102{0%{transform:translate(0,0) scale(1)}100%{transform:translate(0,-10%) scale(1.6)}}
 @keyframes lf102{0%{transform:translate(0,-40px) rotate(0)}100%{transform:translate(40px,680px) rotate(540deg)}}
-.gz102{animation:gz102 4.2s ease-in forwards;transform-origin:200px 360px}.gf102{animation:gf102 4.2s linear forwards}
-.cr102{animation:cr102 4.2s ease-in-out forwards;transform-origin:200px 300px}.lf102{animation:lf102 3.4s linear infinite}
-</style><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">`;
+#ride svg.gz102{animation:gz102 4.2s ease-in forwards;transform-origin:50% 60%;will-change:transform,opacity}
+#ride svg.cr102{animation:cr102 4.2s ease-in-out forwards;transform-origin:50% 50%;will-change:transform}.lf102{animation:lf102 3.4s linear infinite}
+</style><svg class="cr102" ${VB}><g ${GS}>`;
  /* 後面：迷宮的小路（一點透視） */
  /* 2026-11-21 綠籬改成密葉（和迷宮裡一樣的 pattern，近的葉子比較大） */
- s+=`<defs>${leafPat('hrT102',HTOP,{seed:11,k:1.6})}${leafPat('hrF102',HFACE,{seed:23,k:1.8,lc:'#24461d'})}${leafPat('hrH102',HFACE,{seed:31,k:2.6,lc:'#24461d'})}</defs>`;
- s+=`<g class="cr102"><rect width="400" height="600" fill="${HTOP[0]}" stroke="none"/><rect width="400" height="600" fill="url(#hrT102)" stroke="none"/><path d="M0,600 L170,300 H230 L400,600Z" fill="${PATH}"/>`;
+ s+=`<defs>${leafPat('hrT102',HTOP,{seed:11,k:1.6})}${leafPat('hrF102',HFACE,{seed:23,k:1.8,lc:'#24461d'})}</defs>`;
+ s+=`<g><rect width="400" height="600" fill="${HTOP[0]}" stroke="none"/><rect width="400" height="600" fill="url(#hrT102)" stroke="none"/><path d="M0,600 L170,300 H230 L400,600Z" fill="${PATH}"/>`;
  const sw=(d)=>`<path d="${d}" fill="${HFACE[0]}"/><path d="${d}" fill="url(#hrF102)" stroke="none"/>`;
  s+=sw('M0,0 L170,250 V300 L0,600Z')+sw('M400,0 L230,250 V300 L400,600Z')+sw('M170,250 H230 V300 H170Z');
  s+=`<path d="M-4,-6${bumps(-4,-6,170,250,.83,-.56,16,9)} L170,250 L-4,-6Z" fill="${HTOP[2]}" stroke="#2f5a26" stroke-width="1.2"/><path d="M404,-6${bumps(404,-6,230,250,-.83,-.56,16,9)} L230,250 L404,-6Z" fill="${HTOP[2]}" stroke="#2f5a26" stroke-width="1.2"/>`;
- s+=`<g fill="#a88ad8" stroke="none"><circle cx="192" cy="242" r="5"/><circle cx="202" cy="238" r="5"/><circle cx="212" cy="244" r="5"/></g></g>`;
+ s+=`<g fill="#a88ad8" stroke="none"><circle cx="192" cy="242" r="5"/><circle cx="202" cy="238" r="5"/><circle cx="212" cy="244" r="5"/></g></g></g></svg>`;
  /* 前面：綠籬牆上的小缺口，越來越大，最後淡掉 */
- s+=`<g class="gf102"><g class="gz102"><clipPath id="gc102"><path clip-rule="evenodd" d="M-400,-400 H800 V1000 H-400Z M180,380 V340 Q200,318 220,340 V380Z"/></clipPath><path d="M-400,-400 H800 V1000 H-400Z M180,380 V340 Q200,318 220,340 V380Z" fill="${HFACE[0]}" fill-rule="evenodd"/><path d="M-400,-400 H800 V1000 H-400Z M180,380 V340 Q200,318 220,340 V380Z" fill="url(#hrH102)" fill-rule="evenodd" stroke="none"/><path d="M180,380 V340 Q200,318 220,340 V380" fill="none" stroke="#24461d" stroke-width="2.5"/></g></g>`;
+ s+=`<svg class="gz102" ${VB}><defs>${leafPat('hrH102',HFACE,{seed:31,k:2.6,lc:'#24461d'})}</defs><g ${GS}><path d="M-400,-400 H800 V1000 H-400Z M180,380 V340 Q200,318 220,340 V380Z" fill="${HFACE[0]}" fill-rule="evenodd"/><path d="M-400,-400 H800 V1000 H-400Z M180,380 V340 Q200,318 220,340 V380Z" fill="url(#hrH102)" fill-rule="evenodd" stroke="none"/><path d="M180,380 V340 Q200,318 220,340 V380" fill="none" stroke="#24461d" stroke-width="2.5"/></g></svg>`;
  /* 小男孩和主角（側面，往前走） */
+ s+=`<svg ${VB}><g ${GS}>`;
  s+=`<g transform="translate(150,520)"><g class="an a-hop" style="--d:.6s">${kid({view:'bq',pose:'walk',hat:HAT_KIDB,hs:0,hair:'#6a4428',shirt:'#3f6fa8',pants:'#5a4a3a',top:'long',bottom:'shorts',skin:SKIN[1],mood:2,plain:true})}</g></g>`;
  s+=`<g transform="translate(238,560) scale(1.37)"><g class="an a-hop" style="--d:.66s">${playerArt('bq',0)}</g></g>`;   /* 主角圖縮到 .85 了，過場裡放回原本大小 */
  for(let i=0;i<6;i++)s+=`<g transform="translate(${40+i*60},0)"><g class="lf102" style="animation-delay:-${i*.6}s"><path d="M0,-5 Q4,-2 0,5 Q-4,-2 0,-5Z" fill="${i%2?'#6aa64e':'#a88ad8'}" stroke-width=".8"/></g></g>`;
@@ -436,7 +457,7 @@ H.RIDES.maze102={text:'跟著小男孩，從綠籬的小缺口鑽進去⋯',ever
    小男孩每隔 15～25 秒從缺口探頭 3 秒；點缺口（不管有沒有探頭）→ 小男孩探頭、跳出「要進去看看嗎？」。 */
 (function(){
 const NSv='http://www.w3.org/2000/svg';
-const GAP={x:648,y:828};   /* 宮廷院 MAZE.ax、MAZE.y1（綠籬牆正面的底部） */
+const GAP={x:610,y:758};   /* 2026-11-21u 宮廷院綠籬牆往左上靠，缺口跟著搬 */   /* 宮廷院 MAZE.ax、MAZE.y1（綠籬牆正面的底部） */
 const open18=()=>{try{if(H.testOn&&H.testOn())return true;return (+localStorage.getItem('townhunt-stars-L18')||0)>=2}catch(_){return false}};
 let peekT=0,upT=0,anim=0,cur=0;
 function layer(){let lo=document.getElementById('maze102L');if(!lo){const il=document.getElementById('itemsL');lo=document.createElementNS(NSv,'g');lo.id='maze102L';['stroke','stroke-width','stroke-linejoin','stroke-linecap'].forEach(a=>lo.setAttribute(a,il.getAttribute(a)));il.parentNode.insertBefore(lo,il)}return lo}

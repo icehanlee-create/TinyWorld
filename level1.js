@@ -295,9 +295,9 @@ H.mapHook(3,({U,P,ink,FN,f})=>{let g='';const on=U>=2;
  // ---- town ----
  const house=(x,y,c)=>P(`M${x-7},${y} V${y-8} H${x+7} V${y}Z`,'#f3e8cf',1.3)+P(`M${x-9},${y-8} L${x},${y-16} L${x+9},${y-8}Z`,c,1.3)+`<rect x="${x-2}" y="${y-5}" width="4" height="5" fill="${ink}"/>`;
  let t=`<g class="mnode" data-n="1"><circle cx="100" cy="206" r="46" fill="transparent"/>`;
- const TK=.7; /* 2026-11-11 小鎮圖案縮小（使用者：範圍太大），以 (100,222) 為中心 */
+ const TK=.8; /* 2026-11-11 小鎮圖案縮小（使用者：範圍太大），以 (100,222) 為中心；2026-11-21w 繪本風放大一點 .7→.8 */
  t+=`<g transform="translate(100,222) scale(${TK}) translate(-100,-222)">`;
- t+=`<ellipse cx="100" cy="228" rx="50" ry="20" fill="#000" opacity=".1"/><ellipse cx="100" cy="222" rx="48" ry="20" fill="#e6d6ad" stroke="${ink}" stroke-width="1.4"/>`;
+ t+=H.MAPC.deco(100,238,96,{tree:'round',s:1.1,h:96});   /* 2026-11-21w 繪本風：拿掉底座，兩側小樹、波浪草線、小鳥 */
  [[64,224,'#b14d27'],[78,236,'#6a7488'],[126,236,'#c98a3a'],[138,222,'#b14d27'],[60,208,'#c98a3a'],[142,206,'#6a7488'],[100,242,'#b14d27']].sort((a,b)=>a[1]-b[1]).forEach(([x,y,c])=>{if(y<215)t+=house(x,y,c)});
  // castle
  t+=`<g transform="translate(100,222)">`;

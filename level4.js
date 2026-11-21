@@ -352,8 +352,8 @@ MAPHOOKS.push(({U,P,ink,FN})=>{if(U<4)return '';
  m+=[[200,116,7],[186,106,5],[206,108,4]].map(([x,y,r_])=>`<ellipse cx="${x}" cy="${y}" rx="${r_}" ry="${r_*.45}" fill="#fbf9f3" stroke="${ink}" stroke-width=".9"/>`).join('');
  m+=[[160,132],[146,112],[136,134],[156,110]].map(([x,y])=>`<path d="M${x},${y} v4" stroke="${ink}" stroke-width="1.2"/><circle cx="${x}" cy="${y-3}" r="5" fill="#4f7a3a" stroke="${ink}" stroke-width="1.1"/><circle cx="${x+3}" cy="${y-5}" r="3" fill="#6f9a4a" stroke="none"/>`).join('');
  m+=[[112,128],[104,124]].map(([x,y])=>`<rect x="${x-2.5}" y="${y-8}" width="5" height="8" fill="#b9ab8c" stroke="${ink}" stroke-width="1"/>`).join('');
- m+=`<g class="mnode" data-n="4"><circle cx="60" cy="96" r="36" fill="transparent"/><ellipse cx="60" cy="104" rx="36" ry="11" fill="#7f8f52" stroke="${ink}" stroke-width="1.3"/>`;
- m+=P('M36,104 L42,92 L78,92 L84,104Z','#b9ab8c',1.3)+P('M44,92 L48,82 L72,82 L76,92Z','#c6b99a',1.3)+P('M51,82 L54,74 L66,74 L69,82Z','#b9ab8c',1.3)+`<rect x="57" y="96" width="6" height="8" fill="${ink}"/><path d="M42,94 q2,6 -1,10 M78,94 q-2,6 1,10" fill="none" stroke="#5f7a3f" stroke-width="1.6"/>`;
+ m+=`<g class="mnode" data-n="4"><circle cx="60" cy="96" r="36" fill="transparent"/>`+H.MAPC.deco(60,104,50,{s:.9,more:1,h:40})+`<g transform="translate(60,104) scale(1.18) translate(-60,-104)">`;   /* 2026-11-21w 繪本風：拿掉底座、放大、兩側小樹 */
+ m+=P('M36,104 L42,92 L78,92 L84,104Z','#b9ab8c',1.3)+P('M44,92 L48,82 L72,82 L76,92Z','#c6b99a',1.3)+P('M51,82 L54,74 L66,74 L69,82Z','#b9ab8c',1.3)+`<rect x="57" y="96" width="6" height="8" fill="${ink}"/><path d="M42,94 q2,6 -1,10 M78,94 q-2,6 1,10 M50,84 q-1,4 1,7" fill="none" stroke="#5f7a3f" stroke-width="1.6"/>`+`<path d="M70,104 L76,92 L84,104Z M66,92 L69,82 L76,92Z" fill="#000" opacity=".13"/></g>`;
  m+=`<g transform="translate(64,126)"><rect x="-44" y="-11" width="88" height="20" rx="10" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4.5" text-anchor="middle" font-size="12" fill="${ink}" font-family="${FN}">森林古代遺跡</text></g></g>`;
  return m});
 

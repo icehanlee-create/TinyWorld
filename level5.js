@@ -453,9 +453,9 @@ MAPHOOKS.push(({U,P,ink,FN})=>{if(U<5)return '';
  let m=H.mapRoute(land,'road',ink);
  m+=H.mapRoute(sea_,'sea',ink); /* 2026-11-20 小鎮港口改畫在第 1 關的地圖圖案（木棧橋＋港口小屋＋漁船） */
  m+=`<g transform="translate(160,334) scale(.16)" stroke="${ink}" stroke-width="7">${ferry()}</g>`;
- m+=`<g class="mnode" data-n="5"><circle cx="250" cy="364" r="38" fill="transparent"/><ellipse cx="250" cy="372" rx="40" ry="13" fill="#ecd9a8" stroke="${ink}" stroke-width="1.4"/><ellipse cx="250" cy="370" rx="28" ry="8" fill="#a9b768" stroke="none"/>`;
+ m+=`<g class="mnode" data-n="5"><circle cx="250" cy="364" r="38" fill="transparent"/>`+H.MAPC.waves(250,384,70)+H.MAPC.birds(226,328,.8)+`<g transform="translate(250,372) scale(1.15) translate(-250,-372)"><ellipse cx="250" cy="372" rx="40" ry="13" fill="#ecd9a8" stroke="${ink}" stroke-width="1.4"/><ellipse cx="250" cy="370" rx="28" ry="8" fill="#a9b768" stroke="none"/>`;   /* 島本身就是地形，保留；放大、加浪和小鳥 */
  m+=P('M264,370 L266,340 L272,340 L274,370Z','#fbf9f3',1.3)+`<path d="M265,352 h9 M266,362 h8" stroke="#d8413a" stroke-width="3"/>`+P('M264,340 L269,332 L274,340Z','#d8413a',1.2);
- m+=`<path d="M236,370 Q234,356 240,346" fill="none" stroke="${ink}" stroke-width="2"/>`+P('M240,346 q-10,-2 -14,4 q8,0 14,-4Z M240,346 q10,-2 14,4 q-8,0 -14,-4Z M240,346 q-4,-8 -12,-8 q4,6 12,8Z M240,346 q4,-8 12,-8 q-4,6 -12,8Z','#5f8a3a',1.1);
+ m+=`<path d="M236,370 Q234,356 240,346" fill="none" stroke="${ink}" stroke-width="2"/>`+P('M240,346 q-10,-2 -14,4 q8,0 14,-4Z M240,346 q10,-2 14,4 q-8,0 -14,-4Z M240,346 q-4,-8 -12,-8 q4,6 12,8Z M240,346 q4,-8 12,-8 q-4,6 -12,8Z','#5f8a3a',1.1)+`<path d="M270,370 L272,340 L274,370Z" fill="#000" opacity=".12"/><path d="M276,372 h10 l-2,3 h-6Z" fill="#a8784a" stroke="${ink}" stroke-width="1"/></g>`;
  m+=`<g transform="translate(250,398)"><rect x="-32" y="-11" width="64" height="20" rx="10" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4.5" text-anchor="middle" font-size="12" fill="${ink}" font-family="${FN}">海島港口</text></g></g>`;
  return m});
 

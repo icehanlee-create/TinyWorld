@@ -385,7 +385,7 @@ STORIES[N]={title:'躲在大岩石後面的小梅花鹿',who:'民宿阿姨',
 HERE[N]=[405,324];
 H.mapHook(2,({P,ink,FN,open})=>{if(!open(N))return '';
  const route=H.mapRoute('M276,364 Q330,396 372,352 Q388,340 392,338','sea',ink);
- let m=`<g class="mnode" data-n="${N}"><circle cx="405" cy="336" r="34" fill="transparent"/><g transform="translate(405,336)">`;
+ let m=`<g class="mnode" data-n="${N}"><circle cx="405" cy="336" r="34" fill="transparent"/>`+H.MAPC.waves(405,354,64)+H.MAPC.birds(384,304,.8)+`<g transform="translate(405,336) scale(1.12)">`;   /* 2026-11-21w 繪本風：島保留、放大、浪、小鳥 */
  m+=`<ellipse cx="0" cy="8" rx="34" ry="15" fill="#efe0a8" stroke="${ink}" stroke-width="1.8"/><ellipse cx="0" cy="5" rx="25" ry="9.5" fill="#8fbf6a"/>`;
  m+=P('M-24,6 Q-16,-12 -4,-10 Q4,-18 14,-6 Q20,-8 24,6Z','#7fae5a',1.4);
  m+=`<g transform="translate(14,-2)">`+P('M-3,10 L-2,-12 H2 L3,10Z','#fffdf4',1.4)+`<path d="M-2.4,-2 H2.4 L2.6,-6 H-2.6Z" fill="#2f7a88"/>`+P('M-3,-12 L0,-18 L3,-12Z','#2f7a88',1.2)+`</g>`;

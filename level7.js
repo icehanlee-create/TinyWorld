@@ -559,10 +559,11 @@ HERE[N]=[-96,170];
 MAPHOOKS.push(({U,P,ink,FN})=>{if(U<N)return '';
  const road='M-50,220 Q-66,216 -78,206';
  let m=H.mapRoute(road,'road',ink);
- m+=`<g class="mnode" data-n="${N}"><g transform="translate(-14,-52)"><circle cx="-82" cy="244" r="26" fill="transparent"/><ellipse cx="-82" cy="250" rx="21" ry="7" fill="#cfd9a0" stroke="${ink}" stroke-width="1.3"/>`+
+ m+=`<g class="mnode" data-n="${N}"><g transform="translate(-14,-52)"><circle cx="-82" cy="244" r="26" fill="transparent"/>`+H.MAPC.round(-106,250,.72,'#f2b4c6')+H.MAPC.round(-58,251,.62,'#f2b4c6')+H.MAPC.tufts(-82,253,34)+`<g transform="translate(-82,250) scale(1.15) translate(82,-250)">`;   /* 2026-11-21w 繪本風：拿掉底座、兩旁小樹、放大 */
+ m+=``+
   P('M-94,248 V238 L-88,232 L-82,238 V248Z','#f1e8d2',1.3)+P('M-98,239 L-88,229 L-78,239Z','#6f7088',1.3)+P('M-80,248 V240 L-74,235 L-68,240 V248Z','#efe4cb',1.3)+P('M-83,241 L-74,232 L-65,241Z','#6f7088',1.3)+
   `<g fill="#fff" stroke="${ink}" stroke-width="1"><circle cx="-90" cy="224" r="3.4"/><circle cx="-85" cy="219" r="4.2"/><circle cx="-77" cy="222" r="3"/></g>`+
-  `</g><g transform="translate(-147,194)"><rect x="-26" y="-10" width="52" height="19" rx="9.5" fill="#fffaf0" stroke="${ink}" stroke-width="1.6"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">溫泉老街</text></g></g>`;
+  `</g></g><g transform="translate(-147,194)"><rect x="-26" y="-10" width="52" height="19" rx="9.5" fill="#fffaf0" stroke="${ink}" stroke-width="1.6"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">溫泉老街</text></g></g>`;
  return m});
 })();
 

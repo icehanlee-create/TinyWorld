@@ -279,12 +279,10 @@ STORIES[N]={title:'鑽進彩旗堆的小跳鼠',who:'滑沙小孩',
 HERE[N]=[-118,330];
 H.mapHook(2,({P,ink,FN,open})=>{if(!open(N))return '';
  let g=H.mapRoute('M-54,358 Q-78,354 -98,350','road',ink);
- let m=`<g class="mnode" data-n="${N}"><g transform="translate(-118,346) scale(.8) translate(150,-354)"><g transform="translate(0,-10)"><circle cx="-150" cy="362" r="36" fill="transparent"/>`;
- m+=`<ellipse cx="-150" cy="364" rx="34" ry="17" fill="#ecd29c" stroke="${ink}" stroke-width="1.5"/>`;
- m+=P('M-176,368 Q-162,342 -148,348 Q-134,338 -122,368 Z','#f4dfa8',1.5)+`<path d="M-148,348 Q-134,338 -122,368 H-136Z" fill="#dcbc7e"/>`;
- m+=`<path d="M-160,366 Q-156,356 -152,349 M-146,367 Q-143,358 -140,351" fill="none" stroke="#f9ebc6" stroke-width="4" stroke-linecap="round"/><path d="M-160,366 Q-156,356 -152,349 M-146,367 Q-143,358 -140,351" fill="none" stroke="#cfa860" stroke-width="1" stroke-linecap="round"/>`;
- m+=`<g transform="translate(-138,344) rotate(10)"><rect x="-2.6" y="-13" width="5.2" height="15" rx="2.6" fill="#c4573a" stroke="${ink}" stroke-width="1.2"/></g>`;
- m+=`</g></g><g transform="translate(-118,374)"><rect x="-38" y="-10" width="76" height="18" rx="9" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">沙丘滑沙場</text></g></g>`;
+ let m=`<g class="mnode" data-n="${N}"><g transform="translate(-118,346) scale(.9) translate(150,-354)"><g transform="translate(0,-10)"><circle cx="-150" cy="362" r="36" fill="transparent"/>`;
+ /* 2026-11-22 使用者選 A：高高的大沙丘，兩條滑沙痕，頂上插一面小紅旗 */
+ const ART=P('M-147,358 Q-133,326 -121,326 Q-108,326 -101,358Z','#f4dfa8',1.5)+`<path d="M-121,326 Q-108,326 -101,358 H-115 Q-114,340 -121,326Z" fill="#000" opacity=".12"/><path d="M-129,356 Q-125,342 -122,330 M-120,356 Q-116,342 -114,331" fill="none" stroke="#f9ebc6" stroke-width="3.6" stroke-linecap="round"/><path d="M-129,356 Q-125,342 -122,330 M-120,356 Q-116,342 -114,331" fill="none" stroke="#cfa860" stroke-width=".9" stroke-linecap="round"/><path d="M-121,327 v-13" stroke="${ink}" stroke-width="1.2"/>`+P('M-121,314 l9,3 l-9,3Z','#c4473a',1)+`<g transform="translate(-112,350) rotate(18)"><rect x="-2.4" y="-11" width="4.8" height="13" rx="2.4" fill="#c4573a" stroke="${ink}" stroke-width="1.1"/></g>`;
+ m+=`</g></g>`+ART+`<g transform="translate(-118,374)"><rect x="-38" y="-10" width="76" height="18" rx="9" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">沙丘滑沙場</text></g></g>`;
  return g+m});
 /* 過場：抱著滑沙板從大沙丘頂衝下去（背後看）。2026-11-18e 使用者說沙子方向反了：往前衝時地上的沙紋要往下（往鏡頭）流，沙花往後、往兩旁飛向鏡頭 */
 RIDES.slide12={text:'抱緊板子，衝下去！',every:260,tick:k=>tone(300+(k%4)*40,.07,'triangle',.04),

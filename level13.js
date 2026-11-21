@@ -347,12 +347,12 @@ STORIES[N]={title:'躲在陶罐堆後面的小埃及貓',who:'考古隊員',
 HERE[N]=[-95,288];
 H.mapHook(2,({P,ink,FN,open})=>{if(!open(N))return '';
  let g=H.mapRoute('M-112,330 Q-110,316 -104,310','road',ink);
- let m=`<g class="mnode" data-n="${N}"><g transform="translate(-95,306) scale(.8) translate(252,-344)"><g transform="translate(-20,-12)"><circle cx="-232" cy="352" r="38" fill="transparent"/>`;
- m+=`<ellipse cx="-232" cy="356" rx="36" ry="18" fill="#ecd29c" stroke="${ink}" stroke-width="1.5"/>`;
- m+=P('M-256,358 L-236,326 L-214,358Z','#e6cb92',1.6)+`<path d="M-236,326 L-214,358 H-226Z" fill="#d3b274"/>`;
- m+=P('M-224,358 L-210,336 L-196,358Z','#e8cf98',1.5);
- m+=`<path d="M-246,350 H-224 M-242,343 H-230" fill="none" stroke="#b99a58" stroke-width="1" opacity=".8"/><rect x="-241" y="350" width="7" height="8" rx="1" fill="#3a2a22" stroke="${ink}" stroke-width="1"/>`;
- m+=`</g></g><g transform="translate(-95,266)"><rect x="-26" y="-10" width="52" height="18" rx="9" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">金字塔</text></g></g>`;
+ let m=`<g class="mnode" data-n="${N}"><g transform="translate(-95,306) scale(.92) translate(252,-344)"><g transform="translate(-20,-12)"><circle cx="-232" cy="352" r="38" fill="transparent"/>`;
+ const pyrA=(x,y,w,cap)=>P(`M${x-w/2},${y} L${x},${y-w*.62} L${x+w/2},${y}Z`,'#e8c97a',1.5)+`<path d="M${x},${y-w*.62} L${x+w/2},${y} L${x+w*.12},${y}Z" fill="#000" opacity=".18"/><path d="M${x-w*.32},${y-w*.2} H${x+w*.2} M${x-w*.2},${y-w*.38} H${x+w*.1}" stroke="#b8954a" stroke-width="1"/>`+(cap?P(`M${x-w*.09},${y-w*.5} L${x},${y-w*.62} L${x+w*.09},${y-w*.5}Z`,'#f5c842',1.1):'');
+ const camelM=(x,y,s=1,d=1)=>`<g transform="translate(${x},${y}) scale(${s*d},${s})"><path d="M-5,-8 V0 M-2,-8 V0 M4,-8 V0 M7,-8 V0" stroke="${ink}" stroke-width="1.2"/><path d="M-8,-8 Q-7,-14 -2,-14 Q1,-19 4,-14 Q8,-13 8,-9 Q12,-11 11,-16 L15,-17 L15,-15 L13,-14 Q14,-8 8,-7 Q0,-5 -8,-8Z" fill="#c9955a" stroke="${ink}" stroke-width="1.1" stroke-linejoin="round"/><path d="M-1,-13 Q1,-17 4,-14 Q6,-12 7,-9 Q2,-8 -1,-13Z" fill="#000" opacity=".12"/><path d="M-8,-9 q-2,1 -2,4" fill="none" stroke="${ink}" stroke-width="1"/></g>`;
+ /* 2026-11-22 使用者選 A：金字塔一大一小（大的金頂、門洞）＋旁邊兩隻駱駝 */
+ const ART=pyrA(-102,310,40,1)+`<rect x="-106" y="302" width="7" height="8" rx="1" fill="#3a2a22" stroke="${ink}" stroke-width="1"/>`+pyrA(-77,310,24)+camelM(-62,316,.9,-1)+camelM(-50,318,.8,-1)+H.MAPC.birds(-128,276,.9);
+ m+=`</g></g>`+ART+`<g transform="translate(-95,266)"><rect x="-26" y="-10" width="52" height="18" rx="9" fill="#fffaf0" stroke="${ink}" stroke-width="1.8"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">金字塔</text></g></g>`;
  return g+m});
 /* 過場：背後看商隊（駱駝＋小孩）走向越來越大的金字塔，沙紋往下捲 */
 RIDES.pyramid13={text:'跟著商隊，走向金字塔⋯',every:380,tick:k=>tone(k%2?262:233,.1,'triangle',.05),

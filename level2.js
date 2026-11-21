@@ -101,8 +101,8 @@ H.mapHook(0,({U,P,ink,FN,f})=>{let g='';const on=U>=2;
 H.mapHook(4,({U,P,ink,FN,f})=>{let g='';const on=U>=2;
  // ---- farm ----
  if(on){let m=`<g class="mnode" data-n="2"><circle cx="262" cy="214" r="50" fill="transparent"/>`;
-  const FK=.7; /* 2026-11-11 農莊圖案縮小，以 (264,240) 為中心 */
-  m+=`<g transform="translate(264,240) scale(${FK}) translate(-264,-240)">`;
+  const FK=.8; /* 2026-11-11 農莊圖案縮小，以 (264,240) 為中心；2026-11-21w 繪本風放大 .7→.8 */
+  m+=`<g transform="translate(264,240) scale(${FK}) translate(-264,-240)">`+H.MAPC.deco(272,262,120,{tree:'round',s:1.2,h:72});   /* 繪本風：兩側圓葉樹、草線、小鳥 */
   // fields
   const field=(pts,c,lc)=>P('M'+pts.join(' L')+'Z',c,1.4)+`<g clip-path="none"></g>`;
   m+=field(['230,236','290,230','318,244','262,256'],'#d9c06a')+`<path d="M242,238 l50,-5 M250,243 l52,-5 M256,248 l52,-4" stroke="#b39b45" stroke-width="1.1"/>`;

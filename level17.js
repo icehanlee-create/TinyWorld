@@ -233,15 +233,49 @@ function keep17(){const cx=1250,by=DOOR.y,fw=540,fh=110,dep=250,bw=486,bh=84,ft=
  g+=`<path d="M${cx-bw},${bb} H${cx+bw} L${cx+fw},${ft} H${cx-fw}Z" fill="#cfc6aa"/><path d="M${cx-bw+90},${bb+18} H${cx+bw-90} L${cx+fw-120},${ft} H${cx-fw+120}Z" fill="#a9b768" opacity=".8"/>`;
  g+=`<rect x="${cx-bw}" y="${btop}" width="${2*bw}" height="${bh}" fill="#d2c6a8"/>`+stn(cx-bw,cx+bw,btop,bb,18,40,'#bcae8c')+crn(cx-bw,cx+bw,btop,11,24,13,'#d2c6a8');
  g+=rTower(cx-bw,bb+4,76,180,'#c4572f')+rTower(cx+bw,bb+4,76,180,'#c4572f');
- /* 中庭：左邊小禮拜堂、右邊宴會大廳（煙囪冒煙、亮著的窗：下一關的伏筆）、樹、花園噴泉、人 */
- g+=tree3(820,430,.8)+tree3(1690,428,.8);
- g+=house3(940,452,84,44,22,'#e8ddc2','#7a5a8a',{rh:30,extra:`<path d="M934,${452-44-30} V${452-44-46} M928,${452-44-40} H940" fill="none" stroke-width="2.4"/><circle cx="940" cy="${452-26}" r="8" fill="#9fd0e0"/><path d="M932,452 V438 Q940,430 948,438 V452Z" fill="#5a3a2a"/>`});
- g+=house3(1500,462,210,54,26,'#e2d7bc','#a85640',{rh:40,extra:`<rect x="1570" y="${462-54-58}" width="14" height="30" fill="#b9ad92"/><circle cx="1580" cy="${462-54-70}" r="8" fill="#e8e4dc" stroke="none" opacity=".8"/><circle cx="1588" cy="${462-54-84}" r="6" fill="#e8e4dc" stroke="none" opacity=".6"/>`+[1420,1460,1540,1580].map(x=>`<path d="M${x-8},${462-12} V${462-34} Q${x},${462-44} ${x+8},${462-34} V${462-12}Z" fill="#f5c842"/>`).join('')+`<path d="M1490,462 V434 Q1500,424 1510,434 V462Z" fill="#5a3a2a"/>`});
- g+=`<ellipse cx="1110" cy="490" rx="34" ry="12" fill="#9fc8d4"/><ellipse cx="1110" cy="490" rx="34" ry="12" fill="none" stroke-width="2"/><path d="M1104,490 V474 H1116 V490" fill="#d6cbb0"/><path d="M1110,474 q-8,-10 -14,0 M1110,474 q8,-10 14,0" fill="none" stroke="#9fd0e0" stroke-width="2.2"/>`;
- [[1030,500],[1190,500],[1330,506]].forEach(([x,y])=>g+=`<path d="M${x-26},${y} h52 v-12 q-26,-8 -52,0Z" fill="#6f9a4a"/>`+[[-16,-12,'#d8413a'],[-4,-14,'#e0b44a'],[10,-12,'#f0a8a0'],[20,-10,'#d8413a']].map(([a,b,c])=>`<circle cx="${x+a}" cy="${y+b}" r="3" fill="${c}" stroke-width="1"/>`).join(''));
- g+=tree3(870,478,.7)+tree3(1640,488,.7);
- g+=rTower(cx,470,150,240,'#5c6f96')+[[cx-40,290],[cx+40,290]].map(([x,y])=>`<path d="M${x-12},${y} H${x+12} V${y+44} L${x},${y+36} L${x-12},${y+44}Z" fill="#b8402e" stroke-width="1.4"/><circle cx="${x}" cy="${y+16}" r="4.6" fill="#e0b44a" stroke-width="1.1"/>`).join('');
- g+=pp(1060,520,{shirt:'#3f6f9a',hs:2})+pp(1170,516,{view:'side',shirt:'#c4473a',hs:4,fl:true})+pp(1360,520,{view:'side',shirt:'#5f7a4a'})+pp(1420,516,{shirt:'#e0b44a',hs:3,fl:true})+pp(960,516,{view:'bq',shirt:'#7a4f8a'})+pp(1560,520,{view:'fq',shirt:'#fbf9f2',hat:H.HATCHEF17,fl:true});
+ /* 2026-11-21w 使用者：中庭照宮廷院（第 18 關）畫出約略的樣子（選 B）：主殿（兩層、中間方塔、兩側圓塔在後面）＋三層噴水池＋花壇；
+    圖書塔靠近主殿右邊、有空中廊道連過去；左邊禮拜堂保留，右邊宴會廳縮小放在圖書塔後面（之後可能往左右延伸別的關卡） */
+ const GARD=false;
+ g+=tree3(800,430,.75)+tree3(1705,428,.75);
+ /* 左：小禮拜堂（原本的） */
+ g+=house3(905,452,84,44,22,'#e8ddc2','#7a5a8a',{rh:30,extra:`<path d="M899,${452-44-30} V${452-44-46} M893,${452-44-40} H905" fill="none" stroke-width="2.4"/><circle cx="905" cy="${452-26}" r="8" fill="#9fd0e0"/><path d="M897,452 V438 Q905,430 913,438 V452Z" fill="#5a3a2a"/>`});
+ /* 右上：宴會大廳（縮小，躲在圖書塔後面） */
+ g+=house3(1650,438,104,36,20,'#e2d7bc','#a85640',{rh:26,extra:`<rect x="1668" y="${438-36-40}" width="12" height="22" fill="#b9ad92"/><circle cx="1676" cy="${438-36-50}" r="7" fill="#e8e4dc" stroke="none" opacity=".8"/>`+[1636,1660,1684].map(x=>`<path d="M${x-6},${438-8} V${438-24} Q${x},${438-31} ${x+6},${438-24} V${438-8}Z" fill="#f5c842"/>`).join('')});
+ /* 主殿右邊：紫屋頂圖書塔（第 19 關的伏筆） */
+ const LX=1566;g+=rTower(LX,474,64,236,'#7a5a8a')+`<circle cx="${LX}" cy="318" r="10" fill="#e8d9a8"/><path d="M${LX-6},322 h12 M${LX-6},317 h12" stroke="#8a5a3a" stroke-width="1.4"/>`;
+ {let iv='';for(let i=0;i<14;i++){const y=466-i*10,x=LX-30+Math.sin(i*.8)*4;iv+=`<circle cx="${f(x)}" cy="${f(y)}" r="${3+(i%3)}" fill="${i%4?'#5f9a48':'#4a7a3a'}" stroke-width="1"/>`}g+=iv}
+ /* 北：主殿（兩層樓、中間方塔、兩側圓塔，照宮廷院縮小） */
+ {const x0=1060,x1=1440,yb=444,f1=yb-52,f2=f1-46,rt=f2-6;
+  g+=rTower(1040,yb-8,56,176,'#5c6f96')+rTower(1460,yb-8,56,176,'#5c6f96');   /* 塔底往後收，圓弧落在主殿牆腳 */
+  g+=`<path d="M${x0-6},${f2} L${x0+22},${rt-34} H${x1-22} L${x1+6},${f2}Z" fill="#5c6f96"/><path d="M${x0+22},${rt-34} L${x0+40},${rt-58} H${x1-40} L${x1-22},${rt-34}Z" fill="#4c5d82"/><path d="M${x1-22},${rt-34} L${x1+6},${f2} H${x1-40}Z" fill="#000" opacity=".12" stroke="none"/>`;
+  [1120,1170,1330,1380].forEach(x=>g+=`<path d="M${x-8},${rt-24} V${rt-36} L${x},${rt-44} L${x+8},${rt-36} V${rt-24}Z" fill="#e8ddc2"/><rect x="${x-4}" y="${rt-36}" width="8" height="9" fill="#3a3040" stroke="none"/>`);
+  g+=`<rect x="${x0}" y="${f2}" width="${x1-x0}" height="${yb-f2}" fill="#e8ddc2"/>`+stn(x0,x1,f2,yb,13,30,'#cfc3a2')+`<path d="M${x0},${f1} H${x1}" stroke="#bfb291" stroke-width="3"/><rect x="${x0}" y="${f2}" width="${x1-x0}" height="${yb-f2}" fill="none"/>`;
+  [1090,1130,1170,1330,1370,1410].forEach(x=>g+=`<path d="M${x-7},${yb-8} V${yb-34} Q${x},${yb-44} ${x+7},${yb-34} V${yb-8}Z" fill="#3a5878"/><rect x="${x-9}" y="${yb-9}" width="18" height="5" fill="#c4473a" stroke-width="1"/><path d="M${x-5},${f1-6} V${f1-26} H${x+5} V${f1-6}Z" fill="#3a5878"/><path d="M${x-9},${f1-6} H${x+9}" stroke-width="2"/>`);
+  /* 中間方塔 */
+  g+=`<rect x="1205" y="${rt-130}" width="90" height="${yb-rt+130}" fill="#e8ddc2"/><rect x="1265" y="${rt-130}" width="30" height="${yb-rt+130}" fill="#cfc2a2" stroke="none"/><rect x="1205" y="${rt-130}" width="90" height="${yb-rt+130}" fill="none"/>`;
+  {const pt=rt-142,ap=pt-96;g+=`<path d="M1199,${rt-130} V${pt} Q1250,${pt+12} 1301,${pt} V${rt-130} Q1250,${rt-118} 1199,${rt-130}Z" fill="#e2d7bc"/><path d="M1193,${pt} Q1250,${pt+14} 1307,${pt} L1250,${ap}Z" fill="#5c6f96"/><path d="M1250,${ap} L1270,${pt+9} Q1290,${pt+6} 1307,${pt}Z" fill="#000" opacity=".13" stroke="none"/>`+flg(1250,ap)}
+  g+=`<circle cx="1250" cy="${rt-96}" r="13" fill="#f2ead2"/><path d="M1250,${rt-96} V${rt-105} M1250,${rt-96} L1257,${rt-92}" stroke-width="1.8"/>`;
+  g+=`<path d="M1235,${yb} V${yb-38} Q1250,${yb-56} 1265,${yb-38} V${yb}Z" fill="#7a4e32"/><path d="M1222,${yb} h56 v6 h-56Z M1228,${yb+6} h44 v5 h-44Z" fill="#d6cbb0" stroke-width="1.2"/>`;
+  [[1222,f1+4],[1278,f1+4]].forEach(([x,y])=>g+=`<path d="M${x-8},${y-40} H${x+8} V${y-8} L${x},${y-14} L${x-8},${y-8}Z" fill="#3f5f9a" stroke-width="1.2"/><circle cx="${x}" cy="${y-28}" r="3" fill="#e0b44a" stroke-width="1"/>`)}
+ /* 空中廊道：主殿右邊圓塔 → 圖書塔（照宮廷院：斜一點、紅瓦屋頂、小拱窗、下面石拱撐著） */
+ {const x0=1486,x1=LX-30,y0=346,y1=362,yy=x=>y0+(y1-y0)*(x-x0)/(x1-x0);
+  g+=`<path d="M${x0},${yy(x0)+24} L${x1},${yy(x1)+24} L${x1},${yy(x1)+40} Q${(x0+x1)/2},${(yy(x0)+yy(x1))/2+30} ${x0},${yy(x0)+40}Z" fill="#d6cbb0"/>`;
+  g+=`<path d="M${x0},${yy(x0)} L${x1},${yy(x1)} L${x1},${yy(x1)+26} L${x0},${yy(x0)+26}Z" fill="#e8ddc2"/>`;
+  [.3,.7].forEach(t=>{const x=x0+(x1-x0)*t,y=yy(x);g+=`<path d="M${x-5},${y+20} V${y+10} Q${x},${y+4} ${x+5},${y+10} V${y+20}Z" fill="#3a5878"/>`});
+  g+=`<path d="M${x0-2},${yy(x0)+1} L${x0+4},${yy(x0)-12} L${x1-2},${yy(x1)-12} L${x1+2},${yy(x1)+1}Z" fill="#a85640"/>`}
+ /* 中庭：石子步道＋三層噴水池＋兩側幾何花壇 */
+ g+=`<path d="M1236,456 H1264 L1280,520 H1220Z" fill="#e6dcc0" stroke="none"/><ellipse cx="1250" cy="488" rx="78" ry="22" fill="#e6dcc0" stroke="none"/>`;
+ g+=`<ellipse cx="1250" cy="490" rx="44" ry="13" fill="#9fc8d4"/><ellipse cx="1250" cy="490" rx="44" ry="13" fill="none" stroke-width="2"/><path d="M1246,490 V470 H1254 V490" fill="#d6cbb0"/><ellipse cx="1250" cy="470" rx="22" ry="6" fill="#9fc8d4"/><path d="M1247,470 V456 H1253 V470" fill="#d6cbb0"/><ellipse cx="1250" cy="456" rx="11" ry="3.5" fill="#9fc8d4"/><path d="M1250,452 q-10,-14 -18,2 M1250,452 q10,-14 18,2 M1250,452 v-10" fill="none" stroke="#9fd0e0" stroke-width="2.2"/>`;
+ const bed=(x,y,w)=>`<path d="M${x-w/2+10},${y-16} H${x+w/2-10} L${x+w/2},${y} H${x-w/2}Z" fill="#5f8a3e"/><path d="M${x-w/2+16},${y-12} H${x+w/2-16} L${x+w/2-8},${y-3} H${x-w/2+8}Z" fill="#7aa24c" stroke="none"/><path d="M${x},${y-14} V${y-2} M${x-w/2+12},${y-8} H${x+w/2-12}" stroke="#d6cbb0" stroke-width="2.4"/>`+[[-.32,-11,'#d8413a'],[-.18,-6,'#e0b44a'],[.2,-11,'#f0a8a0'],[.32,-6,'#d8413a'],[-.06,-10,'#b07ad8'],[.08,-5,'#e0b44a']].map(([a,b,c])=>`<circle cx="${x+a*w}" cy="${y+b}" r="2.6" fill="${c}" stroke-width=".9"/>`).join('');
+ g+=bed(1120,500,100)+bed(1380,500,100);
+ if(GARD){/* 西：毛茸茸樹籬雕塑（兔子、圓球）；東：白色圓頂涼亭 */
+  const blob=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#5f8f3e"/><circle cx="${x-r*.3}" cy="${y-r*.35}" r="${r*.45}" fill="#7aaa50" stroke="none"/>`;
+  const rab=(x,y)=>`<path d="M${x-10},${y} h20 v-6 h-20Z" fill="#8a6a48" stroke-width="1.2"/>`+blob(x,y-16,11)+blob(x+6,y-30,7)+`<path d="M${x+3},${y-36} q-2,-16 2,-16 q4,0 1,16 M${x+8},${y-36} q2,-15 6,-13 q2,3 -4,14" fill="#5f8f3e"/>`;
+  g+=rab(985,500)+`<path d="M1010,500 h16 v-5 h-16Z" fill="#8a6a48" stroke-width="1.2"/>`+blob(1018,484,11)+rab(1050,504);
+  const gz=(x,y)=>`<ellipse cx="${x}" cy="${y}" rx="30" ry="7" fill="#e8e2d4"/>`+[-22,-8,8,22].map(d=>`<path d="M${x+d-2},${y-2} V${y-34} h4 V${y-2}Z" fill="#fbf9f2" stroke-width="1.2"/>`).join('')+`<path d="M${x-30},${y-34} Q${x},${y-74} ${x+30},${y-34}Z" fill="#fbf9f2"/><path d="M${x-30},${y-34} H${x+30}" stroke-width="2"/><circle cx="${x}" cy="${y-58}" r="3" fill="#e0b44a" stroke-width="1"/>`;
+  g+=gz(1510,506)}
+ g+=tree3(840,488,.65)+tree3(1660,494,.65);
+ g+=pp(1170,522,{view:'side',shirt:'#c4473a',hs:4,fl:true})+pp(1330,522,{shirt:'#7a4f8a',hs:2,top:'long'})+pp(1080,518,{view:'side',shirt:'#3f6f9a'})+pp(1425,518,{shirt:'#e0b44a',hs:3,fl:true})+pp(950,520,{view:'bq',shirt:'#5f7a4a'})+pp(1585,522,{view:'fq',shirt:'#fbf9f2',hat:H.HATCHEF17,fl:true});
  /* 兩側城牆：往後縮的外牆面＋牆頂走道＋垛口＋巡邏衛兵 */
  for(const sg of [-1,1]){const xf=cx+sg*fw,xb=cx+sg*bw,inw=-sg;
   g+=`<path d="M${xf},${by} V${ft} L${xb},${btop} V${bb}Z" fill="#c6b994"/>`;

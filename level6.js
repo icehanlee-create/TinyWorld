@@ -449,12 +449,17 @@ MAPHOOKS.push(({U,P,ink,FN})=>{if(U<N)return '';
  /* 小鎮港口的月台 */
  /* 2026-11-20 月台拿掉，小鎮港口改畫在第 1 關的地圖圖案 */
  /* 櫻花山（縮小版）：淡粉的圓團樹冠蓋在山上 */
- m+=P('M-134,238 L-108,170 L-90,188 L-66,122 L-6,238Z','#b9c6a0',1.5)+`<path d="M-66,122 L-6,238 L-30,238Z" fill="#9fae86" opacity=".9"/>`;
- m+=[[-124,230],[-114,208],[-70,232],[-18,230],[-26,206],[-64,140],[-72,186],[-58,160]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="7" fill="#f7c4d3" stroke="${ink}" stroke-width="1.1"/><circle cx="${x-2}" cy="${y-2}" r="2.2" fill="#fde4ec" stroke="none"/>`).join('');
+ /* 2026-11-22 使用者選 B：圓潤繪本山——圓圓的大山丘，櫻花一團團蓋上去，Z 字石板小路串起 4 個地點 */
+ const blob=(x,y,r,c='#f7c4d3',hl='#fde4ec')=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" stroke="${ink}" stroke-width="1.1"/><circle cx="${x-r*.3}" cy="${y-r*.3}" r="${r*.32}" fill="${hl}" stroke="none"/><path d="M${x+r*.2},${y-r*.95} A${r},${r} 0 0 1 ${x+r*.2},${y+r*.95} A${r*.7},${r} 0 0 0 ${x+r*.2},${y-r*.95}Z" fill="#000" opacity=".08"/>`;
+ {/* 圓潤繪本山：圓圓的大山丘，櫻花樹一團團蓋上去，Z 字石板小路 */
+  m+=P('M-146,240 Q-140,180 -110,160 Q-90,110 -60,112 Q-28,116 -20,170 Q-2,196 -2,240Z','#b9cc9a',1.6)+`<path d="M-60,112 Q-28,116 -20,170 Q-2,196 -2,240 H-24 Q-22,190 -40,160 Q-46,124 -60,112Z" fill="#000" opacity=".1"/>`;
+  m+=`<path d="M-26,236 Q-60,226 -90,214 Q-60,200 -36,190 Q-64,176 -92,166 Q-70,150 -56,128" fill="none" stroke="#f3e2b0" stroke-width="4" stroke-linecap="round"/><path d="M-26,236 Q-60,226 -90,214 Q-60,200 -36,190 Q-64,176 -92,166 Q-70,150 -56,128" fill="none" stroke="#c9b27a" stroke-width="1" stroke-dasharray="3 3"/>`;
+  m+=[[-136,226,8],[-126,236,7],[-120,196,8],[-128,206,6],[-16,224,8],[-10,236,6],[-22,200,7],[-112,172,7],[-28,172,7],[-76,124,8],[-50,122,7],[-64,112,6]].map(([x,y,r])=>blob(x,y,r)).join('')}
  /* 第 6 關節點：小鳥居＋短名牌 */
- m+=`<g class="mnode" data-n="${N}"><g transform="translate(38,-66)"><circle cx="-78" cy="284" r="26" fill="transparent"/><ellipse cx="-78" cy="288" rx="20" ry="7" fill="#d4e8ad" stroke="${ink}" stroke-width="1.3"/>`+
+ m+=`<g class="mnode" data-n="${N}"><g transform="translate(38,-66)"><circle cx="-78" cy="284" r="26" fill="transparent"/>`+H.MAPC.round(-102,288,.72,'#f2b4c6')+H.MAPC.round(-54,289,.62,'#f2b4c6')+H.MAPC.tufts(-78,291,34)+`<g transform="translate(-78,288) scale(1.15) translate(78,-288)">`;   /* 2026-11-21w 繪本風：拿掉底座、兩旁小樹、放大 */
+ m+=``+
   P('M-86,286 V272 M-70,286 V272','none',2.4)+`<path d="M-88,274 H-68 M-90,270 Q-78,267 -66,270" fill="none" stroke="#d8413a" stroke-width="2.6" stroke-linecap="round"/>`+
-  `</g><g transform="translate(10,218)"><rect x="-26" y="-10" width="52" height="19" rx="9.5" fill="#fffaf0" stroke="${ink}" stroke-width="1.6"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">櫻花參道</text></g></g>`;
+  `</g></g><g transform="translate(10,218)"><rect x="-26" y="-10" width="52" height="19" rx="9.5" fill="#fffaf0" stroke="${ink}" stroke-width="1.6"/><text y="4" text-anchor="middle" font-size="11" fill="${ink}" font-family="${FN}">櫻花參道</text></g></g>`;
  return m});
 })();
 
