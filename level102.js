@@ -14,7 +14,7 @@ const {T,f,r,sr,pk,ri,shade,OL,SKIN,HATS,kid,act,add,mark,canPlace,KIND,REG,SCRE
 const N=102;
 
 /* ================= 迷宮的格子 ================= */
-const CELL=140,WT=24,HH=64,COLS=11,ROWS=13,MX=620,MY=160,MX1=MX+COLS*CELL,MY1=MY+ROWS*CELL;   /* HH＝綠籬牆的高度（畫出來的正面） */
+const CELL=180,WT=64,HH=64,COLS=11,ROWS=13,MX=620,MY=160,MX1=MX+COLS*CELL,MY1=MY+ROWS*CELL;   /* HH＝綠籬牆的高度（畫出來的正面） */
 /* E[r][c]＝格子東邊有牆、S[r][c]＝格子南邊有牆（固定的迷宮，用種子 1 產生後寫死）。
    2026-11-21 使用者：要讓「一直摸著同一邊的牆走」的人走不到終點（選 B），而且迷宮往外擴、不要讓原本的空間變小（9×11 → 11×13）：
    中央 3×3 是紫藤棚架空地（門開在北邊），外面整整繞一圈「環狀走道」（5×5 的外圈），環狀走道只有西邊（第 7 列）和東邊（第 5 列）兩個出入口。
@@ -43,14 +43,14 @@ const SC={x0:560,x1:MX1+60,y1:LAWN.y1+70,c:[cx(5),LAWN.y1-100]};
 SCENES[N]=SC;SCREG[N]=[];DENS[N]=1;TARGET[N]=300;
 H.SKYC[N]='#78b85a';H.SKYY[N]=0;H.EDGEM[N]='';H.EDGED[N]='';
 /* 場地外：一大片綠籬頂（不用雲） */
-if(H.FOGFN)H.FOGFN[N]=({X0,X1,Y1})=>`<defs><pattern id="hp102" width="46" height="40" patternUnits="userSpaceOnUse"><rect width="46" height="40" fill="#78b85a"/><path d="M6,12 l3,-3.4 l3,3.4 M28,8 l3,-3.4 l3,3.4 M16,30 l3,-3.4 l3,3.4 M38,28 l3,-3.4 l3,3.4" fill="none" stroke="#5f9a46" stroke-width="1.6"/><circle cx="36" cy="18" r="3" fill="#fbf9f2" stroke="#2b2420" stroke-width="1"/></pattern></defs><path d="M-6000,-4000 H8800 V5800 H-6000Z M${X0-300},-300 V${Y1+300} H${X1+300} V-300Z" fill="url(#hp102)" fill-rule="evenodd"/>`;
+if(H.FOGFN)H.FOGFN[N]=({X0,X1,Y1})=>`${hedgeDefs('hf102')}<path d="M-6000,-4000 H8800 V5800 H-6000Z M${X0-300},-300 V${Y1+300} H${X1+300} V-300Z" fill="${HTOP[0]}" fill-rule="evenodd"/><path d="M-6000,-4000 H8800 V5800 H-6000Z M${X0-300},-300 V${Y1+300} H${X1+300} V-300Z" fill="url(#hf102T)" fill-rule="evenodd"/>`;
 const inWall=(x,y,px=15,pn=6,ps=7)=>WALLS.some(w=>x>w.x0-px&&x<w.x1+px&&y>w.y0-pn&&y<w.y1+ps);
 const inMaze=(x,y)=>x>MX&&x<MX1&&y>MY&&y<MY1;
 const inLawn=(x,y)=>x>LAWN.x0&&x<LAWN.x1&&y>=MY1-14&&y<LAWN.y1;
 const terrain=(x,y)=>(inMaze(x,y)||inLawn(x,y))&&!inWall(x,y);
 WATERFN[N]=()=>false;
 /* 物件、佈景的區域：迷宮切成六塊＋中央空地＋草坪 */
-const RX=[MX,MX+513,MX+1027,MX1],RY=[MY,MY+607,MY+1213,MY1];
+const RX=[MX,MX+Math.round(COLS*CELL/3),MX+Math.round(COLS*CELL*2/3),MX1],RY=[MY,MY+Math.round(ROWS*CELL/3),MY+Math.round(ROWS*CELL*2/3),MY1];
 const rg=(i,j)=>({x:RX[i],y:RY[j],w:RX[i+1]-RX[i],h:RY[j+1]-RY[j]});
 Object.assign(REG,{
  nw102:rg(0,0),nn102:rg(1,0),ne102:rg(2,0),w102:rg(0,1),e102:rg(2,1),sw102:rg(0,2),s102:rg(1,2),se102:rg(2,2),
@@ -67,18 +67,34 @@ const rq=(()=>{let a=102102;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a
 const rose=(x,y,s=1)=>`<g transform="translate(${f(x)},${f(y)}) scale(${s})"><circle r="3.8" fill="#fbf9f2" stroke-width="1"/><path d="M-1.6,-.6 Q0,-2.4 1.6,-.6" fill="none" stroke="#e6dcc6" stroke-width=".9"/><circle r="1.1" fill="#e8cf6a" stroke="none"/></g>`;
 const ball=(x,y)=>`<circle cx="${f(x)}" cy="${f(y)}" r="12" fill="${G}"/><circle cx="${f(x-3.5)}" cy="${f(y-4)}" r="4" fill="${GT}" stroke="none"/><path d="M${f(x-5)},${f(y+5)} l2,-2.4 l2,2.4 M${f(x+2)},${f(y+1)} l2,-2.4 l2,2.4" fill="none" stroke="${GD}" stroke-width="1"/>`;
 const leafTex=(x0,y0,w,h,step=11)=>{let lf='';for(let y=y0+8;y<y0+h-2;y+=10)for(let x=x0+5+((y/10|0)%2)*5;x<x0+w-4;x+=step)lf+=`M${f(x)},${f(y)} l2,-2.4 l2,2.4 `;return lf?`<path d="${lf}" fill="none" stroke="#2f5a26" stroke-width="1.1"/>`:''};
-function hedgeArt(w){/* 回傳以「正面底部中心」為原點的圖 */
- const W=w.x1-w.x0,L=w.y1-w.y0;let s='';
- if(w.h){const x0=-W/2;
-  s+=`<rect x="${f(x0)}" y="${-HH-L}" width="${f(W)}" height="${L}" fill="${GT}"/>`;
-  s+=`<rect x="${f(x0)}" y="${-HH}" width="${f(W)}" height="${HH}" fill="${GD}"/>`+leafTex(x0,-HH,W,HH);
-  for(let x=x0+14+rq()*16;x<x0+W-8;x+=20+rq()*26)s+=rose(x,-HH+12+rq()*(HH-22),.9+rq()*.2);
-  const n=Math.max(1,Math.round(W/CELL));for(let i=0;i<=n;i++){const x=x0+WT/2+(W-WT)*i/n;s+=ball(x,-HH-L/2-6)}}
- else{s+=`<rect x="${-W/2}" y="${f(-HH-L)}" width="${W}" height="${f(L)}" fill="${GT}"/>`;
-  s+=`<path d="M${-W/2+4},${f(-HH-L+8)} V${-HH-6}" fill="none" stroke="${GTD}" stroke-width="1.2" stroke-dasharray="3 7"/>`;
-  s+=`<rect x="${-W/2}" y="${-HH}" width="${W}" height="${HH}" fill="${GD}"/>`+leafTex(-W/2,-HH,W,HH,10)+rose(0,-HH/2,.9);
-  const n=Math.max(1,Math.round(L/CELL));for(let i=0;i<=n;i++){const y=-HH-L+WT/2+(L-WT)*i/n;s+=ball(0,y-6)}}
+/* 2026-11-21 使用者選 1B（大葉茂密，像草叢 A）、2b（牆 64、主角 80%）：綠籬牆改成密密的大葉子。
+   葉子畫在 <pattern> 圖樣磚裡（一塊磚重複貼），手機只要畫一塊磚，不會因為幾千片葉子變卡。
+   邊緣用一條「葉尖鋸齒」的路徑描出輪廓（每面牆只多一兩個圖形）。第 18 關西邊高牆、過場用同樣的做法（level18.js 有一份一樣的）。 */
+const HTOP=['#6aa64e','#4f8a3e','#78b85a','#96cc70'],HFACE=['#3c6e30','#2c5424','#3f7030','#548a3c'];
+function leafPat(id,cs,{w=64,h=56,L=10,n=120,seed=7,lc='#2f5a26',k=1}={}){let a=seed;const q=()=>{a=(a*16807)%2147483647;return a/2147483647};
+ const P=[];for(let i=0;i<n;i++)P.push([q()*w,q()*h,(q()-.5)*150,L*(.75+q()*.5),cs[1+Math.min(2,Math.floor(q()*3.3))]]);P.sort((u,v)=>u[1]-v[1]);
+ const lf=(x,y,an,l,c)=>`<path transform="translate(${f(x)},${f(y)}) rotate(${an|0})" d="M0,${f(l*.45)} Q${f(-l*.42)},${f(-l*.05)} 0,${f(-l*.55)} Q${f(l*.42)},${f(-l*.05)} 0,${f(l*.45)}Z" fill="${c}"/>`;
+ let s='';for(const [x,y,an,l,c] of P)for(const dx of [-w,0,w])for(const dy of [-h,0,h]){const X=x+dx,Y=y+dy;if(X>-l&&X<w+l&&Y>-l&&Y<h+l)s+=lf(X,Y,an,l,c)}
+ return `<pattern id="${id}" width="${w}" height="${h}" patternUnits="userSpaceOnUse"${k!==1?` patternTransform="scale(${k})"`:''}><g stroke="${lc}" stroke-width=".7" stroke-linejoin="round">${s}</g></pattern>`}
+const hedgeDefs=(pre,k=1)=>`<defs>${leafPat(pre+'T',HTOP,{seed:11,k})}${leafPat(pre+'F',HFACE,{seed:23,k,lc:'#24461d'})}</defs>`;
+/* 葉尖鋸齒：從 (x0,y0) 到 (x1,y1)，往 (nx,ny) 那一側長出一個個葉尖 */
+function bumps(x0,y0,x1,y1,nx,ny,st=9,dp=5){const L=Math.hypot(x1-x0,y1-y0),n=Math.max(1,Math.round(L/st));let d='';
+ for(let i=0;i<n;i++){const t0=i/n,t1=(i+1)/n,ax=x0+(x1-x0)*t0,ay=y0+(y1-y0)*t0,bx=x0+(x1-x0)*t1,by=y0+(y1-y0)*t1,mx=(ax+bx)/2,my=(ay+by)/2,e=dp*(.75+((i*37)%10)/20);
+  d+=` Q${f(ax+nx*e*.9)},${f(ay+ny*e*.9)} ${f(mx+nx*e)},${f(my+ny*e)} Q${f(bx+nx*e*.9)},${f(by+ny*e*.9)} ${f(bx)},${f(by)}`}return d}
+/* 一面密葉綠籬：x0～x1、頂面 yT～yB、正面 yB～yG（地面）。pre＝pattern 的 id 開頭 */
+function leafWall(x0,x1,yT,yB,yG,pre,{top=1,left=1,right=1}={}){let s='';
+ /* 頂面外圍的葉尖（後面、左、右） */
+ let d=`M${f(x0)},${f(yB)}`;d+=left?bumps(x0,yB,x0,yT,-1,0):` L${f(x0)},${f(yT)}`;d+=top?bumps(x0,yT,x1,yT,0,-1):` L${f(x1)},${f(yT)}`;d+=right?bumps(x1,yT,x1,yB,1,0):` L${f(x1)},${f(yB)}`;d+='Z';
+ s+=`<path d="${d}" fill="${HTOP[0]}" stroke-width="1.6"/>`;
+ s+=`<rect x="${f(x0)}" y="${f(yT)}" width="${f(x1-x0)}" height="${f(yB-yT)}" fill="url(#${pre}T)" stroke="none"/>`;   /* 底色已經在上面的鋸齒輪廓裡 */
+ /* 正面 */
+ s+=`<rect x="${f(x0)}" y="${f(yB)}" width="${f(x1-x0)}" height="${f(yG-yB)}" fill="${HFACE[0]}" stroke="none"/><rect x="${f(x0)}" y="${f(yB)}" width="${f(x1-x0)}" height="${f(yG-yB)}" fill="url(#${pre}F)" stroke="none"/>`;
+ s+=`<path d="M${f(x0)},${f(yB)} V${f(yG)} H${f(x1)} V${f(yB)}" fill="none" stroke-width="1.6"/>`;
+ /* 頂面的葉子垂到正面上（一排亮綠葉尖） */
+ s+=`<path d="M${f(x0)},${f(yB-3)}${bumps(x0,yB-3,x1,yB-3,0,1,9,7)} Z" fill="${HTOP[2]}" stroke="#2f5a26" stroke-width="1"/>`;
  return s}
+function hedgeArt(w){/* 回傳以「正面底部中心」為原點的圖 */
+ const W=w.x1-w.x0,L=w.y1-w.y0;return leafWall(-W/2,W/2,-HH-L,-HH,0,'hd102')}
 
 /* ================= 要找的東西（8 種 × 3）與干擾物 ================= */
 const PARCH='#efe0b4';
@@ -165,7 +181,7 @@ function playerArt(v,fr){const key=v+fr;if(PCACHE[key])return PCACHE[key];const 
  else if(v==='side'){pre=`<path d="M-3,-18 Q-14,-8 -12,-1 L-2,-2Z" fill="${CAPE}" stroke-width="1.4"/>`;post=`<path d="M-2,-17 L3,-7" fill="none" stroke="${STRAP}" stroke-width="1.8"/>`+bagF(1,-9)}
  else if(v==='bq'){post=`<path d="M-9,-19 Q-13,-8 -11,-1 H9 Q11,-8 8,-19 Q0,-21 -9,-19Z" fill="${CAPE}" stroke-width="1.4"/><path d="M-4,-16 Q-5,-9 -4,-3 M3,-16 Q4,-9 3,-3" fill="none" stroke="#24497a" stroke-width="1"/>`}
  else{post=`<path d="M-9,-19 Q-13,-8 -12,-1 H12 Q13,-8 9,-19 Q0,-21 -9,-19Z" fill="${CAPE}" stroke-width="1.4"/><path d="M-4,-16 Q-5,-9 -4,-2 M4,-16 Q5,-9 4,-2" fill="none" stroke="#24497a" stroke-width="1"/><path d="M-7,-18 L7,-7" fill="none" stroke="${STRAP}" stroke-width="1.6" opacity=".7"/>`}
- return PCACHE[key]=`<g transform="scale(1.06)">${pre}${kid({...HERO,view:v,pose,plain:true})}${post}</g>`}
+ return PCACHE[key]=`<g transform="scale(.85)">${pre}${kid({...HERO,view:v,pose,plain:true})}${post}</g>`}
 /* 迷宮裡的人：宮廷院的貴族風，色彩柔和 */
 const RICH=['#8e2630','#2f4f8a','#3f6a4a','#6a3f8a','#c99a3a','#7a3a5a','#1f5f6a','#a8502e','#b8667a','#7aa8c4'];
 OUTFITS[N]=o=>{if(o.top)return o;o.top='long';o.bottom=o.bottom||'pants';o.shirt=o.shirt||pk(RICH);o.pants=o.pants||pk(['#3d3833','#4a3a2a','#2f2f3a','#5a4a3a']);o.skin=o.skin||pk([SKIN[0],SKIN[1],SKIN[1],SKIN[2]]);return o};
@@ -233,7 +249,8 @@ const grandma=()=>benchWith(sitter(-10,{hat:-1,hs:3,hair:'#e8e4dc',shirt:'#6a3f8
 const violin=()=>act(0,0,1,{view:'fq',pose:'up',hat:-1,hs:1,mood:1,shirt:'#8e2630',extra:`<g transform="translate(9,-22) rotate(-30)"><ellipse rx="4" ry="7" fill="#a8502e" stroke-width="1"/><path d="M0,-7 V-14" fill="none" stroke-width="1.4"/></g><path d="M18,-30 L2,-12" fill="none" stroke="#c9b48a" stroke-width="1.4"/>`},'nod')+H.noteM(24,-58);
 const dancers=()=>act(-11,0,1,{view:'fq',pose:'up',hat:-1,hs:3,mood:2,shirt:'#c99a3a'},'hop')+act(11,0,-1,{view:'fq',pose:'up',hat:-1,hs:4,mood:1,shirt:'#1f5f6a'},'hop');
 const butterfly=()=>`<g transform="translate(0,-38)"><path d="M0,0 Q-8,-8 -9,-2 Q-8,3 0,0Z M0,0 Q8,-8 9,-2 Q8,3 0,0Z" fill="#f5c842" stroke-width="1"/><path d="M0,0 Q-6,5 -4,8 Q-1,7 0,0Z M0,0 Q6,5 4,8 Q1,7 0,0Z" fill="#f0a030" stroke-width="1"/></g>`;
-const tuft=()=>`<path d="M-6,0 l-2,-8 M-2,0 l0,-10 M2,0 l2,-9 M6,0 l3,-7" fill="none" stroke="#5f8a4a" stroke-width="1.5"/>`;
+/* 2026-11-21 使用者選 3D：放射狀葉片 */
+const tuft=()=>[[-50,9],[-20,11],[20,11],[50,9],[0,8]].map(([a,h],i)=>`<path transform="rotate(${a})" d="M0,0 Q-2.6,${-h*.5} 0,${-h} Q2.6,${-h*.5} 0,0Z" fill="${i%2?'#6aa04a':'#5f9442'}" stroke-width="1"/>`).join('');
 const flowers=()=>{const c=pk(['#fbf9f2','#e86a9a','#f5c842','#a88ad8']);return `<path d="M-5,0 l-1,-6 M0,0 v-8 M5,0 l1,-6" fill="none" stroke="#5f8a4a" stroke-width="1.3"/><circle cx="-6" cy="-7" r="2.6" fill="${c}" stroke-width=".9"/><circle cx="0" cy="-9" r="2.6" fill="${c}" stroke-width=".9"/><circle cx="6" cy="-7" r="2.6" fill="${c}" stroke-width=".9"/>`};
 const petals=()=>{let s='';for(let i=0;i<4;i++)s+=`<path transform="translate(${ri(-10,10)},${ri(-4,0)}) rotate(${ri(0,180)})" d="M0,-3 Q2.4,0 0,3 Q-2.4,0 0,-3Z" fill="${pk(['#fbf9f2','#c4aaf0','#f4a0b4'])}" stroke="none"/>`;return s};
 /* 可以翻開的東西：落葉堆、矮樹叢、花盆 */
@@ -317,12 +334,9 @@ const at=(rr,c,fx=.5,fy=.4)=>[MX+c*CELL+WT/2+(CELL-WT)*fx,MY+rr*CELL+WT/2+(CELL-
 
 function ground(){const NS_='stroke="none"';let s='';
  const X0=SC.x0-420,Y0=-420,W_=SC.x1-SC.x0+840,H_=SC.y1+840;
- /* 迷宮外面：滿滿的綠籬頂 */
- s+=`<rect x="${X0}" y="${Y0}" width="${W_}" height="${H_}" fill="${GT}" ${NS_}/>`;
- let tp='';for(let i=0;i<900;i++){const x=sr(X0,X0+W_),y=sr(Y0,Y0+H_);if((x>MX&&x<MX1&&y>MY-HH&&y<MY1)||(x>LAWN.x0&&x<LAWN.x1&&y>MY1-HH&&y<LAWN.y1))continue;tp+=`M${f(x)},${f(y)} l2.4,-2.8 l2.4,2.8 `}
- s+=`<path d="${tp}" fill="none" stroke="${GTD}" stroke-width="1.5"/>`;
- for(let i=0;i<60;i++){const x=sr(X0,X0+W_),y=sr(Y0,Y0+H_);if((x>MX-20&&x<MX1+20&&y>MY-HH-20&&y<MY1+20)||(x>LAWN.x0-20&&x<LAWN.x1+20&&y>MY1-HH&&y<LAWN.y1+20))continue;s+=ball(x,y)}
- for(let i=0;i<50;i++){const x=sr(X0,X0+W_),y=sr(Y0,Y0+H_);if((x>MX-20&&x<MX1+20&&y>MY-HH-20&&y<MY1+20)||(x>LAWN.x0-20&&x<LAWN.x1+20&&y>MY1-HH&&y<LAWN.y1+20))continue;s+=rose(x,y,1.1)}
+ /* 迷宮外面：滿滿的綠籬頂（2026-11-21 密葉 pattern；牆的 pattern hd102 也在這裡定義） */
+ s+=hedgeDefs('hd102');
+ s+=`<rect x="${X0}" y="${Y0}" width="${W_}" height="${H_}" fill="${HTOP[0]}" ${NS_}/><rect x="${X0}" y="${Y0}" width="${W_}" height="${H_}" fill="url(#hd102T)" ${NS_}/>`;
  /* 迷宮裡的碎石小路 */
  s+=`<rect x="${MX}" y="${MY-HH}" width="${MX1-MX}" height="${MY1-MY+HH}" fill="${PATH}" ${NS_}/>`;
  let pb='';for(let i=0;i<1500;i++){const x=sr(MX,MX1),y=sr(MY,MY1);pb+=`M${f(x)},${f(y)} h2 `}s+=`<path d="${pb}" fill="none" stroke="${PE}" stroke-width="2.2" stroke-linecap="round" opacity=".6"/>`;
@@ -341,7 +355,7 @@ function structures(){C.solids.length=0;C.flips.length=0;
  for(const w of WALLS){const W=w.x1-w.x0,L=w.y1-w.y0,isEntr=w.h&&Math.abs(w.y0+WT/2-MY1)<2&&w.x0<ENTR.x&&w.x1>ENTR.x;
   put((w.x0+w.x1)/2,w.y1,W,(w.h?L:L)+HH+18,'hedge102',hedgeArt(w),{sh:1})}
  /* 迷宮入口兩側的圓球綠籬柱 */
- [ENTR.x-CELL/2,ENTR.x+CELL/2].forEach(x=>put(x,MY1+WT/2+2,30,HH+40,'hedge102',`<rect x="-14" y="${-HH-10}" width="28" height="${HH+10}" fill="${GD}"/>${leafTex(-14,-HH-10,28,HH+10,9)}${ball(0,-HH-22)}${rose(0,-HH/2,1)}`,{mark:false}));
+ [ENTR.x-CELL/2,ENTR.x+CELL/2].forEach(x=>put(x,MY1+WT/2+2,WT+8,HH+40,'hedge102',leafWall(-WT/2-4,WT/2+4,-HH-WT-22,-HH-10,0,'hd102'),{mark:false}));   /* 迷宮入口兩側高一點的綠籬柱 */
  /* 草坪南邊：剛剛鑽進來的小缺口 */
  put(BACKGAP.x,BACKGAP.y+1,40,50,'gap102',`<path d="M-15,0 V-30 Q0,-46 15,-30 V0Z" fill="#1f3a18"/><path d="M-15,0 V-30 Q0,-46 15,-30 V0" fill="none" stroke="${GD}" stroke-width="3"/><circle cx="-17" cy="-6" r="6" fill="${G}"/><circle cx="17" cy="-10" r="6" fill="${G}"/>`,{mark:false});
  /* 中央：紫藤木棚架（點了花瓣飄） */
@@ -402,15 +416,18 @@ H.RIDES.maze102={text:'跟著小男孩，從綠籬的小缺口鑽進去⋯',ever
 .cr102{animation:cr102 4.2s ease-in-out forwards;transform-origin:200px 300px}.lf102{animation:lf102 3.4s linear infinite}
 </style><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">`;
  /* 後面：迷宮的小路（一點透視） */
- s+=`<g class="cr102"><rect width="400" height="600" fill="${GT}" stroke="none"/><path d="M0,600 L170,300 H230 L400,600Z" fill="${PATH}"/>`;
- s+=`<path d="M0,0 L170,250 V300 L0,600Z" fill="${GD}"/><path d="M400,0 L230,250 V300 L400,600Z" fill="${GD}"/><path d="M170,250 H230 V300 H170Z" fill="${G}"/>`;
- for(let i=0;i<6;i++){const k=i/6,yl=40+k*220;s+=rose(20+k*130,yl+60,1.4-k*.8)+rose(380-k*130,yl+90,1.4-k*.8)}
+ /* 2026-11-21 綠籬改成密葉（和迷宮裡一樣的 pattern，近的葉子比較大） */
+ s+=`<defs>${leafPat('hrT102',HTOP,{seed:11,k:1.6})}${leafPat('hrF102',HFACE,{seed:23,k:1.8,lc:'#24461d'})}${leafPat('hrH102',HFACE,{seed:31,k:2.6,lc:'#24461d'})}</defs>`;
+ s+=`<g class="cr102"><rect width="400" height="600" fill="${HTOP[0]}" stroke="none"/><rect width="400" height="600" fill="url(#hrT102)" stroke="none"/><path d="M0,600 L170,300 H230 L400,600Z" fill="${PATH}"/>`;
+ const sw=(d)=>`<path d="${d}" fill="${HFACE[0]}"/><path d="${d}" fill="url(#hrF102)" stroke="none"/>`;
+ s+=sw('M0,0 L170,250 V300 L0,600Z')+sw('M400,0 L230,250 V300 L400,600Z')+sw('M170,250 H230 V300 H170Z');
+ s+=`<path d="M-4,-6${bumps(-4,-6,170,250,.83,-.56,16,9)} L170,250 L-4,-6Z" fill="${HTOP[2]}" stroke="#2f5a26" stroke-width="1.2"/><path d="M404,-6${bumps(404,-6,230,250,-.83,-.56,16,9)} L230,250 L404,-6Z" fill="${HTOP[2]}" stroke="#2f5a26" stroke-width="1.2"/>`;
  s+=`<g fill="#a88ad8" stroke="none"><circle cx="192" cy="242" r="5"/><circle cx="202" cy="238" r="5"/><circle cx="212" cy="244" r="5"/></g></g>`;
  /* 前面：綠籬牆上的小缺口，越來越大，最後淡掉 */
- s+=`<g class="gf102"><g class="gz102"><clipPath id="gc102"><path clip-rule="evenodd" d="M-400,-400 H800 V1000 H-400Z M180,380 V340 Q200,318 220,340 V380Z"/></clipPath><path d="M-400,-400 H800 V1000 H-400Z M180,380 V340 Q200,318 220,340 V380Z" fill="${G}" fill-rule="evenodd"/><g clip-path="url(#gc102)">${leafTex(-60,240,520,300,14)}</g><path d="M180,380 V340 Q200,318 220,340 V380" fill="none" stroke="${GD}" stroke-width="2"/>${rose(150,330,1.2)}${rose(250,300,1.2)}${rose(120,420,1.2)}</g></g>`;
+ s+=`<g class="gf102"><g class="gz102"><clipPath id="gc102"><path clip-rule="evenodd" d="M-400,-400 H800 V1000 H-400Z M180,380 V340 Q200,318 220,340 V380Z"/></clipPath><path d="M-400,-400 H800 V1000 H-400Z M180,380 V340 Q200,318 220,340 V380Z" fill="${HFACE[0]}" fill-rule="evenodd"/><path d="M-400,-400 H800 V1000 H-400Z M180,380 V340 Q200,318 220,340 V380Z" fill="url(#hrH102)" fill-rule="evenodd" stroke="none"/><path d="M180,380 V340 Q200,318 220,340 V380" fill="none" stroke="#24461d" stroke-width="2.5"/></g></g>`;
  /* 小男孩和主角（側面，往前走） */
  s+=`<g transform="translate(150,520)"><g class="an a-hop" style="--d:.6s">${kid({view:'bq',pose:'walk',hat:HAT_KIDB,hs:0,hair:'#6a4428',shirt:'#3f6fa8',pants:'#5a4a3a',top:'long',bottom:'shorts',skin:SKIN[1],mood:2,plain:true})}</g></g>`;
- s+=`<g transform="translate(238,560) scale(1.1)"><g class="an a-hop" style="--d:.66s">${playerArt('bq',0)}</g></g>`;
+ s+=`<g transform="translate(238,560) scale(1.37)"><g class="an a-hop" style="--d:.66s">${playerArt('bq',0)}</g></g>`;   /* 主角圖縮到 .85 了，過場裡放回原本大小 */
  for(let i=0;i<6;i++)s+=`<g transform="translate(${40+i*60},0)"><g class="lf102" style="animation-delay:-${i*.6}s"><path d="M0,-5 Q4,-2 0,5 Q-4,-2 0,-5Z" fill="${i%2?'#6aa64e':'#a88ad8'}" stroke-width=".8"/></g></g>`;
  return s+`</g></svg>`}};
 

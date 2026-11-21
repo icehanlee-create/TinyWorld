@@ -351,11 +351,22 @@ function ground(){
  /* ---- 四塊花壇（2026-11-21 使用者選：左上、右下 D 刺繡花壇；右上、左下 C 玫瑰花叢＋四角樹籬球＋薰衣草邊） ---- */
  PART.forEach(([cx,cy],k)=>g+=`<g transform="translate(${cx},${cy+PHt/2})">${BED[k===0||k===3?'D':'C'](k)}</g>`);
  /* ---- 西北：一般的高綠籬牆（2026-11-21 使用者：迷宮提示太明顯 → 拿掉頂視圖的彎曲小路和拱門；樹籬迷宮的入口改成牆上的小缺口，在 level102.js） ---- */
- g+=`<path d="M${X0},${MAZE.y0} H${MAZE.x1} V${MAZE.y1-90} H${X0}Z" fill="${GL}"/>`;
- {let tp='';for(let i=0;i<70;i++){const x=sr(X0+8,MAZE.x1-10),y=sr(MAZE.y0+10,MAZE.y1-100);tp+=`M${f(x)},${f(y)} l2,-2.4 l2,2.4 `}g+=`<path d="${tp}" fill="none" stroke="${G}" stroke-width="1.4"/>`}
- g+=`<path d="M${X0},${MAZE.y0} H${MAZE.x1} V${MAZE.y1-90} H${X0}Z" fill="none" stroke="${G}" stroke-width="6"/>`;
- g+=`<path d="M${X0},${MAZE.y1-90} H${MAZE.x1} V${MAZE.y1} H${X0}Z" fill="${G}"/><path d="M${X0},${MAZE.y1-90} H${MAZE.x1}" fill="none" stroke="${GL}" stroke-width="6"/>`;
- let lf='';for(let i=0;i<40;i++){const x=sr(X0,MAZE.x1-6),y=sr(MAZE.y1-80,MAZE.y1-8);lf+=`M${f(x)},${f(y)} l2,-2.4 l2,2.4 `}g+=`<path d="${lf}" fill="none" stroke="${GD}" stroke-width="1.4"/>`;
+ /* 2026-11-21 使用者：綠籬牆要和樹籬迷宮一樣的密葉感（選 1B 大葉茂密）。葉子畫在 pattern 圖樣磚裡（和 level102.js 的 leafPat 一樣），邊緣用葉尖鋸齒描輪廓 */
+ {const HT=['#6aa64e','#4f8a3e','#78b85a','#96cc70'],HF=['#3c6e30','#2c5424','#3f7030','#548a3c'];
+  const pat=(id,cs,seed,lc)=>{let a=seed;const q=()=>{a=(a*16807)%2147483647;return a/2147483647};const w=64,h=56,L=10,P=[];
+   for(let i=0;i<120;i++)P.push([q()*w,q()*h,(q()-.5)*150,L*(.75+q()*.5),cs[1+Math.min(2,Math.floor(q()*3.3))]]);P.sort((u,v)=>u[1]-v[1]);let s_='';
+   for(const [x,y,an,l,c] of P)for(const dx of [-w,0,w])for(const dy of [-h,0,h]){const X=x+dx,Y=y+dy;if(X>-l&&X<w+l&&Y>-l&&Y<h+l)s_+=`<path transform="translate(${f(X)},${f(Y)}) rotate(${an|0})" d="M0,${f(l*.45)} Q${f(-l*.42)},${f(-l*.05)} 0,${f(-l*.55)} Q${f(l*.42)},${f(-l*.05)} 0,${f(l*.45)}Z" fill="${c}"/>`}
+   return `<pattern id="${id}" width="${w}" height="${h}" patternUnits="userSpaceOnUse"><g stroke="${lc}" stroke-width=".7" stroke-linejoin="round">${s_}</g></pattern>`};
+  const bumps=(x0,y0,x1,y1,nx,ny,st=9,dp=5)=>{const L=Math.hypot(x1-x0,y1-y0),n=Math.max(1,Math.round(L/st));let d='';
+   for(let i=0;i<n;i++){const t0=i/n,t1=(i+1)/n,ax=x0+(x1-x0)*t0,ay=y0+(y1-y0)*t0,bx=x0+(x1-x0)*t1,by=y0+(y1-y0)*t1,mx=(ax+bx)/2,my=(ay+by)/2,e=dp*(.75+((i*37)%10)/20);
+    d+=` Q${f(ax+nx*e*.9)},${f(ay+ny*e*.9)} ${f(mx+nx*e)},${f(my+ny*e)} Q${f(bx+nx*e*.9)},${f(by+ny*e*.9)} ${f(bx)},${f(by)}`}return d};
+  const x0=X0,x1=MAZE.x1,yT=MAZE.y0,yB=MAZE.y1-90,yG=MAZE.y1;
+  g+=`<defs>${pat('hd18cT',HT,11,'#2f5a26')}${pat('hd18cF',HF,23,'#24461d')}</defs>`;
+  g+=`<path d="M${x0},${yB} L${x0},${yT}${bumps(x0,yT,x1,yT,0,-1)}${bumps(x1,yT,x1,yB,1,0)}Z" fill="${HT[0]}" stroke-width="2"/>`;
+  g+=`<rect x="${x0}" y="${yT}" width="${x1-x0}" height="${yB-yT}" fill="url(#hd18cT)" stroke="none"/>`;
+  g+=`<rect x="${x0}" y="${yB}" width="${x1-x0}" height="${yG-yB}" fill="${HF[0]}" stroke="none"/><rect x="${x0}" y="${yB}" width="${x1-x0}" height="${yG-yB}" fill="url(#hd18cF)" stroke="none"/>`;
+  g+=`<path d="M${x1},${yB} V${yG} H${x0}" fill="none" stroke-width="2"/>`;
+  g+=`<path d="M${x0},${yB-3}${bumps(x0,yB-3,x1,yB-3,0,1,9,7)} Z" fill="${HT[2]}" stroke="#2f5a26" stroke-width="1.2"/>`}
  /* ---- 東北：塔樓（紫屋頂、爬藤、小側門＝圖書館的伏筆） ---- */
  /* 右邊圓塔 → 圖書塔的空中廊道（有屋頂、小拱窗、紅瓦），圖書塔加高，廊道接在它上面幾層 */
  {const corr=(x0,x1,by)=>{let c=`<path d="M${x0},${by} V${by-40} H${x1} V${by}Z" fill="#ece4d0"/>`+stn(x0,x1,by-40,by,13,30);for(let x=x0+24;x<x1-14;x+=46)c+=`<path d="M${x-6},${by-8} V${by-24} Q${x},${by-32} ${x+6},${by-24} V${by-8}Z" fill="#3a3040"/>`;

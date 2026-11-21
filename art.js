@@ -406,7 +406,14 @@ function pine(){const c=pk(['#56603a','#646f40','#727e46']),d=shade(c,-.32);let 
  return g}
 function roundTree(){const c=pk(['#86925a','#76824e','#98a266']),d=shade(c,-.32);const C='M-30,-40 Q-38,-58 -24,-66 Q-22,-88 0,-86 Q22,-90 26,-68 Q40,-58 30,-40 Q14,-30 0,-34 Q-16,-30 -30,-40Z';
  return `<ellipse cx="6" cy="1" rx="28" ry="6" fill="#000" opacity=".2" stroke="none"/><path d="M-6,0 Q-9,-18 -3,-36 L4,-36 Q1,-18 7,0Z" fill="#7a5235"/><path d="M-2,-8 q2,-6 0,-12 M2,-20 q2,-5 0,-10" fill="none" stroke-width=".9"/><path d="${C}" fill="${c}" stroke="none"/><path d="M-30,-40 Q-14,-30 0,-34 Q14,-30 30,-40 Q36,-50 26,-56 Q10,-46 -4,-48 Q-20,-46 -30,-40Z" fill="${d}" stroke="none"/><path d="M10,-80 Q24,-82 26,-68 Q34,-62 32,-54 Q24,-64 14,-66Z" fill="${d}" stroke="none" opacity=".6"/><path d="${C}" fill="none"/><path d="M-14,-62 q4,-6 10,-2 M6,-74 q5,-4 9,1 M-20,-50 q3,-4 8,-1" fill="none" stroke-width="1.2"/>`}
-const bush=()=>{const c=pk(['#76824e','#86925a','#646f40']),B='M-24,0 Q-30,-14 -18,-20 Q-14,-34 0,-30 Q14,-36 18,-20 Q30,-14 24,0Z';return `<path d="${B}" fill="${c}" stroke="none"/><path d="M-26,-6 Q-12,0 0,-4 Q14,0 26,-6 L24,0 L-24,0Z" fill="${shade(c,-.35)}" stroke="none"/><path d="${B}" fill="none"/><path d="M-8,-18 q3,-4 7,-1 M6,-12 q3,-4 7,0 M-16,-10 q3,-3 6,0" fill="none" stroke-width="1.1"/>`};
+const GFL=(x,y,c,q)=>`<g transform="translate(${x},${y})" stroke-width=".8">${[0,72,144,216,288].map(a=>`<ellipse cx="0" cy="${-q}" rx="${q*.6}" ry="${q}" transform="rotate(${a})" fill="${c}"/>`).join('')}<circle r="${q*.55}" fill="#f2c94c"/></g>`;
+/* 2026-11-21 使用者選 1A：三團疊的層次灌木（後面一團深色、前面兩團，亮面葉緣＋小葉點）；所有關卡都換 */
+const bush=()=>{const [d,m,l]=pk([['#4f7e36','#6a9c45','#8bbd5a'],['#5e6b3a','#76824e','#98a266'],['#3f6a30','#56843e','#74a650']]);return `<ellipse cx="0" cy="0" rx="25" ry="3.5" fill="#000" opacity=".15" stroke="none"/>`+
+ `<path d="M-14,-4 Q-20,-22 -6,-26 Q2,-36 12,-26 Q24,-24 18,-6Z" fill="${d}"/>`+
+ `<path d="M-25,0 Q-30,-14 -16,-17 Q-12,-28 -1,-22 Q4,-12 -2,0Z" fill="${m}"/>`+
+ `<path d="M-4,0 Q-6,-14 6,-17 Q14,-26 22,-15 Q30,-10 25,0Z" fill="${m}"/>`+
+ `<path d="M-19,-12 Q-15,-19 -8,-18 M8,-12 Q12,-18 19,-14 M-2,-26 Q3,-30 9,-27" fill="none" stroke="${l}" stroke-width="2.2"/>`+
+ `<g fill="${shade(d,-.2)}" stroke="none"><circle cx="-14" cy="-6" r="1.3"/><circle cx="-8" cy="-10" r="1.1"/><circle cx="12" cy="-7" r="1.3"/><circle cx="18" cy="-4" r="1.1"/><circle cx="3" cy="-21" r="1.1"/></g>`};
 const barrel=()=>`<path d="M-11,0 Q-14,-13 -11,-26 L11,-26 Q14,-13 11,0Z" fill="#a8703f"/><path d="M-13,-8 H13 M-13,-18 H13" fill="none"/><ellipse cx="0" cy="-26" rx="11" ry="3" fill="#c99a5b"/>`;
 /* 木板補給箱：橫木條＋鐵護角（不再畫 X） */
 const crate=()=>`<path d="M-12,0 V-20 H12 V0Z" fill="#c99a5b"/><path d="M12,0 L16,-3 V-23 L12,-20Z" fill="#a8703f"/><path d="M-12,-20 L-8,-23 H16 L12,-20Z" fill="#d6a868"/><path d="M-12,-7 H12 M-12,-13.5 H12" fill="none" stroke="#8a6a3a" stroke-width="1.2"/><path d="M-12,-20 h4 v4 M12,-20 h-4 v4 M-12,0 h4 v-4 M12,0 h-4 v-4" fill="none" stroke="#5a5f64" stroke-width="2"/>`;
@@ -489,7 +496,7 @@ Object.assign(KIND,VIG);
 Object.assign(KIND,{cow:{w:46,h:38,fn:cow},pig:{w:34,h:26,fn:pig},
  whiteCarrot:{w:20,h:30,fn:()=>T(0,-12,.9,DECOY.whiteCarrot)},tomato:{w:18,h:18,fn:()=>T(0,-8,.8,DECOY.tomato)},bucket:{w:22,h:24,fn:()=>T(0,-4,1,DECOY.bucket)}});
 Object.assign(KIND,{
- grassClump:{w:20,h:16,fn:()=>`<path d="M-8,0 q2,-8 4,-12 M-3,0 q0,-10 1,-14 M2,0 q1,-8 4,-11 M7,0 q1,-6 3,-8" fill="none" stroke="#56603a" stroke-width="1.6"/>`+(r()<.5?`<circle cx="-2" cy="-14" r="2.4" fill="${pk(['#e3a89e','#f1ead8','#c58be0'])}" stroke-width="1"/>`:'')},
+ grassClump:{w:20,h:16,fn:()=>`<path d="M-7,0 q1,-7 -1,-11 M-3,0 q0,-9 1,-13 M2,0 q1,-7 3,-10 M6,0 q2,-5 4,-7" fill="none" stroke="#5a8a3c" stroke-width="1.5"/>`+GFL(-1,-13,'#fff',2)+(r()<.5?GFL(5,-9,pk(['#f4a6b8','#f1ead8','#c58be0']),1.7):'')},   /* 2026-11-21 使用者選 2B：細草＋小野花 */
  pebbles:{w:20,h:8,fn:()=>`<ellipse cx="-6" cy="-2" rx="4" ry="2.6" fill="#b0a996" stroke-width="1.3"/><ellipse cx="3" cy="-3" rx="3" ry="2" fill="#9d9684" stroke-width="1.3"/><ellipse cx="8" cy="-1" rx="2.4" ry="1.6" fill="#b0a996" stroke-width="1.3"/>`},
  crateStack:{w:28,h:46,fn:()=>crate()+`<g transform="translate(2,-22) scale(.85)">${crate()}</g>`},
  peekBush:{w:52,h:44,fn:()=>wrapAn('bob',peekHead(sr(-8,8),-26,.62,true),true)+bush()},
