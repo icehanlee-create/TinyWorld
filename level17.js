@@ -22,12 +22,9 @@ H.FRINGEX[N]=[[0,0,2600,780]];   /* 北邊的城牆、主堡、天空不要長�
 H.DENS[N]=1.1;
 
 /* ================= 2. 當地人：中世紀風（束腰外衣、斗篷帽、羽毛扁帽、頭巾）；衛兵戴鐵盔、穿紅色罩袍 ================= */
-const HAT_HOOD=HATS.push(()=>{const c=pk(['#6a7a4a','#8a5a3a','#5a6a8a','#7a4a5a','#a8843f']);
- return `<path d="M-15,-29 Q-18,-58 0,-60 Q18,-58 15,-29 Q13,-45 0,-47 Q-13,-45 -15,-29Z" fill="${c}"/><path d="M-6,-58 Q-2,-66 4,-64" fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round"/>`})-1;
-const HAT_BERET=HATS.push(()=>{const c=pk(['#b8402e','#3f6f9a','#4a6a3a','#6a3f7a','#2f2f3a']),fe=pk(['#f4ecd6','#e0b44a','#e8e0f0']);
- return `<path d="M-14,-42 Q-12,-55 2,-55 Q16,-54 17,-45 Q8,-44 -14,-42Z" fill="${c}"/><path d="M-14,-42 Q2,-46 17,-45" fill="none" stroke-width="1.6"/><path d="M6,-52 Q18,-68 25,-62 Q18,-58 9,-50Z" fill="${fe}" stroke-width="1.4"/>`})-1;
-const HAT_KER=HATS.push(()=>{const c=pk(['#f1e6cc','#d9a5a0','#e8d49a','#bcd0dc']);
- return `<path d="M-14,-38 Q-15,-54 0,-55 Q15,-54 14,-38 Q0,-44 -14,-38Z" fill="${c}"/><path d="M12,-41 l8,6 l-7,3Z" fill="${c}" stroke-width="1.4"/>`})-1;
+const HAT_HOOD=HATS.push(v=>H.HATKIT.hoodV(pk(['#6a7a4a','#8a5a3a','#5a6a8a','#7a4a5a','#a8843f']))(v) /* 2026-11-23c 跟著方向畫 */)-1;
+const HAT_BERET=HATS.push(v=>H.HATKIT.beretB(pk(['#b8402e','#3f6f9a','#4a6a3a','#6a3f7a','#2f2f3a']))(v) /* 2026-11-23c 使用者選羽毛帽 B */)-1;
+const HAT_KER=HATS.push(v=>H.HATKIT.kerV(pk(['#f1e6cc','#d9a5a0','#e8d49a','#bcd0dc']))(v))-1;
 const HAT_HELM=HATS.push(()=>`<ellipse cx="0" cy="-41" rx="19" ry="4.4" fill="#a3aab4"/><path d="M-13,-42 Q-14,-60 0,-60 Q14,-60 13,-42Z" fill="#c4cad2"/><path d="M0,-60 V-42" fill="none" stroke="#8a929c" stroke-width="1.6"/><path d="M-8,-52 Q-6,-57 -2,-58" fill="none" stroke="#fff" stroke-width="1.8"/>`)-1;
 H.HATHELM17=HAT_HELM;
 const HAT_CHEF=H.HATCHEF17=HATS.push(()=>`<path d="M-11,-42 L-12,-54 Q-18,-60 -11,-64 Q-8,-72 0,-68 Q8,-72 11,-64 Q18,-60 12,-54 L11,-42Z" fill="#fbf9f2"/><path d="M-11,-46 H11" fill="none" stroke="#d9d2c0" stroke-width="1.6"/>`)-1;
@@ -357,10 +354,10 @@ function ground(){
 /* ================= 6. 建築與佈景 ================= */
 Object.assign(POOL,{
  court17:[['planter17',.4],['pot',.25],['flowersY',.2],['barrel',.5],['pebbles',.6],['bucket17',.25],['ring17',.25],['hglass17',.2],['potlid17',.2],['glove17',.2],['hatBrown',.2],['bottleG',.15]],
- market17:[['crate',1],['barrel',1],['sacks17',.35],['pot',.15],['pebbles',.5],['croissant17',.3],['gourd17',.3],['rpin17',.25],['cupcake',.25],['bottleG',.2],['hglass17',.2],['potlid17',.2]],
+ market17:[['crate',1],['barrel',1],['sacks17',.35],['pot',.15],['pebbles',.5],['croissant17',.3],['gourd17',.3],['rpin17',.25],['cheese17d',.25],['bottleG',.2],['hglass17',.2],['potlid17',.2]],
  yard17:[['hay',1],['barrel',.8],['crate',.8],['sacks17',.4],['rock',.4],['pebbles',.6],['bucket17',.3],['glove17',.3],['ring17',.3],['potlid17',.2],['pumpkinPlain',.2]],
  show17:[['barrel',.7],['crate',.5],['pot',.2],['flowersY',.15],['pebbles',.5],['bucket17',.25],['gourd17',.25],['croissant17',.2],['glove17',.2],['hatBrown',.2]],
- bank17:[['round',.5],['bush',1.2],['flowersY',1],['grassClump',1.4],['rock',.6],['pebbles',.6],['hatBrown',.2],['pumpkinPlain',.2],['bucket17',.2],['cupcake',.15]],
+ bank17:[['round',.5],['bush',1.2],['flowersY',1],['grassClump',1.4],['rock',.6],['pebbles',.6],['hatBrown',.2],['pumpkinPlain',.2],['bucket17',.2],['cheese17d',.15]],
  decor17:[['pebbles',1.4],['pot',.15],['barrel',.4],['crate',.4]]});
 /* 人群小故事：每組在做一件有趣的事，點了說一句話 */
 const grp=(x,y,w,h,kind,svg,say,o={})=>add(x,y,w,h,kind,svg,{say,...o});
@@ -437,9 +434,12 @@ H.SPOTS[N]={
  potion:[['stall17',.32,.25],['barrel',.95],['well17',.05,-.6]],
  pumpkin:[['cart17',.05,-.6],['hay',.05,.6],['sacks17',.05,.6]],
  cake:[['stall17',.32,-.1],['crate',.9],['kids17',.03,.6]]};
+/* 2026-11-23c 使用者重選的干擾物（同一個名稱在第 17～20 關都一樣，最後載入的檔案也會設成同一張圖） */
+Object.assign(DECOY,{cheese17d:"<path d=\"M-15,8 L15,8 L15,-6 L-15,-12Z\" fill=\"#f2c94c\"/><path d=\"M-15,-12 L15,-6 L12,-14Z\" fill=\"#f8de7a\"/><circle cx=\"-4\" cy=\"0\" r=\"2.4\" fill=\"#e0b040\" stroke-width=\"1\"/><circle cx=\"7\" cy=\"2\" r=\"1.8\" fill=\"#e0b040\" stroke-width=\"1\"/>",bucket17:"<path d=\"M-11,14 V-2 Q-11,-8 -6,-10 V-12 H6 V-10 Q11,-8 11,-2 V14Z\" fill=\"#c4cad2\"/><path d=\"M-9,-12 Q0,-20 9,-12 L11,-6 L6,-8 L0,-5 L-6,-8 L-11,-6Z\" fill=\"#c4473c\"/><path d=\"M-11,4 H11\" fill=\"none\" stroke=\"#8a929c\" stroke-width=\"1.4\"/>",potlid17:"<path d=\"M0,-18 L12,0 L0,18 L-12,0Z\" fill=\"#3f6f9a\"/><path d=\"M0,-18 V18 M-12,0 H12\" fill=\"none\" stroke=\"#e0b44a\" stroke-width=\"1.6\"/><path d=\"M0,18 q4,4 0,8 q-4,4 0,8\" fill=\"none\" stroke-width=\"1.2\"/>",ring17:"<g transform=\"rotate(-40)\"><path d=\"M-2.4,-14 V16 L0,22 L2.4,16 V-14Z\" fill=\"#3d4248\"/><rect x=\"-7\" y=\"-19\" width=\"14\" height=\"5\" rx=\"1.5\" fill=\"#3d4248\"/></g>",rpin17:"<g transform=\"rotate(-15)\"><rect x=\"-17\" y=\"-7\" width=\"34\" height=\"14\" rx=\"3\" fill=\"#efe4cc\"/><ellipse cx=\"-17\" cy=\"0\" rx=\"3.6\" ry=\"7\" fill=\"#e2d4b4\"/><path d=\"M-17,-3 Q-15,0 -17,3\" fill=\"none\" stroke=\"#c9b48a\" stroke-width=\"1.1\"/><path d=\"M-3,-7.6 V7.6\" fill=\"none\" stroke=\"#c4473c\" stroke-width=\"2.2\"/><path d=\"M-3,6 q-5,4 -7,8 M-3,6 q3,5 6,7\" fill=\"none\" stroke=\"#c4473c\" stroke-width=\"1.6\"/></g>",croissant17:"<path d=\"M-15,-11 Q2,-10 17,-17 Q8,-2 -15,3Z\" fill=\"#e8c04a\"/><path d=\"M-12,-6 Q2,-6 12,-13\" fill=\"none\" stroke=\"#fff3c0\" stroke-width=\"1.6\" stroke-linecap=\"round\"/><ellipse cx=\"-15\" cy=\"-4\" rx=\"3.2\" ry=\"7.2\" fill=\"#c9a03a\"/><path d=\"M-10,-10.6 Q-8,-3 -10,2.4\" fill=\"none\" stroke=\"#b8902a\" stroke-width=\"2\"/>",gourd17:"<g transform=\"rotate(30)\"><path d=\"M0,4 V24\" fill=\"none\" stroke=\"#2b2420\" stroke-width=\"6.4\" stroke-linecap=\"round\"/><path d=\"M0,4 V24\" fill=\"none\" stroke=\"#c99a5b\" stroke-width=\"4\" stroke-linecap=\"round\"/><circle cx=\"0\" cy=\"-8\" r=\"13\" fill=\"#c99a5b\"/><circle cx=\"0\" cy=\"-8\" r=\"9\" fill=\"#a8703f\" stroke=\"none\"/><path d=\"M-6,-12 Q-7,-6 -4,-2\" fill=\"none\" stroke=\"#d8b078\" stroke-width=\"2\" stroke-linecap=\"round\"/></g>",hglass17:"<path d=\"M-11,-14 Q-11,4 0,4 Q11,4 11,-14Z\" fill=\"#e8c04a\"/><path d=\"M-11,-14 H11\" fill=\"none\"/><path d=\"M-6,-10 Q-6,-2 -3,0\" fill=\"none\" stroke=\"#fff3c0\" stroke-width=\"2\"/><path d=\"M-2,4 V12 M2,4 V12\" fill=\"none\" stroke-width=\"2\"/><rect x=\"-2\" y=\"4\" width=\"4\" height=\"8\" fill=\"#e8c04a\" stroke=\"none\"/><ellipse cx=\"0\" cy=\"13\" rx=\"9\" ry=\"3\" fill=\"#e8c04a\"/>"});
+KIND.cheese17d=dk('cheese17d',34,26,-10);
 H.BLEND[N]={helmet17:['bucket17','rock'],shield17:['potlid17','flag17'],gkey17:['ring17','pebbles'],scroll17:['rpin17','sacks17'],
  horn17:['croissant17','hay'],lute17:['gourd17','barrel'],goblet17:['hglass17','flowersY'],gaunt17:['glove17','rock'],
- hat:['hatBrown','barrel'],potion:['bottleG','crate'],pumpkin:['pumpkinPlain','hay'],cake:['cupcake','crate']};
+ hat:['hatBrown','barrel'],potion:['bottleG','crate'],pumpkin:['pumpkinPlain','hay'],cake:['cheese17d','crate']};
 
 /* ================= 7. 連環小故事：信差的信鴿 ================= */
 const satchel=`<path d="M-7,-18 L8,-6" fill="none" stroke="#7a5235" stroke-width="2"/><rect x="4" y="-10" width="10" height="9" rx="2" fill="#a8703f" stroke-width="1.3"/>`;

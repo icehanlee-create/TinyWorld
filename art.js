@@ -25,11 +25,54 @@ const HATS=[
  ()=>`<ellipse cx="0" cy="-43" rx="21" ry="4.5" fill="#e8c46a"/><path d="M-9,-43 Q-9,-53 0,-53 Q9,-53 9,-43Z" fill="#e8c46a"/><path d="M-9,-45 L9,-45" stroke="#c4572f" stroke-width="2.5"/>`,
  ()=>{const c=pk(['#c4572f','#6f7f9a','#8f9d58']);return `<path d="M-13,-41 Q0,-45 13,-41 L4,-67 Q2,-71 -1,-67Z" fill="${c}"/>`},
  ()=>{const c=pk(['#5f6b3a','#7a5235']);return `<ellipse cx="0" cy="-43" rx="19" ry="4" fill="${c}"/><path d="M-9,-44 L-2,-66 Q2,-70 6,-64 L3,-62 L9,-44Z" fill="${c}"/>`},
- ()=>{const c=pk(['#6fa8a0','#c4572f','#e0b44a']);return `<path d="M-12,-42 Q-12,-53 0,-53 Q12,-53 12,-42Z" fill="${c}"/><path d="M4,-43 L19,-42 Q19,-39 4,-40" fill="${c}"/>`},
+ /* 4：鴨舌帽（2026-11-23c：帽舌跟著方向——側面朝臉、正面在額頭前、背面看不到） */
+ v=>{const c=pk(['#6fa8a0','#c4572f','#e0b44a']);let g=`<path d="M-12,-42 Q-12,-53 0,-53 Q12,-53 12,-42Z" fill="${c}"/>`;
+  if(v==='front')g+=`<path d="M-12,-43 Q0,-35 12,-43 Q0,-41 -12,-43Z" fill="${c}"/>`;
+  else if(v==='fq')g+=`<path d="M-7,-43 Q6,-35 16,-42 Q5,-41 -7,-43Z" fill="${c}"/>`;
+  else if(v==='bq')g+=`<path d="M11,-43 L16,-42 Q16,-40 11,-41" fill="${c}"/>`;
+  else if(v==='back')g+=`<path d="M-4,-43 Q0,-45 4,-43" fill="none" stroke-width="1.2"/>`;
+  else g+=`<path d="M4,-43 L19,-42 Q19,-39 4,-40" fill="${c}"/>`;
+  return g},
  ()=>`<path d="M0,-47 L-8,-52 L-8,-42Z M0,-47 L8,-52 L8,-42Z" fill="#f0a8a0"/><circle cx="0" cy="-47" r="2.5" fill="#f0a8a0"/>`,
  /* 6：遮陽探險盔（探險隊用，不會被隨機抽到） */
  ()=>`<ellipse cx="0" cy="-42" rx="18" ry="4" fill="#cdbb8a"/><path d="M-12,-42 Q-13,-59 0,-59 Q13,-59 12,-42Z" fill="#ddcc9c"/><path d="M-12,-45.5 H12" fill="none" stroke="#8a6a3a" stroke-width="2.6"/><circle cx="0" cy="-59" r="1.8" fill="#cdbb8a"/><path d="M-6,-55 Q0,-57 6,-55" fill="none" stroke="#bca870" stroke-width="1"/>`
 ];
+
+/* ================= 帽子工具（2026-11-23c，城堡系列）：依方向畫的帽子；關卡檔用 TH.HATKIT ================= */
+const isBk=v=>v==='back'||v==='bq';
+/* 細緻羽毛：原點在羽根，往上長 L；w 羽片寬；c 羽片、c2 羽枝線、tip 尖端色、curl 羽軸彎曲 */
+function plumeArt(L,w,c,c2,tip,curl=0){
+ const X=t=>curl*t*t,Y=t=>-L*t,pt=(t,o)=>[X(t)+o,Y(t)];
+ const ed=side=>{const a=[];for(let i=0;i<=12;i++){const t=.06+.94*i/12,ww=w*Math.pow(Math.sin(Math.PI*Math.min(1,t*1.05)),.8)*(side<0?1:.85);let o=side*ww;if(side<0&&(i===5||i===9))o*=.55;a.push(pt(t,o))}return a};
+ const P=a=>a.map(([x,y])=>`${x.toFixed(1)},${y.toFixed(1)}`).join(' L');
+ let g=`<path d="M${X(.06).toFixed(1)},${Y(.06).toFixed(1)} L${P(ed(-1))} L${P(ed(1).reverse())}Z" fill="${c}" stroke-width="1.1" stroke-linejoin="round"/>`;
+ if(tip)g+=`<path d="M${P([pt(.82,-w*.7),pt(1.01,0),pt(.82,w*.6),pt(.9,0)])}Z" fill="${tip}" stroke="none"/>`;
+ [.3,.48,.66,.82].forEach(t=>{const[x,y]=pt(t,0);g+=`<path d="M${x.toFixed(1)},${y.toFixed(1)} q${(-w*.5).toFixed(1)},${(L*.03).toFixed(1)} ${(-w*.85).toFixed(1)},${(L*.08).toFixed(1)}" fill="none" stroke="${c2}" stroke-width=".9" stroke-linecap="round"/>`});
+ return g+`<path d="M0,3 Q${(curl*.25).toFixed(1)},${(-L*.5).toFixed(1)} ${X(.98).toFixed(1)},${Y(.98).toFixed(1)}" fill="none" stroke="${c2}" stroke-width="1.2" stroke-linecap="round"/>`}
+/* 合身扁帽（頭半徑 13），往右歪；band＝帽帶色 */
+const beretFit=(c,band)=>`<path d="M-14,-41 Q-14,-54 0,-55 Q14,-55 16,-46 Q15,-42 13,-42 Q0,-45 -14,-41Z" fill="${c}"/>`+(band?`<path d="M-14,-42 Q0,-46 14,-43" fill="none" stroke="${band}" stroke-width="2.4"/>`:`<path d="M-14,-42 Q0,-46 14,-43" fill="none" stroke-width="1.4"/>`);
+/* 羽毛扁帽（使用者 11-23 選 B：合身扁帽＋金帶＋細長白羽毛），依方向畫；deco 可換成別的（例：鈕扣）不畫羽毛 */
+const beretB=(c,o={})=>{const fe=o.fe||'#fbf9f2',fe2=o.fe2||'#cfc6b4',band=o.band===undefined?'#e0b44a':o.band,pl=o.noPlume?'':null;
+ const b=beretFit(c,band);
+ return v=>{
+  if(v==='side')return `<g transform="scale(-1,1)">${b}</g>`+(o.noPlume?(o.deco?o.deco(-4,-46):''):`<g transform="translate(-4,-47) rotate(-58)">${plumeArt(30,5.4,fe,fe2,null,9)}</g><circle cx="-4" cy="-46.4" r="2.2" fill="#e0b44a" stroke-width="1"/>`);
+  if(v==='back')return `<g transform="scale(-1,1)">${b}</g>`+(o.noPlume?'':`<g transform="translate(-11,-46) rotate(-40)">${plumeArt(28,5.2,fe,fe2,null,8)}</g>`);
+  if(v==='bq')return `<g transform="scale(-1,1)">${b}</g>`+(o.noPlume?'':`<g transform="translate(-9,-47) rotate(-48)">${plumeArt(29,5.2,fe,fe2,null,8)}</g>`);
+  const x=v==='fq'?1.5:0;return `<g transform="translate(${x},0)">${b}`+(o.noPlume?(o.deco?o.deco(10,-46):''):`<g transform="translate(10,-46) rotate(52)">${plumeArt(30,5.4,fe,fe2,null,-9)}</g><circle cx="10" cy="-45.4" r="2.2" fill="#e0b44a" stroke-width="1"/>`)+`</g>`}};
+/* 兜帽：側面開口朝臉、背面整個包住、斜前方開口偏右 */
+const hoodV=c=>v=>{const tip=`<path d="${isBk(v)?'M2,-58 Q-2,-66 -8,-64':v==='side'?'M-10,-56 Q-16,-62 -20,-58':'M-6,-58 Q-2,-66 4,-64'}" fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round"/>`;
+ if(isBk(v))return `<path d="M-15,-29 Q-18,-58 0,-60 Q18,-58 15,-29 Q0,-24 -15,-29Z" fill="${c}"/>`+tip;
+ if(v==='side')return `<path d="M-17,-28 Q-20,-58 -2,-60 Q10,-60 11,-50 Q3,-47 1,-38 Q-1,-30 -2,-26 Q-10,-22 -17,-28Z" fill="${c}"/>`+tip;
+ if(v==='fq')return `<path d="M-15,-29 Q-18,-58 0,-60 Q18,-58 15,-29 Q14,-45 4,-47 Q-9,-45 -8,-29Z" fill="${c}"/>`+tip;
+ return `<path d="M-15,-29 Q-18,-58 0,-60 Q18,-58 15,-29 Q13,-45 0,-47 Q-13,-45 -15,-29Z" fill="${c}"/>`+tip};
+/* 頭巾：結打在後腦（側面在左後方、背面在中間、正面看不到） */
+const kerV=c=>v=>{let g=`<path d="M-14,-38 Q-15,-54 0,-55 Q15,-54 14,-38 Q0,-44 -14,-38Z" fill="${c}"/>`;
+ if(v==='side')g+=`<path d="M-13,-40 l-8,5 l7,3Z" fill="${c}" stroke-width="1.4"/>`;else if(isBk(v))g+=`<path d="M0,-40 l-6,9 l6,-2 l6,2Z" fill="${c}" stroke-width="1.4"/><circle cx="0" cy="-40" r="2.4" fill="${c}" stroke-width="1.2"/>`;
+ return g};
+/* 小皇冠頭飾：背面只看到一圈金色細帶；側面窄一點、往臉的方向 */
+const tiaraV=v=>{if(isBk(v))return `<path d="M-12,-44 Q0,-40 12,-44" fill="none" stroke="${OL}" stroke-width="3.6"/><path d="M-12,-44 Q0,-40 12,-44" fill="none" stroke="#efe0a8" stroke-width="2"/>`;
+ const o=v==='side'?5:v==='fq'?2:0,k=v==='side'?.7:1;return `<g transform="translate(${o},0) scale(${k},1)"><path d="M-10,-45 Q0,-49 10,-45 L7,-50 L3.4,-47.6 L0,-54 L-3.4,-47.6 L-7,-50Z" fill="#efe0a8" stroke-width="1.4"/><circle cx="0" cy="-49.4" r="1.6" fill="#d8413a" stroke="none"/></g>`};
+const HATKIT={plumeArt,beretFit,beretB,hoodV,kerV,tiaraV};
 function face(m){
  const eyes=m===3?`<path d="M-7,-33 Q-4.5,-36 -2,-33 M2,-33 Q4.5,-36 7,-33" fill="none" stroke-width="1.5"/>`:`<g stroke="none"><ellipse cx="-4.5" cy="-33" rx="1.8" ry="2.3" fill="${OL}"/><ellipse cx="4.5" cy="-33" rx="1.8" ry="2.3" fill="${OL}"/><circle cx="-3.9" cy="-33.9" r=".7" fill="#fff"/><circle cx="5.1" cy="-33.9" r=".7" fill="#fff"/></g>`;
  const mouth=m===1?`<ellipse cx="0" cy="-27" rx="2" ry="1.6" fill="#b5403a" stroke-width="1.2"/>`:m===2?`<path d="M-2.5,-28 L2.5,-28" fill="none" stroke-width="1.4"/>`:`<path d="M-2.2,-28.5 Q0,-26 2.2,-28.5" fill="none" stroke-width="1.4"/>`;
@@ -89,7 +132,7 @@ function chibi(o={}){o=outfitOf(o);
  g+=bodyD(sh);
  let h=`<circle cy="-35" r="13" fill="${sk}"/>`+HAIRS[hs](hr)+face(o.mood??ri(0,3));
  if(o.beard)h+=`<path d="M-9,-29 Q0,-12 9,-29 Q4,-26 0,-28 Q-4,-26 -9,-29Z" fill="#fbf6ea"/>`;
- if(hat>=0)h+=HATS[hat]();
+ if(hat>=0)h+=HATS[hat]('front'); /* 2026-11-23：帽子函式會收到方向（front／side／back／fq／bq），舊的帽子不理它，畫法不變 */
  return g+headG(h)+after;
 }
 /* ---------- side / back view characters ---------- */
@@ -129,7 +172,7 @@ function kid(o={}){o=outfitOf(o);
  if(v==='side'){h+=SH_SIDE[L.hs](L.hr)+`<ellipse cx="-2" cy="-33" rx="2.4" ry="3" fill="${L.sk}"/>`+faceSide(o.eyes==='closed');
   if(o.beard)h+=`<path d="M1,-31 Q8,-12 14,-29 Q9,-25 1,-31Z" fill="#fbf6ea"/>`;}
  else h+=`<ellipse cx="-13" cy="-33" rx="2.2" ry="3" fill="${L.sk}"/><ellipse cx="13" cy="-33" rx="2.2" ry="3" fill="${L.sk}"/>`+SH_BACK[L.hs](L.hr);
- if(L.hat>=0)h+=HATS[L.hat]();
+ if(L.hat>=0)h+=HATS[L.hat](v);
  u+=headG(h);
  g+=cy?`<g transform="translate(0,${cy})">${u}</g>`:u;
  return g+(o.extra||'');
@@ -151,7 +194,7 @@ function kidQ(o,L,v,p){dressStart(o,L.sk,L.sh,L.pa);const front=v==='fq',legs=o.
  if(front){h+=`<ellipse cx="-12.5" cy="-33" rx="2.2" ry="3" fill="${L.sk}"/>`+`<g transform="translate(-.8,-35) scale(1.07,1.04) translate(0,35)">${HAIRS[L.hs](L.hr)}</g>`+`<g transform="translate(3.2,0) scale(.84,1)">${face(o.eyes==='closed'?3:(o.mood??ri(0,3)))}</g>`;
   if(o.beard)h+=`<path d="M-5,-29 Q3,-12 12,-29 Q7,-26 3,-28 Q-1,-26 -5,-29Z" fill="#fbf6ea"/>`}
  else h+=`<ellipse cx="9.5" cy="-30" rx="4" ry="5" fill="${L.sk}"/><ellipse cx="12.6" cy="-33" rx="2.2" ry="3" fill="${L.sk}"/>`+`<g transform="translate(-.9,-35) scale(1.07,1.04) translate(0,35)">${SH_BACK[L.hs](L.hr)}</g>`;
- if(L.hat>=0)h+=`<g transform="translate(-1,0)">${HATS[L.hat]()}</g>`;
+ if(L.hat>=0)h+=`<g transform="translate(-1,0)">${HATS[L.hat](v)}</g>`;
  u+=headG(h);
  g+=cy?`<g transform="translate(0,${cy})">${u}</g>`:u;
  return g+(o.extra||'')}

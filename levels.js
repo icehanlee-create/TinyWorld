@@ -12,7 +12,7 @@
    要開放某一關：把編號從清單拿掉，並把那一關的 level{n}.js 上傳到 GitHub。
    注意：系列關卡要一起處理（例：18 要靠 17 才進得去，開放 18 之前 17 也要開放）。
    自己測試完整版時，改成 const HIDE_LEVELS=[]; 就好。 */
-const HIDE_LEVELS=[];
+const HIDE_LEVELS=[21,22];
 {const add0=addLevel;addLevel=L=>{if(!HIDE_LEVELS.includes(L.n))add0(L)}}
 
 addLevel({n:1,title:'第 1 關．奇幻小鎮',file:'level1.js',c:[900,760],map:{x:120,y:170,ic:'🏰',name:'奇幻小鎮'},
@@ -121,14 +121,26 @@ addLevel({n:20,title:'奇幻晚宴',file:'level20.js',c:[1520,1880],
  map:{x:100,y:198,ic:'🕯️',name:'奇幻晚宴'},next:{pv:()=>hallPreview(),btn:'跟侍從去參加晚宴',had:'侍從隨時可以帶你去參加晚宴',fresh:'宮廷院主殿大門前的侍從在等你',ride:'hall18'},
  desc:'跟著管家走進國王的慶功宴：2 種老朋友加上 <b>10 種晚宴新東西</b>。'});
 /* 冒險地圖的大區（2026-11-18）：遠看只顯示大區名，放大才顯示各關名字。x,y 是大區名牌的位置 */
+/* 2026-11-23 雪橇犬驛站（雪山系列往北的第一關）：第 10 關 2 星後，滑雪場山頂東北山口的小狗屋前，雪橇犬頭上「…」；冒險地圖北方雪國 TH.NSPOT[0] */
+const sledPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#f0d6bc"/><g stroke="#2b2420" stroke-width="1.5" stroke-linejoin="round"><path d="M0,46 L24,22 L44,38 L70,12 L96,34 L120,26 V84 H0Z" fill="#c8ccdc"/><path d="M0,56 Q60,48 120,56 V84 H0Z" fill="#f8f2e8"/>${[8,26,92,108].map(x=>`<path d="M${x},58 L${x+7},40 L${x+14},58Z" fill="#3f5d48"/>`).join('')}<path d="M20,70 H86" stroke="#5a3a28" stroke-width="1.2"/>${[24,42,60].map(x=>`<g transform="translate(${x},72)"><path d="M-7,-3 Q-7,-9 0,-9 L6,-9 Q8,-13 11,-11 L12,-8 L9,-7 Q8,-3 6,-3 Z" fill="#8e959c"/><path d="M-5,-3 v3 M4,-3 v3" stroke-width="1.6"/></g>`).join('')}<path d="M84,72 H110 Q114,72 113,67" fill="none" stroke="#7a5235" stroke-width="2.4"/><path d="M86,62 H106 L107,69 H86Z" fill="#c4473c"/></g></svg>`;
+addLevel({n:21,title:'雪橇犬驛站',file:'level21.js',c:[1350,1450],
+ find:{after:10,from:10,hint:['路人：滑雪場最上面、東北邊的山口，多了一間小狗屋耶！','路人：聽說翻過滑雪場東北邊的山口，北邊有一座雪橇犬驛站。','路人：吊椅山頂站再往北一點，常常聽到狗狗在叫⋯是不是有雪橇犬隊？']},
+ map:{x:196,y:-14,ic:'🛷',name:'雪橇犬驛站',north:true},next:{pv:()=>sledPreview(),btn:'坐雪橇犬隊翻過山口',had:'雪橇犬隊隨時可以出發',fresh:'滑雪場東北山口的雪橇犬在等你',ride:'sled21'},
+ desc:'坐雪橇犬隊翻過山口，來到北方的雪橇犬驛站：2 種老朋友加上 <b>10 種驛站新東西</b>。'});
+addLevel({n:22,title:'冰湖雪祭',file:'level22.js',c:[1350,1500],
+ find:{after:21,from:21,hint:['路人：驛站起跑線旁邊，馴犬師阿伯身邊多了一塊畫著冰雕的木牌耶！','路人：聽說西北邊的冰湖今晚在辦雪祭，阿伯知道怎麼去。','路人：西邊小溪旁邊常常有馴鹿雪橇經過⋯是不是要去冰湖那邊？']},
+ map:{x:96,y:-66,ic:'❄️',name:'冰湖雪祭',north:true},next:{pv:()=>(window.TH&&window.TH.PV22?window.TH.PV22():''),btn:'坐馴鹿雪橇去雪祭',had:'馴鹿雪橇隨時可以出發',fresh:'驛站的馴犬師阿伯要帶你去冰湖雪祭',ride:'deer22'},
+ desc:'跟著馴犬師阿伯、坐馴鹿雪橇來到黃昏的冰湖雪祭：2 種老朋友加上 <b>10 種雪祭新東西</b>。'});
 addRegion({name:'櫻花山城',ids:[6,7,8,9],x:-68,y:250});
 addRegion({name:'沙漠',ids:[11,12,13],x:-85,y:392});
+/* 2026-11-23 北國雪嶺：第 2 關（冰湖雪祭）去得了才出現大區名 */
+addRegion({name:'北國雪嶺',get ids(){const T_=window.TH;return T_&&T_.isOpen(22)?[21,22]:[]},x:110,y:-24});
 /* 2026-11-19 城堡系列（第 17 關起）隸屬於奇幻小鎮：發現城門廣場之後，遠看只顯示大區名「奇幻小鎮」，放大才看得到「奇幻小鎮」「城堡」兩個名牌；還沒發現時完全不變 */
 addRegion({name:'奇幻小鎮',get ids(){const T_=window.TH;if(!T_||!T_.isOpen(17))return [17];return [1,17,18,19,20].filter(n=>n===1||T_.isOpen(n))},x:100,y:244});
 /* 2026-11-21w 地圖卡片、收集冊的分組（使用者選 B、b）。新關卡把編號加進某一組；秘境自動放「秘境」。 */
 addCardGroup({name:'奇幻小鎮',ic:'🏰',ids:[1,17,18,19,20]});
 addCardGroup({name:'農莊與森林',ic:'🌾',ids:[2,4]});
-addCardGroup({name:'雪山',ic:'❄️',ids:[3,10,15]});
+addCardGroup({name:'雪山',ic:'❄️',ids:[3,10,15,21,22]});
 addCardGroup({name:'海島',ic:'⚓',ids:[5,14,16]});
 addCardGroup({name:'櫻花山城',ic:'🌸',ids:[6,7,8,9]});
 addCardGroup({name:'沙漠',ic:'🏜️',ids:[11,12,13]});
