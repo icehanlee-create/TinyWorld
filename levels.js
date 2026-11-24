@@ -12,7 +12,7 @@
    要開放某一關：把編號從清單拿掉，並把那一關的 level{n}.js 上傳到 GitHub。
    注意：系列關卡要一起處理（例：18 要靠 17 才進得去，開放 18 之前 17 也要開放）。
    自己測試完整版時，改成 const HIDE_LEVELS=[]; 就好。 */
-const HIDE_LEVELS=[21,22];
+const HIDE_LEVELS=[21,22,23];
 {const add0=addLevel;addLevel=L=>{if(!HIDE_LEVELS.includes(L.n))add0(L)}}
 
 addLevel({n:1,title:'第 1 關．奇幻小鎮',file:'level1.js',c:[900,760],map:{x:120,y:170,ic:'🏰',name:'奇幻小鎮'},
@@ -131,16 +131,21 @@ addLevel({n:22,title:'冰湖雪祭',file:'level22.js',c:[1350,1500],
  find:{after:21,from:21,hint:['路人：驛站起跑線旁邊，馴犬師阿伯身邊多了一塊畫著冰雕的木牌耶！','路人：聽說西北邊的冰湖今晚在辦雪祭，阿伯知道怎麼去。','路人：西邊小溪旁邊常常有馴鹿雪橇經過⋯是不是要去冰湖那邊？']},
  map:{x:96,y:-66,ic:'❄️',name:'冰湖雪祭',north:true},next:{pv:()=>(window.TH&&window.TH.PV22?window.TH.PV22():''),btn:'坐馴鹿雪橇去雪祭',had:'馴鹿雪橇隨時可以出發',fresh:'驛站的馴犬師阿伯要帶你去冰湖雪祭',ride:'deer22'},
  desc:'跟著馴犬師阿伯、坐馴鹿雪橇來到黃昏的冰湖雪祭：2 種老朋友加上 <b>10 種雪祭新東西</b>。'});
+/* 2026-11-24 極光山頂（雪山系列第三關）：第 22 關 2 星後，冰雕廣場南端冰熊雕像旁的天文社攤位，提燈大姊頭上「…」→ 帶路到廣場北邊登山步道口；冒險地圖北方雪國 TH.NSPOT[2] */
+addLevel({n:23,title:'極光山頂',file:'level23.js',c:[1350,2080],
+ find:{after:22,from:22,hint:['路人：冰雕廣場南邊、冰熊雕像旁多了一個藍色小攤位，攤位的大姊手上提著燈⋯','路人：聽說今晚山頂會有極光，天文社的人要帶大家從北邊的步道上山！','路人：冰雕城堡西北邊有一個登山步道口，晚上常看到提燈的人往山上走。']},
+ map:{x:10,y:-128,ic:'🌌',name:'極光山頂',north:true},next:{pv:()=>(window.TH&&window.TH.PV23?window.TH.PV23():''),btn:'跟天文社大姊提燈上山',had:'天文社大姊隨時可以帶你上山',fresh:'冰湖雪祭的天文社大姊要帶你上山看極光',ride:'trail23'},
+ desc:'跟著天文社大姊的提燈，爬上看得到極光的山頂：2 種老朋友加上 <b>10 種山頂新東西</b>。'});
 addRegion({name:'櫻花山城',ids:[6,7,8,9],x:-68,y:250});
 addRegion({name:'沙漠',ids:[11,12,13],x:-85,y:392});
 /* 2026-11-23 北國雪嶺：第 2 關（冰湖雪祭）去得了才出現大區名 */
-addRegion({name:'北國雪嶺',get ids(){const T_=window.TH;return T_&&T_.isOpen(22)?[21,22]:[]},x:110,y:-24});
+addRegion({name:'北國雪嶺',get ids(){const T_=window.TH;return T_&&T_.isOpen(22)?[21,22].concat(T_.isOpen(23)?[23]:[]):[]},x:110,y:-24});
 /* 2026-11-19 城堡系列（第 17 關起）隸屬於奇幻小鎮：發現城門廣場之後，遠看只顯示大區名「奇幻小鎮」，放大才看得到「奇幻小鎮」「城堡」兩個名牌；還沒發現時完全不變 */
 addRegion({name:'奇幻小鎮',get ids(){const T_=window.TH;if(!T_||!T_.isOpen(17))return [17];return [1,17,18,19,20].filter(n=>n===1||T_.isOpen(n))},x:100,y:244});
 /* 2026-11-21w 地圖卡片、收集冊的分組（使用者選 B、b）。新關卡把編號加進某一組；秘境自動放「秘境」。 */
 addCardGroup({name:'奇幻小鎮',ic:'🏰',ids:[1,17,18,19,20]});
 addCardGroup({name:'農莊與森林',ic:'🌾',ids:[2,4]});
-addCardGroup({name:'雪山',ic:'❄️',ids:[3,10,15,21,22]});
+addCardGroup({name:'雪山',ic:'❄️',ids:[3,10,15,21,22,23]});
 addCardGroup({name:'海島',ic:'⚓',ids:[5,14,16]});
 addCardGroup({name:'櫻花山城',ic:'🌸',ids:[6,7,8,9]});
 addCardGroup({name:'沙漠',ic:'🏜️',ids:[11,12,13]});

@@ -285,19 +285,66 @@ function storyBubble(){const sp=storySp.giver;if(!sp)return;const el=document.qu
 function onSpriteTap(sp){const S=STORIES[scene];
  const role=sp===storySp.giver?'giver':sp===storySp.target?'target':sp===storySp.helper?'helper':null;
  if(S&&story&&role){
+  if(story.busy)return true;
   if(story.done){toast(role==='giver'?`${S.who}：謝謝你幫忙！`:'牠現在很開心～',1600);return true}
   const want=SEQ[story.step];
   if(role===want){const msg=[S.ask,S.need,S.got,S.ok][story.step];story.step++;
    if(story.step>=SEQ.length){finishStory();return true}
-   toast(msg,4200);storyBubble();if(story.step===3)sfx.found();return true}
+   toast(msg,4200);storyBubble();if(story.step===3)sfx.found();if(story.step===4&&S.reunion)reunion(S);return true}
   // 順序不對：給提示，不扣分
   const hint=role==='giver'?(story.step===0?S.ask:`${S.who}：拜託你了，${story.step>=4?'快帶回來給我！':'找到了嗎？'}`)
-   :role==='target'?(story.step===0?'這是誰家的寶貝？好像有人在找牠⋯':story.step===2?S.need:'牠乖乖跟著你，快帶回去吧！')
+   :role==='target'?(story.step===0?'這是誰家的寶貝？好像有人在找牠⋯':story.step===2?S.need:(story.step>=4&&S.reunion)?`牠已經回到${S.who}身邊了，去跟${S.who}說說話吧！`:'牠乖乖跟著你，快帶回去吧！')
    :(story.step<2?'（看起來正在忙⋯也許之後會需要幫忙）':'已經幫過你囉！');
   toast(hint,3200);if(story.step===0&&role==='giver')story.step=1;return true}
  for(const c of [clovers.story,clovers.bonus]){if(c&&!c.revealed&&!c.found&&sp===c.host){if(c.kind==='story'&&!(story&&story.done))return false;revealClover(c);return true}}
  if(sp.say){toast(sp.say,1800);return true} /* 看板不寫字，點了才跳出名稱（2026-11-11） */
  return false}
+/* ---- 小故事團聚（2026-11-24，使用者選 A＋D；先在極光山頂試）：STORIES[n].reunion={fly?:true,prints?:'paw'|'shoe',dur?:秒,card?:()=>SVG,say?:'…'}
+   第 4 步（點目標第二次）之後：目標從原地沿路走／飛回提問的人身邊（畫面跟著，走路會留腳印）→ 到了冒愛心 → 跳出「團聚小卡」特寫（約 2.6 秒，可點掉）
+   → 目標留在提問的人旁邊，再點提問的人說謝謝（第 5 步）。沒設 reunion 的關卡維持原樣。 */
+function reunion(S){const R=S.reunion||{},g=storySp.giver,tg=storySp.target;if(!g||!tg)return;
+ const el=document.querySelector(`#bg [data-n="${tg.n}"]`);story.busy=true;const my=story;
+ if(el&&!tg._home)tg._home={x:tg.x,y:tg.y,tr:el.getAttribute('transform'),html:el.innerHTML,dx:el.dataset.x,dy:el.dataset.y,next:el.nextSibling,par:el.parentNode};
+ const side=tg.x<g.x?-1:1,ex=g.x+side*34,ey=g.y+4,sx=tg.x,sy=tg.y,D=Math.hypot(ex-sx,ey-sy);
+ const dur=(R.dur||Math.max(2.6,Math.min(6,D/260))*(R.fly?1.25:1))*1000; /* 11-24：飛行速度調降為 80%（使用者） */
+ const art=R.after||S.target,w=svgEl('g',{},fx);w.innerHTML=art();if(el)el.style.visibility='hidden';
+ const prints=svgEl('g',{opacity:.7},fx);let lastP=0;
+ const t0=performance.now()+700;let lastCam=0;
+ setTimeout(()=>{try{tweenTo(Math.max(view.s,base*1.15),sx,sy-30,600)}catch(_){}},0);
+ const step=t=>{if(story!==my){w.remove();prints.remove();return} /* 中途按「重新開始」：停下來（位置由 reunionReset 還原） */
+  const k=Math.max(0,Math.min(1,(t-t0)/dur)),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+  let x=sx+(ex-sx)*e,y=sy+(ey-sy)*e;
+  if(R.fly)y-=Math.sin(Math.PI*k)*Math.min(160,40+D*.15);else y-=Math.abs(Math.sin(k*D/14))*3;
+  const fl=ex<sx;w.setAttribute('transform',`translate(${f(x)},${f(y)})${fl&&!R.fly?' scale(-1,1)':''}`);
+  if(!R.fly&&k>0&&k<1&&t-lastP>220){lastP=t;const px=sx+(ex-sx)*e,py=sy+(ey-sy)*e;
+   prints.insertAdjacentHTML('beforeend',R.prints==='shoe'?`<ellipse cx="${f(px)}" cy="${f(py+2)}" rx="3" ry="5" fill="#8a96b0" opacity=".6" stroke="none"/>`:
+    `<g transform="translate(${f(px)},${f(py+2)})" fill="#8a96b0" opacity=".6" stroke="none"><ellipse rx="2.6" ry="2"/><circle cx="-2.2" cy="-3" r="1"/><circle cx="2.2" cy="-3" r="1"/></g>`)}
+  if(t-lastCam>650&&k<1){lastCam=t;const kk=Math.min(1,k+.18),ee=kk<.5?2*kk*kk:1-Math.pow(-2*kk+2,2)/2;try{tweenTo(view.s,sx+(ex-sx)*ee,sy+(ey-sy)*ee-40,700)}catch(_){}}
+  if(k<1){requestAnimationFrame(step);return}
+  /* 到了：把目標搬到提問的人旁邊（照 y 重新排前後） */
+  tg.x=ex;tg.y=ey;
+  if(el){el.setAttribute('transform',(el.getAttribute('transform')||'').replace(/translate\([^)]*\)/,`translate(${f(ex)},${f(ey)})`));
+   if(el.dataset.x){el.dataset.x=f(ex);el.dataset.y=f(ey)}
+   const par=el.parentNode,sib=[...par.children].find(c=>c!==el&&c.dataset&&c.dataset.n!=null&&sprites[+c.dataset.n]&&sprites[+c.dataset.n].y>ey);if(sib)par.insertBefore(el,sib);else par.appendChild(el);
+   if(R.after)el.innerHTML=R.after();el.style.visibility=''}
+  w.remove();setTimeout(()=>prints.remove(),2500);
+  for(let i=0;i<3;i++)setTimeout(()=>floatText(g.x+(i-1)*18,g.y-70-i*6,'💗'),i*180);
+  try{[784,988,1175,1568].forEach((q,i)=>tone(q,.18,'triangle',.12,i*.09))}catch(_){}
+  setTimeout(()=>{if(story===my)reunionCard(S,()=>{if(story!==my)return;story.busy=false;toast(R.say||`${S.who}：（張開雙手）你回來了！⋯⋯快過來讓我說聲謝謝！`,3200)})},700)};
+ requestAnimationFrame(step)}
+/* 重新開始時：團聚搬走的目標回到原本的位置和樣子（使用者 11-24 回報） */
+function reunionReset(){const ov=document.getElementById('reuOv');if(ov)ov.remove();const tg=storySp&&storySp.target,h=tg&&tg._home;if(!h)return;
+ const el=document.querySelector(`#bg [data-n="${tg.n}"]`);tg.x=h.x;tg.y=h.y;
+ if(el){el.setAttribute('transform',h.tr);el.innerHTML=h.html;if(h.dx!=null){el.dataset.x=h.dx;el.dataset.y=h.dy}el.style.visibility='';
+  try{if(h.next&&h.next.parentNode===h.par)h.par.insertBefore(el,h.next);else h.par.appendChild(el)}catch(_){}}
+ delete tg._home}
+function reunionCard(S,done){let ov=document.getElementById('reuOv');if(ov)ov.remove();
+ if(!document.getElementById('reuCss')){const st=document.createElement('style');st.id='reuCss';st.textContent=`#reuOv{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(24,28,46,.55);animation:reuF .3s ease-out}#reuOv .rc{background:#fff8e8;border:3px solid #2b2420;border-radius:18px;padding:10px;box-shadow:0 8px 0 rgba(0,0,0,.18);animation:reuP .45s cubic-bezier(.3,1.6,.5,1)}#reuOv .ht{animation:reuH 1.2s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}@keyframes reuF{from{opacity:0}}@keyframes reuP{from{transform:scale(.4);opacity:0}}@keyframes reuH{from{transform:translateY(0)}to{transform:translateY(-6px)}}`;document.head.appendChild(st)}
+ const art=S.reunion&&S.reunion.card?S.reunion.card():`<g transform="translate(108,196) scale(2.6)">${S.giver()}</g><g transform="translate(172,198) scale(2.4)">${(S.reunion&&S.reunion.after||S.target)()}</g>`;
+ ov=document.createElement('div');ov.id='reuOv';
+ ov.innerHTML=`<div class="rc"><svg viewBox="0 0 280 230" width="280" height="230"><circle cx="140" cy="130" r="96" fill="#ffe7a8"/><circle cx="140" cy="130" r="70" fill="#fff2c8"/><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${art}<g class="ht"><g transform="translate(140,30) scale(2.6)">${heart(0,0)}</g><g transform="translate(106,44) scale(1.8)">${heart(0,0)}</g><g transform="translate(176,40) scale(2)">${heart(0,0)}</g></g></g></svg></div>`;
+ document.body.appendChild(ov);let closed=false;const close=()=>{if(closed)return;closed=true;ov.remove();done&&done()};
+ ov.addEventListener('pointerdown',close);setTimeout(close,2800)}
 function finishStory(){if(!story||story.done)return;story.done=true;story.step=SEQ.length;const S=STORIES[scene];storyBubble();colStory(level);sfx.typeDone();
  const c=clovers.story,g=storySp.giver;if(g){burst(g.x,g.y-40);floatText(g.x,g.y-70,'📖 故事完成！')}
  if(c&&!c.found){addSpark(c,'fast');toast(`📖 ${S.title}：完成！\n${S.who}：謝謝你！我剛剛看到 🍀 幸運草藏在${dirFrom(g||{x:c.x,y:c.y},c)}的${HOSTN[c.host.kind]||'東西'}後面，去點點看！`,6000)}
@@ -509,7 +556,7 @@ function setHintUI(){const b=$('#hintBtn');$('#hintN').textContent=testMode?'∞
 function applyTestUI(){document.querySelectorAll('.tbtn').forEach(b=>b.style.display=testMode?'':'none');$('#testBadge').style.display=testMode?'':'none';$('#winBtn').style.display=testMode?'':'none';{const pb=$('#panoBtn');if(pb)pb.style.display=testMode?'':'none';if(!testMode&&PANO)panoSet(false)}$('#resetBtn').style.display=testMode?'':'none';setHintUI()}
 function newGame(keepView){if(PANO)panoSet(false);WINGO=0;const S=SEC();
  if(S){items=S.items();clovers={story:null,bonus:null};itemsL.innerHTML='';marks.innerHTML='';fx.innerHTML=''}else{placeItems();placeClover();renderItems()}
- story={step:0,done:false};storyBubble();renderTray();updateCounts();
+ reunionReset();story={step:0,done:false};storyBubble();renderTray();updateCounts();
  st={running:true,t0:performance.now(),hintsLeft:HINTS,misses:0,clover:false,bonus:false};setHintUI();
  measure();if(S)S.start();else if(!keepView){const c=LEVELS[level].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base}}clampV();apply();reveal(true);clearInterval(timer);timer=setInterval(tick,250);tick();
  NGHOOKS.forEach(h=>{try{h(scene)}catch(e){console.error(e)}});drawExits();pickSecretHint()}
