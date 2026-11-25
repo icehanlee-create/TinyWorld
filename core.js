@@ -390,8 +390,10 @@ function renderItems(){
 /* ================= view ================= */
 const stage=$('#stage'),world=$('#world');
 let PANO=false;let SW=1,SH=1,base=.6,minS=.3,maxS=2,view={s:.6,tx:0,ty:0};
-function measure(){const r_=stage.getBoundingClientRect();SW=r_.width;SH=r_.height;base=Math.min(SW,SH*.8)/640*1.2;minS=base;maxS=base*2.8;{const S=SEC();if(S&&(S.pano()||(S.cine&&S.cine())))minS=base*.28}if(PANO){const SC=SCENES[scene]||SCENES[1],fit=Math.min(SW/(SC.x1-SC.x0+2*EX),SH/((SC.y1||H)+2*EX))*.96;minS=Math.min(minS,fit)}} /* 開場比原本大 1.2 倍；最多只能縮回開場大小，不能拉遠看全圖 */
+function measure(){const r_=stage.getBoundingClientRect();SW=r_.width;SH=r_.height;base=Math.min(SW,SH*.8)/640*1.2;minS=base;maxS=base*2.8;{const S=SEC();if(S&&(S.pano()||(S.cine&&S.cine())))minS=base*.28;if(S&&S.room&&!PANO){const SC=SCENES[scene]||SCENES[1],P=pads(),fit=Math.min(SW/(SC.x1-SC.x0),(SH-P.t-P.b)/(SC.y1||H));minS=fit;maxS=fit*2.2}} /* 室內小關卡：整間房間剛好塞滿、最多放大約 2 倍 */if(PANO){const SC=SCENES[scene]||SCENES[1],fit=Math.min(SW/(SC.x1-SC.x0+2*EX),SH/((SC.y1||H)+2*EX))*.96;minS=Math.min(minS,fit)}} /* 開場比原本大 1.2 倍；最多只能縮回開場大小，不能拉遠看全圖 */
 function clampV(){view.s=Math.max(minS,Math.min(maxS,view.s));const s_=view.s,SC=SCENES[scene]||SCENES[1];
+ {const S=SEC();if(S&&S.room&&!PANO){const P=pads(),X0=SC.x0*s_,X1=SC.x1*s_,Y1=(SC.y1||H)*s_,av=SH-P.t-P.b,cl=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+  view.tx=X1-X0<=SW+.5?(SW-(X1-X0))/2-X0:cl(view.tx,SW-X1,-X0);view.ty=Y1<=av+.5?P.t+(av-Y1)/2:cl(view.ty,P.t+av-Y1,P.t);return}} /* 室內小關卡：比畫面小就置中，放大後不能拖出房間 */
  if(PANO){const X0=(SC.x0-EX)*s_,X1=(SC.x1+EX)*s_,Y0=-EX*s_,Y1=((SC.y1||H)+EX)*s_,cl=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
   view.tx=X1-X0<SW?(SW-(X1-X0))/2-X0:cl(view.tx,SW-X1,-X0);view.ty=Y1-Y0<SH?(SH-(Y1-Y0))/2-Y0:cl(view.ty,SH-Y1,-Y0);return}
  view.tx=Math.min(-(SC.x0-EX)*s_,Math.max(SW-(SC.x1+EX)*s_,view.tx));const P=pads();view.ty=Math.min(EX*s_+P.t,Math.max(SH-((SC.y1||H)+EX)*s_-P.b,view.ty))}
@@ -415,16 +417,21 @@ const loc=e=>({x:e.clientX-rect.left,y:e.clientY-rect.top});
    之後一根手指滑動會被當成兩指縮放（畫面忽大忽小）、也點不到東西。三道保險：
    1. 新的一次觸碰是「第一根手指」（isPrimary）時，清掉舊的；2. lostpointercapture 也算抬起；
    3. 觸控事件 touchend／touchcancel 時，螢幕上已經沒有手指就全部清掉；切到背景也清掉。 */
-const clearPts=()=>{pts.clear();pinch=null;tap=null};
+const clearPts=()=>{if(GRAB){const S=SEC();if(S&&S.dragEnd)S.dragEnd(null);GRAB=null}pts.clear();pinch=null;tap=null};
+/* 2026-11-24k 室內小關卡：按住物件可以拖（控制器 grab／dragMove／dragEnd，座標是 stage 裡的位置）；拖的時候不移動畫面 */
+let GRAB=null;
 stage.addEventListener('pointerdown',e=>{if(e.target.closest('.zpill,#panoBar'))return;rect=stage.getBoundingClientRect();try{stage.setPointerCapture(e.pointerId)}catch(_){}
  if(e.isPrimary&&pts.size)clearPts();
- pts.set(e.pointerId,loc(e));if(pts.size===1){const p=loc(e);tap={id:e.pointerId,x:p.x,y:p.y,t:performance.now(),moved:false}}else{tap=null;startPinch()}});
+ pts.set(e.pointerId,loc(e));if(pts.size===1){const p=loc(e);tap={id:e.pointerId,x:p.x,y:p.y,t:performance.now(),moved:false};
+  {const S=SEC();if(S&&S.grab&&st.running&&!PANO&&S.grab((p.x-view.tx)/view.s,(p.y-view.ty)/view.s,p.x,p.y)){GRAB={id:e.pointerId};tap=null}}}else{if(GRAB)return;tap=null;startPinch()}});
 function startPinch(){const[a,b]=[...pts.values()];const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2};pinch={d0:Math.hypot(a.x-b.x,a.y-b.y)||1,s0:view.s,wx:(m.x-view.tx)/view.s,wy:(m.y-view.ty)/view.s}}
 stage.addEventListener('pointermove',e=>{const p=pts.get(e.pointerId);if(!p)return;const n=loc(e),dx=n.x-p.x,dy=n.y-p.y;p.x=n.x;p.y=n.y;
+ if(GRAB){if(GRAB.id===e.pointerId){const S=SEC();if(S&&S.dragMove)S.dragMove(n.x,n.y)}return}
  if(pts.size===1){if(tap&&!tap.moved&&Math.hypot(n.x-tap.x,n.y-tap.y)>8)tap.moved=true;if(!tap||tap.moved){if(CAMLOCK())return;view.tx+=dx;view.ty+=dy;clampV();apply()}}
  else if(pts.size>=2&&pinch&&!CAMLOCK()){const[a,b]=[...pts.values()];const d=Math.hypot(a.x-b.x,a.y-b.y),m={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
   view.s=Math.max(minS,Math.min(maxS,pinch.s0*d/pinch.d0));view.tx=m.x-pinch.wx*view.s;view.ty=m.y-pinch.wy*view.s;clampV();apply()}});
-function endPtr(e){if(!pts.has(e.pointerId))return;pts.delete(e.pointerId);
+function endPtr(e){if(!pts.has(e.pointerId))return;const n_=pts.get(e.pointerId);pts.delete(e.pointerId);
+ if(GRAB&&GRAB.id===e.pointerId){GRAB=null;const S=SEC();if(S&&S.dragEnd)S.dragEnd(e.type==='pointerup'?n_:null);if(pts.size<2)pinch=null;tap=null;return}
  if(e.type==='pointerup'&&tap&&tap.id===e.pointerId&&!tap.moved&&performance.now()-tap.t<700)onTap(tap.x,tap.y);
  if(pts.size<2)pinch=null;tap=null}
 stage.addEventListener('pointerup',endPtr);stage.addEventListener('pointercancel',endPtr);stage.addEventListener('lostpointercapture',endPtr);
@@ -464,14 +471,16 @@ function iconVB(id){if(ICONVB[id])return ICONVB[id];let vb='-21 -21 42 42';
  return vb}
 const icon=id=>`<svg viewBox="${iconVB(id)}"><g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${ART[id]}</g></svg>`;
 const leftOf=id=>items.filter(it=>!it.found&&(!id||it.t.id===id)).length;
-function renderTray(){$('#chips').innerHTML=TYPES.map(t=>`<button class="chip" data-t="${t.id}" aria-label="${t.name}"><span class="ic">${icon(t.id)}<span class="ok">✓</span></span><span class="dots">${'<i></i>'.repeat(PER())}</span></button>`).join('');
+function renderTray(){{const R=ROOMC();if(R&&R.tray){R.tray($('#chips'));return}} /* 室內小關卡：下方換成點單圖卡 */
+ $('#chips').innerHTML=TYPES.map(t=>`<button class="chip" data-t="${t.id}" aria-label="${t.name}"><span class="ic">${icon(t.id)}<span class="ok">✓</span></span><span class="dots">${'<i></i>'.repeat(PER())}</span></button>`).join('');
  $('#chips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{const t=TYPES.find(x=>x.id===b.dataset.t),n=leftOf(t.id);trayTip(b,SEC()?(n?`${t.name}：找到 ${PER()-n} / ${PER()}`:`${t.name}：找齊了 ✓`):n?`${t.name}：還有 ${n} 個`:`${t.name}：全部找到了 ✓`)})}
 /* 點下方列的物件：說明直接顯示在那個物件正上方，不跑到畫面最上面 */
 let trayTipT;function trayTip(chip,msg){const tray=$('#tray');let el=document.getElementById('trayTip');if(!el){el=document.createElement('div');el.id='trayTip';tray.appendChild(el)}
  el.textContent=msg;const tr=tray.getBoundingClientRect(),cr=chip.getBoundingClientRect(),cx=cr.left+cr.width/2-tr.left;el.style.left='0px';el.classList.add('show');
  const w=el.offsetWidth,L=Math.max(w/2+8,Math.min(tr.width-w/2-8,cx));el.style.left=L+'px';el.style.setProperty('--ax',(cx-L+w/2)+'px');
  clearTimeout(trayTipT);trayTipT=setTimeout(()=>el.classList.remove('show'),1800)}
-function updateCounts(bump){const tot=TYPES.length*PER(),got=tot-leftOf();$('#foundN').textContent=got;$('#foundTxt').textContent=`${got} / ${tot}`;$('#trayProg').textContent=`${got}/${tot}`;
+function updateCounts(bump){{const R=ROOMC();if(R&&R.counts){R.counts(bump);return}} /* 室內小關卡：表頭顯示第幾杯 */
+ const tot=TYPES.length*PER(),got=tot-leftOf();$('#foundN').textContent=got;$('#foundTxt').textContent=`${got} / ${tot}`;$('#trayProg').textContent=`${got}/${tot}`;
  const C=2*Math.PI*18;$('#ringArc').setAttribute('stroke-dasharray',`${f(C*got/tot)} ${f(C)}`);
  TYPES.forEach(t=>{const n=leftOf(t.id),c=$(`.chip[data-t="${t.id}"]`);if(!c)return;if(n===0&&!c.classList.contains('done'))$('#chips').appendChild(c);c.classList.toggle('done',n===0);c.querySelectorAll('.dots i').forEach((d,k)=>d.classList.toggle('on',k<PER()-n))});
  if(bump){const c=$(`.chip[data-t="${bump}"]`);if(c){c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump');if(!c.classList.contains('done'))c.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})}}}
@@ -512,7 +521,10 @@ const isOpen=n=>{const L=LEVELS[n];if(!L||L.secret)return false;return L.find?is
 const openMain=()=>{const a=[];for(let n=1;n<=prog.unlocked;n++)if(LEVELS[n]&&!LEVELS[n].find)a.push(n);prog.found.forEach(n=>{if(LEVELS[n]&&!a.includes(n))a.push(n)});return a};
 const linNext=n=>{const L=LEVELS[n+1];return L&&!L.find&&!L.secret?n+1:0};
 const SEC=()=>LEVELS[level]&&LEVELS[level].secret&&scene===level&&SECRETS[level]?SECRETS[level]:null;
-const CAMLOCK=()=>{const S=SEC();return !!(S&&!S.pano()&&!PANO)};
+/* 2026-11-24 室內小關卡（沉船酒館 201 起，room.js）：levels.js 加 room:true，控制器跟秘境一樣登記在 SECRETS[n]。
+   ROOMC() 不管 scene 是不是已經換好（renderTray／renderStart 在換場景前就會被叫到）。控制器可以給：tray(el)、counts()、startInfo()。 */
+const ROOMC=()=>LEVELS[level]&&LEVELS[level].room&&SECRETS[level]?SECRETS[level]:null;
+const CAMLOCK=()=>{const S=SEC();return !!(S&&!S.room&&!S.pano()&&!PANO)}; /* 室內小關卡：放大後可以拖 */
 const PER=()=>(LEVELS[level]&&LEVELS[level].per)||4;
 /* 過場只在第一次前往時播放；記錄已看過的過場（第一次更新時，先把原本已解鎖的關卡記成看過） */
 let RODE=[];try{const v=localStorage.getItem('townhunt-rode');RODE=v?JSON.parse(v):[...Array(prog.unlocked)].map((_,i)=>i+1);if(!v)localStorage.setItem('townhunt-rode',JSON.stringify(RODE))}catch(_){}
@@ -521,12 +533,13 @@ let RODE=[];try{const v=localStorage.getItem('townhunt-rode');RODE=v?JSON.parse(
 const secretSeen=n=>{const L=LEVELS[n];if(!L)return false;if(L.seen)return !!L.seen();try{return !!(localStorage.getItem('townhunt-best-L'+n)||localStorage.getItem('townhunt-stars-L'+n))}catch(_){return false}};
 const rodeHas=n=>n<=1||RODE.includes(n),rodeAdd=n=>{if(!RODE.includes(n)){RODE.push(n);try{localStorage.setItem('townhunt-rode',JSON.stringify(RODE))}catch(_){}}};
 let level=1;
-function setLevel(n){level=n;document.body.classList.toggle('secret',!!(LEVELS[n]&&LEVELS[n].secret));TYPES=typesFor(n);renderStart();renderTray()}
+function setLevel(n){level=n;document.body.classList.toggle('secret',!!(LEVELS[n]&&LEVELS[n].secret));document.body.classList.toggle('room',!!(LEVELS[n]&&LEVELS[n].room));TYPES=typesFor(n);renderStart();renderTray()}
 let howOrig=null,ruleOrig=null;
 function renderStart(){const L=LEVELS[level];{const hd=document.querySelector('#startOv .shead');if(hd){hd.querySelector('b').textContent=`這一關要找的 ${TYPES.length} 樣東西`;hd.querySelector('span').textContent=`每樣 ${L.per||4} 個`}
   const how=document.querySelector('#startOv .how'),rule=document.querySelector('#startOv .rule');if(howOrig===null){howOrig=how.innerHTML;ruleOrig=rule.innerHTML}
   const SX=L.secret&&SECRETS[level];how.innerHTML=SX&&SX.how?SX.how:howOrig;rule.innerHTML=SX&&SX.rule?SX.rule:ruleOrig;$('#startBtn').textContent=SX?'開始探險':'開始尋找'}$('#startTitle').textContent=L.title;$('#startDesc').innerHTML=borrowed.length?`這次<b>${borrowed.map(t=>t.short).join('、')}</b>也跑來這裡了！`:'';
  $('#startGrid').innerHTML=TYPES.map(t=>`<div><span class="t">${icon(t.id)}</span>${t.short}</div>`).join('');
+ {const R=ROOMC();if(R&&R.startInfo){const I=R.startInfo(),hd=document.querySelector('#startOv .shead');if(hd){hd.querySelector('b').textContent=I.b;hd.querySelector('span').textContent=I.span}$('#startGrid').innerHTML=I.grid}} /* 室內小關卡：開始畫面列這一局的材料 */
  let best=null;try{best=parseFloat(localStorage.getItem('townhunt-best-L'+level))}catch(_){}$('#startBest').textContent=best?`這一關最佳紀錄 ${Math.floor(best/60)}:${String(Math.floor(best%60)).padStart(2,'0')}`:''}
 /* ---- exploration fog ---- */
 const FC=150,FCOLS=Math.ceil(W/FC),FROWS=Math.ceil(H/FC);
@@ -565,7 +578,7 @@ function newGame(keepView){if(PANO)panoSet(false);WINGO=0;const S=SEC();
    條件：這一關過關過（有 best）、秘境的出發地過關過、秘境還沒過關。挑人在 newGame 最後做，不影響物件和場景的亂數。 */
 const DOTSIG='cx="-6" cy="-1" r="1.7"';let hintSp=null,hintMsg='';
 function pickSecretHint(){hintSp=null;hintMsg='';if(SEC())return;if(!(bestOf(level)>0))return;
- const cand=SECRET_IDS.filter(n=>{const L=LEVELS[n];return L&&L.hint&&L.hint.length&&!(bestOf(n)>0)&&(L.needStars?starsOf(L.home)>=L.needStars:bestOf(L.home)>0)}) /* 2026-11-21 needStars：出發地要幾顆星才開始有路人提這個秘境（樹籬迷宮＝宮廷院 2 星） */
+ const cand=SECRET_IDS.filter(n=>{const L=LEVELS[n];return L&&L.hint&&L.hint.length&&!(bestOf(n)>0)&&(!L.cond||L.cond())&& /* 2026-11-24m cond：秘境自己的額外條件（沉船酒館＝去過綠島或海底世界） */(L.needStars?starsOf(L.home)>=L.needStars:bestOf(L.home)>0)}) /* 2026-11-21 needStars：出發地要幾顆星才開始有路人提這個秘境（樹籬迷宮＝宮廷院 2 星） */
   .concat(FIND_IDS.filter(n=>canFind(n)&&LEVELS[n].find.hint&&LEVELS[n].find.hint.length));if(!cand.length)return; /* 新關卡（find）和秘境的提示放在同一個籤筒輪流 */
  const ppl=sprites.filter(s=>s.svg&&s.svg.includes(DOTSIG)&&s!==storySp.giver&&s!==storySp.helper);if(!ppl.length)return;
  const R=Math.random;hintSp=ppl[Math.floor(R()*ppl.length)];const L=LEVELS[cand[Math.floor(R()*cand.length)]],hs=L.find?L.find.hint:L.hint;hintMsg=hs[Math.floor(R()*hs.length)]}
@@ -615,7 +628,7 @@ function floatText(x,y,txt){const fs=Math.min(36,15/view.s);const t=svgEl('text'
  anim(1200,k=>{t.setAttribute('y',y-k*fs*1.4);t.setAttribute('opacity',k<.6?1:1-(k-.6)/.4)},()=>t.remove())}
 $('#hintBtn').onclick=()=>{if(!st.running||hintLock||(!testMode&&st.hintsLeft<=0))return;const rest=items.filter(it=>!it.found);if(!rest.length&&!(SEC()&&SEC().goalOn&&SEC().goalOn()))return; /* 2026-11-21 秘境找齊後還要走到終點（C.goal）時，提示箭頭指向終點 */
  {const S=SEC();if(S){if(!S.hint())return;st.hintsUsed=(st.hintsUsed||0)+1;if(!testMode)st.hintsLeft--;hintLock=true;setHintUI();sfx.hint();
-  toast(testMode?'提示：跟著頭上的箭頭走':st.hintsLeft?`提示：跟著頭上的箭頭走（剩 ${st.hintsLeft} 次）`:'提示：跟著頭上的箭頭走（提示用完了）',2600);setTimeout(()=>{hintLock=false;setHintUI()},testMode?900:2600);return}}
+  toast(S.hintMsg?S.hintMsg(testMode?-1:st.hintsLeft):testMode?'提示：跟著頭上的箭頭走':st.hintsLeft?`提示：跟著頭上的箭頭走（剩 ${st.hintsLeft} 次）`:'提示：跟著頭上的箭頭走（提示用完了）',2600); /* 室內小關卡自己給提示的話 hintMsg */setTimeout(()=>{hintLock=false;setHintUI()},testMode?900:2600);return}}
  const it=rest[Math.floor(Math.random()*rest.length)];revealAround(it.x,it.y,1);st.hintsUsed=(st.hintsUsed||0)+1;if(!testMode)st.hintsLeft--;hintLock=true;setHintUI();sfx.hint();
  toast(testMode?`提示：「${it.t.name}」就在這個畫面裡`:st.hintsLeft?`提示：「${it.t.name}」就在這個畫面裡（剩 ${st.hintsLeft} 次）`:`提示：「${it.t.name}」就在這個畫面裡（提示用完了）`,2600);
  const P=pads(),av=SH-P.t-P.b,s2=Math.max(view.s,base*1.3),sx=SW*(1/6+Math.random()*2/3),sy=P.t+av*(1/6+Math.random()*2/3);
@@ -752,12 +765,13 @@ const MAPSW='#cfc98a'; /* 冒險地圖西南角（之後做沙漠）的底色 */
 /* 冒險地圖：北方雪國（2026-11-17，使用者看 A～C 選 A「往西北斜上」；U>=11 才畫）。
    預留位置：第 11 關雪橇犬驛站 (196,-14)、第 12 關冰湖雪祭 (96,-66)（冰湖 NLAKE）、第 13 關極光山頂 (10,-128)（最高的山 NPEAK）。各關的節點、路線畫在自己的 mapHook。 */
 const NSPOT=[[196,-14],[96,-66],[10,-128]],NLAKE=[110,-58,46,20],NPEAK=[10,-128,40,62];
-let NWO=0;
+let NWO=0,NEO=0; /* 2026-11-24k 使用者：地圖往東加寬（綠島）之後，右上角也要是雪地 */
 function northMap(P,ink){const R=mulberry32(5151);let g='';
- g+=`<path d="M${-120-NWO},-170 H342 V104 Q300,94 260,100 Q200,90 140,100 Q80,90 20,100 Q-40,92 ${-120-NWO},100Z" fill="#eaf0ee"/>`;
- g+=`<path d="M-120,-138 Q-40,-158 40,-138 T200,-140 T342,-138" fill="none" stroke="#9fe3bf" stroke-width="10" opacity=".45"/><path d="M-120,-126 Q-20,-144 80,-126 T260,-128 T342,-122" fill="none" stroke="#c7a6ea" stroke-width="6" opacity=".35"/>`;
+ g+=`<path d="M${-120-NWO},-170 H${342+NEO} V${NEO?100:104} Q${NEO?380:300},94 ${NEO?340:260},100 Q300,94 260,100 Q200,90 140,100 Q80,90 20,100 Q-40,92 ${-120-NWO},100Z" fill="#eaf0ee"/>`;
+ g+=`<path d="M-120,-138 Q-40,-158 40,-138 T200,-140 T342,-138${NEO?` T${342+NEO},-138`:''}" fill="none" stroke="#9fe3bf" stroke-width="10" opacity=".45"/><path d="M-120,-126 Q-20,-144 80,-126 T260,-128 T342,-122${NEO?` T${342+NEO},-124`:''}" fill="none" stroke="#c7a6ea" stroke-width="6" opacity=".35"/>`;
  const mt=(x,y,w,h)=>P(`M${x-w},${y} L${x},${y-h} L${x+w},${y}Z`,'#d7dfe2',1.6)+`<path d="M${x},${y-h} L${x+w},${y} L${x+w*.25},${y}Z" fill="#b9c6cc" opacity=".9"/>`+P(`M${f(x-w*.4)},${f(y-h*.6)} L${x},${f(y-h)} L${f(x+w*.4)},${f(y-h*.6)} L${f(x+w*.16)},${f(y-h*.5)} L${x},${f(y-h*.64)} L${f(x-w*.16)},${f(y-h*.5)}Z`,'#fbf9f3',1.2);
  [[-90,-104],[-40,-110],[70,-112],[130,-106],[190,-112],[250,-104],[310,-110]].forEach(([x,y])=>g+=mt(x,y,30,f(40+R()*14)));
+ if(NEO){const R3=mulberry32(5252);[[370,-106],[420,-112]].forEach(([x,y])=>g+=mt(x,y,30,f(40+R3()*14)));[[360,-40],[372,-30],[350,-24],[400,-60],[412,-50],[392,-46],[430,10],[418,22],[440,30],[380,40],[366,52]].forEach(([x,y])=>g+=P(`M${x-6},${y} L${x},${y-15} L${x+6},${y}Z`,'#3f5d48',1.2)+`<path d="M${x-3},${y-8} L${x},${y-15} L${x+3},${y-8}" fill="#fbf9f3" stroke="${ink}" stroke-width="1"/>`)} /* 東邊多出來的雪地：兩座雪山＋幾棵雪松（另外的亂數，原本的樹位置不變） */
  {const[x,y,w,h]=NPEAK;g+=mt(x,y+34,w+12,h+44)}
  {const[x,y,rx,ry]=NLAKE;g+=`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#bfe0ea" stroke="${ink}" stroke-width="1.6"/><path d="M${x-rx*.5},${y-3} l10,4 l8,-5 M${x+rx*.1},${y+5} l9,-3 l7,4" fill="none" stroke="#fff" stroke-width="1.4"/>`}
  /* 2026-11-23 繪本風：雪地不畫波浪線（R() 照樣跑完，後面的樹位置不變） */for(let i=0;i<40;i++){R();R()}
@@ -766,7 +780,7 @@ function northMap(P,ink){const R=mulberry32(5151);let g='';
  tr.sort((a,b)=>a[1]-b[1]).forEach(([x,y,s])=>g+=P(`M${f(x-6*s)},${f(y)} L${f(x)},${f(y-15*s)} L${f(x+6*s)},${f(y)}Z`,'#3f5d48',1.2)+`<path d="M${f(x-3*s)},${f(y-8*s)} L${f(x)},${f(y-15*s)} L${f(x+3*s)},${f(y-8*s)}" fill="#fbf9f3" stroke="${ink}" stroke-width="1"/>`);
  return g}
 function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,Noto Sans TC,sans-serif',R=mulberry32(4242);
- const NO=MAPNODES.some(m=>m.north&&isOpen(m.n))?170:0,WO=MAPNODES.some(m=>m.west&&isOpen(m.n))?80:0,EO=MAPNODES.some(m=>m.east&&isOpen(m.n))?110:0;NWO=WO;/* 2026-11-20 使用者：一開始地圖約略正方形——西邊只到森林（櫻花山城或西邊的關卡去得了才往西長出空地），南邊只露一點海（第 5 關去得了才多出海、放海島）；沙漠去得了之前西南角是海 */const W6=isOpen(6)||WO>0,DS=isOpen(11),CS=(prog.unlocked>=5||EO>0||DS)?0:62;const WOx=W6?WO:WO-76;/* 2026-11-18 map 有 east:true 的關卡（綠島）去得了，地圖往東加寬 110 *//* 2026-11-18 地圖可以拖曳縮放之後：map 有 west:true 的關卡（櫻花參道、滑沙場、金字塔）去得了，地圖往西加寬 80（櫻花山城左邊的名牌、沙漠一區）。11-17d 原本是 200 */ /* 2026-11-17 北方雪國：addLevel 的 map 加 north:true 的關卡「去得了」之後，地圖往北長高 170；之前維持原本大小（11-17b 起不再寫死第 11 關） */
+ const NO=MAPNODES.some(m=>m.north&&isOpen(m.n))?170:0,WO=MAPNODES.some(m=>m.west&&isOpen(m.n))?80:0,EO=MAPNODES.some(m=>m.east&&isOpen(m.n))?110:0;NWO=WO;NEO=EO;/* 2026-11-20 使用者：一開始地圖約略正方形——西邊只到森林（櫻花山城或西邊的關卡去得了才往西長出空地），南邊只露一點海（第 5 關去得了才多出海、放海島）；沙漠去得了之前西南角是海 */const W6=isOpen(6)||WO>0,DS=isOpen(11),SWL=DS||W6,/* 2026-11-25k 使用者：西南角那塊地在櫻花山城出現時就長出來（不要等沙漠才從海變陸地） */CS=(prog.unlocked>=5||EO>0||DS)?0:62;const WOx=W6?WO:WO-76;/* 2026-11-18 map 有 east:true 的關卡（綠島）去得了，地圖往東加寬 110 *//* 2026-11-18 地圖可以拖曳縮放之後：map 有 west:true 的關卡（櫻花參道、滑沙場、金字塔）去得了，地圖往西加寬 80（櫻花山城左邊的名牌、沙漠一區）。11-17d 原本是 200 */ /* 2026-11-17 北方雪國：addLevel 的 map 加 north:true 的關卡「去得了」之後，地圖往北長高 170；之前維持原本大小（11-17b 起不再寫死第 11 關） */
  const P=(d,fill,sw=1.6,extra='')=>`<path d="${d}" fill="${fill}" stroke="${ink}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round" ${extra}/>`;
  let g=`<svg viewBox="${-120-WOx} ${-NO} ${462+WOx+EO} ${430-CS+NO}" role="img" aria-label="冒險地圖"><defs><clipPath id="mapClip"><path d="${NO?`M${-102-WOx},-144 Q110,-154 ${324+EO},-142 Q${334+EO},130 ${322+EO},${406-CS} Q110,${416-CS} ${-100-WOx},${406-CS} Q${-110-WOx},130 ${-102-WOx},-144Z`:`M${-102-WOx},26 Q110,16 ${324+EO},28 Q${332+EO},220 ${322+EO},${406-CS} Q110,${416-CS} ${-100-WOx},${406-CS} Q${-108-WOx},220 ${-102-WOx},26Z`}"/></clipPath>
  <radialGradient id="mapVig" cx="50%" cy="50%" r="${WO?76:62}%"><stop offset="70%" stop-color="#f1e2bf" stop-opacity="0"/><stop offset="100%" stop-color="#e8d3a5" stop-opacity=".85"/></radialGradient></defs>`;
@@ -778,7 +792,7 @@ function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,
  g+=`<rect x="${-120-WOx}" y="${-NO}" width="${462+WOx+EO}" height="${430+NO}" fill="#c6cb8c"/>`;
  /* 2026-11-11 地圖向西加寬 120（櫻花山城在西邊）；西南角留陸地（之後做沙漠）。西邊的亂數用 R2，東邊原本的圖案不變 */
  const R2=mulberry32(4343);
- if(DS)g+=`<path d="M${-120-WOx},300 H-4 Q-20,360 -14,430 H${-120-WOx}Z" fill="${MAPSW}"/>`;
+ if(SWL)g+=`<path d="M${-120-WOx},300 H-4 Q-20,360 -14,430 H${-120-WOx}Z" fill="${MAPSW}"/>`;
  // grass texture
  let tf='';for(let i=0;i<70;i++){const x=20+R()*300,y=130+R()*160;tf+=`M${f(x)},${f(y)} q2,-2.6 4,0 q2,2.6 4,0 `}g+=`<path d="${tf}" fill="none" stroke="#9aa361" stroke-width="1.1" stroke-linecap="round"/>`;   /* 2026-11-21w 繪本風：草地的 ^ 改成小波浪草線 */
  // foothills
@@ -798,7 +812,7 @@ function renderMap(){const U=prog.unlocked,ink='#2b2420',FN='Huninn,PingFang TC,
  let tw='';for(let i=0;i<26;i++){const x=-110+R2()*104,y=220+R2()*70;tw+=`M${f(x)},${f(y)} q2,-2.6 4,0 q2,2.6 4,0 `}g+=`<path d="${tw}" fill="none" stroke="#9aa361" stroke-width="1.1" stroke-linecap="round"/>`;
  if(!W6){const R5=mulberry32(6161);for(let i=0;i<22;i++)tr.push([-44+R5()*66,132+R5()*150,.8+R5()*.4])}/* 西邊還沒開：左邊緣是森林 */tr.sort((a,b)=>a[1]-b[1]).forEach(([x,y,s])=>g+=tree(x,y,s));
  // coast + sea
- if(!DS){const L=-130-WOx;/* 沙漠還沒去之前：海一路延伸到西邊 */g+=`<path d="M${L},430 V290 Q-60,282 0,288 Q20,290 40,294 Q100,284 170,298 Q250,312 ${342+EO},290 V430Z" fill="#e8d6a4"/>`;g+=P(`M${L},440 V300 Q-60,292 0,298 Q20,300 40,304 Q100,294 170,306 Q250,320 ${342+EO},298 V440Z`,'#9cc6bd',2);g+=`<path d="M${L},310 Q-60,302 0,308 Q22,312 46,314 Q100,304 170,316 Q250,330 ${342+EO},308" fill="none" stroke="#fffaf0" stroke-width="1.6" stroke-dasharray="10 8" opacity=".8"/>`;g+=`<path d="M-80,356 q7,-4 14,0 q7,4 14,0 M-20,392 q7,-4 14,0 q7,4 14,0" fill="none" stroke="#fffaf0" stroke-width="1.8" stroke-linecap="round"/>`}else{g+=`<path d="M-26,430 Q-30,366 -12,326 Q2,298 40,294 Q100,284 170,298 Q250,312 ${342+EO},290 V430Z" fill="#e8d6a4"/>`;
+ if(!SWL){const L=-130-WOx;/* 沙漠還沒去之前：海一路延伸到西邊 */g+=`<path d="M${L},430 V290 Q-60,282 0,288 Q20,290 40,294 Q100,284 170,298 Q250,312 ${342+EO},290 V430Z" fill="#e8d6a4"/>`;g+=P(`M${L},440 V300 Q-60,292 0,298 Q20,300 40,304 Q100,294 170,306 Q250,320 ${342+EO},298 V440Z`,'#9cc6bd',2);g+=`<path d="M${L},310 Q-60,302 0,308 Q22,312 46,314 Q100,304 170,316 Q250,330 ${342+EO},308" fill="none" stroke="#fffaf0" stroke-width="1.6" stroke-dasharray="10 8" opacity=".8"/>`;g+=`<path d="M-80,356 q7,-4 14,0 q7,4 14,0 M-20,392 q7,-4 14,0 q7,4 14,0" fill="none" stroke="#fffaf0" stroke-width="1.8" stroke-linecap="round"/>`}else{g+=`<path d="M-26,430 Q-30,366 -12,326 Q2,298 40,294 Q100,284 170,298 Q250,312 ${342+EO},290 V430Z" fill="#e8d6a4"/>`;
  g+=P('M-12,440 Q-16,370 0,334 Q12,310 40,304 Q100,294 170,306 Q250,320 '+(342+EO)+',298 V440Z','#9cc6bd',2);
  g+=`<path d="M4,430 Q2,372 12,344 Q22,320 46,314 Q100,304 170,316 Q250,330 ${342+EO},308" fill="none" stroke="#fffaf0" stroke-width="1.6" stroke-dasharray="10 8" opacity=".8"/>`;
  }
@@ -913,7 +927,7 @@ const MAPREGIONS=[];function addRegion(r){MAPREGIONS.push(r)}
 const CARDGROUPS=[];function addCardGroup(g){CARDGROUPS.push(g)}
 const CARDPV={};   /* 2026-11-21w 只給明信片用的圖（沒有「下一站預告圖」的關卡，例如第 1 關）：levels.js 設 CARDPV[n]=()=>svg */
 const SECGRP={name:'秘境',ic:'🗝️',ids:[]},OTHGRP={name:'其他',ic:'📍',ids:[]};
-function groupOf(n){if(LEVELS[n]&&LEVELS[n].secret)return SECGRP;return CARDGROUPS.find(g=>g.ids.includes(n))||OTHGRP}
+function groupOf(n){if(LEVELS[n]&&LEVELS[n].secret&&!LEVELS[n].room)return SECGRP; /* 室內小關卡照 addCardGroup 分組（沉船酒館＝海島），不進秘境組 */return CARDGROUPS.find(g=>g.ids.includes(n))||OTHGRP}
 let CGOPEN=null;   /* 地圖卡片：打開的組（名字）；一開始打開「現在這一關」那一組 */
 let COLTAB=null;   /* 收集冊：選中的分頁 */
 const COLOPEN=new Set();   /* 收集冊：展開的關卡 */
@@ -1069,11 +1083,13 @@ function openCol(){if(BGBUSY){whenReady(openCol);return}let got=0,tot=0;const se
  for(const n of openMain()){const L=LEVELS[n];if(!L||!L.types)continue;const fresh=L.types.filter(t=>!seen.has(t.id));fresh.forEach(t=>seen.add(t.id));rows.push(row(n,fresh,false))}
  for(const n of SECRET_IDS){if(!secretSeen(n))continue;const L=LEVELS[n];if(!L.types){ensureLevel(n,openCol);return}rows.push(row(n,L.types,true))}
  const GL=[];rows.forEach(r=>{if(!GL.includes(r.g))GL.push(r.g)});GL.sort((a,b)=>(a===SECGRP)-(b===SECGRP)||(a===OTHGRP)-(b===OTHGRP));
-if(COLTAB!=='全部'&&!GL.some(g=>g.name===COLTAB))COLTAB='全部';
- const tabs=['全部',...GL.map(g=>g.name)].map(t=>`<button class="ctab${t===COLTAB?' on':''}" data-t="${t}">${t}</button>`).join('');
- $('#colBody').innerHTML=`<div class="ctabs">${tabs}</div><div class="colscroll">`+rows.map(r=>r.html.replace('<section ',`<section data-g="${r.g.name}"${COLTAB==='全部'||r.g.name===COLTAB?'':' hidden'} `)).join('')+`</div>`;   /* 2026-11-22b 使用者：收集冊大小固定、表頭＋標籤列凍結，只有 .colscroll 捲動 */
+const RB=(window.TH&&TH.ROOM&&TH.ROOM.book)?TH.ROOM.book(n=>secretSeen(n)):'';   /* 2026-11-25j 調酒圖鑑：去過的酒吧才有「調酒」分頁（room.js 畫藏寶圖） */
+if(COLTAB!=='全部'&&!(COLTAB==='調酒'&&RB)&&!GL.some(g=>g.name===COLTAB))COLTAB='全部';
+ const tabs=['全部',...GL.map(g=>g.name),...(RB?['調酒']:[])].map(t=>`<button class="ctab${t===COLTAB?' on':''}" data-t="${t}">${t}</button>`).join('');
+ $('#colBody').innerHTML=`<div class="ctabs">${tabs}</div><div class="colscroll">`+rows.map(r=>r.html.replace('<section ',`<section data-g="${r.g.name}"${COLTAB==='全部'||r.g.name===COLTAB?'':' hidden'} `)).join('')+(RB?`<section class="colsec dbsec" data-g="調酒"${COLTAB==='調酒'?'':' hidden'}>${RB}</section>`:'')+`</div>`;   /* 2026-11-22b 使用者：收集冊大小固定、表頭＋標籤列凍結，只有 .colscroll 捲動 */
  $('#colSub').textContent=`已收集 ${got} / ${tot} 種東西（每種只記一次）`;
- document.querySelectorAll('#colBody .ctab').forEach(b=>b.onclick=()=>{COLTAB=b.dataset.t;document.querySelectorAll('#colBody .ctab').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('#colBody .colsec').forEach(x=>x.hidden=!(COLTAB==='全部'||x.dataset.g===COLTAB));const sc=$('#colBody .colscroll');if(sc)sc.scrollTop=0});
+ document.querySelectorAll('#colBody .ctab').forEach(b=>b.onclick=()=>{COLTAB=b.dataset.t;document.querySelectorAll('#colBody .ctab').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('#colBody .colsec').forEach(x=>x.hidden=!(x.dataset.g===COLTAB||(COLTAB==='全部'&&x.dataset.g!=='調酒')));const sc=$('#colBody .colscroll');if(sc)sc.scrollTop=0});
+ if(RB&&TH.ROOM.bind)TH.ROOM.bind($('#colBody'));
  document.querySelectorAll('#colBody .colsec h4').forEach(h=>h.onclick=()=>{const sec=h.parentNode,n=+sec.dataset.n,on=sec.classList.toggle('open');h.setAttribute('aria-expanded',on);on?COLOPEN.add(n):COLOPEN.delete(n)});
  if(!$('#colOv').classList.contains('hide'))return;
  colUnder=['startOv','winOv'].filter(id=>!$('#'+id).classList.contains('hide'));colUnder.forEach(id=>$('#'+id).classList.add('hide'));$('#colOv').classList.remove('hide')}
@@ -1134,9 +1150,9 @@ window.TH={MAPC,NSPOT,NLAKE,NPEAK,EDGELAND,ROADS,T,f,r,sr,pk,ri,rnd,shuffle,limb
  cat,frog,owl,sheep,chicken,anyDog,dog,swan,pine,roundTree,bush,rock,barrel,crate,pot,lamp,bench,sign,fence,reeds,lily,well,tent,campfire,swirl,signpost,signIcon,stall,
  add,mark,canPlace,scatter,SCATREG,SCATOK,skyBirds,chaikin,bow,qBubble,qThink,qMark,QHEART,GC,GR,CELL,occ,mulberry32,DK,balloon,castle,fountain,house,kayak,lighthouse,mushHouse,rowboat,sailboat,tower,windmill,pig,barn,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,HEAVY,ANIM,ALWAYS,DUR,
  ANIMX,ALWAYSX,HEAVYX,SPOTS,BLEND,SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,mapHook,mapRoute,TAPHOOKS,NGHOOKS,MAPTOP,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,SECRETS,STORIES,SEQ,SKYC,SKYY,FOGFN,EDGEM,EDGED,EDGEDECO,EDGEMY,EDGEFILL,FRINGE,FRINGEX,RESERVE,ROADK,RESETKEYS,BEENF,canDiscover,dayLog,icon,starSvg,HATKIT,EXITS,FIND_IDS,isOpen,isFound,canFind,askExit:n=>askExit(n),drawExits:()=>drawExits(),prog:()=>prog,
- typeOf:id=>LEVELS.slice(1).flatMap(L_=>L_.types||[]).find(t=>t.id===id),colAdd,colClover,colBonus,colStory,updateCounts,win:()=>win(),goLevel:(n,viaExit)=>goLevel(n,viaExit),level:()=>level,rodeHas,pads:()=>pads(),scr:()=>({w:SW,h:SH,base}),apply:()=>apply(),clampV:()=>clampV(),rezoom:()=>{measure();clampV();apply()},updAnim:()=>updateAnim(),tweenTo:(s,x,y,d,cb)=>tweenTo(s,x,y,d,cb),curtain,pickView,walkPose,DENS,sprites,ride,toast,clockHold,clockRun,burst,floatText,sfx,items:()=>items,game:()=>st,scene:()=>scene,view:()=>view,testOn:()=>testMode,dbg:{clover:()=>clovers,hint:()=>({sp:hintSp,msg:hintMsg}),step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG};
+ typeOf:id=>LEVELS.slice(1).flatMap(L_=>L_.types||[]).find(t=>t.id===id),colAdd,colClover,colBonus,colStory,reunionCard:(S,cb)=>reunionCard(S,cb),updateCounts,win:()=>win(),goLevel:(n,viaExit)=>goLevel(n,viaExit),level:()=>level,rodeHas,pads:()=>pads(),scr:()=>({w:SW,h:SH,base}),apply:()=>apply(),clampV:()=>clampV(),rezoom:()=>{measure();clampV();apply()},updAnim:()=>updateAnim(),tweenTo:(s,x,y,d,cb)=>tweenTo(s,x,y,d,cb),curtain,pickView,walkPose,DENS,sprites,ride,toast,clockHold,clockRun,burst,floatText,sfx,items:()=>items,game:()=>st,scene:()=>scene,view:()=>view,testOn:()=>testMode,dbg:{clover:()=>clovers,hint:()=>({sp:hintSp,msg:hintMsg}),step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG};
 /* 測試模式：選單列出測試中的關卡（編號 900 以上、還沒接上主線的主線關卡），在 Claude 作品裡也能直接玩（2026-11-12） */
-LEVELS.forEach((L_,n)=>{if(!L_||n<900||L_.secret||document.getElementById('tLv'+n))return;const b=document.createElement('button');b.id='tLv'+n;b.className='tbtn';b.style.display='none';b.innerHTML=`<span>🧪 測試中的關卡：${L_.title}</span>`;
+LEVELS.forEach((L_,n)=>{if(!L_||((n<900||L_.secret)&&!L_.room)||document.getElementById('tLv'+n))return; /* 2026-11-24h 室內小關卡（還沒有入口）也列在測試選單 */const b=document.createElement('button');b.id='tLv'+n;b.className='tbtn';b.style.display='none';b.innerHTML=`<span>🧪 測試中的關卡：${L_.title}</span>`;
  b.onclick=()=>{closeMenu();toast('🧪 載入測試中的關卡⋯',1400);ensureUpTo(899,()=>goLevel(n))};const a=document.getElementById('tGiver');a.parentNode.insertBefore(b,a);
  const sb=document.createElement('button');sb.id='tLvS'+n;sb.className='sbtn tbtn';sb.style.cssText='display:none;flex:none;margin-top:6px';sb.textContent='🧪 玩測試中的關卡：'+L_.title;sb.onclick=b.onclick;const row=document.querySelector('#startOv .testrow');if(row)row.appendChild(sb)});
 applyTestUI();

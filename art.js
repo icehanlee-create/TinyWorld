@@ -72,7 +72,15 @@ const kerV=c=>v=>{let g=`<path d="M-14,-38 Q-15,-54 0,-55 Q15,-54 14,-38 Q0,-44 
 /* 小皇冠頭飾：背面只看到一圈金色細帶；側面窄一點、往臉的方向 */
 const tiaraV=v=>{if(isBk(v))return `<path d="M-12,-44 Q0,-40 12,-44" fill="none" stroke="${OL}" stroke-width="3.6"/><path d="M-12,-44 Q0,-40 12,-44" fill="none" stroke="#efe0a8" stroke-width="2"/>`;
  const o=v==='side'?5:v==='fq'?2:0,k=v==='side'?.7:1;return `<g transform="translate(${o},0) scale(${k},1)"><path d="M-10,-45 Q0,-49 10,-45 L7,-50 L3.4,-47.6 L0,-54 L-3.4,-47.6 L-7,-50Z" fill="#efe0a8" stroke-width="1.4"/><circle cx="0" cy="-49.4" r="1.6" fill="#d8413a" stroke="none"/></g>`};
-const HATKIT={plumeArt,beretFit,beretB,hoodV,kerV,tiaraV};
+/* 2026-11-25k 沙漠頭巾：跟著方向轉（正面看到額前的摺口、斜前方摺口偏右、側面摺口在臉那一側；垂下來的布尾一律在後腦，正面看不到）。o.jewel＝額前寶石顏色 */
+const turbanV=(c,o={})=>v=>{const ln='#00000033';
+ const J=(x,y,r)=>o.jewel?`<circle cx="${x}" cy="${y}" r="${r}" fill="${o.jewel}" stroke-width="1"/>`:'';
+ if(v==='side')return `<path d="M-13,-44 Q-22,-36 -19,-25 Q-14,-30 -9,-41Z" fill="${c}"/><path d="M-16,-36 Q-19,-61 -1,-62 Q15,-61 15,-40 Q2,-45 -6,-42 Q-11,-39 -16,-36Z" fill="${c}"/><path d="M-15,-51 Q-2,-58 13,-52 M-15,-46 Q-2,-53 14,-47" fill="none" stroke="${ln}" stroke-width="1.3"/><path d="M11,-44 Q7,-51 11,-59" fill="none" stroke="${ln}" stroke-width="1.4"/>`+J(11.5,-51,2);
+ if(v==='back')return `<path d="M-15,-37 Q-17,-61 0,-62 Q17,-61 15,-37 Q0,-39 -15,-37Z" fill="${c}"/><path d="M-13,-52 Q0,-58 13,-52 M-13,-47 Q0,-52 13,-47" fill="none" stroke="${ln}" stroke-width="1.3"/><path d="M-5,-45 Q-7,-34 -3,-26 Q1,-30 5,-27 Q6,-36 4,-45Z" fill="${c}"/>`;
+ if(v==='bq')return `<path d="M-15,-37 Q-17,-61 0,-62 Q17,-61 15,-37 Q0,-39 -15,-37Z" fill="${c}"/><path d="M-13,-52 Q0,-58 13,-52 M-13,-47 Q0,-52 13,-47" fill="none" stroke="${ln}" stroke-width="1.3"/><path d="M-10,-45 Q-13,-34 -9,-26 Q-5,-30 -2,-27 Q-1,-36 -2,-45Z" fill="${c}"/>`;
+ if(v==='fq')return `<path d="M-12,-45 Q-19,-38 -17,-28 Q-13,-32 -9,-42Z" fill="${c}"/><path d="M-15,-39 Q-17,-61 0,-62 Q17,-61 15,-39 Q0,-45 -15,-39Z" fill="${c}"/><path d="M-13,-52 Q-1,-58 13,-51 M-13,-47 Q-1,-53 13,-46" fill="none" stroke="${ln}" stroke-width="1.3"/><path d="M5,-45 Q1,-52 6,-60" fill="none" stroke="${ln}" stroke-width="1.4"/>`+J(5.5,-52,2.3);
+ return `<path d="M-15,-39 Q-17,-61 0,-62 Q17,-61 15,-39 Q0,-45 -15,-39Z" fill="${c}"/><path d="M-13,-52 Q0,-58 13,-51 M-13,-47 Q0,-53 13,-46" fill="none" stroke="${ln}" stroke-width="1.3"/><path d="M0,-46 Q-4,-53 1,-60" fill="none" stroke="${ln}" stroke-width="1.4"/>`+J(0,-52,2.4)};
+const HATKIT={plumeArt,beretFit,beretB,hoodV,kerV,tiaraV,turbanV};
 function face(m){
  const eyes=m===3?`<path d="M-7,-33 Q-4.5,-36 -2,-33 M2,-33 Q4.5,-36 7,-33" fill="none" stroke-width="1.5"/>`:`<g stroke="none"><ellipse cx="-4.5" cy="-33" rx="1.8" ry="2.3" fill="${OL}"/><ellipse cx="4.5" cy="-33" rx="1.8" ry="2.3" fill="${OL}"/><circle cx="-3.9" cy="-33.9" r=".7" fill="#fff"/><circle cx="5.1" cy="-33.9" r=".7" fill="#fff"/></g>`;
  const mouth=m===1?`<ellipse cx="0" cy="-27" rx="2" ry="1.6" fill="#b5403a" stroke-width="1.2"/>`:m===2?`<path d="M-2.5,-28 L2.5,-28" fill="none" stroke-width="1.4"/>`:`<path d="M-2.2,-28.5 Q0,-26 2.2,-28.5" fill="none" stroke-width="1.4"/>`;

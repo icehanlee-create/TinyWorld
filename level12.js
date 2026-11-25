@@ -19,14 +19,13 @@ H.FRINGE[N]=[['dryBush12',2.4],['duneRock12',1.2],['cactus12',.8],['palm12',.5],
 H.DENS[N]=1.15;
 
 /* ================= 2. 當地人：長袍＋頭巾（和綠洲市集一樣） ================= */
-const turbanHat=()=>{const c=pk(['#f4ecd6','#f4ecd6','#e8d8b0','#3f6f9a','#a4442f','#f4ecd6']);
- return `<path d="M-14,-41 Q-16,-60 0,-61 Q16,-60 14,-41 Q0,-47 -14,-41Z" fill="${c}"/><path d="M-13,-52 Q0,-59 13,-51 M-13,-47 Q0,-54 13,-46" fill="none" stroke="#00000033" stroke-width="1.3"/><path d="M11,-48 q7,6 5,16 q-5,-4 -7,-12Z" fill="${c}"/>`};
+const turbanHat=v=>H.HATKIT.turbanV(pk(['#f4ecd6','#f4ecd6','#e8d8b0','#3f6f9a','#a4442f','#f4ecd6']))(v); /* 2026-11-25k 頭巾跟著方向轉（art.js HATKIT.turbanV） */
 const HAT_T=HATS.push(turbanHat)-1;
 const ROBES=['#e8d9b4','#c4573a','#2f6f73','#d89a3a','#7a4fa0','#f1e6cc','#4a6f9a','#8a5a3a'];
 OUTFITS[N]=o=>{if(o.top)return o;
  o.skin=o.skin||pk(['#c98d5e','#b97a4e','#a8683e','#d9a578','#8f5a36']);
  o.top='long';o.bottom='pants';o.shirt=o.shirt||pk(ROBES);o.pants=o.pants||'#e8d9b4';
- if(o.hat==null&&!o.plain)o.hat=r()<.7?HAT_T:-1;return o};
+ if(o.hat==null&&!o.plain)o.hat=r()<.7?HAT_T:-1;if(o.hat===HAT_T&&o.hs==null)o.hs=r()<.5?0:2; /* 2026-11-25k 戴頭巾的只用短髮／披肩長髮，頭髮不會從頭巾冒出來 */return o};
 
 /* ================= 3. 物件與干擾物 ================= */
 Object.assign(ART,{
@@ -315,7 +314,7 @@ const H=window.TH;if(!H)return;const N=12;const {T,OL,act,chibi,HATS}=H;
 const EX={x:836,y:472}; /* 2026-11-18 地圖上滑沙場改到綠洲西北邊，大沙丘和入口一起往西搬 404 */
 (H.RESERVE[11]||(H.RESERVE[11]=[])).push([EX.x,EX.y+6,150,112]);
 const turbanC='#f1e6cc';
-const turban=`<path d="M-15,-45 Q-17,-60 0,-62 Q17,-60 15,-45 Q0,-50 -15,-45Z" fill="${turbanC}"/><path d="M-13,-53 Q0,-60 13,-52 M-14,-48 Q0,-55 14,-47" fill="none" stroke="#c9b48a" stroke-width="1.2"/><circle cx="0" cy="-56" r="2.4" fill="#c4473a" stroke-width="1"/>`;
+const turban=`<g transform="translate(-1,0)">${H.HATKIT.turbanV(turbanC,{jewel:'#c4473a'})('fq')}</g>`; /* 2026-11-25k 帶路的人站斜前方，頭巾也畫斜前方 */
 const board=(c,a)=>`<g transform="rotate(${a})"><rect x="-6" y="-62" width="12" height="62" rx="6" fill="${c}"/><path d="M0,-58 V-6" stroke="#fbf6ea" stroke-width="1.6" fill="none" opacity=".8"/><path d="M-6,-34 H6" stroke="#5a3a22" stroke-width="3" fill="none"/></g>`;
 let kidSvg='';const boy=()=>kidSvg||(kidSvg=act(0,0,1,{view:'fq',pose:'hold',hat:-1,hs:3,skin:'#b97a4e',hair:'#2b2420',shirt:'#c4573a',pants:'#e8d9b4',mood:2,top:'long',bottom:'pants'})+T(0,0,1,turban));
 /* 2026-11-18 使用者：入口角色頭上從「？」改成「…」（和一般路人一樣，增加探索難度）；圓點半徑 1.75，不會被當成路人提示（DOTSIG） */

@@ -20,8 +20,7 @@ H.FRINGE[N]=[['bush13',2.4],['rock13',1.2],['cactus13',.8],['palm13',.5],['pebbl
 H.DENS[N]=1.15;
 
 /* ================= 2. 當地人（長袍＋頭巾）和考古隊員（卡其襯衫＋探險盔） ================= */
-const turbanHat=()=>{const c=pk(['#f4ecd6','#f4ecd6','#e8d8b0','#3f6f9a','#a4442f','#f4ecd6']);
- return `<path d="M-14,-41 Q-16,-60 0,-61 Q16,-60 14,-41 Q0,-47 -14,-41Z" fill="${c}"/><path d="M-13,-52 Q0,-59 13,-51 M-13,-47 Q0,-54 13,-46" fill="none" stroke="#00000033" stroke-width="1.3"/><path d="M11,-48 q7,6 5,16 q-5,-4 -7,-12Z" fill="${c}"/>`};
+const turbanHat=v=>H.HATKIT.turbanV(pk(['#f4ecd6','#f4ecd6','#e8d8b0','#3f6f9a','#a4442f','#f4ecd6']))(v); /* 2026-11-25k 頭巾跟著方向轉（art.js HATKIT.turbanV） */
 const HAT_T=HATS.push(turbanHat)-1;
 const ROBES=['#e8d9b4','#c4573a','#2f6f73','#d89a3a','#7a4fa0','#f1e6cc','#4a6f9a','#8a5a3a'];
 OUTFITS[N]=o=>{if(o.top)return o;
@@ -31,7 +30,7 @@ OUTFITS[N]=o=>{if(o.top)return o;
   if(o.hat==null&&!o.plain)o.hat=r()<.8?6:-1;return o}
  o.skin=o.skin||pk(['#c98d5e','#b97a4e','#a8683e','#d9a578','#8f5a36']);
  o.top='long';o.bottom='pants';o.shirt=o.shirt||pk(ROBES);o.pants=o.pants||'#e8d9b4';
- if(o.hat==null&&!o.plain)o.hat=r()<.7?HAT_T:-1;return o};
+ if(o.hat==null&&!o.plain)o.hat=r()<.7?HAT_T:-1;if(o.hat===HAT_T&&o.hs==null)o.hs=r()<.5?0:2; /* 2026-11-25k 戴頭巾的只用短髮／披肩長髮，頭髮不會從頭巾冒出來 */return o};
 
 /* ================= 3. 物件與干擾物 ================= */
 Object.assign(ART,{
@@ -387,7 +386,7 @@ const H=window.TH;if(!H)return;const N=13;const {T,f,OL,act}=H;
 const EX={x:1250,y:560};
 (H.RESERVE[12]||(H.RESERVE[12]=[])).push([EX.x-4,EX.y+6,250,126]);
 const camel=(c,c2,bag=true)=>CAMELART.next().stand(c,c2,bag); /* 2026-11-18 換成 B／G 輪流 */
-const turban=`<path d="M-15,-45 Q-17,-60 0,-62 Q17,-60 15,-45 Q0,-50 -15,-45Z" fill="#f1e6cc"/><path d="M-13,-53 Q0,-60 13,-52 M-14,-48 Q0,-55 14,-47" fill="none" stroke="#c9b48a" stroke-width="1.2"/><circle cx="0" cy="-56" r="2.4" fill="#c4473a" stroke-width="1"/>`;
+const turban=`<g transform="translate(-1,0)">${H.HATKIT.turbanV('#f1e6cc',{jewel:'#c4473a'})('fq')}</g>`; /* 2026-11-25k 帶路的人站斜前方，頭巾也畫斜前方 */
 let lead='';const leader=()=>lead||(lead=act(0,0,1,{view:'fq',pose:'stand',hat:-1,hs:3,skin:'#b97a4e',hair:'#2b2420',shirt:'#7a4fa0',pants:'#8a5a3a',beard:true,mood:2,top:'long',bottom:'pants'})+T(0,0,1,turban));
 /* 2026-11-18 使用者：入口角色頭上從「？」改成「…」（和一般路人一樣，增加探索難度）；圓點半徑 1.75，不會被當成路人提示（DOTSIG） */
 const svg=found=>T(-72,4,1,camel('#c99a5b','#a87a3c',true))+T(74,6,1,camel())+T(4,10,1,(found?'':`<g class="qbob">${H.bubble(14,-74,'dots').replace(/r="1\.7"/g,'r="1.75"')}</g>`)+leader());
