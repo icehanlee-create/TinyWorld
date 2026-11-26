@@ -13,13 +13,13 @@ const {T,f,r,sr,pk,ri,OL,SKIN,kid,act,add,mark,canPlace,scatter,KIND,POOL,VPLAN,
  SCENE_IMPL,WATERFN,RIDES,OUTFITS,STORIES,HOSTK,HOSTN,tone,typeOf,HATS}=H;
 
 /* ================= 1. 場景範圍、深海、場地邊緣 ================= */
-H.SCENES[N]={x0:600,x1:1900,y1:2150,c:[1250,1820]};
+H.SCENES[N]={x0:250,x1:2250,y1:2150,c:[1250,1820]}; /* 2026-11-26g 加寬：原本 x 600～1900（約 4.5 畫面）→ 250～2250（約 7 畫面） */
 H.TARGET[N]=330;
 H.SKYC[N]='#2a6d8e';H.SKYY[N]=0;
 H.EDGEM[N]='';H.EDGED[N]='';
 H.EDGEDECO[N]=[['kelp16',1],['rock16',1]];
 H.FRINGE[N]=[['seagrass16',1.4],['rock16',.4]];
-H.DENS[N]=1.1;
+H.DENS[N]=1; /* 11-26g 加寬後 1.1→1 */
 /* 場地外不用雲：改成深藍色的海水，兩邊是海草和岩石的剪影（core.js FOGFN） */
 if(H.FOGFN)H.FOGFN[N]=({X0,X1,Y1,R})=>{const rr=(a,b)=>a+R()*(b-a),C='#14405e';
  const gd=(n,x1,x2,y1,y2)=>`<linearGradient id="${n}" x1="${x1}" x2="${x2}" y1="${y1}" y2="${y2}"><stop offset="0" stop-color="${C}" stop-opacity="1"/><stop offset=".45" stop-color="${C}" stop-opacity=".85"/><stop offset="1" stop-color="${C}" stop-opacity="0"/></linearGradient>`;
@@ -75,6 +75,7 @@ OUTFITS[N]=o=>{if(o.top)return o;const v=o.view||'side',x=r(),job=x<.62?'C':x<.8
  return o};
 /* 故事角色、人群用：指定面向、工作、顏色 */
 const dv=(v,pose,job,suit,more={})=>({view:v,pose,...diver(v,job,suit),skin:more.skin||'#e8b890',mood:2,plain:true,...more,extra:diver(v,job,suit).extra+(more.extra||'')});
+H.DV16=dv; /* 選項圖、測試用 */
 
 /* ================= 3. 物件與干擾物（12 種 × 4 個）：原圖最長邊約 34（細長的約 40），引擎會再縮 ================= */
 const WOOD='#a8703f',WOOD2='#c99a5b';
@@ -141,17 +142,17 @@ if(!ART.bottle)ART.bottle=`<g transform="rotate(-35)"><rect x="-6.5" y="-12" wid
 if(!ART.anchor)ART.anchor=`<path d="M0,-9 V12 M-8,-4 H8 M-12,3 Q-10,13 0,13 Q10,13 12,3" fill="none" stroke="${OL}" stroke-width="5.6"/><path d="M0,-9 V12 M-8,-4 H8 M-12,3 Q-10,13 0,13 Q10,13 12,3" fill="none" stroke="#6f7f8f" stroke-width="2.8"/><circle cy="-12" r="3.4" fill="none" stroke="${OL}" stroke-width="5"/><circle cy="-12" r="3.4" fill="none" stroke="#6f7f8f" stroke-width="2.2"/>`;
 const old=(id,regions)=>({...(typeOf(id)||OLD[id]),float:false,regions}); /* 海底沒有水面，不用漂浮 */
 const TYPES=[
- old('bottle',['wreck16','mid16','kelp16','camp16']),old('anchor',['wreck16','camp16','reef16','kelp16']),
- {id:'coin16',name:'海盜金幣',short:'金幣',r:15,rot:15,regions:['wreck16','wreck16','reef16','mid16']},
- {id:'chest16',name:'小寶箱',short:'寶箱',r:16,rot:8,regions:['wreck16','kelp16','camp16','mid16']},
- {id:'helm16',name:'船舵',short:'船舵',r:16,rot:20,regions:['wreck16','mid16','camp16','kelp16']},
- {id:'tmap16',name:'藏寶圖',short:'藏寶圖',r:16,rot:12,regions:['camp16','wreck16','mid16','reef16']},
- {id:'oillamp16',name:'船用油燈',short:'油燈',r:15,rot:10,regions:['wreck16','camp16','kelp16','wreck16']},
- {id:'conch16',name:'海螺號角',short:'海螺',r:16,rot:20,regions:['reef16','kelp16','mid16','camp16']},
- {id:'nautilus16',name:'鸚鵡螺殼',short:'鸚鵡螺',r:15,rot:20,regions:['reef16','kelp16','mid16','reef16']},
- {id:'puffer16',name:'河豚玩偶',short:'河豚',r:15,rot:12,regions:['reef16','mid16','camp16','kelp16']},
- {id:'seahorse16',name:'海馬吊飾',short:'海馬',r:15,rot:15,regions:['kelp16','reef16','mid16','camp16']},
- {id:'crown16',name:'小金皇冠',short:'皇冠',r:15,rot:12,regions:['wreck16','reef16','kelp16','wreck16']}];
+ old('bottle',['wreck16','mid16','rayE16','postE16']),old('anchor',['wreck16','camp16','cageW16','rayE16']),
+ {id:'coin16',name:'海盜金幣',short:'金幣',r:15,rot:15,regions:['wreck16','reef16','rayE16','ventW16']},
+ {id:'chest16',name:'小寶箱',short:'寶箱',r:16,rot:8,regions:['wreck16','kelp16','cageW16','postE16']},
+ {id:'helm16',name:'船舵',short:'船舵',r:16,rot:20,regions:['wreck16','farmW16','camp16','cageW16']},
+ {id:'tmap16',name:'藏寶圖',short:'藏寶圖',r:16,rot:12,regions:['camp16','wreck16','postE16','farmW16']},
+ {id:'oillamp16',name:'船用油燈',short:'油燈',r:15,rot:10,regions:['wreck16','camp16','ventW16','cageW16']},
+ {id:'conch16',name:'海螺號角',short:'海螺',r:16,rot:20,regions:['reef16','kelp16','nurseE16','farmW16']},
+ {id:'nautilus16',name:'鸚鵡螺殼',short:'鸚鵡螺',r:15,rot:20,regions:['reef16','ventW16','mid16','nurseE16']},
+ {id:'puffer16',name:'河豚玩偶',short:'河豚',r:15,rot:12,regions:['reef16','mid16','nurseE16','rayE16']},
+ {id:'seahorse16',name:'海馬吊飾',short:'海馬',r:15,rot:15,regions:['kelp16','reef16','farmW16','nurseE16']},
+ {id:'crown16',name:'小金皇冠',short:'皇冠',r:15,rot:12,regions:['wreck16','reef16','ventW16','postE16']}];
 LEVELS[N].types=TYPES;
 /* BORROW：不借（使用者確認） */
 
@@ -166,8 +167,11 @@ const BELL={x:1250,y:1930};
 const EDGE=y=>250+18*Math.sin(y); /* 深海和沙地的交界（大約 y 250） */
 WATERFN[N]=(x,y)=>y<262;
 Object.assign(REG,{wreck16:{x:640,y:270,w:1220,h:520},kelp16:{x:640,y:800,w:420,h:700},mid16:{x:1080,y:800,w:340,h:700},
- reef16:{x:1440,y:800,w:420,h:700},camp16:{x:660,y:1520,w:1180,h:560},all16:{x:640,y:270,w:1220,h:1830}});
-H.SCREG[N]=['wreck16','kelp16','mid16','reef16','camp16'];
+ reef16:{x:1440,y:800,w:420,h:700},camp16:{x:660,y:1520,w:1180,h:560},all16:{x:270,y:270,w:1960,h:1830},
+ /* 加寬區（11-26g）：西＝補給吊籠、海帶養殖、熱泉煙囪；東＝魟魚沙地、礁球苗圃、海底郵筒 */
+ cageW16:{x:270,y:290,w:330,h:520},farmW16:{x:270,y:820,w:330,h:660},ventW16:{x:270,y:1490,w:330,h:600},
+ rayE16:{x:1900,y:290,w:330,h:520},nurseE16:{x:1900,y:820,w:330,h:660},postE16:{x:1900,y:1490,w:330,h:600}});
+H.SCREG[N]=['wreck16','kelp16','mid16','reef16','camp16','cageW16','farmW16','ventW16','rayE16','nurseE16','postE16'];
 
 /* 鯨魚：藍鯨（2026-11-18 使用者：先選過 A 座頭鯨，後來改「藍鯨，重畫更像的，身體扭動悠遊感」）
    2026-11-18u 使用者給兩張參考圖：「藍鯨游動曲線類似這樣」→ 選「週期起伏、斜側面、第二張插畫風」：
@@ -235,7 +239,7 @@ function whaleSvg(){const b=whaleBody(WT0),s=wSpout(WT0);
 let WD=-1; /* WD：-1 往左（西）、1 往右（東） */
 /* 2026-11-18 使用者：從西邊消失就再游回來，游到東邊也再游回來 → 游出場地（在海水邊緣看不到的地方）才轉身，來回游 */
 function whaleTick(t,dt){WT+=dt;WX+=WD*14*dt;
- if(WD<0&&WX<300){WD=1;whaleFace()}else if(WD>0&&WX>2200){WD=-1;whaleFace()}
+ if(WD<0&&WX<-60){WD=1;whaleFace()}else if(WD>0&&WX>2560){WD=-1;whaleFace()} /* 11-26g 加寬：轉身點跟著往外移 */
  const g=document.getElementById('wh16');if(!g)return;const k=WT*2*Math.PI/5.2;
  g.setAttribute('transform',`translate(${f(WX)},${f(WY0+6*Math.sin(k))}) scale(${f(-WD*WSC)},${WSC}) rotate(${f(WTILT+2.5*Math.sin(k+1.2))})`)}
 /* 轉身時，哼歌的音符也翻回正面（不然整隻翻過來，音符的符桿會跑到左邊） */
@@ -310,17 +314,26 @@ function ground(){
  for(let i=0;i<26;i++)g+=`<ellipse cx="${f(sr(640,1060))}" cy="${f(sr(800,1500))}" rx="${f(sr(60,130))}" ry="${f(sr(26,50))}" fill="${pk(['#b8be8a','#aab47e','#c2c494'])}" stroke="none" opacity=".7"/>`;
  for(let i=0;i<26;i++)g+=`<ellipse cx="${f(sr(1440,1860))}" cy="${f(sr(800,1500))}" rx="${f(sr(50,120))}" ry="${f(sr(22,44))}" fill="${pk(['#e2c0aa','#dcb8a8','#e8ccb4'])}" stroke="none" opacity=".75"/>`;
  g+=`<ellipse cx="${BELL.x}" cy="${BELL.y-40}" rx="520" ry="220" fill="#e6dcb6" stroke="none" opacity=".7"/>`;
+ /* 加寬區（11-26g）地面：西＝吊籠（木屑）、養殖場（偏綠）、熱泉（暗、黃色礦物）；東＝魟魚沙地（亮沙＋圈紋）、苗圃（偏粉）、郵筒（亮一點） */
+ for(let i=0;i<14;i++)g+=`<ellipse cx="${f(sr(280,600))}" cy="${f(sr(840,1460))}" rx="${f(sr(50,110))}" ry="${f(sr(22,44))}" fill="${pk(['#b8be8a','#aab47e','#c2c494'])}" stroke="none" opacity=".7"/>`;
+ g+=`<ellipse cx="430" cy="1800" rx="200" ry="150" fill="#a8a088" stroke="none" opacity=".45"/>`;for(let i=0;i<10;i++)g+=`<ellipse cx="${f(sr(300,580))}" cy="${f(sr(1640,2000))}" rx="${f(sr(16,40))}" ry="${f(sr(6,14))}" fill="${pk(['#e8d060','#d8c050','#f0e080'])}" stroke="none" opacity=".55"/>`;
+ g+=`<ellipse cx="2080" cy="560" rx="170" ry="70" fill="#e6dcb6" stroke="none" opacity=".8"/>`+X16.raySand(2060,566);
+ for(let i=0;i<14;i++)g+=`<ellipse cx="${f(sr(1910,2220))}" cy="${f(sr(840,1460))}" rx="${f(sr(50,110))}" ry="${f(sr(22,44))}" fill="${pk(['#e2c0aa','#dcb8a8','#e8ccb4'])}" stroke="none" opacity=".75"/>`;
+ g+=`<ellipse cx="2070" cy="1800" rx="190" ry="140" fill="#e6dcb6" stroke="none" opacity=".7"/>`;
+ [[`M${BELL.x},1760 Q900,1800 600,1800 Q470,1800 440,1740`,46],[`M${BELL.x},1760 Q1600,1800 1900,1790 Q2000,1785 2010,1760`,46],[`M900,1300 Q700,1200 520,1150`,40],[`M1600,1300 Q1800,1200 2000,1120`,40]]
+  .forEach(([d,w])=>{g+=`<path d="${d}" fill="none" stroke="#e8dfbe" stroke-width="${w+26}" stroke-linecap="round" opacity=".45"/>`});
+ g+=X16.css;
  /* 被走亮的沙地（不畫框線）：潛水鐘 → 沉船、→ 海草林、→ 珊瑚礁 */
  [[`M${BELL.x},2080 L${BELL.x},1500 Q1250,1100 1240,700`,70],[`M${BELL.x},1600 Q1050,1500 900,1300`,54],[`M${BELL.x},1600 Q1450,1500 1600,1300`,54],[`M${BELL.x},1760 Q1000,1780 800,1820`,50],[`M${BELL.x},1760 Q1500,1780 1700,1820`,50]]
   .forEach(([d,w])=>{g+=`<path d="${d}" fill="none" stroke="#e8dfbe" stroke-width="${w+26}" stroke-linecap="round" opacity=".5"/><path d="${d}" fill="none" stroke="#efe8cc" stroke-width="${w*.6}" stroke-linecap="round" opacity=".5"/>`});
  /* 沙紋 */
- let rp='';for(let i=0;i<220;i++){const x=sr(640,1880),y=sr(290,2120),w=sr(26,60);rp+=`M${f(x)},${f(y)} q${f(w/2)},${f(sr(-6,-2))} ${f(w)},0 `}
+ let rp='';for(let i=0;i<340;i++){const x=sr(Sc.x0+30,Sc.x1-20),y=sr(290,2120),w=sr(26,60);rp+=`M${f(x)},${f(y)} q${f(w/2)},${f(sr(-6,-2))} ${f(w)},0 `}
  g+=`<path d="${rp}" fill="none" stroke="#bfb184" stroke-width="2" stroke-linecap="round" opacity=".7"/>`;
  /* 海底的光紋（水面的光照下來） */
- let cs='';for(let i=0;i<260;i++){const x=sr(640,1880),y=sr(290,2120),w=sr(14,30);cs+=`M${f(x)},${f(y)} q${f(w*.3)},${f(-w*.3)} ${f(w*.6)},0 q${f(w*.2)},${f(w*.25)} ${f(w*.4)},${f(-w*.1)} `}
+ let cs='';for(let i=0;i<400;i++){const x=sr(Sc.x0+30,Sc.x1-20),y=sr(290,2120),w=sr(14,30);cs+=`M${f(x)},${f(y)} q${f(w*.3)},${f(-w*.3)} ${f(w*.6)},0 q${f(w*.2)},${f(w*.25)} ${f(w*.4)},${f(-w*.1)} `}
  g+=`<path d="${cs}" fill="none" stroke="#fffbe0" stroke-width="2.4" stroke-linecap="round" opacity=".45"/>`;
  /* 小石子 */
- for(let i=0;i<120;i++)g+=`<ellipse cx="${f(sr(640,1880))}" cy="${f(sr(290,2120))}" rx="${f(sr(3,7))}" ry="${f(sr(2,4))}" fill="${pk(['#b8a880','#c4b48c','#a8987a'])}" stroke="none"/>`;
+ for(let i=0;i<180;i++)g+=`<ellipse cx="${f(sr(Sc.x0+30,Sc.x1-20))}" cy="${f(sr(290,2120))}" rx="${f(sr(3,7))}" ry="${f(sr(2,4))}" fill="${pk(['#b8a880','#c4b48c','#a8987a'])}" stroke="none"/>`;
  /* 沉船（北）：前面堆一圈沙，船尾埋進沙裡 */
  g+=shipSvg();
  g+=`<path d="M1300,640 Q1420,560 1560,580 Q1640,600 1600,660 Q1460,690 1300,670Z" fill="#d6cba0" stroke-width="2"/><path d="M1340,650 Q1440,610 1560,620" fill="none" stroke="#bfb184" stroke-width="2"/>`;
@@ -330,7 +343,7 @@ function ground(){
  /* 西：大岩拱＋大章魚 */
  g+=archSvg();
  /* 上方透下來的光線 */
- for(let k=0;k<7;k++){const x=700+k*190+sr(-40,40);g+=`<path d="M${f(x)},-60 L${f(x+50)},-60 L${f(x+220)},${f(1500+k*60)} L${f(x+110)},${f(1500+k*60)}Z" fill="#fffbe6" opacity=".09" stroke="none"/>`}
+ for(let k=0;k<11;k++){const x=300+k*190+sr(-40,40);g+=`<path d="M${f(x)},-60 L${f(x+50)},-60 L${f(x+220)},${f(1500+k*60)} L${f(x+110)},${f(1500+k*60)}Z" fill="#fffbe6" opacity=".09" stroke="none"/>`}
  return `<g stroke="${OL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${g}</g>`}
 
 /* ================= 6. 佈景美術 ================= */
@@ -422,6 +435,68 @@ const jellyG=()=>say('🎐 水母一閃一閃的，好像小燈籠。',shg(40)+a
 const phones=`<path d="M-2,-60 Q0,-74 8,-74 Q16,-74 16,-62" fill="none" stroke="#3a3a44" stroke-width="2.6"/>`;
 const whaleG=()=>say('🐋 聽到了嗎？北邊的大鯨魚在唱歌！',shg(40)+act(-14,0,1,dv('fq','hold','D',null,{extra:phones+board}),'nod')+act(18,2,-1,dv('bq','up','C','#e8823a'),'nod'));
 
+
+/* ---- 2026-11-26g 加寬：兩側新區域（使用者選：西＝補給吊籠 D、海帶養殖繩 B、熱泉煙囪 B；東＝魟魚沙地 D、礁球苗圃 D、紅色圓頂郵筒 A）---- */
+const X16=(()=>{
+ const wrapAn=H.wrapAn;
+ const pole=(x0,y0,x1,y1,w=6,c=WOOD)=>`<path d="M${x0},${y0} L${x1},${y1}" fill="none" stroke="${OL}" stroke-width="${w}" stroke-linecap="round"/><path d="M${x0},${y0} L${x1},${y1}" fill="none" stroke="${c}" stroke-width="${w-2.6}" stroke-linecap="round"/>`;
+ const ropeUp=(x,y)=>`<path d="M${x},${y} V-300" fill="none" stroke="#d9c8a0" stroke-width="2.6" opacity=".9"/><path d="M${x-1},${y} V-300" fill="none" stroke="#7a6a50" stroke-width=".8"/>`;
+ const crate=(w=34,h=26,c=WOOD2)=>`<rect x="${-w/2}" y="${-h}" width="${w}" height="${h}" rx="2" fill="${c}"/><path d="M${-w/2},${-h/2} H${w/2} M${-w/2+5},${-h} V0 M${w/2-5},${-h} V0" fill="none" stroke="#8a5a32" stroke-width="1.4"/>`;
+ const crab=(x,y,s=1,c='#e0503a')=>T(x,y,s,`<path d="M-8,-3 l-6,4 M-8,-6 l-7,0 M8,-3 l6,4 M8,-6 l7,0" fill="none" stroke-width="1.8"/><path d="M-9,-10 q-8,-6 -4,-12 q4,2 2,6 M9,-10 q8,-6 4,-12 q-4,2 -2,6" fill="${c}" stroke-width="1.4"/><ellipse cx="0" cy="-6" rx="10" ry="6.4" fill="${c}"/><path d="M-3,-12 v-4 M3,-12 v-4" fill="none" stroke-width="1.4"/><circle cx="-3" cy="-16.4" r="1.6" fill="${OL}" stroke="none"/><circle cx="3" cy="-16.4" r="1.6" fill="${OL}" stroke="none"/>`);
+ const bubbles=(x,y,n=4)=>`<g class="bub16">`+Array.from({length:n},(_,i)=>`<circle cx="${x+(i%2?5:-4)}" cy="${y-i*14}" r="${2.4+i*.6}" fill="#e8fbff" fill-opacity=".5" stroke="#bfe8f4" stroke-width="1.2"/>`).join('')+`</g>`;
+ const KELPC=['#4f8a4a','#5f9a52','#3f7a48','#6aa058'];
+ const blade=(x,h,c,y=0)=>{let d=`M${x},${y}`;for(let k=1;k<=4;k++)d+=` Q${f(x+(k%2?7:-7))},${f(y-h*(k-.5)/4)} ${f(x+(k%2?2:-2))},${f(y-h*k/4)}`;return `<path d="${d}" fill="none" stroke="${OL}" stroke-width="7" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round"/>`};
+ /* 西北：三個吊籠高高低低＋貨物清單板（吊籠 D） */
+ const cage=()=>{let g=sh(90);[[-60,-150,.75],[0,-200,.95],[62,-130,.7]].forEach(([x,ry,s])=>{g+=ropeUp(x,ry+40)+T(x,ry+130*s,s,[-30,-10,10,30].map(xx=>pole(xx,0,xx,-80,5)).join('')+pole(-34,-80,34,-80,6)+pole(-34,-2,34,-2,6)+T(0,-4,.9,crate()))});
+  return g+T(-96,0,.9,pole(0,0,0,-56,5)+`<rect x="-18" y="-80" width="36" height="28" rx="3" fill="#e8e4da" stroke-width="1.6"/><path d="M-12,-72 h10 M-12,-66 h18 M-12,-60 h14" fill="none" stroke="#9a9a9a" stroke-width="1.4"/><path d="M6,-74 l3,3 l6,-6" fill="none" stroke="#4f9a5a" stroke-width="2"/>`)};
+ /* 西中：海帶養殖繩（農場 B） */
+ const farm=()=>{let g=sh(90)+pole(-84,0,-84,-60,7)+pole(84,0,84,-60,7)+`<path d="M-84,-52 Q0,-44 84,-52 M-84,-24 Q0,-16 84,-24" fill="none" stroke="#d9c8a0" stroke-width="2.6"/>`;
+  [-70,-48,-26,-4,18,40,62].forEach((x,i)=>{g+=blade(x,60+(i%3)*14,pk(KELPC),-48+(i%2))+blade(x+10,30+(i%2)*10,'#8a6a3a',-20)});
+  return g+`<circle cx="-84" cy="-66" r="7" fill="#f2903a"/><circle cx="84" cy="-66" r="7" fill="#f2903a"/>`};
+ /* 西南：熱泉煙囪（B 三根高矮＋白色管蟲）；ventS＝單根小煙囪 */
+ const smoke=(x,y,s=1)=>`<g transform="translate(${x},${y}) scale(${s})"><g class="sm16"><circle cx="0" cy="-10" r="12" fill="#3a3a44" opacity=".7" stroke="none"/><circle cx="-8" cy="-26" r="14" fill="#4a4a54" opacity=".55" stroke="none"/><circle cx="6" cy="-44" r="16" fill="#5a5a64" opacity=".4" stroke="none"/><circle cx="-4" cy="-64" r="14" fill="#6a6a74" opacity=".25" stroke="none"/></g></g>`;
+ const chim=(w,h,c='#3e3a3c')=>`<path d="M${-w},0 Q${f(-w*.8)},${f(-h*.5)} ${f(-w*.45)},${-h} H${f(w*.45)} Q${f(w*.8)},${f(-h*.5)} ${w},0Z" fill="${c}"/>`+
+  [.25,.5,.75].map(k=>`<path d="M${f(-w*(1-k*.5))},${f(-h*k)} q${f(w*.4)},6 ${f(w*.7)},0" fill="none" stroke="#6a6266" stroke-width="2"/>`).join('')+`<ellipse cx="0" cy="${-h}" rx="${f(w*.45)}" ry="4" fill="#ff8a3a" stroke-width="1.6"/>`;
+ const tube=(x,h)=>`<path d="M${x},0 V${-h}" fill="none" stroke="${OL}" stroke-width="6.4" stroke-linecap="round"/><path d="M${x},0 V${-h}" fill="none" stroke="#f2efe6" stroke-width="4" stroke-linecap="round"/><path d="M${x-4},${-h-2} q4,-10 8,0" fill="#e8403a" stroke-width="1.4"/>`;
+ const vent=()=>sh(70)+T(-38,0,1,chim(22,90))+T(30,0,1,chim(26,140))+T(-4,6,1,chim(16,60,'#4a4446'))+smoke(-38,-92,.8)+smoke(30,-142)+smoke(-4,-56,.6)+
+  [-70,-62,-56,58,64,72].map((x,i)=>tube(x,22+(i%3)*8)).join('')+crab(-46,10,.7);
+ const ventS=()=>sh(30)+chim(18,ri(56,76))+smoke(0,-70,.6)+tube(-24,20)+tube(24,26);
+ /* 東北：一大一小兩隻魟魚＋沙地圈紋（魟魚 D）；raySand＝沙地圈紋（地面畫） */
+ const RAY='#7a8a9a';
+ const rayBody=(s=1,c=RAY)=>`<g transform="scale(${s})"><path d="M0,-36 Q30,-30 58,-4 Q40,6 18,8 Q8,16 0,16 Q-8,16 -18,8 Q-40,6 -58,-4 Q-30,-30 0,-36Z" fill="${c}"/><path d="M0,16 Q4,40 14,62" fill="none" stroke="${OL}" stroke-width="4.4" stroke-linecap="round"/><path d="M0,16 Q4,40 14,62" fill="none" stroke="${c}" stroke-width="2.4" stroke-linecap="round"/>`+
+  [[-20,-14],[16,-18],[-6,-4],[30,-6],[-34,-6]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="3" fill="#e8f0f4" opacity=".7" stroke="none"/>`).join('')+`<circle cx="-7" cy="-26" r="2.6" fill="${OL}" stroke="none"/><circle cx="7" cy="-26" r="2.6" fill="${OL}" stroke="none"/><path d="M-30,-20 Q-14,-30 0,-31" fill="none" stroke="#a8b8c4" stroke-width="2" stroke-linecap="round"/></g>`;
+ const raySand=(x,y)=>`<g transform="translate(${x},${y})"><ellipse cx="0" cy="-4" rx="100" ry="26" fill="none" stroke="#bfb184" stroke-width="2.4"/><ellipse cx="0" cy="-4" rx="76" ry="18" fill="none" stroke="#bfb184" stroke-width="2"/></g>`;
+ const rays=()=>`<ellipse cx="-20" cy="2" rx="50" ry="8" fill="#1e3a48" opacity=".12" stroke="none"/><ellipse cx="56" cy="6" rx="26" ry="5" fill="#1e3a48" opacity=".12" stroke="none"/>`+
+  wrapAn('float',T(-20,-50,1,`<g transform="scale(1,.6)">${rayBody(.95)}</g>`),true)+wrapAn('float',T(56,-30,1,`<g transform="scale(1,.6)">${rayBody(.5,'#8a9aaa')}</g>`),true);
+ /* 東中：礁球苗圃（D）；domeS＝小礁球 */
+ const CORC=['#f08a6a','#e86a9a','#f5b84a','#b07ad8','#f0a0b8'];
+ const frag=(x,y,c)=>{c=c||pk(CORC);return `<path d="M${x},${y} v-6 M${x},${y-4} l-4,-5 M${x},${y-5} l4,-6" fill="none" stroke="${OL}" stroke-width="4.4" stroke-linecap="round"/><path d="M${x},${y} v-6 M${x},${y-4} l-4,-5 M${x},${y-5} l4,-6" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round"/>`};
+ const domeS=()=>sh(34)+`<path d="M-30,0 Q-32,-40 0,-44 Q32,-40 30,0Z" fill="#cfc4a8"/><circle cx="-8" cy="-18" r="7" fill="#2a3a40" stroke-width="1.4"/><circle cx="12" cy="-26" r="6" fill="#2a3a40" stroke-width="1.4"/><circle cx="16" cy="-8" r="5" fill="#2a3a40" stroke-width="1.4"/>`+frag(-16,-34)+frag(10,-40)+frag(-24,-12);
+ const dome=()=>{let g=sh(70)+`<path d="M-60,0 Q-62,-80 0,-86 Q62,-80 60,0Z" fill="#cfc4a8"/>`+[[-30,-40,14],[10,-56,12],[30,-24,13],[-6,-20,11],[-36,-14,9],[40,-50,9]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#2a3a40" stroke-width="1.6"/>`).join('');
+  [[-44,-60],[-16,-78],[18,-80],[46,-58],[-54,-30],[52,-20]].forEach(([x,y],i)=>g+=frag(x,y,CORC[i%5]));return g};
+ const tree=()=>{let g=sh(56)+pole(0,0,0,-150,7,'#e8e4da');for(let k=0;k<5;k++){const y=-26-k*26,w=56-k*10;g+=pole(-w,y+6,w,y,5,'#e8e4da');for(let i=-2;i<=2;i++){const x=i*w/2.4;g+=`<path d="M${f(x)},${y} v8" fill="none" stroke="#9aa2ac" stroke-width="1.2"/>`+frag(f(x),y+14)}}return g};
+ /* 東南：紅色圓頂郵筒（A）；boxB＝方形郵筒（郵差小組不用） */
+ const RED='#d8413a';
+ const env=(x,y,r=0)=>`<g transform="translate(${x},${y}) rotate(${r})"><rect x="-8" y="-5.4" width="16" height="10.8" rx="1" fill="#fbf6ea" stroke-width="1.2"/><path d="M-8,-5.4 L0,1 L8,-5.4" fill="none" stroke-width="1"/></g>`;
+ const post=()=>sh(30)+`<path d="M-22,0 V-80 Q-22,-104 0,-104 Q22,-104 22,-80 V0Z" fill="${RED}"/><path d="M-22,-78 H22" fill="none" stroke-width="2"/><rect x="-14" y="-72" width="28" height="6" rx="2" fill="${OL}"/>`+
+  `<path d="M-14,-96 Q-6,-104 4,-102" fill="none" stroke="#f08a80" stroke-width="3" stroke-linecap="round"/><rect x="-10" y="-50" width="20" height="16" rx="1.6" fill="#fbf6ea" stroke-width="1.2"/>`+env(0,-42)+`<rect x="-26" y="-4" width="52" height="6" rx="2" fill="#8a8f98"/>`+bubbles(18,-110,3);
+ /* ---- 小組 ---- */
+ const board=`<rect x="10" y="-26" width="12" height="15" rx="1.4" fill="#e8e4da" stroke-width="1.3"/><path d="M12,-22 h8 M12,-18 h6 M12,-14 h7" fill="none" stroke="#9a9a9a" stroke-width="1"/>`;
+ const bag=`<rect x="-15" y="-24" width="12" height="14" rx="3" fill="#8a5a32" stroke-width="1.3"/><path d="M-9,-24 L4,-34" fill="none" stroke="#5a3a20" stroke-width="2"/>`+env(-9,-17,-10);
+ const say=(t,inner)=>`<g data-say="${t}">${inner}</g>`,shg=(w,o=.1)=>`<ellipse cx="2" cy="2" rx="${w}" ry="6" fill="#1e3a48" opacity="${o}" stroke="none"/>`;
+ const G={
+  catchG:()=>say('📦 吊籠下來了！慢慢放、慢慢放～',shg(40)+T(0,-120,1,crate())+ropeUp(0,-146)+act(-22,0,1,dv('side','up2','B'),'work')+act(22,2,-1,dv('side','up2','C','#3f7ab0',{skin:'#c98d5e'}),'work')),
+  carryG:()=>say('💪 補給箱搬去營地，午餐在裡面！',shg(40)+act(-20,0,1,dv('side','hold','B',null,{extra:T(14,-14,.7,crate())}),'step')+act(22,2,1,dv('side','hold','C','#e8823a',{extra:T(14,-14,.7,crate(30,24,'#b88a50'))}),'step')),
+  harvestG:()=>say('🌿 這排海帶長好了，可以收成囉。',shg(44)+blade(-38,50,'#5f9a52')+blade(-30,40,'#3f7a48')+act(-6,0,-1,dv('side','reach','C','#4f9a5a'),'work')+T(26,0,1,`<path d="M-16,-24 L-12,0 H12 L16,-24Z" fill="#c9a46a"/><path d="M-15,-14 H15" fill="none" stroke="#9a7a4a" stroke-width="1.4"/>`+blade(-4,12,'#5f9a52',-24))),
+  plantG:()=>say('🌱 海草苗要種直直的，才會長得好。',shg(44)+act(-14,0,1,dv('side','crouch','C','#2f9a9a'),'work')+blade(6,14,'#6aa058')+blade(14,10,'#6aa058')+act(26,2,-1,dv('fq','hold','C','#c4473c',{skin:'#a86a40'}),'nod')),
+  tempG:()=>say('🌡️ 熱泉好燙！螃蟹們卻最喜歡這裡。',shg(50)+T(-34,0,.6,chim(22,90))+smoke(-34,-56,.5)+act(10,0,-1,dv('side','reach','D',null,{extra:`<path d="M14,-18 L-12,-40" fill="none" stroke="#e8e4da" stroke-width="3"/><circle cx="-12" cy="-40" r="2.4" fill="#d8413a" stroke="none"/>`}),'nod')+act(36,2,-1,dv('fq','hold','D',null,{extra:board}),'nod')),
+  rayPhotoG:()=>say('📸 魟魚飛過去了，像水裡的風箏！',shg(40)+wrapAn('float',T(-20,-70,.6,`<g transform="scale(1,.6)">${rayBody(1)}</g>`),true)+act(22,0,-1,dv('bq','hold','C','#4f9a5a',{extra:`<rect x="10" y="-30" width="15" height="11" rx="2.4" fill="#3a3a44" stroke-width="1.2"/><circle cx="17.5" cy="-24.5" r="3.4" fill="#8fc4e8" stroke-width="1"/>`}),'nod')),
+  hangG:()=>say('🪸 小珊瑚長大一點，就搬回礁石上住。',shg(50)+T(-30,0,.6,tree())+act(12,0,-1,dv('side','up','D',null,{extra:`<g transform="translate(18,-30)">${frag(0,0)}</g>`}),'nod')+act(40,2,-1,dv('fq','hold','D',null,{extra:board}),'nod')),
+  queueG:()=>say('✉️ 海底寄出的明信片，會蓋特別的郵戳喔！',shg(46)+act(-22,0,-1,dv('side','reach','C','#3f7ab0',{extra:env(14,-20)}),'nod')+act(4,2,-1,dv('side','hold','C','#e8823a',{extra:env(14,-20,10)}),'lean')+act(30,0,-1,dv('side','stand','B'),'lean')),
+  postmanG:()=>say('📮 今天的信都收好了，等一下送上船！',shg(30)+act(0,0,1,dv('side','walk','C','#3f7ab0',{extra:bag}),'step'))};
+ const css=`<style>.sm16{animation:sm16 3s ease-in-out infinite}@keyframes sm16{from{transform:translateY(8px) scale(.9);opacity:.5}to{transform:translateY(-10px) scale(1.1);opacity:.9}}.bub16{animation:bub16 2.4s ease-in-out infinite}@keyframes bub16{from{transform:translateY(6px);opacity:.3}to{transform:translateY(-10px);opacity:1}}</style>`;
+ return {cage,farm,vent,ventS,rays,raySand,dome,domeS,tree,post,G,css}})();
+
 /* ---- 佈景圖鑑（KIND）---- */
 const dk=(id,w,h,cy=-12)=>({w,h,fn:()=>T(0,cy,1,DECOY[id])});
 Object.assign(KIND,{
@@ -433,25 +508,37 @@ Object.assign(KIND,{
  pipe16:{w:40,h:80,fn:pipe16},lamp16:{w:40,h:90,fn:lamp16},sign16:{w:56,h:76,fn:sign16},table16:{w:80,h:50,fn:table16},
  bottleE16:dk('bottleE16',30,34,-6),harpoon16:dk('harpoon16',30,40,-8),button16:dk('button16',28,28,-6),toolbox16:dk('toolbox16',36,32,-6),
  wheel16:dk('wheel16',34,34,-6),envelope16:dk('envelope16',36,26,-4),birdcage16:dk('birdcage16',28,40,-8),top16:dk('top16',30,36,-8),
- snail16:dk('snail16',30,26,-6),chestnut16:dk('chestnut16',32,32,-6),knight16:dk('knight16',28,34,-8),partyhat16:dk('partyhat16',32,26,-4)});
-['kelp16','branch16','fan16','brain16','sponge16','anemone16','chestBig16','bell16','habitat16','tanks16','boxes16','cannon16','pipe16','lamp16','table16','turtle16'].forEach(k=>H.HEAVYX[N]?H.HEAVYX[N].add(k):(H.HEAVYX[N]=new Set([k])));
-['kelp16','branch16','fan16','brain16','sponge16','chestBig16','habitat16','tanks16','boxes16','box16','barrel16','rock16','cannon16'].forEach(k=>H.OCCK.add(k));
+ snail16:dk('snail16',30,26,-6),chestnut16:dk('chestnut16',32,32,-6),knight16:dk('knight16',28,34,-8),partyhat16:dk('partyhat16',32,26,-4),
+ /* 加寬區（11-26g）：w 只算實心那段（露一角在左右邊緣） */
+ cage16:{w:150,h:120,fn:X16.cage},farm16:{w:160,h:70,fn:X16.farm},vent16:{w:110,h:150,fn:X16.vent},ventS16:{w:50,h:70,fn:X16.ventS},rays16:{w:160,h:60,fn:X16.rays},
+ dome16:{w:120,h:86,fn:X16.dome},domeS16:{w:60,h:44,fn:X16.domeS},post16:{w:44,h:104,fn:X16.post}});
+['kelp16','branch16','fan16','brain16','sponge16','anemone16','chestBig16','bell16','habitat16','tanks16','boxes16','cannon16','pipe16','lamp16','table16','turtle16','cage16','farm16','vent16','dome16','post16'].forEach(k=>H.HEAVYX[N]?H.HEAVYX[N].add(k):(H.HEAVYX[N]=new Set([k])));
+['kelp16','branch16','fan16','brain16','sponge16','chestBig16','habitat16','tanks16','boxes16','box16','barrel16','rock16','cannon16','cage16','farm16','vent16','dome16','domeS16'].forEach(k=>H.OCCK.add(k));
 H.ANIMX[N]={kelp16:['sway'],seagrass16:['sway'],turtle16:['float'],jelly16:['float'],school16:['swim'],anemone16:['sway'],fan16:['sway'],pipe16:['bob']};
 H.ALWAYSX[N]=new Set(['kelp16','turtle16','jelly16','school16','pipe16']);
 
 /* ================= 7. 區域、擺放、人數 ================= */
 const late=()=>{
  const ok=l=>l.filter(([k])=>KIND[k]).map(([k,w])=>[k,k==='rock16'?w*.55:w]);
- Object.assign(POOL,{
-  wreck16:ok([['chestBig16',.35],['barrel16',.8],['cannon16',.4],['rock16',1],['seagrass16',1],['harpoon16',.17],['toolbox16',.17],['wheel16',.17],['birdcage16',.15],['partyhat16',.12],['button16',.12]]),
-  kelp16:ok([['kelp16',2],['rock16',1],['seagrass16',1.4],['turtle16',.3],['bottleE16',.15],['snail16',.17],['knight16',.15],['chestnut16',.12],['envelope16',.1]]),
-  mid16:ok([['rock16',1],['seagrass16',1.6],['brain16',.3],['jelly16',.2],['bottleE16',.15],['top16',.15],['button16',.15],['envelope16',.12],['snail16',.12]]),
-  reef16:ok([['branch16',1.4],['brain16',.9],['fan16',.8],['sponge16',.8],['anemone16',.6],['rock16',.5],['top16',.17],['chestnut16',.17],['knight16',.15],['partyhat16',.12],['snail16',.12]]),
-  camp16:ok([['box16',.8],['lamp16',.3],['rock16',.8],['seagrass16',1],['pipe16',.2],['toolbox16',.2],['envelope16',.17],['harpoon16',.15],['wheel16',.12],['birdcage16',.12],['bottleE16',.12]]),
-  decor16:ok([['seagrass16',1.6],['rock16',1],['kelp16',.3],['branch16',.2]])});
+ Object.assign(POOL,{ /* 11-26g：中間五區干擾物權重 ×0.65 */
+  wreck16:ok([['chestBig16',.35],['barrel16',.8],['cannon16',.4],['rock16',1],['seagrass16',1],['harpoon16',0.111],['toolbox16',0.111],['wheel16',0.111],['birdcage16',0.098],['partyhat16',0.078],['button16',0.078]]),
+  kelp16:ok([['kelp16',2],['rock16',1],['seagrass16',1.4],['turtle16',.3],['bottleE16',0.098],['snail16',0.111],['knight16',0.098],['chestnut16',0.078],['envelope16',0.065]]),
+  mid16:ok([['rock16',1],['seagrass16',1.6],['brain16',.3],['jelly16',.2],['bottleE16',0.098],['top16',0.098],['button16',0.098],['envelope16',0.078],['snail16',0.078]]),
+  reef16:ok([['branch16',1.4],['brain16',.9],['fan16',.8],['sponge16',.8],['anemone16',.6],['rock16',.5],['top16',0.111],['chestnut16',0.111],['knight16',0.098],['partyhat16',0.078],['snail16',0.078]]),
+  camp16:ok([['box16',.8],['lamp16',.3],['rock16',.8],['seagrass16',1],['pipe16',.2],['toolbox16',0.13],['envelope16',0.111],['harpoon16',0.098],['wheel16',0.078],['birdcage16',0.078],['bottleE16',0.078]]),
+  decor16:ok([['seagrass16',1.6],['rock16',1],['kelp16',.3],['branch16',.2]]),
+  /* 加寬區（11-26g）：干擾物權重 ×0.8 */
+  cageW16:ok([['box16',.8],['barrel16',.6],['rock16',1],['seagrass16',1],['toolbox16',0.16],['wheel16',0.137],['harpoon16',0.137],['envelope16',0.121],['birdcage16',0.096]]),
+  farmW16:ok([['kelp16',1],['seagrass16',1.6],['rock16',.8],['turtle16',.2],['snail16',0.137],['knight16',0.121],['chestnut16',0.121],['bottleE16',0.096],['top16',0.096]]),
+  ventW16:ok([['ventS16',.25],['rock16',1.2],['seagrass16',.6],['button16',0.137],['partyhat16',0.121],['harpoon16',0.121],['wheel16',0.096],['top16',0.096]]),
+  rayE16:ok([['rock16',1],['seagrass16',1.2],['brain16',.3],['bottleE16',0.137],['snail16',0.121],['button16',0.121],['chestnut16',0.096],['harpoon16',0.096]]),
+  nurseE16:ok([['domeS16',.4],['branch16',.6],['sponge16',.4],['rock16',.6],['seagrass16',.8],['top16',0.137],['knight16',0.137],['chestnut16',0.121],['partyhat16',0.096],['snail16',0.096]]),
+  postE16:ok([['box16',.6],['rock16',.8],['seagrass16',1],['lamp16',.2],['envelope16',0.16],['birdcage16',0.121],['toolbox16',0.121],['top16',0.096],['partyhat16',0.096]])});
  const v=o=>Object.fromEntries(Object.entries(o).filter(([k])=>KIND[k]));
  Object.assign(VPLAN,{wreck16:v({walker:6,chat:4,carryBox:3,handInHand:1}),kelp16:v({walker:5,chat:3,handInHand:1}),mid16:v({walker:5,chat:4,handInHand:2}),
-  reef16:v({walker:5,chat:3,handInHand:1}),camp16:v({walker:7,chat:5,carryBox:3,handInHand:2})})};
+  reef16:v({walker:5,chat:3,handInHand:1}),camp16:v({walker:7,chat:5,carryBox:3,handInHand:2}),
+  cageW16:v({walker:1,chat:1,carryBox:1}),farmW16:v({walker:2,chat:1}),ventW16:v({walker:1,chat:1}),
+  rayE16:v({walker:1,chat:1}),nurseE16:v({walker:2,chat:1}),postE16:v({walker:1,chat:1,carryBox:1})})};
 
 const STORYP={giver:[1080,1700],helper:[1580,1240]};
 function structures(){
@@ -482,36 +569,53 @@ function structures(){
  [[1130,1860],[1380,1880],[820,1640]].forEach(([x,y])=>add(x,y,40,80,'pipe16',pipe16()));
  [[BELL.x-150,1800],[BELL.x+150,1800],[1000,1580],[1500,1580],[BELL.x-40,1480],[BELL.x+40,1160]].forEach(([x,y])=>add(x,y,40,90,'lamp16',lamp16()));
  add(1250,1640,80,70,'tankG16',tankG());
+ /* 加寬區（11-26g）——西：補給吊籠、海帶養殖繩、熱泉煙囪；東：魟魚沙地、礁球苗圃、海底郵筒 */
+ const KA=(k,x,y,o)=>add(x,y,KIND[k].w,KIND[k].h,k,KIND[k].fn(),o);
+ KA('cage16',440,600);[[330,420],[560,470]].forEach(([x,y])=>add(x,y,70,50,'boxes16',boxes16()));add(320,560,44,44,'barrel16',barrel16());
+ add(350,780,80,70,'catchG16',X16.G.catchG());add(540,760,90,70,'carryG16',X16.G.carryG());
+ KA('farm16',430,1000);KA('farm16',450,1300,{fl:true});
+ add(330,1150,80,70,'harvestG16',X16.G.harvestG());add(560,1160,80,70,'plantG16',X16.G.plantG());
+ KA('vent16',430,1800);KA('ventS16',320,1620);KA('ventS16',560,1990);KA('ventS16',300,2030);
+ add(560,1700,90,70,'tempG16',X16.G.tempG());
+ [[300,1000],[520,1480]].forEach(([x,y])=>{const sp=add(x,y,80,60,'turtle16',turtle16(),{mark:false});sp.y+=400});
+ KA('rays16',2080,560);add(1960,760,80,80,'rayPhotoG16',X16.G.rayPhotoG());[[2200,420],[1950,400]].forEach(([x,y])=>add(x,y,48,22,'rock16',rock16()));
+ KA('dome16',2080,1080);KA('domeS16',1960,1330);KA('domeS16',2190,1380);
+ add(2160,1220,90,90,'hangG16',X16.G.hangG());add(1950,1100,40,140,'kelp16',kelp16(1));
+ KA('post16',2000,1760);add(2060,1764,70,60,'queueG16',X16.G.queueG(),{mark:false});add(2170,1960,40,60,'postmanG16',X16.G.postmanG());
+ add(2180,1680,44,28,'box16',box16());add(1960,1980,76,58,'tanks16',tanks16());add(2200,1840,40,90,'lamp16',lamp16());
+ [[2000,880],[2200,1600],[330,880]].forEach(([x,y])=>{const sp=add(x,y,40,80,'jelly16',jelly16(),{mark:false});sp.y+=600});
  /* 小故事要放的固定位置先佔好 */
  mark(STORYP.giver[0],STORYP.giver[1],40,64,1);mark(STORYP.helper[0],STORYP.helper[1],40,64,1);
  /* 補幾塊石頭和海草 */
- for(let i=0;i<8;i++){const x=sr(660,1860),y=sr(800,2060);if(canPlace(x,y,48,22,false,.8))add(x,y,48,22,'rock16',rock16())}
+ for(let i=0;i<12;i++){const x=sr(280,2220),y=sr(800,2060);if(canPlace(x,y,48,22,false,.8))add(x,y,48,22,'rock16',rock16())}
 }
 function scatterAll(){
  const S=H.dbg.storySp();
  if(S){moveSp(S.giver,STORYP.giver);moveSp(S.target,DOLPH);moveSp(S.helper,STORYP.helper)}
  scatter('wreck16',POOL.wreck16,2800,52);scatter('kelp16',POOL.kelp16,2600,52);scatter('mid16',POOL.mid16,2400,48);
  scatter('reef16',POOL.reef16,2800,56);scatter('camp16',POOL.camp16,3400,56);
- scatter('all16',POOL.decor16,6000,90);
+ scatter('cageW16',POOL.cageW16,1400,18);scatter('farmW16',POOL.farmW16,1700,20);scatter('ventW16',POOL.ventW16,1600,18);
+ scatter('rayE16',POOL.rayE16,1400,16);scatter('nurseE16',POOL.nurseE16,1700,20);scatter('postE16',POOL.postE16,1600,18);
+ scatter('all16',POOL.decor16,6000,22);
 }
 function moveSp(sp,p){if(!sp||!p)return;sp.svg=sp.svg.replace(/translate\([^)]*\)/,`translate(${f(p[0])},${f(p[1])})`).replace(/data-x="[^"]*" data-y="[^"]*"/,`data-x="${f(p[0])}" data-y="${f(p[1])}"`);sp.x=p[0];sp.y=p[1]}
 SCENE_IMPL[N]={ground,structures,scatter:scatterAll};
-Object.assign(HOSTN,{kelp16:'海草',branch16:'珊瑚',brain16:'腦珊瑚',fan16:'扇形珊瑚',sponge16:'海綿',chestBig16:'大寶箱',barrel16:'木桶',cannon16:'大砲',bell16:'潛水鐘',habitat16:'海底小屋',tanks16:'氧氣瓶架',boxes16:'補給箱',lamp16:'燈柱',rock16:'石頭'});
-['kelp16','branch16','brain16','fan16','sponge16','chestBig16','barrel16','cannon16','bell16','habitat16','tanks16','boxes16','lamp16','rock16'].forEach(k=>HOSTK.add(k));
+Object.assign(HOSTN,{cage16:'補給吊籠',farm16:'海帶養殖繩',vent16:'熱泉煙囪',ventS16:'熱泉煙囪',dome16:'礁球',domeS16:'礁球',post16:'郵筒',kelp16:'海草',branch16:'珊瑚',brain16:'腦珊瑚',fan16:'扇形珊瑚',sponge16:'海綿',chestBig16:'大寶箱',barrel16:'木桶',cannon16:'大砲',bell16:'潛水鐘',habitat16:'海底小屋',tanks16:'氧氣瓶架',boxes16:'補給箱',lamp16:'燈柱',rock16:'石頭'});
+['kelp16','branch16','brain16','fan16','sponge16','chestBig16','barrel16','cannon16','bell16','habitat16','tanks16','boxes16','lamp16','rock16','cage16','farm16','vent16','ventS16','dome16','domeS16','post16'].forEach(k=>HOSTK.add(k));
 /* 物件的合理位置 */
 H.SPOTS[N]={
- coin16:[['chestBig16',.5,.3],['cannon16',.5,.3],['barrel16',.5,.4]],
- chest16:[['cannon16',.5,.4],['barrel16',.5,.5],['kelp16',.1,.4]],
- helm16:[['cannon16',.5,.3],['barrel16',.5,.4],['boxes16',.5,.3]],
- tmap16:[['table16',.2,-.6],['habitat16',.4,.3],['boxes16',.55,.3]],
- oillamp16:[['barrel16',.5,.5],['chestBig16',.5,.4],['habitat16',.3,.5]],
- conch16:[['branch16',.5,.3],['brain16',.5,.4],['rock16',.5,.3]],
- nautilus16:[['fan16',.5,.3],['sponge16',.5,.4],['rock16',.5,.3]],
- puffer16:[['anemone16',.4,.5],['branch16',.5,.4],['sponge16',.5,.4]],
- seahorse16:[['kelp16',.15,.3],['fan16',.4,.4],['seagrass16',.5,.4]],
- crown16:[['chestBig16',.45,.35],['cannon16',.5,.3],['brain16',.5,.4]],
- bottle:[['rock16',.5,.3],['kelp16',.1,.4],['boxes16',.55,.3]],
- anchor:[['cannon16',.5,.4],['barrel16',.5,.5],['tanks16',.5,.4]]};
+ coin16:[['ventS16',.2,.6],['chestBig16',.5,.3],['cannon16',.5,.3],['barrel16',.5,.4]],
+ chest16:[['cage16',.1,.4],['post16',.1,.7],['cannon16',.5,.4],['barrel16',.5,.5],['kelp16',.1,.4]],
+ helm16:[['cage16',.1,.4],['cannon16',.5,.3],['barrel16',.5,.4],['boxes16',.5,.3]],
+ tmap16:[['post16',.2,.7],['farm16',.2,.5],['table16',.2,-.6],['habitat16',.4,.3],['boxes16',.55,.3]],
+ oillamp16:[['cage16',.15,.4],['vent16',.1,.5],['barrel16',.5,.5],['chestBig16',.5,.4],['habitat16',.3,.5]],
+ conch16:[['dome16',.3,.5],['farm16',.1,.5],['branch16',.5,.3],['brain16',.5,.4],['rock16',.5,.3]],
+ nautilus16:[['domeS16',.4,.5],['dome16',.5,.4],['fan16',.5,.3],['sponge16',.5,.4],['rock16',.5,.3]],
+ puffer16:[['dome16',.4,.4],['rays16',.1,.4],['anemone16',.4,.5],['branch16',.5,.4],['sponge16',.5,.4]],
+ seahorse16:[['farm16',.4,.5],['kelp16',.15,.3],['fan16',.4,.4],['seagrass16',.5,.4]],
+ crown16:[['vent16',.1,.5],['post16',.3,.7],['chestBig16',.45,.35],['cannon16',.5,.3],['brain16',.5,.4]],
+ bottle:[['rays16',.05,.5],['post16',.1,.7],['rock16',.5,.3],['kelp16',.1,.4],['boxes16',.55,.3]],
+ anchor:[['cage16',.05,.4],['rays16',.05,.4],['cannon16',.5,.4],['barrel16',.5,.5],['tanks16',.5,.4]]};
 H.BLEND[N]={coin16:['button16','chestBig16'],chest16:['toolbox16','barrel16'],helm16:['wheel16','barrel16'],tmap16:['envelope16','table16'],oillamp16:['birdcage16','lamp16'],
  conch16:['top16','branch16'],nautilus16:['snail16','rock16'],puffer16:['chestnut16','sponge16'],seahorse16:['knight16','branch16'],crown16:['partyhat16','chestBig16'],
  bottle:['bottleE16','rock16'],anchor:['harpoon16','cannon16']};
@@ -585,7 +689,7 @@ H.BELL16=bellArt; /* 入口（打撈船）和預告圖也用同一個潛水鐘 *
    每條魚永遠朝著自己前進的方向（頭朝前），轉彎就整條轉過去；往左游時上下翻回來，肚子保持朝下。尾巴用 CSS 動畫擺動。
    單獨的魚：隨機慢慢漫遊，偶爾「快速轉彎＋衝一下」；魚群：跟著一個看不見的領頭，各自游向自己的位置，領頭急轉時大家跟著轉。
    點到：單獨的魚往反方向衝走；魚群被點到附近的魚往四面八方散開，過一下再慢慢游回來集合。不算點錯。 */
-const FB={x0:660,x1:1840,y0:300,y1:2080};
+const FB={x0:300,x1:2200,y0:300,y1:2080}; /* 11-26g 加寬 */
 const tail=(d,c)=>`<g class="ft16"><path d="${d}" fill="${c}" stroke-width="1.2"/></g>`;
 const FISHART={
  small:c=>tail('M-7,0 L-13,-4.4 L-11.6,0 L-13,4.4Z',c)+`<path d="M-8,0 Q-2,-4.8 8,0 Q-2,4.8 -8,0Z" fill="${c}" stroke-width="1.2"/><path d="M-5,1 Q1,2.6 7,.6" fill="none" stroke="#fff" stroke-width="1" opacity=".8"/><circle cx="4.4" cy="-1" r=".9" fill="${OL}" stroke="none"/>`,

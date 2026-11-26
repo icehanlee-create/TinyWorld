@@ -460,7 +460,7 @@ H.RIDES.maze102={text:'跟著小男孩，從綠籬的小缺口鑽進去⋯',ever
    小男孩每隔 15～25 秒從缺口探頭 3 秒；點缺口（不管有沒有探頭）→ 小男孩探頭、跳出「要進去看看嗎？」。 */
 (function(){
 const NSv='http://www.w3.org/2000/svg';
-const GAP={x:610,y:758};   /* 2026-11-21u 宮廷院綠籬牆往左上靠，缺口跟著搬 */   /* 宮廷院 MAZE.ax、MAZE.y1（綠籬牆正面的底部） */
+const GAP={x:326,y:758};   /* 2026-11-26j 宮廷院綠籬牆往西移，缺口 610→326 */   /* 2026-11-21u 宮廷院綠籬牆往左上靠，缺口跟著搬 */   /* 宮廷院 MAZE.ax、MAZE.y1（綠籬牆正面的底部） */
 const open18=()=>{try{if(H.testOn&&H.testOn())return true;return (+localStorage.getItem('townhunt-stars-L18')||0)>=2}catch(_){return false}};
 let peekT=0,upT=0,anim=0,cur=0;
 function layer(){let lo=document.getElementById('maze102L');if(!lo){const il=document.getElementById('itemsL');lo=document.createElementNS(NSv,'g');lo.id='maze102L';['stroke','stroke-width','stroke-linejoin','stroke-linecap'].forEach(a=>lo.setAttribute(a,il.getAttribute(a)));il.parentNode.insertBefore(lo,il)}return lo}

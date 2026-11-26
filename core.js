@@ -71,7 +71,7 @@ function mark(x,y,w,h,sh=.8){const[a,b,c,d]=cellsOf(x,y,w,h,sh);for(let j=Math.m
 
 const sprites=[];
 /* 第 3、4 關場地再放大 1.25 倍：面積 ×1.56，密度降 15% → 數量 ×1.33 */
-const DENS={};/* 佈景密度倍數：各關檔案自己設 DENS[關卡] */
+const DENS={};const DECOYSKIP={};/* 2026-11-26：各關可設干擾物略過比例（預設 .3） *//* 佈景密度倍數：各關檔案自己設 DENS[關卡] */
 const NOT_DECOY=new Set(['flowersY','koi','fishGrey','note']);const isDecoy=k=>DECOY[k]!==undefined&&!NOT_DECOY.has(k);
 const ANIM={storyHelper:['nod'],storyGiver:['nod'],storyTarget:['wig','bob'],capyW:['bob'],capyR:['bob','wig'],monkeyFam:['bob'],monkeyFamW:['bob'],steam:['steam'],monkeyR:['bob','wig'],monkeyW:['bob'],bather:['lean'],cow:['bob','wig'],pig:['bob','wig'],scarecrow:['sway'],cat:['bob','wig','sway'],dog:['hop','bob','wig'],chicken:['peck','peck','bob'],sheep:['bob','sway'],frog:['hop'],owl:['wig','bob'],
  swan:['rock'],boat:['rock'],sail:['rock'],balloon:['float'],bird:['flap'],koi:['swim'],seaFish:['swim']};
@@ -99,7 +99,7 @@ function scatter(regKey,pool,tries,cap,water){
  const tot=pool.reduce((a,b)=>a+b[1],0);let n=0;
  for(let t=0;t<tries&&n<cap;t++){
   let k=r()*tot,kind;for(const [nm,wt] of pool){k-=wt;if(k<=0){kind=nm;break}}if(!kind)kind=pool[0][0];
-  if(isDecoy(kind)&&r()<.3){n++;continue} /* 干擾物減少 30%，空出來不補 */
+  if(isDecoy(kind)&&r()<(DECOYSKIP[SCN]??.3)){n++;continue} /* 干擾物減少 30%，空出來不補 */
   const K=KIND[kind],x=sr(g.x,g.x+g.w),y=sr(g.y,g.y+g.h);
   if(SCATOK[regKey]&&!SCATOK[regKey](x,y))continue; /* 例如河裡的東西要真的在河裡：各關檔案設定 SCATOK */
   if(!canPlace(x,y,K.w,K.h,!!K.water,.6))continue;
@@ -229,8 +229,9 @@ function placeItems(){
      const c={x:sp.x+side*(sp.w*.5-t.r*.42),y:sp.y-Math.max(rr+4,Math.min(sp.h*.45,40))};
      if(!isWater(c.x,c.y)&&!items.some(o=>Math.hypot(o.x-c.x,o.y-c.y)<60)){usedOcc.add(sp);p={...c,occ:sp};mode='corner'}}}
    if(p){}
-   else if(how[i]==='spot'){p=spotPos(t,spotUse,regs);if(p)mode='spot'}
-   else if(how[i]==='blend'){p=blendPos(t,usedOcc,regs);if(p)mode='blend';else{mode='rand';for(let k=0;k<60&&!p;k++){const c=sampleIn(regs[(i+k)%regs.length],t);if(c&&!items.some(o=>Math.hypot(o.x-c.x,o.y-c.y)<60))p=c}}}
+   /* 2026-11-26e：第 i 個先找「自己那個區域」附近的佈景，找不到才放寬到 4 個區域（不然合理位置都擠在佈景最多的中間，加寬的兩側幾乎沒有物件） */
+   else if(how[i]==='spot'){p=spotPos(t,spotUse,[regs[i%regs.length]])||spotPos(t,spotUse,regs);if(p)mode='spot'}
+   else if(how[i]==='blend'){p=blendPos(t,usedOcc,[regs[i%regs.length]])||blendPos(t,usedOcc,regs);if(p)mode='blend';else{mode='rand';for(let k=0;k<60&&!p;k++){const c=sampleIn(regs[(i+k)%regs.length],t);if(c&&!items.some(o=>Math.hypot(o.x-c.x,o.y-c.y)<60))p=c}}}
    for(let tries=0;tries<400&&!p;tries++){
     const reg=regs[(i+Math.floor(tries/80))%regs.length],minD=tries<250?75:45;
     const wantPeek=t.id!=='fish'&&reg!=='sky'&&Math.random()<.42;
@@ -390,7 +391,7 @@ function renderItems(){
 /* ================= view ================= */
 const stage=$('#stage'),world=$('#world');
 let PANO=false;let SW=1,SH=1,base=.6,minS=.3,maxS=2,view={s:.6,tx:0,ty:0};
-function measure(){const r_=stage.getBoundingClientRect();SW=r_.width;SH=r_.height;base=Math.min(SW,SH*.8)/640*1.2;minS=base;maxS=base*2.8;{const S=SEC();if(S&&(S.pano()||(S.cine&&S.cine())))minS=base*.28;if(S&&S.room&&!PANO){const SC=SCENES[scene]||SCENES[1],P=pads(),fit=Math.min(SW/(SC.x1-SC.x0),(SH-P.t-P.b)/(SC.y1||H));minS=fit;maxS=fit*2.2}} /* 室內小關卡：整間房間剛好塞滿、最多放大約 2 倍 */if(PANO){const SC=SCENES[scene]||SCENES[1],fit=Math.min(SW/(SC.x1-SC.x0+2*EX),SH/((SC.y1||H)+2*EX))*.96;minS=Math.min(minS,fit)}} /* 開場比原本大 1.2 倍；最多只能縮回開場大小，不能拉遠看全圖 */
+function measure(){const r_=stage.getBoundingClientRect();SW=r_.width;SH=r_.height;base=Math.min(SW,SH*.8)/640*1.2;minS=base;maxS=base*2.8;{const S=SEC();if(S&&(S.pano()||(S.cine&&S.cine())))minS=base*.28;if(S&&S.room&&!PANO){const SC=SCENES[scene]||SCENES[1],P=pads(),fit=Math.min(SW/(SC.x1-SC.x0),(SH-P.t-P.b)/(SC.y1||H)),zk=(S.zoomK&&S.zoomK())||1;minS=fit*zk;maxS=fit*2.2*zk}} /* 2026-11-26m：開場撒完東西後鎖定放大 zoomK 倍（不能看全圖） */ /* 室內小關卡：整間房間剛好塞滿、最多放大約 2 倍 */if(PANO){const SC=SCENES[scene]||SCENES[1],fit=Math.min(SW/(SC.x1-SC.x0+2*EX),SH/((SC.y1||H)+2*EX))*.96;minS=Math.min(minS,fit)}} /* 開場比原本大 1.2 倍；最多只能縮回開場大小，不能拉遠看全圖 */
 function clampV(){view.s=Math.max(minS,Math.min(maxS,view.s));const s_=view.s,SC=SCENES[scene]||SCENES[1];
  {const S=SEC();if(S&&S.room&&!PANO){const P=pads(),X0=SC.x0*s_,X1=SC.x1*s_,Y1=(SC.y1||H)*s_,av=SH-P.t-P.b,cl=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
   view.tx=X1-X0<=SW+.5?(SW-(X1-X0))/2-X0:cl(view.tx,SW-X1,-X0);view.ty=Y1<=av+.5?P.t+(av-Y1)/2:cl(view.ty,P.t+av-Y1,P.t);return}} /* 室內小關卡：比畫面小就置中，放大後不能拖出房間 */
@@ -1083,12 +1084,12 @@ function openCol(){if(BGBUSY){whenReady(openCol);return}let got=0,tot=0;const se
  for(const n of openMain()){const L=LEVELS[n];if(!L||!L.types)continue;const fresh=L.types.filter(t=>!seen.has(t.id));fresh.forEach(t=>seen.add(t.id));rows.push(row(n,fresh,false))}
  for(const n of SECRET_IDS){if(!secretSeen(n))continue;const L=LEVELS[n];if(!L.types){ensureLevel(n,openCol);return}rows.push(row(n,L.types,true))}
  const GL=[];rows.forEach(r=>{if(!GL.includes(r.g))GL.push(r.g)});GL.sort((a,b)=>(a===SECGRP)-(b===SECGRP)||(a===OTHGRP)-(b===OTHGRP));
-const RB=(window.TH&&TH.ROOM&&TH.ROOM.book)?TH.ROOM.book(n=>secretSeen(n)):'';   /* 2026-11-25j 調酒圖鑑：去過的酒吧才有「調酒」分頁（room.js 畫藏寶圖） */
-if(COLTAB!=='全部'&&!(COLTAB==='調酒'&&RB)&&!GL.some(g=>g.name===COLTAB))COLTAB='全部';
- const tabs=['全部',...GL.map(g=>g.name),...(RB?['調酒']:[])].map(t=>`<button class="ctab${t===COLTAB?' on':''}" data-t="${t}">${t}</button>`).join('');
- $('#colBody').innerHTML=`<div class="ctabs">${tabs}</div><div class="colscroll">`+rows.map(r=>r.html.replace('<section ',`<section data-g="${r.g.name}"${COLTAB==='全部'||r.g.name===COLTAB?'':' hidden'} `)).join('')+(RB?`<section class="colsec dbsec" data-g="調酒"${COLTAB==='調酒'?'':' hidden'}>${RB}</section>`:'')+`</div>`;   /* 2026-11-22b 使用者：收集冊大小固定、表頭＋標籤列凍結，只有 .colscroll 捲動 */
+const RT=(window.TH&&TH.ROOM)?(TH.ROOM.tabs?TH.ROOM.tabs(n=>secretSeen(n)):[{name:'調酒',html:TH.ROOM.book?TH.ROOM.book(n=>secretSeen(n)):''}].filter(t=>t.html)):[],RB=RT.length,RN=RT.map(t=>t.name);   /* 2026-11-25j 調酒圖鑑：去過的酒吧才有「調酒」分頁；11-25 晚宴後廚加「料理」分頁（room.js 的 tabs） */
+if(COLTAB!=='全部'&&!RN.includes(COLTAB)&&!GL.some(g=>g.name===COLTAB))COLTAB='全部';
+ const tabs=['全部',...GL.map(g=>g.name),...RN].map(t=>`<button class="ctab${t===COLTAB?' on':''}" data-t="${t}">${t}</button>`).join('');
+ $('#colBody').innerHTML=`<div class="ctabs">${tabs}</div><div class="colscroll">`+rows.map(r=>r.html.replace('<section ',`<section data-g="${r.g.name}"${COLTAB==='全部'||r.g.name===COLTAB?'':' hidden'} `)).join('')+RT.map(t=>`<section class="colsec dbsec" data-g="${t.name}"${COLTAB===t.name?'':' hidden'}>${t.html}</section>`).join('')+`</div>`;   /* 2026-11-22b 使用者：收集冊大小固定、表頭＋標籤列凍結，只有 .colscroll 捲動 */
  $('#colSub').textContent=`已收集 ${got} / ${tot} 種東西（每種只記一次）`;
- document.querySelectorAll('#colBody .ctab').forEach(b=>b.onclick=()=>{COLTAB=b.dataset.t;document.querySelectorAll('#colBody .ctab').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('#colBody .colsec').forEach(x=>x.hidden=!(x.dataset.g===COLTAB||(COLTAB==='全部'&&x.dataset.g!=='調酒')));const sc=$('#colBody .colscroll');if(sc)sc.scrollTop=0});
+ document.querySelectorAll('#colBody .ctab').forEach(b=>b.onclick=()=>{COLTAB=b.dataset.t;document.querySelectorAll('#colBody .ctab').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('#colBody .colsec').forEach(x=>x.hidden=!(x.dataset.g===COLTAB||(COLTAB==='全部'&&!RN.includes(x.dataset.g))));const sc=$('#colBody .colscroll');if(sc)sc.scrollTop=0});
  if(RB&&TH.ROOM.bind)TH.ROOM.bind($('#colBody'));
  document.querySelectorAll('#colBody .colsec h4').forEach(h=>h.onclick=()=>{const sec=h.parentNode,n=+sec.dataset.n,on=sec.classList.toggle('open');h.setAttribute('aria-expanded',on);on?COLOPEN.add(n):COLOPEN.delete(n)});
  if(!$('#colOv').classList.contains('hide'))return;
@@ -1148,7 +1149,7 @@ level=Math.min(prog.unlocked,LEVELS.length-1);
 /* 給 level{n}.js、secret.js 使用的工具與資料 */
 window.TH={MAPC,NSPOT,NLAKE,NPEAK,EDGELAND,ROADS,T,f,r,sr,pk,ri,rnd,shuffle,limb,shade,wob,OL,SNOW,SKIN,HAIR,SHIRT,PANTS,HATS,kid,chibi,act,wrapAn,heart,bubble,noteM,peekHead,faceHead,headOnly,
  cat,frog,owl,sheep,chicken,anyDog,dog,swan,pine,roundTree,bush,rock,barrel,crate,pot,lamp,bench,sign,fence,reeds,lily,well,tent,campfire,swirl,signpost,signIcon,stall,
- add,mark,canPlace,scatter,SCATREG,SCATOK,skyBirds,chaikin,bow,qBubble,qThink,qMark,QHEART,GC,GR,CELL,occ,mulberry32,DK,balloon,castle,fountain,house,kayak,lighthouse,mushHouse,rowboat,sailboat,tower,windmill,pig,barn,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,HEAVY,ANIM,ALWAYS,DUR,
+ add,mark,canPlace,scatter,SCATREG,SCATOK,skyBirds,chaikin,bow,qBubble,qThink,qMark,QHEART,GC,GR,CELL,occ,mulberry32,DK,balloon,castle,fountain,house,kayak,lighthouse,mushHouse,rowboat,sailboat,tower,windmill,pig,barn,KIND,POOL,VPLAN:VPLANX,REG,SCREG,SCENES,LEVELS,ART,DECOY,BORROW,TARGET,MAPNODES,OCCK,DECOYSKIP,HEAVY,ANIM,ALWAYS,DUR,
  ANIMX,ALWAYSX,HEAVYX,SPOTS,BLEND,SCENE_IMPL,WATERFN,RIDES,MAPHOOKS,mapHook,mapRoute,TAPHOOKS,NGHOOKS,MAPTOP,NEXTINFO,HERE,HOSTK,HOSTN,ferry,OUTFITS,SECRETS,STORIES,SEQ,SKYC,SKYY,FOGFN,EDGEM,EDGED,EDGEDECO,EDGEMY,EDGEFILL,FRINGE,FRINGEX,RESERVE,ROADK,RESETKEYS,BEENF,canDiscover,dayLog,icon,starSvg,HATKIT,EXITS,FIND_IDS,isOpen,isFound,canFind,askExit:n=>askExit(n),drawExits:()=>drawExits(),prog:()=>prog,
  typeOf:id=>LEVELS.slice(1).flatMap(L_=>L_.types||[]).find(t=>t.id===id),colAdd,colClover,colBonus,colStory,reunionCard:(S,cb)=>reunionCard(S,cb),updateCounts,win:()=>win(),goLevel:(n,viaExit)=>goLevel(n,viaExit),level:()=>level,rodeHas,pads:()=>pads(),scr:()=>({w:SW,h:SH,base}),apply:()=>apply(),clampV:()=>clampV(),rezoom:()=>{measure();clampV();apply()},updAnim:()=>updateAnim(),tweenTo:(s,x,y,d,cb)=>tweenTo(s,x,y,d,cb),curtain,pickView,walkPose,DENS,sprites,ride,toast,clockHold,clockRun,burst,floatText,sfx,items:()=>items,game:()=>st,scene:()=>scene,view:()=>view,testOn:()=>testMode,dbg:{clover:()=>clovers,hint:()=>({sp:hintSp,msg:hintMsg}),step:()=>story&&story.step,storySp:()=>storySp,story:()=>story,center:(x,y)=>{view.s=base*1.4;view.tx=SW/2-x*view.s;view.ty=SH/2-y*view.s;clampV();apply();const r=stage.getBoundingClientRect();return [r.left+x*view.s+view.tx,r.top+y*view.s+view.ty]}},isWater:(x,y)=>isWater(x,y),tone,steamPuff,pineS,cabinSVG};
 /* 測試模式：選單列出測試中的關卡（編號 900 以上、還沒接上主線的主線關卡），在 Claude 作品裡也能直接玩（2026-11-12） */

@@ -11,13 +11,13 @@ const {T,f,r,sr,pk,ri,OL,kid,act,wrapAn,add,mark,canPlace,scatter,skyBirds,KIND,
 const tube=(d,c,w=3.4)=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w+2.6}" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
 
 /* ================= 1. 場景範圍、天空、場地邊緣 ================= */
-H.SCENES[N]={x0:600,x1:1900,y1:2150,c:[1250,1650]};
+H.SCENES[N]={x0:250,x1:2250,y1:2150,c:[1250,1650]}; /* 2026-11-26 難度調整：東西各加寬 350（原本 x0:600,x1:1900）；西邊吊石塊的三腳架、東邊出土文物布篷 */
 H.TARGET[N]=330;
 H.SKYC[N]='#f8e6bd';H.SKYY[N]=300;
-H.EDGEM[N]='LRB';H.EDGED[N]='LRB';
+H.EDGEM[N]='B';/* 2026-11-26 加寬後左右不鏡像 */H.EDGED[N]='LRB';
 H.EDGEDECO[N]=[['palm13',1.4],['cactus13',1],['rock13',1.4],['bush13',2.4]];
 H.FRINGE[N]=[['bush13',2.4],['rock13',1.2],['cactus13',.8],['palm13',.5],['pebbles',1.2],['walker',.3]];
-H.DENS[N]=1.15;
+H.DENS[N]=1;/* 2026-11-26 加寬後從 1.15 降到 1 */
 
 /* ================= 2. 當地人（長袍＋頭巾）和考古隊員（卡其襯衫＋探險盔） ================= */
 const turbanHat=v=>H.HATKIT.turbanV(pk(['#f4ecd6','#f4ecd6','#e8d8b0','#3f6f9a','#a4442f','#f4ecd6']))(v); /* 2026-11-25k 頭巾跟著方向轉（art.js HATKIT.turbanV） */
@@ -172,6 +172,36 @@ const jarPile=()=>`<ellipse cx="0" cy="2" rx="38" ry="6" fill="#000" opacity=".1
  `<g transform="translate(23,0)">${jar('#a8501f',1.1)}</g><g transform="translate(-25,1)">${jar('#d27a3a',1)}</g>`+T(0,-29,1,cat13())+`<g transform="translate(1,3)">${jar('#c4642f',.86)}</g>`;
 /* 金字塔入口門洞前的守護像（用在 structures） */
 
+
+/* ===== 2026-11-26 加寬：西邊吊石塊的木頭三腳架（使用者選 A）＋兩人拉繩、滾木推大石塊；東邊出土文物布篷（選 D 拉繩布篷＋地毯）＋修復師 ===== */
+const W13='#a8794a',W13b='#7a5235';
+const rope13=d=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="3.2"/><path d="${d}" fill="none" stroke="#d9c08a" stroke-width="1.6"/>`;
+const block13=(x,y,s=1)=>`<g transform="translate(${x},${y}) scale(${s})"><path d="M-18,0 V-26 L-12,-32 H24 V-6 L18,0Z" fill="#d6c59e"/><path d="M-18,-26 H18 L24,-32 M18,-26 V0" fill="none"/><path d="M18,-26 L24,-32 V-6 L18,0Z" fill="#b9a678" stroke="none"/><path d="M-8,-20 l6,4" stroke="#a89470" stroke-width="1.3"/></g>`;
+const potS13=(x,y,c='#c4642f',s=1)=>`<g transform="translate(${x},${y}) scale(${s})"><path d="M-5,0 Q-8,-7 -4,-12 L-3,-15 H3 L4,-12 Q8,-7 5,0Z" fill="${c}" stroke-width="1.4"/><path d="M-6,-7 H6" stroke="#f4d8a0" stroke-width="1.1" fill="none"/></g>`;
+const finds13=(x0,x1,y)=>{let g='',k=0;for(let x=x0+10;x<x1-6;x+=16){
+ g+=[potS13(x,y,pk(['#c4642f','#a8501f','#d27a3a'])),`<path d="M${x-7},${y} L${x-4},${y-5} L${x+3},${y-6} L${x+7},${y-1} L${x+2},${y+1}Z" fill="#c9764a" stroke-width="1.3"/>`,
+  `<g transform="translate(${x},${y})"><path d="M-3,0 V-10 Q-3,-15 0,-15 Q3,-15 3,-10 V0Z" fill="#2c2a34" stroke-width="1.3"/><path d="M-3,-9 H3" stroke="#e4b53e" stroke-width="1.4"/></g>`,
+  `<rect x="${x-6}" y="${y-7}" width="12" height="7" rx="1.4" fill="#c9b78e" stroke-width="1.3"/>`,potS13(x,y,'#e4b53e',.8)][k%5];
+ if(k%2===0)g+=`<path d="M${x+4},${y} l3,-6" stroke="${OL}" stroke-width="1" fill="none"/><rect x="${x+5}" y="${y-11}" width="7" height="5" rx="1" fill="#fffaf0" stroke-width="1.1"/>`;k++}return g};
+/* 打包文物的木箱堆（布篷兩頭；也是遮擋物） */
+const pack13=()=>`<ellipse cx="0" cy="3" rx="24" ry="5" fill="#000" opacity=".13" stroke="none"/><rect x="-20" y="-24" width="40" height="24" rx="2" fill="#b08a50"/><path d="M-20,-12 H20 M-8,-24 V0 M8,-24 V0" stroke="#8a6a40" stroke-width="1.3" fill="none"/>`+
+ `<rect x="-14" y="-44" width="28" height="20" rx="2" fill="#c49a5e"/><path d="M-14,-34 H14" stroke="#8a6a40" stroke-width="1.3" fill="none"/><path d="M-12,-44 q3,-6 6,-1 q3,-5 6,0 q3,-6 6,-1 q3,-4 6,1" fill="#e8cc72" stroke-width="1.2"/><rect x="-6" y="-20" width="12" height="7" rx="1" fill="#fffaf0" stroke-width="1.1"/>`;
+const sortShed13=()=>{let g=`<ellipse cx="0" cy="3" rx="100" ry="9" fill="#000" opacity=".14" stroke="none"/>`;
+ g+=tube('M-92,0 L-90,-96','#a8794a',4.4)+tube('M92,0 L90,-96','#a8794a',4.4);
+ g+=`<path d="M-90,-94 Q0,-62 90,-94 L94,-84 Q0,-52 -94,-84Z" fill="#e8d4a0"/><path d="M-90,-94 L-108,-40 M90,-94 L108,-40" stroke="#7a5a3a" stroke-width="1.2" fill="none"/>`;
+ g+=`<path d="M-80,-2 L-70,-34 L70,-34 L80,-2Z" fill="#c4573a"/><path d="M-76,-8 H76 M-72,-28 H72" stroke="#f0c040" stroke-width="1.6" fill="none"/>`;
+ return g+finds13(-62,62,-24)+finds13(-70,70,-10)};
+const tripod13=()=>{let g=`<ellipse cx="0" cy="3" rx="80" ry="8" fill="#000" opacity=".14" stroke="none"/>`;
+ g+=`<path d="M-55,2 L-45,-10 L45,-10 L55,2Z" fill="#5a4026"/><path d="M-55,2 H55" stroke="#7a5a30" stroke-width="3"/><path d="M-69,4 Q-63,-10 -51,-6 Z M69,4 Q63,-10 51,-6Z" fill="#c9a468"/>`;
+ g+=tube('M0,-150 L-6,-14','#8a6a40',4.2)+rope13('M0,-150 V-70')+`<path d="M-14,-58 L0,-74 L14,-58" fill="none" stroke="#8a6a40" stroke-width="2"/>`;
+ g+=`<g class="an a-lean" style="--d:3.2s">${block13(-3,-30,1.1)}</g>`;
+ g+=tube('M0,-150 L-62,4','#a8794a',5)+tube('M0,-150 L58,6','#a8794a',5);
+ return g+rope13('M6,-150 L84,-24')+`<circle cx="0" cy="-150" r="8" fill="#c9a05a"/><circle cx="0" cy="-150" r="2.2" fill="${W13b}" stroke-width="1.2"/><path d="M-8,-156 L8,-156" stroke="${W13b}" stroke-width="4"/>`};
+const LOC13=()=>({hat:HAT_T,hs:pk([0,2]),skin:pk(['#c98d5e','#b97a4e','#8f5a36','#a8683e']),top:'long',bottom:'pants',shirt:pk(ROBES),pants:'#e8d9b4',pose:'reach',force:1});
+const pullers13=()=>act(-16,0,-1,LOC13(),'work')+act(16,0,-1,LOC13(),'work')+rope13('M-40,-18 L30,-18');
+const rollers13=()=>`<ellipse cx="0" cy="3" rx="40" ry="6" fill="#000" opacity=".13" stroke="none"/>`+[-26,-6,14].map(x=>`<ellipse cx="${x}" cy="-4" rx="5" ry="5" fill="${W13}" stroke-width="1.4"/>`).join('')+block13(-6,-9,1.2)+act(40,0,-1,LOC13(),'work');
+const restorer13=()=>act(0,0,1,{hat:6,pose:'crouch',view:'side',force:1,skin:pk(['#e8c8a0','#d9a578','#c98d5e']),top:'tee',bottom:'pants',shirt:pk(['#d8c28a','#e8dcc0','#b8c8a0']),pants:pk(['#7a5a3a','#8a6a40'])},'work')+T(22,-2,1,potS13(0,0,pk(['#c4642f','#a8501f']),1.4))+`<path d="M13,-12 L19,-17" stroke="#a8703f" stroke-width="2.4"/><path d="M19,-17 l4,-4" stroke="#e8d4a0" stroke-width="3.4"/>`;
+
 /* ---- 佈景圖鑑（KIND）：場地外、POOL、干擾物都要登記 ---- */
 const dk=(id,w,h,cy=-12)=>({w,h,fn:()=>T(0,cy,1,DECOY[id])});
 Object.assign(KIND,{
@@ -179,7 +209,7 @@ Object.assign(KIND,{
  jar13:{w:30,h:34,fn:()=>jar(pk(['#c4642f','#a8501f','#d27a3a','#8a4a22']),pk([.8,1,1.15]))},tent13:{w:150,h:70,fn:()=>tent(pk(['#b8a060','#c4a050','#a89868']),pk(['#7a5a3a','#c4573a']))},
  camelS13:{w:70,h:80,fn:()=>CAMEL.stand(pk(['#d6aa66','#c99a58','#dcb878']),'#b98a4a',r()<.5)},camelR13:{w:76,h:40,fn:()=>CAMEL.rest()},
  sphinx13:{w:250,h:120,fn:sphinx},obelisk13:{w:30,h:114,fn:obelisk},column13:{w:70,h:76,fn:column},statue13:{w:36,h:100,fn:statue},
- pit13:{w:170,h:50,fn:pit},sieve13:{w:60,h:56,fn:sieve},table13:{w:90,h:44,fn:ftable},cart13:{w:60,h:34,fn:cart},campfire13:{w:60,h:50,fn:campfire},rubble13:{w:60,h:28,fn:rubble},stakes13:{w:64,h:14,fn:stakeLine},
+ pit13:{w:170,h:50,fn:pit},pack13:{w:44,h:48,fn:pack13},sieve13:{w:60,h:56,fn:sieve},table13:{w:90,h:44,fn:ftable},cart13:{w:60,h:34,fn:cart},campfire13:{w:60,h:50,fn:campfire},rubble13:{w:60,h:28,fn:rubble},stakes13:{w:64,h:14,fn:stakeLine},
  paintbrush13:dk('paintbrush13',38,24,0),handmirror13:dk('handmirror13',34,34,0),paperscroll13:dk('paperscroll13',44,22,0),goldplate13:dk('goldplate13',34,34,0),stonebrick13:dk('stonebrick13',34,22,0),
  catbank13:dk('catbank13',28,44,-4),keyring13:dk('keyring13',28,32,-2),beads13:dk('beads13',34,32,-4),ragdoll13:dk('ragdoll13',30,40,-2),cookie13:dk('cookie13',32,32,0)});
 
@@ -187,25 +217,28 @@ Object.assign(KIND,{
 /* 老朋友：定義寫在自己檔案（find 關卡檔案載入時，第 4 關可能還沒載入） */
 const OLD={compass:{id:'compass',name:'黃銅羅盤',short:'羅盤',r:14,rot:30},amphora:{id:'amphora',name:'古陶罐',short:'陶罐',r:15,rot:10}};
 const old=(id,regions)=>({...(typeOf(id)||OLD[id]),regions});
+/* 2026-11-26e 使用者發現兩側很少物件：每種 4 個區域裡放 1～2 個兩側（加寬區），合理位置也加兩側的佈景 */
 const TYPES=[
- old('compass',['camp13','dig13','avenue13','rest13']),old('amphora',['dig13','camp13','rest13','avenue13']),
- {id:'brush13',name:'考古小刷子',short:'小刷子',r:16,rot:12,regions:['dig13','camp13','dig13','avenue13']},
- {id:'lens13',name:'放大鏡',short:'放大鏡',r:15,rot:10,regions:['camp13','dig13','avenue13','rest13']},
- {id:'papyrus13',name:'莎草紙卷',short:'紙卷',r:16,rot:8,regions:['camp13','avenue13','dig13','camp13']},
- {id:'mask13',name:'法老黃金面具',short:'金面具',r:16,rot:10,regions:['avenue13','dig13','camp13','rest13']},
- {id:'eye13',name:'荷魯斯之眼石板',short:'石板',r:15,rot:6,regions:['dig13','avenue13','camp13','dig13']},
- {id:'catstat13',name:'貓神小雕像',short:'貓神像',r:15,rot:6,regions:['avenue13','camp13','rest13','dig13']},
- {id:'ankh13',name:'安卡符號',short:'安卡',r:15,rot:8,regions:['avenue13','camp13','dig13','rest13']},
- {id:'collar13',name:'青金石項圈',short:'項圈',r:17,rot:8,regions:['camp13','dig13','rest13','avenue13']},
- {id:'mummy13',name:'小木乃伊玩偶',short:'木乃伊',r:16,rot:12,regions:['rest13','camp13','avenue13','dig13']},
- {id:'shard13',name:'象形文字陶片',short:'陶片',r:15,rot:20,regions:['dig13','dig13','camp13','avenue13']}];
+ old('compass',['camp13','sortE13','avenue13','liftW13']),old('amphora',['dig13','liftW13','rest13','sortE13']),
+ {id:'brush13',name:'考古小刷子',short:'小刷子',r:16,rot:12,regions:['dig13','camp13','liftW13','westD13']},
+ {id:'lens13',name:'放大鏡',short:'放大鏡',r:15,rot:10,regions:['camp13','westD13','avenue13','eastD13']},
+ {id:'papyrus13',name:'莎草紙卷',short:'紙卷',r:16,rot:8,regions:['camp13','sortE13','dig13','sortE13']},
+ {id:'mask13',name:'法老黃金面具',short:'金面具',r:16,rot:10,regions:['avenue13','dig13','camp13','sortE13']},
+ {id:'eye13',name:'荷魯斯之眼石板',short:'石板',r:15,rot:6,regions:['dig13','eastD13','camp13','liftW13']},
+ {id:'catstat13',name:'貓神小雕像',short:'貓神像',r:15,rot:6,regions:['avenue13','westD13','rest13','eastD13']},
+ {id:'ankh13',name:'安卡符號',short:'安卡',r:15,rot:8,regions:['avenue13','camp13','dig13','liftW13']},
+ {id:'collar13',name:'青金石項圈',short:'項圈',r:17,rot:8,regions:['camp13','sortE13','rest13','sortE13']},
+ {id:'mummy13',name:'小木乃伊玩偶',short:'木乃伊',r:16,rot:12,regions:['rest13','eastD13','avenue13','sortE13']},
+ {id:'shard13',name:'象形文字陶片',short:'陶片',r:15,rot:20,regions:['dig13','liftW13','camp13','eastD13']}];
 LEVELS[N].types=TYPES;
 /* BORROW：不借（沙漠物件不混進前面的關卡） */
 
 /* ================= 5. 地形、區域 ================= */
 Object.assign(REG,{pyr13:{x:660,y:440,w:1200,h:300},avenue13:{x:760,y:760,w:980,h:310},dig13:{x:700,y:1090,w:1100,h:390},camp13:{x:680,y:1490,w:1140,h:310},
- rest13:{x:640,y:1810,w:1230,h:320},all13:{x:620,y:430,w:1260,h:1700}});
-H.SCREG[N]=['avenue13','dig13','camp13','rest13'];  /* 故事和路人只放參道、挖掘場、營地、商隊休息處 */
+ rest13:{x:640,y:1810,w:1230,h:320},all13:{x:620,y:430,w:1260,h:1700},
+ /* 2026-11-26 加寬：西邊吊石塊、東邊文物布篷、兩邊的沙地 */
+ liftW13:{x:275,y:1080,w:320,h:440},sortE13:{x:1905,y:1470,w:320,h:400},westD13:{x:265,y:440,w:330,h:1690},eastD13:{x:1905,y:440,w:330,h:1690}});
+H.SCREG[N]=['avenue13','dig13','camp13','rest13','liftW13','sortE13'];  /* 故事和路人只放參道、挖掘場、營地、商隊休息處 */
 const GATE={x:1250,y:662};   /* 金字塔入口門洞（腳底中心） */
 
 function ground(){
@@ -260,16 +293,23 @@ function ground(){
  /* 挖掘場：拉繩子的格子（木樁＋繩子） */
  [[780,1160,360,200],[1380,1120,360,240]].forEach(([x,y,w,h])=>{g+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#f4ecd8" stroke-width="1.8"/><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#c4473a" stroke-width="1.8" stroke-dasharray="6 6"/>`;
   [[x,y],[x+w,y],[x,y+h],[x+w,y+h],[x+w/2,y],[x+w/2,y+h]].forEach(([a,b])=>g+=`<path d="M${a},${b} v-10" stroke="#7a5235" stroke-width="3.4"/>`)});
+ /* 2026-11-26 加寬：西邊吊石塊的地面（挖出來的深色沙、石塊拖痕）、東邊文物布篷前的小路 */
+ g+=`<ellipse cx="430" cy="1290" rx="170" ry="90" fill="#d9b678" stroke="none" opacity=".75"/><ellipse cx="410" cy="1310" rx="110" ry="50" fill="#c9a460" stroke="none" opacity=".55"/><path d="M360,1440 Q300,1470 250,1470 M372,1452 Q312,1484 252,1486" fill="none" stroke="#c9a460" stroke-width="3" opacity=".8"/>`;
+ ['M960,1250 Q760,1262 580,1300','M1250,1760 Q1600,1790 1960,1700'].forEach(d=>{g+=`<path d="${d}" fill="none" stroke="#d9b678" stroke-width="70" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#c9a460" stroke-width="2.2" stroke-dasharray="3 17" stroke-linecap="round" opacity=".9"/>`});
  for(let i=0;i<46;i++){const x=sr(X0,X0+WW),y=sr(1090,Sc.y1+300);g+=`<path d="M${f(x)},${f(y)} q14,-5 28,0 q14,5 28,0" fill="none" stroke="#d9bb7e" stroke-width="1.6" opacity=".9"/>`}
  return `<g stroke="${OL}" stroke-width="2" stroke-linejoin="round">${g}</g>`}
 
 /* ================= 6. 建築與佈景 ================= */
-Object.assign(POOL,{
- avenue13:[['bush13',1.2],['rock13',1.2],['rubble13',.8],['column13',.3],['pebbles',1],['statue13',.1],['stonebrick13',.3],['cookie13',.25],['paperscroll13',.25],['goldplate13',.2]],
- dig13:[['rubble13',1],['rock13',1],['bush13',.7],['stakes13',.5],['sieve13',.2],['pebbles',.8],['jar13',.5],['stonebrick13',.3],['paintbrush13',.3],['handmirror13',.2],['cookie13',.2],['keyring13',.2]],
- camp13:[['jar13',.8],['crate',.9],['barrel',.8],['rock13',.6],['bush13',.5],['pebbles',.7],['table13',.12],['cart13',.1],['paintbrush13',.3],['handmirror13',.25],['paperscroll13',.3],['keyring13',.3],['beads13',.3],['ragdoll13',.2],['catbank13',.2],['cookie13',.25]],
- rest13:[['camelS13',.7],['camelR13',.8],['jar13',1],['bush13',.7],['rock13',.7],['crate',.5],['barrel',.5],['pebbles',.7],['beads13',.3],['ragdoll13',.3],['catbank13',.2],['goldplate13',.2],['keyring13',.2]],
- decor13:[['bush13',1.6],['rock13',1],['pebbles',1],['cactus13',.4],['jar13',.3]]});
+Object.assign(POOL,{ /* 2026-11-26 難度調整：干擾物權重 ×2.2（每畫面約 7 個） */
+ avenue13:[['bush13',1.2],['rock13',1.2],['rubble13',0.8],['column13',0.3],['pebbles',1],['statue13',0.1],['stonebrick13',0.66],['cookie13',0.56],['paperscroll13',0.56],['goldplate13',0.44]],
+ dig13:[['rubble13',1],['rock13',1],['bush13',0.7],['stakes13',0.5],['sieve13',0.2],['pebbles',0.8],['jar13',0.5],['stonebrick13',0.66],['paintbrush13',0.66],['handmirror13',0.44],['cookie13',0.44],['keyring13',0.44]],
+ camp13:[['jar13',0.8],['crate',0.9],['barrel',0.8],['rock13',0.6],['bush13',0.5],['pebbles',0.7],['table13',0.12],['cart13',0.1],['paintbrush13',0.66],['handmirror13',0.56],['paperscroll13',0.66],['keyring13',0.66],['beads13',0.66],['ragdoll13',0.44],['catbank13',0.44],['cookie13',0.56]],
+ rest13:[['camelS13',0.7],['camelR13',0.8],['jar13',1],['bush13',0.7],['rock13',0.7],['crate',0.5],['barrel',0.5],['pebbles',0.7],['beads13',0.66],['ragdoll13',0.66],['catbank13',0.44],['goldplate13',0.44],['keyring13',0.44]],
+ decor13:[['bush13',1.6],['rock13',1],['pebbles',1],['cactus13',0.4],['jar13',0.3]],
+ /* 2026-11-26 新區域（11-26e：兩側干擾物權重再 ×1.6） */
+ liftW13:[['rubble13',1],['rock13',0.6],['pebbles',0.6],['stonebrick13',1.76],['stakes13',0.3],['paintbrush13',1.056],['keyring13',1.056],['cookie13',0.896],['handmirror13',0.896]],
+ sortE13:[['pack13',0.4],['jar13',0.6],['crate',0.4],['pebbles',0.5],['paperscroll13',1.408],['goldplate13',1.216],['beads13',1.216],['ragdoll13',1.056],['catbank13',1.056],['handmirror13',0.704]],
+ sideD13:[['bush13',2],['rock13',1.3],['pebbles',1],['cactus13',0.15],['jar13',0.4],['stonebrick13',1.088],['cookie13',0.852],['beads13',0.852],['keyring13',0.852],['paperscroll13',0.704]]});
 function structures(){
  skyBirds(N);
 
@@ -302,31 +342,48 @@ function structures(){
  [[1250,1990],[1500,2060],[820,1800]].forEach(([x,y])=>add(x,y,30,34,'jar13',jar('#c4642f',1),{sh:.4}));
  [[700,2060],[1860,2070]].forEach(([x,y])=>add(x,y,44,60,'cactus13',cactusBig(),{sh:.6}));
  [[740,1480],[1860,1500]].forEach(([x,y])=>add(x,y,50,92,'palm13',palm(x<1000?1:-1,1),{sh:.8}));
+ /* ===== 2026-11-26 西邊：吊石塊的木頭三腳架、兩人拉繩、滾木推大石塊 ===== */
+ add(430,1300,130,160,'tripod13',tripod13(),{sh:.8});
+ add(548,1302,70,64,'pullers13',pullers13(),{sh:.6});
+ add(360,1450,64,50,'rollers13',rollers13(),{sh:.7});
+ [[300,1180],[520,1420]].forEach(([x,y])=>add(x,y,60,28,'rubble13',rubble(),{sh:.6}));
+ /* ===== 2026-11-26 東邊：出土文物布篷、打包木箱、修復師 ===== */
+ add(2065,1640,200,100,'shed13',sortShed13(),{sh:.8});mark(2065,1735,230,80,1);/* 布篷前面留空，修復師前後不長仙人掌 */
+ add(1945,1660,44,48,'pack13',pack13(),{sh:.6});add(2190,1650,44,48,'pack13',pack13(),{sh:.6});
+ add(2030,1690,46,52,'restorer13',restorer13(),{sh:.5});
+ add(2120,1800,30,34,'jar13',jar('#a8501f',1),{sh:.4});
+ /* 新的兩側北邊：棕櫚、仙人掌 */
+ [[360,760,1],[2150,780,-1]].forEach(([x,y,l])=>add(x,y,50,92,'palm13',palm(l,1),{sh:.8}));
+ [[470,2050],[2050,2060]].forEach(([x,y])=>add(x,y,44,60,'cactus13',cactusBig(),{sh:.6}));
 }
 function scatterAll(){
  scatter('pyr13',POOL.avenue13,900,14);
  scatter('avenue13',POOL.avenue13,3000,44);scatter('dig13',POOL.dig13,3600,56);scatter('camp13',POOL.camp13,3400,50);scatter('rest13',POOL.rest13,3400,50);
- scatter('all13',POOL.decor13,6000,90);
+ scatter('liftW13',POOL.liftW13,1800,14);scatter('sortE13',POOL.sortE13,1800,14);scatter('westD13',POOL.sideD13,3000,26);scatter('eastD13',POOL.sideD13,3000,26);
+ scatter('all13',POOL.decor13,6000,55);
 }
 SCENE_IMPL[N]={ground,structures,scatter:scatterAll};
 Object.assign(VPLAN,{avenue13:{chat:4,walker:4,reading:2,carryBox:2,stretch:1},dig13:{chat:6,walker:4,carryBox:4,reading:2,stretch:2},
- camp13:{chat:6,walker:6,reading:2,benchPair:2,carryBox:2,sleeping:1,handInHand:1},rest13:{chat:4,walker:4,sleeping:2,stretch:2,carryBox:2,benchPair:1}});
-HOSTK.add('palm13');HOSTK.add('tent13');HOSTK.add('table13');HOSTK.add('jar13');HOSTK.add('sieve13');HOSTK.add('column13');
-HOSTN.palm13='棕櫚樹';HOSTN.tent13='帳篷';HOSTN.table13='野外桌子';HOSTN.jar13='水罐';HOSTN.sieve13='篩沙架';HOSTN.column13='斷柱';
+ camp13:{chat:6,walker:6,reading:2,benchPair:2,carryBox:2,sleeping:1,handInHand:1},rest13:{chat:4,walker:4,sleeping:2,stretch:2,carryBox:2,benchPair:1},
+ liftW13:{walker:2,chat:2,carryBox:1},sortE13:{walker:2,chat:2,reading:1}});
+HOSTK.add('palm13');HOSTK.add('tent13');HOSTK.add('table13');HOSTK.add('jar13');HOSTK.add('sieve13');HOSTK.add('column13');HOSTK.add('pack13');
+HOSTN.palm13='棕櫚樹';HOSTN.tent13='帳篷';HOSTN.table13='野外桌子';HOSTN.jar13='水罐';HOSTN.sieve13='篩沙架';HOSTN.column13='斷柱';HOSTN.pack13='打包木箱';
 /* 物件的合理位置：SPOTS 放在那個東西上或旁邊；BLEND 是顏色相近的東西 */
 H.SPOTS[N]={
- brush13:[['table13',.5,.15],['sieve13',.1,.55],['pit13',.2,.58]],
- lens13:[['table13',.5,-.3],['tent13',.06,.5],['cart13',.35,.2]],
- papyrus13:[['table13',.5,.35],['tent13',.06,-.55],['crate',.4,.1]],
- mask13:[['statue13',.05,.65],['rubble13',.3,.1],['table13',.5,.05]],
- eye13:[['rubble13',.3,.3],['pit13',.2,-.58],['column13',.05,.6]],
- catstat13:[['statue13',.05,-.65],['table13',.5,-.05],['obelisk13',.04,.55]],
- ankh13:[['obelisk13',.04,-.55],['rubble13',.3,-.2],['table13',.5,.3]],
- collar13:[['tent13',.06,.5],['table13',.5,-.4],['camelS13',.55,.45]],
- mummy13:[['tent13',.06,-.55],['crate',.4,.1],['camelR13',.2,.6]],
- shard13:[['pit13',.2,.55],['sieve13',.1,-.55],['rubble13',.3,-.25]],
- compass:[['table13',.5,.4],['camelS13',.55,.45],['tent13',.06,.58]],
- amphora:[['jar13',.1,.7],['tent13',.06,-.58],['column13',.05,-.6]]};
+ brush13:[['table13',.5,.15],['sieve13',.1,.55],['pit13',.2,.58],['rollers13',0.2,0.5],['shed13',0.06,0.55],['pack13',0.3,0.4],['bush13',.1,.55]],
+ lens13:[['table13',.5,-.3],['tent13',.06,.5],['cart13',.35,.2],['rollers13',0.2,0.5],['shed13',0.06,0.55],['pack13',0.3,0.4],['rock13',.1,.5]],
+ papyrus13:[['table13',.5,.35],['tent13',.06,-.55],['crate',.4,.1],['rollers13',0.2,0.5],['shed13',0.06,0.55],['pack13',0.3,0.4],['bush13',.1,.55]],
+ mask13:[['statue13',.05,.65],['rubble13',.3,.1],['table13',.5,.05],['rollers13',0.2,0.5],['shed13',0.06,0.55],['pack13',0.3,0.4],['rock13',.1,.5]],
+ eye13:[['rubble13',.3,.3],['pit13',.2,-.58],['column13',.05,.6],['rollers13',0.2,0.5],['shed13',0.06,0.55],['pack13',0.3,0.4],['bush13',.1,.55]],
+ catstat13:[['statue13',.05,-.65],['table13',.5,-.05],['obelisk13',.04,.55],['rollers13',0.2,0.5],['shed13',0.06,0.55],['pack13',0.3,0.4],['rock13',.1,.5]],
+ ankh13:[['obelisk13',.04,-.55],['rubble13',.3,-.2],['table13',.5,.3],['rollers13',0.2,0.5],['shed13',0.06,0.55],['pack13',0.3,0.4],['bush13',.1,.55]],
+ collar13:[['tent13',.06,.5],['table13',.5,-.4],['camelS13',.55,.45],['rollers13',0.2,0.5],['shed13',0.06,0.55],['pack13',0.3,0.4],['rock13',.1,.5]],
+ mummy13:[['tent13',.06,-.55],['crate',.4,.1],['camelR13',.2,.6],['rollers13',0.2,0.5],['shed13',0.06,0.55],['pack13',0.3,0.4],['bush13',.1,.55]],
+ shard13:[['pit13',.2,.55],['sieve13',.1,-.55],['rubble13',.3,-.25],['rollers13',0.2,0.5],['shed13',0.06,0.55],['pack13',0.3,0.4],['rock13',.1,.5]],
+ compass:[['table13',.5,.4],['camelS13',.55,.45],['tent13',.06,.58],['rollers13',0.2,0.5],['shed13',0.06,0.55],['pack13',0.3,0.4],['bush13',.1,.55]],
+ amphora:[['jar13',.1,.7],['tent13',.06,-.58],['column13',.05,-.6],['rollers13',0.2,0.5],['shed13',0.06,0.55],['pack13',0.3,0.4],['rock13',.1,.5]]};
+/* 2026-11-26 難度調整：遮擋物（每種 1 個露一角藏在這些東西後面） */
+['tent13','sieve13','column13','table13','statue13','camelS13','camelR13','rubble13','cart13','pack13','rollers13'].forEach(k=>H.OCCK.add(k));
 H.BLEND[N]={brush13:['paintbrush13','rubble13'],lens13:['handmirror13','jar13'],papyrus13:['paperscroll13','rubble13'],mask13:['goldplate13','jar13'],
  eye13:['stonebrick13','rubble13'],catstat13:['catbank13','statue13'],ankh13:['keyring13','rock13'],collar13:['beads13','jar13'],
  mummy13:['ragdoll13','rubble13'],shard13:['cookie13','rock13'],compass:['goldplate13','rock13'],amphora:['jar13','jar13']};

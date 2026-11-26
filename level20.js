@@ -21,13 +21,13 @@ const an=(a,d,inner)=>`<g class="an a-${a}" style="--d:${d}s;animation-delay:-${
 const tube=(d,c,w=3.4)=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w+2.6}" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
 
 /* ================= 1. 場景範圍、場地外（暗暗的石牆＋石柱） ================= */
-H.SCENES[N]={x0:600,x1:1900,y1:2150,c:[1520,1880]};
+H.SCENES[N]={x0:250,x1:2250,y1:2150,c:[1520,1880]};  /* 2026-11-26n 加寬：600～1900 → 250～2250 */
 H.TARGET[N]=330;
 H.SKYC[N]='#3a2c25';H.SKYY[N]=0;
 H.EDGEM[N]='';H.EDGED[N]='';
 H.EDGEDECO[N]=[['barrel',1]];
 H.FRINGE[N]=[['barrel',.5],['crate',.4]];
-H.FRINGEX[N]=[[0,0,2600,880]];
+H.FRINGEX[N]=[[0,0,2600,880],[-400,0,600,2700],[1900,0,2900,2700]];  /* 兩側新房間有自己的佈景 */
 H.DENS[N]=1;
 if(H.FOGFN)H.FOGFN[N]=({X0,X1,Y1})=>{const C='#2a1f1a';
  const gd=(n,x1,x2,y1,y2)=>`<linearGradient id="${n}" x1="${x1}" x2="${x2}" y1="${y1}" y2="${y2}"><stop offset="0" stop-color="${C}" stop-opacity="1"/><stop offset=".5" stop-color="${C}" stop-opacity=".86"/><stop offset="1" stop-color="${C}" stop-opacity="0"/></linearGradient>`;
@@ -285,22 +285,23 @@ Object.assign(KIND,{
  funnel18:dk('funnel18',30,38,-6),rook18:dk('rook18',20,34,-6),bowl18:dk('bowl18',32,22,-4),napkin18:dk('napkin18',32,22,-4),straw18:dk('straw18',36,26,-4),
  hglass17:KIND.hglass17||dk('hglass17',24,36,-6),gourd17:KIND.gourd17||dk('gourd17',26,40,-6)});
 ['sweet18','cask18','ktable18','ptable18','oven18','cloak18','armor18','sack18','basket18','firewood18','plant18'].forEach(k=>H.OCCK.add(k));
+H.OCCK.add('chests20');H.OCCK.add('armor20');
 
 /* ================= 4. 12 種 × 4 個（10 種新東西＋2 種第 17 關的老朋友） ================= */
 const OLD={goblet17:{id:'goblet17',name:'高腳金杯',short:'金杯',r:15,rot:8},lute17:{id:'lute17',name:'魯特琴',short:'魯特琴',r:16,rot:12}};
 const old=(id,regions)=>({...(typeOf(id)||OLD[id]),regions});
 const TYPES=[
- old('goblet17',['dais18','hallC18','sweets18','foyer18']),old('lute17',['music18','foyer18','hallW18','dais18']),
- {id:'drum18',name:'烤雞腿',short:'雞腿',r:16,rot:20,regions:['kitchen18','hallW18','hallE18','sweets18']},
- {id:'cdl18',name:'三叉銀燭台',short:'燭台',r:16,rot:6,regions:['dais18','hallC18','music18','foyer18']},
- {id:'honey18',name:'蜂蜜罐',short:'蜂蜜罐',r:15,rot:8,regions:['kitchen18','sweets18','hallE18','hallW18']},
- {id:'cheese18',name:'起司輪',short:'起司',r:16,rot:8,regions:['kitchen18','hallC18','dais18','sweets18']},
- {id:'jelly18',name:'搖晃的果凍',short:'果凍',r:15,rot:6,regions:['sweets18','hallE18','dais18','kitchen18']},
- {id:'bell18',name:'金色餐鈴',short:'餐鈴',r:15,rot:15,regions:['foyer18','dais18','hallW18','music18']},
- {id:'pep18',name:'胡椒研磨罐',short:'胡椒罐',r:15,rot:12,regions:['kitchen18','hallC18','hallW18','foyer18']},
- {id:'cloche18',name:'銀色圓頂餐蓋',short:'餐蓋',r:16,rot:6,regions:['hallE18','kitchen18','dais18','sweets18']},
- {id:'invit18',name:'蠟封邀請函',short:'邀請函',r:15,rot:25,regions:['foyer18','music18','hallC18','hallE18']},
- {id:'wreath18',name:'編織麵包環',short:'麵包環',r:16,rot:20,regions:['kitchen18','hallW18','foyer18','music18']}];
+ old('goblet17',['dais18','hallC18','giftE1_20','foyer18']),old('lute17',['music18','foyer18','hallW18','honW3_20']),
+ {id:'drum18',name:'烤雞腿',short:'雞腿',r:16,rot:20,regions:['kitchen18','honW1_20','hallE18','sweets18']},
+ {id:'cdl18',name:'三叉銀燭台',short:'燭台',r:16,rot:6,regions:['dais18','hallC18','honW1_20','foyer18']},
+ {id:'honey18',name:'蜂蜜罐',short:'蜂蜜罐',r:15,rot:8,regions:['kitchen18','sweets18','giftE1_20','honW3_20']},
+ {id:'cheese18',name:'起司輪',short:'起司',r:16,rot:8,regions:['kitchen18','giftE3_20','dais18','sweets18']},
+ {id:'jelly18',name:'搖晃的果凍',short:'果凍',r:15,rot:6,regions:['sweets18','hallE18','honW2_20','kitchen18']},
+ {id:'bell18',name:'金色餐鈴',short:'餐鈴',r:15,rot:15,regions:['foyer18','dais18','giftE2_20','honW2_20']},
+ {id:'pep18',name:'胡椒研磨罐',short:'胡椒罐',r:15,rot:12,regions:['kitchen18','hallC18','honW1_20','giftE3_20']},
+ {id:'cloche18',name:'銀色圓頂餐蓋',short:'餐蓋',r:16,rot:6,regions:['giftE2_20','kitchen18','dais18','sweets18']},
+ {id:'invit18',name:'蠟封邀請函',short:'邀請函',r:15,rot:25,regions:['foyer18','honW3_20','hallC18','giftE2_20']},
+ {id:'wreath18',name:'編織麵包環',short:'麵包環',r:16,rot:20,regions:['kitchen18','hallW18','giftE1_20','foyer18']}];
 LEVELS[N].types=TYPES;
 /* BORROW：不借（大餐廳的物件不混進前面的關卡） */
 
@@ -314,8 +315,10 @@ const WINX=[860,1050,1450,1640];
 const KING={x:1215,y:712},QUEEN={x:1285,y:712};
 const TORCH=[[660,606],[770,606],[1735,606],[1845,606]];  /* 牆上小火炬（原本兩座大壁爐的位置） */
 Object.assign(REG,{dais18:{x:900,y:650,w:700,h:150},hallW18:{x:840,y:860,w:250,h:680},hallC18:{x:1090,y:860,w:320,h:680},hallE18:{x:1410,y:860,w:250,h:680},
- music18:{x:620,y:840,w:220,h:700},sweets18:{x:1660,y:820,w:220,h:740},kitchen18:{x:630,y:1600,w:540,h:520},foyer18:{x:1240,y:1580,w:640,h:540},all18:{x:620,y:820,w:1260,h:1300}});
-H.SCREG[N]=['hallW18','hallC18','hallE18','music18','sweets18','kitchen18','foyer18'];
+ music18:{x:620,y:840,w:220,h:700},sweets18:{x:1660,y:820,w:220,h:740},kitchen18:{x:630,y:1600,w:540,h:520},foyer18:{x:1240,y:1580,w:640,h:540},all18:{x:270,y:820,w:1960,h:1300},
+ honW1_20:{x:270,y:840,w:310,h:320},honW2_20:{x:270,y:1200,w:310,h:340},honW3_20:{x:270,y:1600,w:310,h:510},
+ giftE1_20:{x:1920,y:840,w:310,h:320},giftE2_20:{x:1920,y:1200,w:310,h:340},giftE3_20:{x:1920,y:1600,w:310,h:510}});
+H.SCREG[N]=['hallW18','hallC18','hallE18','music18','sweets18','kitchen18','foyer18','honW1_20','honW2_20','honW3_20','giftE1_20','giftE2_20','giftE3_20'];
 /* 小故事三個角色的固定位置：主廚在後廚、小白鼠在東邊的蛋糕塔、甜點師在後廚的甜點工作桌旁 */
 const SPOT={giver:[880,1730],target:[1722,1440],helper:[1096,2070]};
 
@@ -335,7 +338,7 @@ function ground(){
  g+=`<path d="${bl}" fill="none" stroke="#62503f" stroke-width="1.3"/>`;
  g+=`<rect x="${X0}" y="-420" width="${WW}" height="440" fill="#2e221c" stroke="none" opacity=".55"/><rect x="${X0}" y="20" width="${WW}" height="80" fill="#2e221c" stroke="none" opacity=".25"/>`;
  g+=`<rect x="${X0}" y="6" width="${WW}" height="30" fill="#5a3e2c"/><path d="M${X0},14 H${X1}" fill="none" stroke="#4a3022" stroke-width="1.4"/>`;
- for(let x=640;x<=1880;x+=155)g+=`<path d="M${x-12},36 h24 l-7,34 h-10Z" fill="#5a3e2c"/>`;
+ for(let x=Sc.x0+40;x<=Sc.x1-20;x+=155)g+=`<path d="M${x-12},36 h24 l-7,34 h-10Z" fill="#5a3e2c"/>`;
  const win=(cx,moon)=>{const w=58,y0=170,y1=520;let s=`<path d="M${cx-w-10},${y1+8} V240 Q${cx-w-10},${y0-14} ${cx},${y0-40} Q${cx+w+10},${y0-14} ${cx+w+10},240 V${y1+8}Z" fill="#9a8470"/>`;
   s+=`<path d="M${cx-w},${y1} V242 Q${cx-w},${y0} ${cx},${y0-26} Q${cx+w},${y0} ${cx+w},242 V${y1}Z" fill="url(#win18)"/>`;
   for(let i=0;i<7;i++)s+=`<circle cx="${f(cx+sr(-w+8,w-8))}" cy="${f(sr(y0-4,340))}" r="${f(sr(.9,1.8))}" fill="#fff8d8" stroke="none"/>`;
@@ -346,7 +349,7 @@ function ground(){
   s+=`<path d="M${cx-w},${y1} V242 Q${cx-w},${y0} ${cx},${y0-26} Q${cx+w},${y0} ${cx+w},242 V${y1}Z" fill="none" stroke-width="2.4"/>`;
   s+=`<rect x="${cx-w-16}" y="${y1+4}" width="${2*w+32}" height="14" rx="3" fill="#a8927c"/>`;
   return s};
- WINX.forEach((x,i)=>g+=win(x,i===2));
+ WINX.forEach((x,i)=>g+=win(x,i===2));[425,2075].forEach(x=>g+=win(x,false));  /* 兩側新房間各一扇高窗 */
  /* 王室掛毯（王座後面）：紅底金邊、盾牌＋皇冠＋星星（原創紋章） */
  const tp=1250;
  g+=`<rect x="${tp-118}" y="84" width="236" height="12" rx="6" fill="#6a4228"/><circle cx="${tp-122}" cy="90" r="8" fill="#e0b44a" stroke-width="1.6"/><circle cx="${tp+122}" cy="90" r="8" fill="#e0b44a" stroke-width="1.6"/>`;
@@ -378,11 +381,12 @@ function ground(){
  g+=`<ellipse cx="725" cy="1240" rx="96" ry="60" fill="#d9c194" stroke="#b89a68" stroke-width="2.4"/><ellipse cx="725" cy="1240" rx="66" ry="40" fill="none" stroke="#c4a674" stroke-width="2"/>`;
  {let d='';for(let i=0;i<8;i++){const a=i*Math.PI/4;d+=`M725,1240 L${f(725+Math.cos(a)*64)},${f(1240+Math.sin(a)*38)} `}g+=`<path d="${d}" fill="none" stroke="#c4a674" stroke-width="1.6"/>`}
  /* ---- 後廚：地磚、隔牆（拱門、掛著的鍋子和香草）、側邊矮牆 ---- */
- g+=`<rect x="${X0}" y="${PART}" width="${PX-X0}" height="${YB-PART}" fill="#a68f70" stroke="none"/>`;
- let kt='';for(let y=PART+40,k=0;y<YB;y+=40,k++){kt+=`M${X0},${y} H${PX} `;for(let x=X0+(k%2)*20;x<PX;x+=40)kt+=`M${x},${y-40} V${y} `}g+=`<path d="${kt}" fill="none" stroke="#8d775a" stroke-width="1.2"/>`;
+ const KX=600;  /* 後廚從 x 600 開始（西邊是榮耀廳） */
+ g+=`<rect x="${KX}" y="${PART}" width="${PX-KX}" height="${YB-PART}" fill="#a68f70" stroke="none"/>`;
+ let kt='';for(let y=PART+40,k=0;y<YB;y+=40,k++){kt+=`M${KX},${y} H${PX} `;for(let x=KX+(k%2)*20;x<PX;x+=40)kt+=`M${x},${y-40} V${y} `}g+=`<path d="${kt}" fill="none" stroke="#8d775a" stroke-width="1.2"/>`;
  g+=`<ellipse cx="880" cy="1800" rx="300" ry="220" fill="url(#glow18)" stroke="none" opacity=".7"/>`;
- g+=`<rect x="${X0}" y="${PART-92}" width="${PX+20-X0}" height="14" fill="#ad977f"/><rect x="${X0}" y="${PART-78}" width="${PX+20-X0}" height="78" fill="#8b7563"/>`;
- let pb='';for(let y=PART-60,k=0;y<PART;y+=20,k++)for(let x=X0+(k%2)*30;x<PX+20;x+=60)pb+=`M${x},${y} h44 `;g+=`<path d="${pb}" fill="none" stroke="#735f4f" stroke-width="1.2"/>`;
+ g+=`<rect x="${KX}" y="${PART-92}" width="${PX+20-KX}" height="14" fill="#ad977f"/><rect x="${KX}" y="${PART-78}" width="${PX+20-KX}" height="78" fill="#8b7563"/>`;
+ let pb='';for(let y=PART-60,k=0;y<PART;y+=20,k++)for(let x=KX+(k%2)*30;x<PX+20;x+=60)pb+=`M${x},${y} h44 `;g+=`<path d="${pb}" fill="none" stroke="#735f4f" stroke-width="1.2"/>`;
  const dm=(DOORX[0]+DOORX[1])/2;
  g+=`<path d="M${DOORX[0]},${PART} V${PART-44} Q${dm},${PART-84} ${DOORX[1]},${PART-44} V${PART}Z" fill="#c4a67a"/><path d="M${DOORX[0]},${PART} V${PART-44} Q${dm},${PART-84} ${DOORX[1]},${PART-44} V${PART}" fill="none" stroke="#6a4228" stroke-width="6"/>`;
  g+=`<path d="M640,${PART-66} H1010" fill="none" stroke="#4a4f5c" stroke-width="3"/>`;
@@ -393,6 +397,14 @@ function ground(){
   else g+=`<path d="M${x},${PART-66} V${PART-30}" fill="none" stroke="#c9a46a" stroke-width="1.6"/>${[-58,-48,-38].map(y=>`<circle cx="${x}" cy="${PART+y}" r="4.4" fill="#f4ecd6" stroke-width="1.2"/>`).join('')}`});
  /* 側邊矮牆（後廚和玄關之間，中間有門） */
  for(const [y0,y1] of [[PART-78,SIDE[0]],[SIDE[1],YB]]){g+=`<rect x="${PX}" y="${y0}" width="22" height="${y1-y0-40}" fill="#ad977f"/><rect x="${PX}" y="${y1-40}" width="22" height="40" fill="#8b7563"/>`}
+ /* 後廚西邊的實牆（榮耀廳和後廚之間） */
+ g+=`<rect x="${KX-14}" y="${PART-92}" width="22" height="${YB-PART+92}" fill="#ad977f"/><rect x="${KX-14}" y="${YB-40}" width="22" height="40" fill="#8b7563"/>`;
+ /* ---- 2026-11-26n 兩側新房間：西＝冠軍榮耀廳（深藍金邊長地毯）、東＝賀禮收禮廳（紅金菱格地毯） ---- */
+ g+=`<rect x="300" y="660" width="250" height="1460" fill="#2f4f8a"/><rect x="310" y="670" width="230" height="1440" fill="none" stroke="#e0b44a" stroke-width="3"/>`;
+ for(let y=760;y<2100;y+=180)g+=`<path d="M425,${y-22} l10,22 l-10,22 l-10,-22Z" fill="#e0b44a" stroke-width="1.2"/>`;
+ g+=`<rect x="1950" y="660" width="250" height="1460" fill="#8e2630"/><rect x="1960" y="670" width="230" height="1440" fill="none" stroke="#e0b44a" stroke-width="3"/>`;
+ {let d='';for(let y=700;y<2100;y+=60)for(let x=1985;x<2180;x+=60)d+=`M${x},${y} l15,30 l-15,30 l-15,-30Z `;g+=`<path d="${d}" fill="none" stroke="#b8484a" stroke-width="1.6"/>`}
+ [[425,1060],[425,1880],[2075,1060],[2075,1880]].forEach(([x,y])=>g+=`<ellipse cx="${x}" cy="${y}" rx="200" ry="150" fill="url(#glow18)" stroke="none" opacity=".6"/>`);
  /* ---- 東南玄關：從大門進來的紅地毯 ---- */
  g+=`<rect x="1520" y="1600" width="80" height="${YB-1600}" fill="#8e2630" stroke="none"/><path d="M1526,1600 V${YB} M1594,1600 V${YB}" fill="none" stroke="#e0b44a" stroke-width="2.2" stroke-dasharray="10 6"/>`;
  return `<g stroke="${OL}" stroke-width="2" stroke-linejoin="round">${g}</g>`}
@@ -403,6 +415,8 @@ Object.assign(POOL,{
  music18:[['stool18',1],['cush18',.5],['jug18',.4],['gourd17',.3],['napkin18',.3],['straw18',.3],['rook18',.2]],
  sweets18:[['basket18',.6],['jug18',.6],['jar18',.4],['cush18',.3],['napkin18',.3],['shade18',.3],['bowl18',.3]],
  kitchen18:[['sack18',1],['barrel',.9],['crate',.9],['basket18',.8],['firewood18',.6],['jug18',.5],['jar18',.4],['bowl18',.35],['fork18',.35],['yam18',.35],['funnel18',.35]],
+ honor20:[['stool18',.6],['cush18',.5],['napkin18',.4],['hglass17',.4],['gourd17',.4],['rook18',.4],['funnel18',.35],['shade18',.35],['fork18',.3],['straw18',.3]],
+ gift20:[['basket18',.5],['jar18',.5],['bowl18',.4],['napkin18',.4],['cush18',.4],['yam18',.4],['sack18',.4],['straw18',.35],['shade18',.35],['funnel18',.3],['rook18',.3]],
  foyer18:[['plant18',.5],['stool18',.4],['cush18',.35],['straw18',.3],['napkin18',.3],['rook18',.25],['hglass17',.25],['funnel18',.2]]});
 /* 人群小故事：每組在做一件有趣的事，點了說一句話 */
 const grp=(x,y,w,h,kind,svg,say,o={})=>add(x,y,w,h,kind,svg,{say,...o});
@@ -421,6 +435,96 @@ const cloakHand=`<path d="M14,-20 Q22,-22 24,-8 L16,-6Z" fill="#2f4f8a" stroke-w
 const towel=`<path d="M-12,-17 Q-16,-12 -14,-4 L-9,-6 L-9,-15Z" fill="#fbf9f2" stroke-width="1.1"/>`;
 const cravat=`<path d="M-3,-17 L0,-12 L3,-17Z" fill="#fbf9f2" stroke-width="1"/>`;
 const butlerO=o=>Object.assign({hat:-1,hs:0,hair:'#c9c4bc',skin:'#f0cfae',shirt:'#2f2f3a',top:'long',bottom:'pants',pants:'#2f2f3a',mood:1,extra:cravat+towel},o);
+H.L20={sh,gown,RICH,HAT_CROWN,HAT_TIARA,HAT_BERET,HAT_CHEF,HAT_CAP,servant,cook,knight,kHelm,kHelmG,kPlate,kCape,kSword,kHalb,laurel,champ,armorStand,gHelm,gPlate,gFlag,plant,stool,jug,cloakRack,butlerO,cravat,towel,torch,tray,harp,tabor,tube};  /* 2026-11-26n 加寬區、選項圖共用 */
+/* ================= 3b. 2026-11-26n 加寬：西＝冠軍榮耀廳、東＝賀禮收禮廳，中間一排方石柱＋火把（使用者選） ================= */
+const HAT_HERALD=HATS.push(H.HATKIT.beretB('#8e2630',{fe:'#f0c94a',fe2:'#c99a3a'}))-1;   /* 吟遊詩人的紅色羽毛扁帽 */
+const HAT_KASA=HATS.push(()=>`<path d="M-24,-40 Q0,-66 24,-40 Q0,-46 -24,-40Z" fill="#d9b46a"/><path d="M-12,-49 Q0,-55 12,-49" fill="none" stroke="#a8803a" stroke-width="1.3"/>`)-1;  /* 櫻花山城使節的斗笠（對稱） */
+const {wrapAn}=H;
+const X20=(()=>{
+const WD='#a8703f',WD2='#8a5a34',WD3='#6a4228',ST='#b8ab98',ST2='#9a8a78',GO='#e0b44a',GO2='#c99a3a';
+const leg=(d,w=4.4,c=WD2)=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w}"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w-1.8}"/>`;
+const P=(o,x,y,dir,a)=>act(x,y,dir,{hat:-1,...o},a||'nod');
+const K=(o,x,y,dir,s=.82)=>T(x,y,s,kid({hat:-1,...o}),dir<0);
+const plinth=(w,h,c=ST)=>`<rect x="${-w/2}" y="${-h}" width="${w}" height="${h}" fill="${c}"/><rect x="${-w/2-5}" y="${-h-7}" width="${w+10}" height="8" rx="2" fill="#cfc3b0"/><rect x="${-w/2-3}" y="-5" width="${w+6}" height="5" fill="${ST2}"/>`;
+const suit=(cape='#2f4f8a')=>kCape(cape)+kid({view:'front',pose:'stand',arm:0,hat:-1,hs:0,skin:'#c4cad2',hair:'#8a929c',shirt:'#c4cad2',pants:'#8a929c',top:'long',bottom:'pants',mood:0})+kPlate('#c4cad2','#8a929c')+kHelm;
+const bow=(x,y,c)=>`<path d="M${x},${y} q-8,-8 -9,0 q1,5 9,0 q8,-8 9,0 q-1,5 -9,0Z" fill="${c}" stroke-width="1.1"/><circle cx="${x}" cy="${y}" r="2" fill="${c}" stroke-width="1"/>`;
+const box=(x,y,w,h,c,rb='#f0c94a')=>`<rect x="${x-w/2}" y="${y-h}" width="${w}" height="${h}" fill="${c}"/><path d="M${x},${y-h} V${y} M${x-w/2},${y-h/2} H${x+w/2}" fill="none" stroke="${rb}" stroke-width="3"/>`+bow(x,y-h,rb);
+const champO=(o={})=>({hat:-1,hs:1,hair:'#4a3424',skin:'#d9a578',shirt:'#c4cad2',pants:'#8a929c',top:'long',bottom:'pants',...o});
+/* 西 1：石台上的冠軍盔甲（A） */
+const armor=()=>sh(70,7)+plinth(76,28)+T(0,-35,1.45,suit());
+/* 西 2：金框大肖像（B） */
+const portraitArt=(w,h)=>`<rect x="${-w/2}" y="${-h}" width="${w}" height="${h}" fill="#3f5f8a"/><path d="M${-w/2},${-h*.25} H${w/2} V0 H${-w/2}Z" fill="#6a8a5a" stroke="none"/>`+T(0,-h*.12,h/90,`<path d="M-16,0 Q-18,-20 0,-22 Q18,-20 16,0Z" fill="#c4cad2"/><circle cx="0" cy="-35" r="13" fill="#d9a578"/><path d="M-13,-38 Q-12,-50 0,-50 Q12,-50 13,-38 Q6,-44 0,-42 Q-6,-44 -13,-38Z" fill="#4a3424"/>${laurel}`);
+const portrait=()=>sh(56,7)+leg('M-40,0 L-34,-60 M40,0 L34,-60',5,WD3)+`<g transform="translate(0,-56)"><rect x="-56" y="-118" width="112" height="126" rx="3" fill="${GO}"/>${portraitArt(96,110)}<rect x="-48" y="-110" width="96" height="110" fill="none" stroke-width="2"/><rect x="-56" y="-118" width="112" height="126" rx="3" fill="none" stroke="${GO2}" stroke-width="1.6"/></g>`;
+/* 西 3：吟遊詩人的小圓台（D），彈豎琴唱冠軍之歌，三個小朋友坐著聽 */
+const stage=()=>sh(64,10)+`<ellipse cx="0" cy="-10" rx="56" ry="18" fill="${WD}"/><path d="M-56,-10 V0 A56,18 0 0 0 56,0 V-10" fill="${WD2}"/>`;
+const bard=()=>stage()+P({hat:HAT_HERALD,hs:2,hair:'#c9853a',shirt:'#6a3f8a',view:'fq',pose:'hold',extra:harp.replace('translate(14,-4)','translate(6,-6)')},-6,-16,1,'groove')+noteM(24,-86)+noteM(36,-70)+
+ K({view:'back',pose:'sit',shirt:'#f5d34a'},-70,18,1,.75)+K({view:'back',pose:'sit',shirt:'#4f86c4'},-30,24,1,.75)+K({view:'bq',pose:'sit',shirt:'#d8413a'},64,20,-1,.75);
+/* 東 1：三個打開的寶箱（B）：布匹、水果、金幣寶石 */
+const chest=(x,inner)=>`<g transform="translate(${x},0)"><path d="M-26,-30 L-24,-64 H24 L26,-30Z" fill="${WD2}"/><path d="M-22,-34 L-21,-60 H21 L22,-34Z" fill="#5a3a22" stroke="none"/>${inner}<path d="M-26,-2 V-30 H26 V-2Z" fill="${WD}"/><path d="M-26,-30 H26 M-26,-16 H26" fill="none" stroke="${GO2}" stroke-width="2.6"/><rect x="-4" y="-24" width="8" height="8" fill="${GO}" stroke-width="1"/><path d="M-26,-2 V-30 H26 V-2Z" fill="none"/></g>`;
+const chests=()=>sh(100,8)+chest(-60,`<path d="M-20,-30 q6,-14 14,-2 q6,-14 14,0 q6,-10 12,2" fill="#8e2630" stroke-width="1.2"/><rect x="-20" y="-40" width="40" height="10" rx="5" fill="#3f8ac4" stroke-width="1.2"/>`)+
+ chest(0,`<circle cx="-10" cy="-32" r="6" fill="#e8742a" stroke-width="1"/><circle cx="4" cy="-34" r="6" fill="#c4473a" stroke-width="1"/><circle cx="14" cy="-30" r="5" fill="#f0c94a" stroke-width="1"/><path d="M-6,-38 q2,-6 6,-4" fill="none" stroke="#5a7a2a" stroke-width="1.4"/>`)+
+ chest(60,[...Array(9)].map((_,i)=>`<circle cx="${-16+(i%5)*8}" cy="${-31-Math.floor(i/5)*5}" r="3.6" fill="${GO}" stroke-width=".9"/>`).join('')+`<path d="M8,-38 l4,-6 l4,6 l-4,4Z" fill="#3fa8c4" stroke-width="1"/><path d="M-12,-40 l4,-6 l4,6 l-4,4Z" fill="#d8413a" stroke-width="1"/>`);
+/* 東 2：老管家念長長的禮單（D，拖到地上），旁邊的侍從聽到打瞌睡 */
+const listRead=()=>sh(60,8)+P({...butlerO({hair:'#e8e4dc',beard:true}),view:'fq',pose:'up2'},0,0,1,'nod')+
+ `<g><rect x="-17" y="-30" width="36" height="6" rx="3" fill="#d8c494"/><path d="M-15,-24 H17 V-2 Q18,10 30,12 Q20,18 0,16 H-16Z" fill="#efe0b8"/><path d="M-12,-20 H12 M-12,-16 H10 M-12,-12 H12 M-12,-8 H8 M-12,-4 H12 M-10,2 H14" fill="none" stroke="#5a4a3a" stroke-width="1"/><path d="M0,16 Q40,22 60,14 Q70,8 62,4 Q54,2 56,10" fill="#efe0b8" stroke-width="1.4"/></g>`+
+ P({...servant({}),view:'side',pose:'stand',mood:3},-70,4,1,'nod');
+/* 東 3：櫻花山城使節送櫻花盆景（D） */
+const bonsai=()=>`<path d="M-18,0 L-14,-12 H14 L18,0Z" fill="#3f5f8a"/><rect x="-20" y="-15" width="40" height="5" rx="2" fill="#2f4f6a"/>`+leg('M0,-14 Q-6,-30 4,-40 Q12,-48 4,-58 M2,-40 Q16,-44 22,-52',4.2,'#6a4a30')+
+ [[-10,-58,12],[8,-64,13],[22,-54,10],[-4,-44,8],[14,-44,8]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#f6c4d4"/>`).join('')+[[-12,-60],[6,-66],[20,-56],[10,-46]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.4" fill="#e07a9a" stroke="none"/>`).join('');
+const envoy=()=>sh(70,8)+P({hat:HAT_KASA,hs:1,hair:'#2b2420',skin:'#f0cfae',kim:'#8e4a6a',shirt:'#8e4a6a',view:'side',pose:'reach'},-10,0,1,'nod')+T(50,0,1.3,bonsai());
+/* 隔開大廳和兩側的方石柱＋火把（B）；fl＝火把朝左 */
+const pillar=()=>{const w=34,h=170;let s=sh(24,5)+`<rect x="${-w/2}" y="${-h}" width="${w}" height="${h-16}" fill="#a8988a"/>`;for(let y=-h+20;y<-20;y+=26)s+=`<path d="M${-w/2},${y} H${w/2}" fill="none" stroke="#8b7a6c" stroke-width="1.4"/>`;
+ s+=`<rect x="${-w/2-6}" y="-12" width="${w+12}" height="12" fill="#a89a86"/><rect x="${-w/2-3}" y="-18" width="${w+6}" height="7" fill="#b8ab98"/><rect x="${-w/2-8}" y="${-h-12}" width="${w+16}" height="12" fill="#a89a86"/><rect x="${-w/2-4}" y="${-h-2}" width="${w+8}" height="6" fill="#b8ab98"/>`;
+ s+=`<g transform="translate(${w/2},${-h*.62})"><circle cx="10" cy="-40" r="20" fill="#ffb24a" opacity=".2" stroke="none"/><path d="M0,0 H8 V-10" fill="none" stroke-width="3"/><path d="M5,-8 L11,-30" fill="none" stroke="${OL}" stroke-width="6"/><path d="M5,-8 L11,-30" fill="none" stroke="#7a5235" stroke-width="3.8"/>`+
+  `<g class="an a-fire" style="--d:.8s"><path d="M11,-30 q-9,-9 -3,-21 q2,6 5,4 q-1,-8 3,-12 q8,10 2,29Z" fill="#f08a3a" stroke-width="1.3"/><path d="M11,-33 q-4,-6 0,-12 q4,6 0,12Z" fill="#f5d34a" stroke="none"/></g></g>`;return s};
+/* ---------- 小組 ---------- */
+const woodSword=(a,x=14,y=-18)=>`<g transform="translate(${x},${y}) rotate(${a})"><path d="M0,0 L14,-22" fill="none" stroke="${OL}" stroke-width="4.4"/><path d="M0,0 L14,-22" fill="none" stroke="#d9b07a" stroke-width="2.6"/><path d="M-4,-4 L6,4" fill="none" stroke="${OL}" stroke-width="3.6"/><path d="M-4,-4 L6,4" fill="none" stroke="#8a5a30" stroke-width="2"/></g>`;
+const hobby=`<g transform="translate(13,-18)"><path d="M-30,24 L4,-6" fill="none" stroke="${OL}" stroke-width="4"/><path d="M-30,24 L4,-6" fill="none" stroke="#a8703f" stroke-width="2.4"/><path d="M2,-4 Q2,-16 12,-18 Q20,-16 18,-8 L22,-6 Q16,0 8,-2Z" fill="#fbf6ea"/><path d="M4,-14 Q-2,-12 0,-4" fill="none" stroke="#8a5a30" stroke-width="2.4"/><circle cx="14" cy="-12" r="1.2" fill="${OL}" stroke="none"/></g>`;
+const helmStack=`<g transform="translate(18,6)">${[0,1,2].map(i=>`<g transform="translate(${(i%2)*2-1},${-i*12}) scale(.5)">${kHelm}</g>`).join('')}</g>`;
+const monkey=`<path d="M-8,0 Q-10,-14 0,-16 Q10,-14 8,0Z" fill="#8a5a30"/><circle cx="0" cy="-22" r="8" fill="#8a5a30"/><ellipse cx="0" cy="-20" rx="5" ry="4.4" fill="#e8c4a0" stroke="none"/><circle cx="-8" cy="-24" r="3" fill="#e8c4a0" stroke-width="1"/><circle cx="8" cy="-24" r="3" fill="#e8c4a0" stroke-width="1"/><circle cx="-2" cy="-22" r="1.1" fill="${OL}" stroke="none"/><circle cx="2" cy="-22" r="1.1" fill="${OL}" stroke="none"/><path d="M-6,-10 L-14,-20 M6,-10 L14,-20" fill="none" stroke="#8a5a30" stroke-width="3" stroke-linecap="round"/><path d="M8,-2 Q18,0 16,-12" fill="none" stroke="#8a5a30" stroke-width="2.4"/><path d="M-6,-28 h12 l-2,-4 h-8Z" fill="#c4473a" stroke-width="1"/>`;
+const G={
+ swords:()=>K({view:'side',pose:'reach',shirt:'#4f86c4',extra:woodSword(-10)},-22,0,1,.9)+K({view:'side',pose:'up',shirt:'#d8413a',extra:woodSword(-40,21,-25)},22,0,-1,.9),
+ hobby:()=>wrapAn('hop',K({view:'side',pose:'hold',legs:'run',shirt:'#f5d34a',extra:hobby},0,0,1,.95),true),
+ helms:()=>P({...servant({hat:-1}),hs:0,hair:'#8a5a2a',view:'side',pose:'hold',legs:'walk',extra:helmStack},0,0,1,'step'),
+ oldKnight:()=>P({hat:-1,hs:0,hair:'#e8e4dc',beard:true,shirt:'#8a929c',top:'long',bottom:'pants',pants:'#6a6f7a',view:'side',pose:'up2',extra:kCape('#3f6a4a')},-22,0,1,'nod')+P({hat:HAT_BERET,shirt:'#7a3a5a',view:'side',pose:'stand',mood:1},24,0,-1,'lean'),
+ sign:()=>P({hat:HAT_TIARA,hs:2,shirt:'#f4a8c4',extra:gown('#f4a8c4')+`<g transform="translate(14,-20)"><rect x="-6" y="-8" width="12" height="15" fill="#fbf8f0" stroke-width="1"/></g>`,view:'side',pose:'reach'},-22,0,1,'nod')+P({...champO({hs:0,hair:'#6a4a30'}),view:'side',pose:'reach',extra:`<path d="M14,-18 L18,-26" fill="none" stroke="#fbf6ea" stroke-width="2.2"/>`},22,0,-1,'nod'),
+ shake:()=>K({view:'side',pose:'up',shirt:'#6fc06a',extra:`<g transform="translate(21,-25)">${box(0,6,16,14,'#b8667a','#fbf6ea')}</g><path d="M32,-36 q3,3 0,6 M36,-38 q4,5 0,10" fill="none" stroke="#9a8a7a" stroke-width="1.2"/>`},0,0,1,.95),
+ ribbon:()=>P({...servant({hat:HAT_CAP}),hs:2,hair:'#c9853a',view:'front',arm:2,mood:3},0,0,1,'nod')+`<path d="M-14,-12 Q0,-4 14,-14 M-14,-22 Q0,-14 14,-24 M-10,-4 Q4,4 12,-6 Q20,-2 16,6" fill="none" stroke="#d8413a" stroke-width="2.6"/>`+bow(12,-16,'#d8413a'),
+ bigBox:()=>P({...servant({hat:-1}),view:'side',pose:'hold'},-30,0,1,'step')+P({...servant({hat:HAT_CAP}),view:'side',pose:'hold'},30,0,-1,'step')+box(0,-6,48,40,'#2f4f8a'),
+ monkey:()=>`<rect x="-45" y="-22" width="30" height="22" fill="#3f6a4a"/><path d="M-30,-22 V0 M-45,-11 H-15" fill="none" stroke="#f0c94a" stroke-width="3"/>`+T(-30,-24,1,wrapAn('hop',monkey,true))+P({...servant({hat:HAT_CAP}),view:'side',pose:'reach',legs:'run',mood:3},30,0,-1,'step'),
+ check:()=>P({...butlerO({hair:'#e8e4dc'}),view:'side',pose:'hold',extra:cravat+`<g transform="translate(13,-18)"><path d="M-4,-8 H8 V10 Q10,22 2,28 Q-4,22 -4,14Z" fill="#efe0b8" stroke-width="1.1"/><path d="M-1,-4 H6 M-1,0 H6 M-1,4 H5" fill="none" stroke="#5a4a3a" stroke-width=".8"/></g>`},-16,0,1,'nod')+box(30,0,22,18,'#8e2630')};
+/* 小禮盒（東邊散放的裝飾，不是干擾物） */
+const gifts=()=>{const c=pk([['#8e2630','#f0c94a'],['#2f4f8a','#fbf6ea'],['#3f6a4a','#f0c94a'],['#6a3f8a','#f0c94a'],['#b8667a','#fbf6ea']]);return sh(20,4)+box(-6,0,22,18,c[0],c[1])+box(10,0,16,12,c[1]==='#fbf6ea'?'#e8c04a':'#fbf6ea',c[0])};
+return {armor,portrait,bard,chests,listRead,envoy,pillar,G,gifts,plinth}})();
+H.X20=X20;
+/* 兩側新房間的佈景 */
+function structuresX(){
+ const Sc=H.SCENES[N],C=[425,2075],{G}=X20;
+ /* 隔開的方石柱：西邊到後廚隔牆為止（後廚西邊是實牆），東邊一路到玄關；東邊的火把朝大廳（左） */
+ [880,1080,1280,1450].forEach(y=>add(600,y,40,180,'pillar20',X20.pillar(),{sh:.6}));
+ [880,1080,1280,1480,1720,1990].forEach(y=>add(1900,y,40,180,'pillar20',T(0,0,1,X20.pillar(),true),{sh:.6}));
+ /* 西：冠軍榮耀廳 */
+ grp(C[0],1060,100,110,'armor20',X20.armor(),'冠軍的盔甲：比武大會三天都穿著它，盔甲上還有一道長槍擦過的痕跡。',{sh:.9});
+ grp(C[0],1420,112,180,'portrait20',X20.portrait(),'宮廷畫家：畫了七天七夜，終於把冠軍的笑容畫出來了！');
+ grp(C[0],1880,120,80,'bardst20',X20.bard(),'吟遊詩人：♪ 第三天的最後一回合～長槍斷成兩截～冠軍還穩穩坐在馬上～');
+ grp(330,900,70,70,'swords20',G.swords(),'小朋友：我是冠軍騎士！——不對，這次換我當冠軍！');
+ grp(525,1200,50,70,'hobby20',G.hobby(),'小朋友：駕！駕！我的木馬跑得比冠軍的馬還快！');
+ grp(330,1640,40,70,'helms20',G.helms(),'侍從：這些頭盔都擦亮了⋯我的臉都照得到！');
+ grp(520,1610,80,70,'oldKnight20',G.oldKnight(),'老騎士：想當年，我一根長槍就把三個對手⋯咳咳，總之很厲害就對了！');
+ grp(335,2085,80,70,'sign20',G.sign(),'少女：可以幫我簽名嗎？我要拿回去給妹妹看！');
+ /* 東：賀禮收禮廳 */
+ grp(C[1],1060,170,70,'chests20',X20.chests(),'寶箱看守：這三箱是鄰國送的賀禮：布匹、水果，還有一整箱金幣！',{sh:.9});
+ grp(C[1]+20,1420,140,80,'list20',X20.listRead(),'老管家：⋯第一百二十七件，北國送的毛毯一條；第一百二十八件⋯（旁邊的侍從睡著了）');
+ grp(C[1],1880,110,90,'envoy20',X20.envoy(),'櫻花山城的使節：這是山城最老的櫻花盆景，一年四季都開花，送給冠軍騎士！');
+ grp(1975,900,40,70,'shake20',G.shake(),'小朋友：（搖一搖）咚咚咚⋯裡面一定是糖果！');
+ grp(2185,1200,40,70,'ribbon20',G.ribbon(),'侍從：誰把緞帶綁這麼長的啦⋯我解不開了！');
+ grp(1995,1610,110,70,'bigBox20',G.bigBox(),'搬禮物的侍從：往左一點⋯不對，是你的左邊還是我的左邊？');
+ grp(2175,1650,90,70,'monkey20',G.monkey(),'侍從：等一下！那隻小猴子是南方國家送的賀禮，不能讓牠跑掉！');
+ grp(2000,2095,80,70,'check20',G.check(),'管家：清單上寫三十箱，這裡只有二十九箱⋯是誰把一箱搬去廚房了？');
+ [[2200,1080],[1960,1780]].forEach(([x,y])=>add(x,y,40,30,'gifts20',X20.gifts(),{sh:.6}));
+ /* 北牆、後廚西牆的位置不能放東西 */
+ mk(Sc.x0,0,Sc.x1,WY+20);mk(586,PART-110,616,2160);
+}
 function structures(){
  /* 北邊：牆上小火炬、王座、主桌、主桌後面的貴族和冠軍騎士、守護騎士 */
  TORCH.forEach(([x,y])=>add(x,y,40,170,'torch18',torch(),{mark:false}));
@@ -492,16 +596,22 @@ function structures(){
   extra:`<g transform="translate(14,-18)"><path d="M-4,0 L-3,-6 H3 L4,0Z" fill="#fbf8f0" stroke-width="1.2"/></g>`},'nod')+an('float','3',teapot+`<path d="M8,-58 Q10,-40 12,-28" fill="none" stroke="#c98a4a" stroke-width="1.8"/>`),'老奶奶：哎呀，茶壺自己飄過來倒茶，這城堡真是太貼心了。');
  add(1268,1640,36,62,'plant18',plant(),{sh:.7});add(1268,2110,36,62,'plant18',plant(),{sh:.7});
  /* 不能放東西的地方：北牆、隔牆、矮牆、樂師台、故事角色的固定位置 */
+ structuresX();
  mk(600,0,1900,WY+20);mk(600,PART-110,PX+30,PART+12);mk(PX-8,PART,PX+30,SIDE[0]);mk(PX-8,SIDE[1],PX+30,2160);mk(620,880,830,1060);
  Object.values(SPOT).forEach(([x,y])=>mk(x-30,y-70,x+30,y+6));
  HEARTHSP=sprites().filter(s=>s.kind==='torch18');
 }
+/* 2026-11-26n 干擾物倍數（DM 中間各區、DS 兩側；只乘干擾物權重）、CM 中間 scatter 上限倍數、CS 兩側每區上限 */
+const DM20=10,DS20=.6,CM20=1.5,CS20=4;
+const dm=(pool,m)=>pool.map(([k,w])=>[k,DECOY[k]!==undefined?w*m:w]);
 let HEARTHSP=[];const sprites=()=>H.sprites||[];
 function scatterAll(){
  /* 故事角色搬到固定的地方 */
  const S=H.dbg.storySp();if(S){moveSp(S.giver,SPOT.giver);moveSp(S.target,SPOT.target);moveSp(S.helper,SPOT.helper)}
- scatter('hallW18',POOL.hall18,1400,10);scatter('hallC18',POOL.hall18,1400,10);scatter('hallE18',POOL.hall18,1400,10);
- scatter('music18',POOL.music18,1600,12);scatter('sweets18',POOL.sweets18,1600,14);scatter('kitchen18',POOL.kitchen18,3200,34);scatter('foyer18',POOL.foyer18,2400,18);
+ const c=n=>Math.max(1,Math.round(n*CM20));
+ scatter('hallW18',dm(POOL.hall18,DM20),c(1400),c(10));scatter('hallC18',dm(POOL.hall18,DM20),c(1400),c(10));scatter('hallE18',dm(POOL.hall18,DM20),c(1400),c(10));
+ scatter('music18',dm(POOL.music18,DM20),c(1600),c(12));scatter('sweets18',dm(POOL.sweets18,DM20),c(1600),c(14));scatter('kitchen18',dm(POOL.kitchen18,DM20),c(3200),c(34));scatter('foyer18',dm(POOL.foyer18,DM20),c(2400),c(18));
+ ['honW1_20','honW2_20','honW3_20'].forEach(k=>scatter(k,dm(POOL.honor20,DS20),1500,CS20));['giftE1_20','giftE2_20','giftE3_20'].forEach(k=>scatter(k,dm(POOL.gift20,DS20),1500,CS20));
 }
 const CELL=H.CELL,occ=H.occ,GC=H.GC,GR=H.GR;
 function clearCells(x,y,w,h){const a=Math.floor((x-w*.3)/CELL),c=Math.floor((x+w*.3)/CELL),b=Math.floor((y-h*.5)/CELL),d=Math.floor(y/CELL);for(let j=Math.max(0,b);j<=Math.min(GR-1,d);j++)for(let i=Math.max(0,a);i<=Math.min(GC-1,c);i++)occ[j*GC+i]=0}
@@ -509,24 +619,27 @@ function moveSp(sp,p){if(!sp||!p)return;clearCells(sp.x,sp.y,sp.w,sp.h);const[x,
 SCENE_IMPL[N]={ground,structures,scatter:scatterAll};
 /* 人要多：玄關最熱鬧，走道和兩側也有人走動 */
 Object.assign(VPLAN,{hallW18:{walker:3,chat:2},hallC18:{walker:5,chat:1},hallE18:{walker:3,chat:2},music18:{chat:3,walker:2},sweets18:{chat:4,walker:3},
- kitchen18:{carryBox:3},foyer18:{chat:12,walker:12,handInHand:3,reading:1}});  /* 2026-11-20 使用者：路上、廚房的人多 1.5 倍 */
+ kitchen18:{carryBox:3},foyer18:{chat:12,walker:12,handInHand:3,reading:1},
+ honW1_20:{walker:1},honW2_20:{walker:1,chat:1},honW3_20:{walker:1},giftE1_20:{walker:1},giftE2_20:{walker:1,chat:1},giftE3_20:{chat:1}});  /* 2026-11-20 使用者：路上、廚房的人多 1.5 倍 */
+['armor20','portrait20','bardst20','chests20','list20','envoy20'].forEach(k=>HOSTK.add(k));
+Object.assign(HOSTN,{armor20:'冠軍盔甲',portrait20:'冠軍肖像',bardst20:'吟遊詩人的小台子',chests20:'賀禮寶箱',list20:'念禮單的老管家',envoy20:'櫻花盆景'});
 HOSTK.add('sweet18');HOSTK.add('cask18');HOSTK.add('oven18');HOSTK.add('cloak18');HOSTK.add('armor18');HOSTK.add('ktable18');HOSTK.add('ptable18');
 Object.assign(HOSTN,{sweet18:'點心桌',cask18:'酒桶架',oven18:'麵包窯',cloak18:'斗篷架',armor18:'盔甲',ktable18:'廚房工作桌',ptable18:'甜點工作桌'});
 /* 物件的合理位置：每種最多一個桌子選項，其他放在人群、壁爐、架子旁邊；BLEND 是顏色相近的東西 */
 const onHead=()=>[Math.random()*480-240,-46];
 H.SPOTS[N]={
- goblet17:[['head18',onHead],['cask18',.05,.6],['champ18',.03,.7]],
- lute17:[['band18',.03,.6],['knight18',.03,.6],['stool18',.6,.1]],
- drum18:[['tbl18',.6,.3],['spit18',.04,.55],['hound18',.05,.6]],
- cdl18:[['head18',onHead],['captain18',.03,.6],['armor18',.03,.7]],
- honey18:[['ktable18',.75,.35],['sack18',.05,.6],['oven18',.04,.6]],
- cheese18:[['ktable18',.75,.35],['cask18',.05,.6],['basket18',.05,.7]],
- jelly18:[['sweet18',()=>[Math.random()*170-85,-30-Math.random()*50]],['tray18',.03,.7],['queen18',.03,.7]],
- bell18:[['head18',onHead],['butler18',.03,.6],['cloak18',.05,.7]],
- pep18:[['tbl18',.6,.3],['soup18',.04,.6],['jug18',.05,.8]],
- cloche18:[['tbl18',.6,.3],['wash18',.04,.6],['pig18',.03,.6]],
- invit18:[['cloak18',.05,.7],['butler18',.03,.6],['chess18',.03,.6]],
- wreath18:[['ptable18',.75,.35],['oven18',.04,.6],['maid18',.03,.7]]};
+ goblet17:[['head18',onHead],['cask18',.05,.6],['champ18',.03,.7],['chests20',.05,.6]],
+ lute17:[['band18',.03,.6],['knight18',.03,.6],['stool18',.6,.1],['bardst20',.04,.5]],
+ drum18:[['tbl18',.6,.3],['spit18',.04,.55],['hound18',.05,.6],['armor20',.05,.6]],
+ cdl18:[['head18',onHead],['captain18',.03,.6],['armor18',.03,.7],['armor20',.04,.6],['list20',.04,.6]],
+ honey18:[['ktable18',.75,.35],['sack18',.05,.6],['oven18',.04,.6],['chests20',.05,.6]],
+ cheese18:[['ktable18',.75,.35],['cask18',.05,.6],['basket18',.05,.7],['envoy20',.05,.6]],
+ jelly18:[['sweet18',()=>[Math.random()*170-85,-30-Math.random()*50]],['tray18',.03,.7],['queen18',.03,.7],['portrait20',.04,.6]],
+ bell18:[['head18',onHead],['butler18',.03,.6],['cloak18',.05,.7],['list20',.04,.6],['oldKnight20',.03,.6]],
+ pep18:[['tbl18',.6,.3],['soup18',.04,.6],['jug18',.05,.8],['envoy20',.04,.6]],
+ cloche18:[['tbl18',.6,.3],['wash18',.04,.6],['pig18',.03,.6],['list20',.05,.6],['gifts20',.1,.8]],
+ invit18:[['cloak18',.05,.7],['butler18',.03,.6],['chess18',.03,.6],['bardst20',.05,.6],['sign20',.04,.6]],
+ wreath18:[['ptable18',.75,.35],['oven18',.04,.6],['maid18',.03,.7],['portrait20',.05,.6]]};
 /* 2026-11-23c 使用者重選的干擾物（同一個名稱在第 17～20 關都一樣，最後載入的檔案也會設成同一張圖） */
 Object.assign(DECOY,{hglass17:"<path d=\"M-11,-14 Q-11,4 0,4 Q11,4 11,-14Z\" fill=\"#e8c04a\"/><path d=\"M-11,-14 H11\" fill=\"none\"/><path d=\"M-6,-10 Q-6,-2 -3,0\" fill=\"none\" stroke=\"#fff3c0\" stroke-width=\"2\"/><path d=\"M-2,4 V12 M2,4 V12\" fill=\"none\" stroke-width=\"2\"/><rect x=\"-2\" y=\"4\" width=\"4\" height=\"8\" fill=\"#e8c04a\" stroke=\"none\"/><ellipse cx=\"0\" cy=\"13\" rx=\"9\" ry=\"3\" fill=\"#e8c04a\"/>",gourd17:"<g transform=\"rotate(30)\"><path d=\"M0,4 V24\" fill=\"none\" stroke=\"#2b2420\" stroke-width=\"6.4\" stroke-linecap=\"round\"/><path d=\"M0,4 V24\" fill=\"none\" stroke=\"#c99a5b\" stroke-width=\"4\" stroke-linecap=\"round\"/><circle cx=\"0\" cy=\"-8\" r=\"13\" fill=\"#c99a5b\"/><circle cx=\"0\" cy=\"-8\" r=\"9\" fill=\"#a8703f\" stroke=\"none\"/><path d=\"M-6,-12 Q-7,-6 -4,-2\" fill=\"none\" stroke=\"#d8b078\" stroke-width=\"2\" stroke-linecap=\"round\"/></g>",yam18:"<g transform=\"rotate(-30)\"><path d=\"M0,4 V22\" fill=\"none\" stroke=\"#2b2420\" stroke-width=\"5.8\" stroke-linecap=\"round\"/><path d=\"M0,4 V22\" fill=\"none\" stroke=\"#8a5a32\" stroke-width=\"3.4\" stroke-linecap=\"round\"/><ellipse cx=\"0\" cy=\"-8\" rx=\"10\" ry=\"12\" fill=\"#a8603a\"/><path d=\"M-9,-10 H9 M-9,-4 H9\" fill=\"none\" stroke=\"#e0b44a\" stroke-width=\"1.6\"/></g>",fork18:"<path d=\"M0,14 V-2 M0,4 Q-12,-2 -12,-14 M-8,-6 L-16,-8 M0,4 Q12,-2 12,-14 M8,-6 L16,-8 M-12,-14 L-14,-20 M12,-14 L14,-20\" fill=\"none\" stroke=\"#2b2420\" stroke-width=\"5\" stroke-linecap=\"round\"/><path d=\"M0,14 V-2 M0,4 Q-12,-2 -12,-14 M-8,-6 L-16,-8 M0,4 Q12,-2 12,-14 M8,-6 L16,-8 M-12,-14 L-14,-20 M12,-14 L14,-20\" fill=\"none\" stroke=\"#c4cad2\" stroke-width=\"3\" stroke-linecap=\"round\"/><ellipse cx=\"0\" cy=\"15\" rx=\"7\" ry=\"2.6\" fill=\"#a3aab4\"/>",cush18:"<path d=\"M-15,8 V-4 Q0,-10 15,-4 V8 Q0,14 -15,8Z\" fill=\"#f2d070\"/><ellipse cx=\"0\" cy=\"-4\" rx=\"15\" ry=\"5\" fill=\"#f8e09a\"/><path d=\"M4,-6 L15,-4 V8 L4,4Z\" fill=\"#fbf3d8\" stroke-width=\"1.2\"/>",rook18:"<circle cx=\"0\" cy=\"-12\" r=\"5\" fill=\"#a8703f\"/><path d=\"M-5,-7 H5 L7,10 H-7Z\" fill=\"#a8703f\"/><rect x=\"-10\" y=\"10\" width=\"20\" height=\"5\" rx=\"2\" fill=\"#8a5a32\"/>",napkin18:"<rect x=\"-13\" y=\"-12\" width=\"26\" height=\"24\" rx=\"3\" fill=\"#e8d4a8\"/><circle cx=\"0\" cy=\"0\" r=\"4.6\" fill=\"#c4473c\" stroke-width=\"1.2\"/><circle cx=\"-8\" cy=\"-7\" r=\"1\" fill=\"#b8944a\" stroke=\"none\"/><circle cx=\"8\" cy=\"-7\" r=\"1\" fill=\"#b8944a\" stroke=\"none\"/><circle cx=\"-8\" cy=\"7\" r=\"1\" fill=\"#b8944a\" stroke=\"none\"/><circle cx=\"8\" cy=\"7\" r=\"1\" fill=\"#b8944a\" stroke=\"none\"/>"});
 H.BLEND[N]={goblet17:['hglass17','jar18'],lute17:['gourd17','stool18'],drum18:['yam18','firewood18'],cdl18:['fork18','jug18'],honey18:['jar18','basket18'],cheese18:['cush18','sack18'],

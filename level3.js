@@ -288,6 +288,7 @@ H.SKYC[3]='#e6eef0';H.SKYY[3]=710;H.EDGEM[3]='LRB';H.EDGED[3]='LRB';
 H.EDGEDECO[3]=[['pineS',4],['snowMound',2],['rockS',.8]];
 H.FRINGE[3]=[['pineS',2.6],['snowMound',2.4],['rockS',1],['woodpile',.3],['walker3',.5]];
 H.DENS[3]=1.33;
+H.DECOYSKIP[3]=.37; /* 2026-11-26 難度調整：第 3 關干擾物減少約兩成（空出來不補） */
 H.HERE[3]=[276,66];
 /* 借物件：雪山的東西每局隨機借幾種放進第 1、2 關 */
 H.BORROW[3]=[['scarf',{1:['village','plaza','top','banks'],2:['farmS','farm','farmS','farm']}],['mitten',{1:['plaza','village','banks','top'],2:['farm','farmS','farm','farmS']}],['cocoa',{1:['plaza','village','plaza','banks'],2:['farmS','farmS','farm','farmS']}],

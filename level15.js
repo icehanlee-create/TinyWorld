@@ -12,13 +12,13 @@ const {T,f,r,sr,pk,ri,OL,SKIN,kid,act,wrapAn,add,mark,canPlace,scatter,KIND,POOL
  SCENE_IMPL,WATERFN,RIDES,HERE,OUTFITS,STORIES,HOSTK,HOSTN,tone,typeOf,HATS}=H;
 
 /* ================= 1. 場景範圍、洞頂、場地邊緣 ================= */
-H.SCENES[N]={x0:600,x1:1900,y1:2150,c:[1250,1820]};
+H.SCENES[N]={x0:250,x1:2250,y1:2150,c:[1250,1820]}; /* 2026-11-26f 難度調整：東西各加寬 350（約 6.99 畫面），原本 x 600～1900 */
 H.TARGET[N]=330;
 H.SKYC[N]='#5a4a42';H.SKYY[N]=0;
 H.EDGEM[N]='';H.EDGED[N]='';
 H.EDGEDECO[N]=[['stalag15',1]];
 H.FRINGE[N]=[['fungus15',1.1],['rock15s',1]];
-H.DENS[N]=1.1;
+H.DENS[N]=1;
 /* 場地外不用雲：改成暗暗的岩壁＋垂下來的鐘乳石、地上的石筍剪影（core.js FOGFN） */
 if(H.FOGFN)H.FOGFN[N]=({X0,X1,Y1,R})=>{const rr=(a,b)=>a+R()*(b-a),C='#2e2522';
  const gd=(n,x1,x2,y1,y2)=>`<linearGradient id="${n}" x1="${x1}" x2="${x2}" y1="${y1}" y2="${y2}"><stop offset="0" stop-color="${C}" stop-opacity="1"/><stop offset=".45" stroke="none" stop-color="${C}" stop-opacity=".85"/><stop offset="1" stop-color="${C}" stop-opacity="0"/></linearGradient>`;
@@ -101,22 +101,23 @@ SCL(DECOY,{hardhat15:.81,cheese15:.94,onion15:.82,pencil15:.77,umbrella15:.77,ba
 const OLD={tub:{id:'tub',name:'溫泉木桶',short:'木桶',r:14,rot:8},egg:{id:'egg',name:'溫泉蛋',short:'溫泉蛋',r:13,rot:20}};
 const old=(id,regions)=>({...(typeOf(id)||OLD[id]),...(id==='egg'?{name:'溫泉蛋',short:'溫泉蛋'}:{}),regions});
 const TYPES=[
- old('tub',['center15','terrace15','camp15','geyser15']),old('egg',['terrace15','center15','camp15','geyser15']),
- {id:'headlamp15',name:'礦工頭燈',short:'頭燈',r:16,rot:12,regions:['mine15','camp15','crystal15','lake15']},
- {id:'sulfur15',name:'硫磺結晶',short:'硫磺',r:15,rot:10,regions:['geyser15','crystal15','geyser15','terrace15']},
- {id:'geode15',name:'紫水晶晶洞',short:'晶洞',r:15,rot:15,regions:['crystal15','lake15','camp15','mine15']},
- {id:'thermo15',name:'溫度計',short:'溫度計',r:15,rot:20,regions:['geyser15','terrace15','camp15','center15']},
- {id:'bat15',name:'倒掛小蝙蝠玩偶',short:'小蝙蝠',r:15,rot:8,regions:['lake15','mine15','crystal15','center15']},
- {id:'cart15',name:'小礦車模型',short:'小礦車',r:16,rot:10,regions:['mine15','camp15','lake15','mine15']},
- {id:'pick15',name:'十字鎬',short:'十字鎬',r:16,rot:20,regions:['mine15','crystal15','camp15','geyser15']},
- {id:'shroom15',name:'發光藍蘑菇',short:'藍蘑菇',r:15,rot:8,regions:['lake15','terrace15','crystal15','center15']},
- {id:'salamander15',name:'白色小蠑螈玩偶',short:'小蠑螈',r:15,rot:20,regions:['lake15','terrace15','center15','geyser15']},
- {id:'map15',name:'洞窟探險地圖',short:'探險地圖',r:16,rot:12,regions:['camp15','center15','mine15','lake15']}];
+ old('tub',['center15','colW15','camp15','geyser15']),old('egg',['terrace15','steamE15','camp15','restW15']),
+ {id:'headlamp15',name:'礦工頭燈',short:'頭燈',r:16,rot:12,regions:['mine15','restW15','crystal15','batW15']},
+ {id:'sulfur15',name:'硫磺結晶',short:'硫磺',r:15,rot:10,regions:['geyser15','lavaE15','crystal15','terrace15']},
+ {id:'geode15',name:'紫水晶晶洞',short:'晶洞',r:15,rot:15,regions:['crystal15','colW15','mossE15','mine15']},
+ {id:'thermo15',name:'溫度計',short:'溫度計',r:15,rot:20,regions:['geyser15','lavaE15','camp15','restW15']},
+ {id:'bat15',name:'倒掛小蝙蝠玩偶',short:'小蝙蝠',r:15,rot:8,regions:['lake15','batW15','colW15','center15']},
+ {id:'cart15',name:'小礦車模型',short:'小礦車',r:16,rot:10,regions:['mine15','restW15','lake15','steamE15']},
+ {id:'pick15',name:'十字鎬',short:'十字鎬',r:16,rot:20,regions:['mine15','colW15','camp15','lavaE15']},
+ {id:'shroom15',name:'發光藍蘑菇',short:'藍蘑菇',r:15,rot:8,regions:['lake15','mossE15','batW15','center15']},
+ {id:'salamander15',name:'白色小蠑螈玩偶',short:'小蠑螈',r:15,rot:20,regions:['lake15','mossE15','center15','terrace15']},
+ {id:'map15',name:'洞窟探險地圖',short:'探險地圖',r:16,rot:12,regions:['camp15','batW15','mine15','center15']}];
 LEVELS[N].types=TYPES;
 /* BORROW：不借（地熱洞窟物件不混進前面的關卡） */
 
 /* ================= 5. 地形：洞窟輪廓、水域 ================= */
-const CAVE=[[700,560],[860,478],[1060,452],[1250,446],[1450,452],[1650,476],[1800,546],[1862,700],[1874,950],[1884,1250],[1874,1550],[1852,1800],[1800,1990],[1650,2066],[1450,2092],[1250,2100],[1050,2092],[850,2066],[700,1990],[648,1800],[626,1550],[618,1250],[628,950],[648,700]];
+/* 11-26f 東西各長出去約 350：西岸約 x 280～330、東岸約 2170～2220 */
+const CAVE=[[400,590],[580,500],[860,478],[1060,452],[1250,446],[1450,452],[1650,476],[1920,500],[2090,590],[2180,780],[2212,1050],[2222,1350],[2212,1650],[2172,1880],[2060,2010],[1850,2066],[1650,2082],[1450,2092],[1250,2100],[1050,2092],[850,2082],[650,2066],[440,2010],[328,1880],[288,1650],[278,1350],[288,1050],[320,780]];
 const smoothD=P=>{const n=P.length,mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2],m0=mid(P[n-1],P[0]);let d=`M${f(m0[0])},${f(m0[1])}`;for(let i=0;i<n;i++){const c=P[i],m=mid(P[i],P[(i+1)%n]);d+=` Q${c[0]},${c[1]} ${f(m[0])},${f(m[1])}`}return d+'Z'};
 const CAVED=smoothD(CAVE);
 const CPTS=(()=>{const n=CAVE.length,mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2],out=[];for(let i=0;i<n;i++){const a=mid(CAVE[(i+n-1)%n],CAVE[i]),c=CAVE[i],b=mid(CAVE[i],CAVE[(i+1)%n]);for(let t=0;t<1;t+=.125){const u=1-t;out.push([u*u*a[0]+2*u*t*c[0]+t*t*b[0],u*u*a[1]+2*u*t*c[1]+t*t*b[1]])}}return out})();
@@ -131,8 +132,11 @@ const FOOT={x:1250,y:1520},MINE={x:780,y:670},STAIR={x:1250};
 WATERFN[N]=(x,y)=>!inCave(x,y)||inE(LAKE,x,y)||TERR.some(t=>inE(t,x,y,1.08))||MUD.some(m=>inE(m,x,y,1.1))||inE(GPOOL,x,y);
 Object.assign(REG,{lake15:{x:900,y:500,w:700,h:250},mine15:{x:660,y:560,w:320,h:380},crystal15:{x:1500,y:540,w:340,h:420},
  terrace15:{x:660,y:940,w:500,h:580},center15:{x:1160,y:820,w:240,h:820},geyser15:{x:1410,y:960,w:430,h:560},
- camp15:{x:680,y:1640,w:1150,h:400},all15:{x:640,y:480,w:1220,h:1600}});
-H.SCREG[N]=['lake15','mine15','crystal15','terrace15','center15','geyser15','camp15'];
+ camp15:{x:680,y:1640,w:1150,h:400},all15:{x:290,y:480,w:1920,h:1600},
+ /* 11-26f 加寬區：西＝蝙蝠觀察角、巨石柱大廳、礦工休息站；東＝螢光苔蘚坡、熔岩觀景台、地熱蒸籠小攤 */
+ batW15:{x:300,y:560,w:350,h:380},colW15:{x:290,y:940,w:360,h:580},restW15:{x:300,y:1520,w:380,h:480},
+ mossE15:{x:1850,y:540,w:350,h:420},lavaE15:{x:1850,y:960,w:360,h:560},steamE15:{x:1830,y:1520,w:370,h:480}});
+H.SCREG[N]=['lake15','mine15','crystal15','terrace15','center15','geyser15','camp15','batW15','colW15','restW15','mossE15','lavaE15','steamE15'];
 
 function ground(){
  const Sc=H.SCENES[N],X0=Sc.x0-420,WW=Sc.x1-Sc.x0+840;let g='';
@@ -146,10 +150,10 @@ function ground(){
  g+=`<path d="${CAVED}" fill="none" stroke="#7a675a" stroke-width="58" stroke-linejoin="round"/><path d="${CAVED}" fill="none" stroke="#8e7a6a" stroke-width="30" stroke-linejoin="round"/>`;
  g+=`<path d="${CAVED}" fill="#dccab0" stroke-width="2.6"/>`;
  g+=`<defs><clipPath id="cave15"><path d="${CAVED}"/></clipPath></defs><g clip-path="url(#cave15)">`;
- for(let i=0;i<70;i++){const x=sr(640,1880),y=sr(460,2100);g+=`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(sr(40,120))}" ry="${f(sr(16,44))}" fill="${pk(['#d2bf9f','#e4d5bb','#cfba98','#d8c4a4'])}" stroke="none" opacity=".6"/>`}
- for(let i=0;i<90;i++){const x=sr(640,1880),y=sr(460,2100);g+=`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(sr(3,7))}" ry="${f(sr(2,4))}" fill="${pk(['#b8a486','#c4b092','#a8967a'])}" stroke="none"/>`}
+ for(let i=0;i<100;i++){const x=sr(Sc.x0+30,Sc.x1-30),y=sr(460,2100);g+=`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(sr(40,120))}" ry="${f(sr(16,44))}" fill="${pk(['#d2bf9f','#e4d5bb','#cfba98','#d8c4a4'])}" stroke="none" opacity=".6"/>`}
+ for(let i=0;i<130;i++){const x=sr(Sc.x0+30,Sc.x1-30),y=sr(460,2100);g+=`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(sr(3,7))}" ry="${f(sr(2,4))}" fill="${pk(['#b8a486','#c4b092','#a8967a'])}" stroke="none"/>`}
  /* 暖暖的燈光：營地、足湯、湖邊 */
- [[1250,1880,420,150],[1250,1520,220,90],[1250,700,360,120]].forEach(([x,y,a,b])=>g+=`<ellipse cx="${x}" cy="${y}" rx="${a}" ry="${b}" fill="#fff1c8" stroke="none" opacity=".28"/>`);
+ [[1250,1880,420,150],[1250,1520,220,90],[1250,700,360,120],[2040,1240,200,90],[2040,1770,190,80],[450,1250,170,90]].forEach(([x,y,a,b])=>g+=`<ellipse cx="${x}" cy="${y}" rx="${a}" ry="${b}" fill="#fff1c8" stroke="none" opacity=".28"/>`);
  /* 地底湖：深藍綠、會發光的倒影 */
  const L=LAKE;g+=`<ellipse cx="${L[0]}" cy="${L[1]+6}" rx="${L[2]+22}" ry="${L[3]+16}" fill="#b8a68a" stroke="none"/><ellipse cx="${L[0]}" cy="${L[1]}" rx="${L[2]}" ry="${L[3]}" fill="#3f8e98" stroke-width="2.4"/><ellipse cx="${L[0]-20}" cy="${L[1]-10}" rx="${L[2]*.72}" ry="${L[3]*.6}" fill="#56a6ae" stroke="none"/>`;
  for(let i=0;i<14;i++){const x=L[0]+sr(-230,230),y=L[1]+sr(-60,60);if(!inE(L,x,y,.9))continue;g+=`<path d="M${f(x)},${f(y)} q8,-4 16,0 q8,4 16,0" fill="none" stroke="#a8efe6" stroke-width="2" stroke-linecap="round" opacity=".8"/>`}
@@ -177,7 +181,7 @@ function ground(){
  for(let k=0;k<6;k++){const y=2150-k*20,w=80+k*0;g+=`<path d="M${STAIR.x-w},${y} H${STAIR.x+w} V${y-20} H${STAIR.x-w}Z" fill="${k%2?'#b8ab9a':'#c6baa8'}" stroke-width="1.8"/><path d="M${STAIR.x-w},${y-20} H${STAIR.x+w}" fill="none" stroke="#e0d6c6" stroke-width="2.4"/>`}
  g+=`<path d="M${STAIR.x-96},2160 V2030 Q${STAIR.x-96},2010 ${STAIR.x-80},2020 V2160Z M${STAIR.x+96},2160 V2030 Q${STAIR.x+96},2010 ${STAIR.x+80},2020 V2160Z" fill="#8e7a6a"/>`;
  /* 洞頂垂下來的鐘乳石（沿著北邊的洞壁） */
- for(let i=0;i<34;i++){const x=700+i*34+sr(-8,8);const top=CPTS.filter(p=>p[1]<800&&Math.abs(p[0]-x)<30).reduce((m,p)=>Math.min(m,p[1]),9999);if(top>900)continue;const y=top-20,h=sr(20,56),w=sr(7,13);
+ for(let i=0;i<56;i++){const x=320+i*34+sr(-8,8);const top=CPTS.filter(p=>p[1]<800&&Math.abs(p[0]-x)<30).reduce((m,p)=>Math.min(m,p[1]),9999);if(top>900)continue;const y=top-20,h=sr(20,56),w=sr(7,13);
   g+=`<path d="M${f(x-w)},${f(y)} Q${f(x-w*.4)},${f(y+h*.6)} ${f(x)},${f(y+h)} Q${f(x+w*.4)},${f(y+h*.6)} ${f(x+w)},${f(y)}Z" fill="${pk(['#9a8676','#8e7a6a','#a6927e'])}" stroke-width="1.8"/><path d="M${f(x-w*.4)},${f(y+4)} Q${f(x-w*.2)},${f(y+h*.5)} ${f(x-1)},${f(y+h*.8)}" fill="none" stroke="#c4b09a" stroke-width="1.6" stroke-linecap="round"/>`}
  return `<g stroke="${OL}" stroke-width="2" stroke-linejoin="round">${g}</g>`}
 
@@ -251,6 +255,66 @@ const measureG=()=>say('🌡️ 九十二度！不要靠太近喔。',shg(30)+ac
 /* 坐礦車：小孩坐在礦車裡，大人在後面推 */
 const cartG=()=>say('🛤️ 抓緊囉，礦車要出發了！',shg(50)+act(-4,-14,1,{view:'fq',pose:'up2',top:'long',bottom:'pants',shirt:'#e8823a',pants:'#3b4a6a',hat:HAT_MINER,mood:2,plain:true},'hop')+T(-4,0,1,`<path d="M-30,-34 L-24,-8 H24 L30,-34Z" fill="#7a7f88"/><path d="M-28,-24 H28" fill="none" stroke="#5a5f68" stroke-width="1.6"/><circle cx="-16" cy="-6" r="7" fill="#3a3a3a"/><circle cx="16" cy="-6" r="7" fill="#3a3a3a"/>`)+act(-46,2,1,{view:'side',pose:'reach',top:'long',bottom:'pants',shirt:'#6f9a8a',pants:'#2b3a55',hat:HAT_MINER,mood:2,extra:tie('#e0a030'),plain:true},'nod'));
 
+/* ---- 11-26f 難度調整：加寬區的佈景與人群（使用者選：西 巨石柱 D＋礦工休息站 A＋蝙蝠觀察角 A；東 熔岩觀景台 D＋地熱蒸籠 C＋苔蘚圓石 B）---- */
+const X15=(()=>{
+ const pole=(x0,y0,x1,y1,w=6)=>`<path d="M${x0},${y0} L${x1},${y1}" fill="none" stroke="${OL}" stroke-width="${w}" stroke-linecap="round"/><path d="M${x0},${y0} L${x1},${y1}" fill="none" stroke="${WOOD}" stroke-width="${w-2.6}" stroke-linecap="round"/>`;
+ const lampHang=(x,y)=>`<circle cx="${x}" cy="${y+6}" r="14" fill="#ffe9a0" opacity=".4" stroke="none"/><path d="M${x-5},${y} H${x+5} L${x+4},${y+12} H${x-4}Z" fill="#ffd970" stroke-width="1.4"/><path d="M${x-5},${y} L${x},${y-5} L${x+5},${y}Z" fill="#3a3a44" stroke-width="1.2"/>`;
+ const COLC=['#b8a48a','#a8947c','#c4b096'];
+ /* 連到洞頂的巨石柱：上下寬、中間細腰，頂端隱進暗暗的岩頂 */
+ const col=(w,h,c,wa=.55)=>{const m=-h*.52;
+  let g=sh(w+10)+`<path d="M${-w},0 Q${f(-w*.9)},${f(-h*.18)} ${f(-w*wa)},${f(m)} Q${f(-w*.95)},${f(-h*.86)} ${f(-w*1.15)},${-h} H${f(w*1.15)} Q${f(w*.95)},${f(-h*.86)} ${f(w*wa)},${f(m)} Q${f(w*.9)},${f(-h*.18)} ${w},0Z" fill="${c}"/>`;
+  for(let k=1;k<7;k++){const y=-h*k/7.4,ww=w*(k<4?1-k*.12:wa+(k-3)*.12);g+=`<path d="M${f(-ww)},${f(y)} Q0,${f(y+5)} ${f(ww)},${f(y)}" fill="none" stroke="#8e7a66" stroke-width="1.4"/>`}
+  g+=`<path d="M${f(-w*.55)},-8 Q${f(-w*.4)},${f(-h*.3)} ${f(-w*.3)},${f(m)}" fill="none" stroke="#e0d0b8" stroke-width="3" stroke-linecap="round"/>`;
+  return g+`<path d="M${f(-w*1.6)},${-h} Q0,${f(-h-34)} ${f(w*1.6)},${-h} Q${f(w*.6)},${f(-h+16)} 0,${f(-h+10)} Q${f(-w*.6)},${f(-h+16)} ${f(-w*1.6)},${-h}Z" fill="#4a3c36" stroke="none" opacity=".9"/>`};
+ const column=s=>col(f(30*s),f(200*s),pk(COLC));
+ const columnD=()=>{let g=col(34,210,COLC[0]);
+  g+=`<path d="M-44,-120 Q0,-104 44,-128" fill="none" stroke="#6a5040" stroke-width="2"/>`+[-30,-6,20].map((x,i)=>lampHang(x,-118+i*-3)).join('');
+  return g+[-70,-40,40,70].map(x=>pole(x,10,x,-16,6)).join('')+`<path d="M-70,-10 Q-55,-4 -40,-10 M40,-10 Q55,-4 70,-10" fill="none" stroke="#c9a46a" stroke-width="2.4"/>`};
+ /* 礦工休息站 A：斜頂木棚＋長板凳、便當水壺 */
+ const bench=(w=60)=>`<rect x="${-w/2}" y="-16" width="${w}" height="6" rx="2" fill="${WOOD2}"/>`+pole(-w/2+6,-10,-w/2+6,0,5)+pole(w/2-6,-10,w/2-6,0,5);
+ const lunch=(x,y)=>`<rect x="${x-8}" y="${y-6}" width="16" height="9" rx="2" fill="#c4473c" stroke-width="1.3"/><path d="M${x-8},${y-2} H${x+8}" fill="none" stroke="#f2e6c8" stroke-width="1.4"/>`;
+ const flask=(x,y)=>`<rect x="${x-4}" y="${y-16}" width="8" height="16" rx="2.4" fill="#5f9a5a" stroke-width="1.3"/><rect x="${x-3}" y="${y-19}" width="6" height="4" fill="#c9ccd0" stroke-width="1.1"/>`;
+ const shed=()=>sh(60)+pole(-50,0,-50,-74,7)+pole(50,0,50,-64,7)+`<path d="M-66,-74 L66,-62 L66,-54 L-66,-66Z" fill="#8a6a48"/><path d="M-66,-70 L66,-58" fill="none" stroke="#6a5038" stroke-width="1.4"/>`+lampHang(36,-52)+T(0,-4,1,bench(80))+lunch(-14,-20)+flask(20,-20);
+ /* 蝙蝠觀察角 A：木柱撐起的岩簷，下面倒掛真的蝙蝠（深褐、比要找的紫色玩偶小、翅膀收起來） */
+ const realBat=(s=1)=>`<g transform="scale(${s})"><path d="M0,-4 V0" fill="none" stroke-width="1.4"/><path d="M-5,0 Q-9,10 -4,16 Q0,13 4,16 Q9,10 5,0Z" fill="#3e3230" stroke-width="1.4"/><path d="M-3,16 L-4,20 L-1,17Z M3,16 L4,20 L1,17Z" fill="#3e3230" stroke-width="1"/><circle cx="-1.6" cy="13" r=".8" fill="#e8c070" stroke="none"/><circle cx="1.6" cy="13" r=".8" fill="#e8c070" stroke="none"/></g>`;
+ const batLedge=()=>{const w=70,h=116;let g=sh(56)+pole(-46,0,-46,-112,7)+pole(46,0,46,-112,7)+
+  `<path d="M${-w},${-h} Q${-w*.9},${-h-26} ${-w*.3},${-h-30} Q${w*.4},${-h-34} ${w},${-h-20} Q${w*1.05},${-h-4} ${w*.8},${-h+6} Q0,${-h+14} ${-w*.8},${-h+6}Z" fill="#7a675a"/><path d="M${-w*.7},${-h+2} Q0,${-h+10} ${w*.7},${-h+2}" fill="none" stroke="#5a4a42" stroke-width="2"/>`;
+  for(let i=0;i<6;i++)g+=T(-39+i*15.6,-h+6+(i%2)*4,1,wrapAn('sway',realBat(.9+(i%3)*.1),true));return g};
+ const scope=x=>`<g transform="translate(${x},0)"><path d="M0,-30 L-10,0 M0,-30 L10,0 M0,-30 L0,0" fill="none" stroke="#5a5f68" stroke-width="2.2"/><g transform="translate(0,-32) rotate(-28)"><rect x="-14" y="-4" width="26" height="8" rx="2" fill="#2f5f8a" stroke-width="1.4"/><rect x="12" y="-5" width="5" height="10" rx="1" fill="#3a3a44" stroke-width="1.2"/></g></g>`;
+ /* 熔岩觀景台 D：地上發光裂縫＋木欄杆＋火星＋黃色警示牌 */
+ const crack=w=>{const O=[0,-4,3,-2,5,-3,1,4,-2,2,-1,3,0],n=O.length-1,pts=O.map((o,i)=>[-w+i*2*w/n,o]),wd=i=>2+9*Math.sin(Math.PI*i/n);
+  const ed=(k,sg)=>pts.map(([x,y],i)=>`${f(x)},${f(y+sg*wd(i)*k)}`);
+  return `<ellipse cx="0" cy="0" rx="${w+26}" ry="34" fill="#ff8a3a" opacity=".2" stroke="none"/><ellipse cx="0" cy="0" rx="${f(w*.75)}" ry="18" fill="#ffb060" opacity=".28" stroke="none"/><path d="M${ed(1,-1).join(' L')} L${ed(1,1).reverse().join(' L')}Z" fill="#ff6a2a" stroke="#3a2418" stroke-width="2.4"/><path d="M${ed(.45,-1).join(' L')} L${ed(.45,1).reverse().join(' L')}Z" fill="#ffd060" stroke="none"/><path d="M${f(-w*.5)},2 l-14,10 M${f(w*.3)},-3 l12,-10 M${f(w*.7)},2 l10,8" fill="none" stroke="#3a2418" stroke-width="2"/>`};
+ const rail=(w,y=0)=>{let g='';const n=Math.round(w/22);for(let i=0;i<=n;i++){const x=-w/2+i*w/n;g+=pole(x,y,x,y-24,5)}return g+pole(-w/2,y-22,w/2,y-22,5)};
+ const lava=()=>T(0,-30,1,crack(64))+`<g class="ember15"><circle cx="-30" cy="-58" r="2.4" fill="#ffd060" stroke="none"/><circle cx="-22" cy="-68" r="1.6" fill="#ff8a3a" stroke="none"/><circle cx="10" cy="-66" r="2.4" fill="#ffd060" stroke="none"/><circle cx="40" cy="-54" r="2.4" fill="#ffd060" stroke="none"/><circle cx="48" cy="-64" r="1.6" fill="#ff8a3a" stroke="none"/></g>`+rail(120,14)+
+  T(84,16,1,pole(0,0,0,-40,5)+`<path d="M-14,-40 L0,-64 L14,-40Z" fill="#f2c230" stroke-width="2"/><path d="M0,-58 V-48" fill="none" stroke-width="2.6" stroke-linecap="round"/><circle cx="0" cy="-44" r="1.4" fill="${OL}"/>`)+
+  `<style>.ember15{animation:emb15 1.6s ease-in-out infinite alternate}@keyframes emb15{from{opacity:.25;transform:translateY(4px)}to{opacity:1;transform:translateY(-6px)}}</style>`;
+ /* 地熱蒸籠 C：一排冒煙的地熱小孔，木架吊網袋蒸地瓜、玉米 */
+ const puff=(x,y,s=1)=>T(x,y,s,`<circle cx="-6" cy="0" r="7" fill="#fff" stroke="none" opacity=".7"/><circle cx="4" cy="-8" r="9" fill="#fff" stroke="none" opacity=".6"/><circle cx="0" cy="-22" r="6" fill="#fff" stroke="none" opacity=".45"/>`);
+ const corn=(x,y)=>`<g transform="translate(${x},${y}) rotate(-20)"><ellipse rx="4" ry="9" fill="#f2d43a" stroke-width="1.2"/><path d="M-4,4 Q-8,-4 -3,-10 M4,4 Q8,-4 3,-10" fill="#6f9a4a" stroke-width="1.2"/></g>`;
+ const potato=(x,y)=>`<ellipse cx="${x}" cy="${y}" rx="8" ry="5" fill="#b0506a" stroke-width="1.3"/><ellipse cx="${x-2}" cy="${y-1}" rx="3" ry="1.6" fill="#f2c88a" stroke="none"/>`;
+ const vents=()=>sh(64)+[-46,-14,18,50].map((x,i)=>`<ellipse cx="${x}" cy="${i%2?4:-4}" rx="13" ry="5" fill="#5a4a42" stroke-width="1.6"/>${wrapAn('steam',puff(x,(i%2?4:-4)-8,.7),true)}`).join('')+pole(-64,8,-64,-58,6)+pole(64,8,64,-58,6)+pole(-66,-56,66,-56,6)+
+  [-46,-14,18,50].map((x,i)=>`<path d="M${x},-54 V-24" fill="none" stroke="#6a5040" stroke-width="1.4"/><path d="M${x-8},-24 Q${x},-12 ${x+8},-24Z" fill="#c9a46a" stroke-width="1.2"/>`+(i%2?corn(x,-22):potato(x,-20))).join('');
+ /* 螢光苔蘚 B：苔蘚包著的一堆大圓石；mossS＝單顆 */
+ const MOSS=['#b8d84a','#9cc63a','#d4ec7a','#7fae3a'];
+ const glow=(w,h,n)=>{let g='';for(let i=0;i<n;i++)g+=`<circle cx="${f(sr(-w*.8,w*.8))}" cy="${f(-sr(4,h))}" r="${f(sr(1.4,3))}" fill="#f4ffb0" stroke="none" opacity=".9"/>`;return g};
+ const mstone=(w,h,c)=>`<path d="M${-w},0 Q${-w},${-h} 0,${-h} Q${w},${-h} ${w},0Z" fill="#8e7a6a"/><path d="M${f(-w*.95)},${f(-h*.5)} Q${f(-w*.8)},${f(-h*1.02)} 0,${f(-h*1.02)} Q${f(w*.8)},${f(-h*1.02)} ${f(w*.95)},${f(-h*.5)} Q${f(w*.3)},${f(-h*.3)} 0,${f(-h*.6)} Q${f(-w*.4)},${f(-h*.3)} ${f(-w*.95)},${f(-h*.5)}Z" fill="${c}"/>`;
+ const mossB=()=>`<ellipse cx="0" cy="-34" rx="90" ry="56" fill="#e8ff9a" opacity=".22" stroke="none"/>`+[[-40,0,36,46],[20,-4,44,60],[60,4,26,30],[-6,6,22,20]].map(([x,y,w,h],i)=>T(x,y,1,mstone(w,h,MOSS[i%4]))).join('')+glow(70,56,18);
+ const mossS=()=>`<ellipse cx="0" cy="-16" rx="40" ry="28" fill="#e8ff9a" opacity=".2" stroke="none"/>`+sh(26,.12)+mstone(sr(22,28),sr(24,34),pk(MOSS))+glow(22,26,6);
+ /* ---- 人群小故事 ---- */
+ const A=(x,y,d,o,an)=>act(x,y,d,Object.assign({hat:-1,top:'long',bottom:'pants',plain:true},o),an);
+ const cam=`<rect x="8" y="-38" width="13" height="9" rx="2" fill="#3a3a44" stroke-width="1.2"/>`;
+ const G={
+  lunch:()=>say('🍱 下班前先吃便當，石頭都敲餓了！',shg(50)+T(0,0,1,bench(70))+A(-18,-12,1,{view:'front',pose:'sit',hat:HAT_MINER,shirt:'#6f9a8a',pants:'#3b4a6a',arm:1,mood:2},'nod')+A(18,-12,-1,{view:'front',pose:'sit',hat:HAT_MINER,shirt:'#c9a46a',pants:'#5a4a3e',mood:3,extra:TIE('#c4473c')},'nod')+lunch(-6,-40)+flask(30,-14)),
+  hug:()=>say('🤲 兩個人手牽手，還抱不住這根石柱！',T(0,0,.62,col(28,190,COLC[0]))+A(-34,6,1,{view:'side',pose:'up2',shirt:'#e8823a',pants:'#3b4a6a'},'hop')+A(34,6,-1,{view:'side',pose:'up2',shirt:'#5f9a5a',pants:'#2b3a55',extra:TIE('#2f5f8a')},'hop')),
+  watch:()=>say('🦇 噓⋯牠們白天在睡覺，小聲一點。',shg(40)+scope(-18)+A(-34,4,1,{view:'side',pose:'hold',shirt:'#3f7a4a',pants:'#5a4a3e',hat:6},'nod')+A(22,4,-1,{view:'fq',pose:'up',shirt:'#f2c230',pants:'#3b4a6a',s:.82,mood:2},'hop')),
+  queue:()=>say('🌽 地熱蒸的玉米，排隊也值得！',shg(50)+A(-40,0,1,{view:'side',pose:'stand',shirt:'#c4473c',pants:'#3b4a6a',extra:TIE('#3f7a4a')},'nod')+A(-10,0,1,{view:'side',pose:'stand',shirt:'#8a9ab0',pants:'#5a4a3e',s:.8},'hop')+A(20,0,1,{view:'side',pose:'hold',shirt:'#e8dcc4',pants:'#2b3a55',extra:corn(14,-18)},'nod')),
+  blow:()=>say('😮‍💨 呼——呼——好燙好燙！',shg(34)+A(-14,0,1,{view:'fq',pose:'hold',shirt:'#f2a0b8',pants:'#3b4a6a',s:.82,mood:2,extra:corn(10,-22)+puff(16,-34,.4)},'hop')+A(18,0,-1,{view:'fq',pose:'stand',shirt:'#6f9a8a',pants:'#5a4a3e',mood:3},'nod')),
+  peek:()=>say('🌋 哇，底下真的是紅紅的熔岩！',shg(40)+rail(90,10)+A(-22,4,1,{view:'bq',pose:'reach',shirt:'#2f5f8a',pants:'#3b4a6a'},'nod')+A(14,4,-1,{view:'bq',pose:'up2',shirt:'#e0a030',pants:'#5a4a3e',extra:TIE('#6a4a8a')},'hop')),
+  torch:()=>say('🔦 關掉手電筒，苔蘚自己會發光耶！',shg(40)+A(-10,0,1,{view:'side',pose:'reach',shirt:'#b08ac0',pants:'#3b4a6a',extra:`<path d="M12,-18 L22,-16" fill="none" stroke="#3a3a44" stroke-width="4" stroke-linecap="round"/><path d="M22,-16 L46,-10 L46,-26Z" fill="#fffbd0" opacity=".5" stroke="none"/>`},'nod')+A(-40,0,1,{view:'fq',pose:'crouch',shirt:'#d88a6a',pants:'#2b3a55',s:.82,mood:2},'hop')),
+  sketch:()=>say('🎨 黃綠色要調好多次才調得出來⋯',shg(24)+`<rect x="-14" y="-6" width="28" height="8" rx="2" fill="#9a8a7a"/>`+A(0,-4,1,{view:'front',pose:'sit',shirt:'#e8dcc4',pants:'#3b4a6a',arm:1,hat:0,extra:`<rect x="-14" y="-26" width="18" height="14" fill="#fbf6ea" stroke-width="1.3"/><path d="M-10,-20 Q-5,-24 0,-18" fill="none" stroke="#9cc63a" stroke-width="1.6"/>`},'nod'))};
+ return {column,columnD,shed,batLedge,lava,vents,mossB,mossS,G}})();
+
 /* ---- 佈景圖鑑（KIND）---- */
 const dk=(id,w,h,cy=-12)=>({w,h,fn:()=>T(0,cy,1,DECOY[id])});
 Object.assign(KIND,{
@@ -261,9 +325,12 @@ Object.assign(KIND,{
  geyser15:{w:126,h:44,fn:geyser15},rope15:{w:96,h:24,fn:()=>rope15()},eggPot15:{w:56,h:44,fn:eggPot15},
  hardhat15:dk('hardhat15',44,30,0),cheese15:dk('cheese15',40,28,0),onion15:dk('onion15',36,40,-4),pencil15:dk('pencil15',26,46,-4),
  umbrella15:dk('umbrella15',30,50,-6),barrow15:dk('barrow15',50,32,0),hoe15:dk('hoe15',36,40,-4),bluebell15:dk('bluebell15',36,36,-4),
- sock15:dk('sock15',30,40,-4),paper15:dk('paper15',44,26,0)});
-['stalag15','crystal15','tent15','mineGate15','geyser15','lamp15','boxes15','table15','bigCart15'].forEach(k=>H.HEAVYX[N]?H.HEAVYX[N].add(k):(H.HEAVYX[N]=new Set([k])));
-['stalag15','crystal15','tent15','boxes15','box15','table15','bigCart15','rock15s'].forEach(k=>H.OCCK.add(k));
+ sock15:dk('sock15',30,40,-4),paper15:dk('paper15',44,26,0),
+ /* 11-26f 加寬區 */
+ column15:{w:60,h:200,fn:()=>X15.column(sr(.8,1))},columnD15:{w:80,h:220,fn:X15.columnD},shed15:{w:140,h:80,fn:X15.shed},batLedge15:{w:150,h:150,fn:X15.batLedge},
+ lava15:{w:180,h:90,fn:X15.lava},vents15:{w:150,h:80,fn:X15.vents},mossB15:{w:150,h:70,fn:X15.mossB},mossS15:{w:56,h:36,fn:X15.mossS}});
+['stalag15','crystal15','tent15','mineGate15','geyser15','lamp15','boxes15','table15','bigCart15','column15','columnD15','shed15','batLedge15','lava15','vents15','mossB15'].forEach(k=>H.HEAVYX[N]?H.HEAVYX[N].add(k):(H.HEAVYX[N]=new Set([k])));
+['stalag15','crystal15','tent15','boxes15','box15','table15','bigCart15','rock15s','column15','columnD15','mossB15','mossS15'].forEach(k=>H.OCCK.add(k));
 H.ANIMX[N]={steam15:['bob']};
 H.ALWAYSX[N]=new Set(['steam15']);
 
@@ -271,18 +338,27 @@ H.ALWAYSX[N]=new Set(['steam15']);
 const late=()=>{
  const ok=l=>l.filter(([k])=>KIND[k]);
  Object.assign(POOL,{
-  lake15:ok([['crystal15',.5],['stalag15',.8],['fungus15',1.2],['rock15s',1],['pebbles',.8],['bluebell15',0.15],['sock15',0.15],['umbrella15',0.15],['onion15',0.12],['paper15',0.1]]),
+  lake15:ok([['crystal15',.5],['stalag15',.8],['fungus15',1.2],['rock15s',1],['pebbles',.8],['bluebell15',0.21],['sock15',0.21],['umbrella15',0.21],['onion15',0.168],['paper15',0.14]]), /* 11-26f 干擾物 ×1.4 */
   mine15:ok([['stalag15',1],['box15',.6],['rock15s',1.2],['fungus15',.8],['lamp15',.25],['pebbles',1],['hardhat15',0.2],['hoe15',0.17],['barrow15',0.15],['umbrella15',0.15],['paper15',0.12]]),
   crystal15:ok([['crystal15',1.4],['stalag15',.8],['rock15s',.8],['fungus15',.6],['onion15',0.17],['cheese15',0.17],['hoe15',0.12],['bluebell15',0.12],['hardhat15',0.1]]),
   terrace15:ok([['stalag15',.7],['rock15s',1],['fungus15',1],['steam15',.4],['pebbles',.8],['bluebell15',0.15],['sock15',0.17],['cheese15',0.12],['pencil15',0.15],['umbrella15',0.1]]),
-  center15:ok([['lamp15',.4],['rock15s',.8],['fungus15',1],['box15',.3],['pebbles',.6],['pencil15',0.15],['sock15',0.15],['paper15',0.15],['bluebell15',0.12],['hardhat15',0.12]]),
+  center15:ok([['lamp15',.4],['rock15s',.8],['fungus15',1],['box15',.3],['pebbles',.6],['pencil15',0.21],['sock15',0.21],['paper15',0.21],['bluebell15',0.168],['hardhat15',0.168]]), /* 11-26f 干擾物 ×1.4 */
   geyser15:ok([['stalag15',.8],['rock15s',1.2],['steam15',.5],['crystal15',.25],['pebbles',.8],['cheese15',0.2],['pencil15',0.17],['onion15',0.12],['hoe15',0.1]]),
   camp15:ok([['box15',.8],['lamp15',.3],['rock15s',.8],['fungus15',.6],['barrel',.4],['pebbles',.6],['hardhat15',0.2],['paper15',0.2],['barrow15',0.17],['pencil15',0.15],['cheese15',0.12],['sock15',0.12]]),
-  decor15:ok([['fungus15',1.4],['rock15s',1.2],['stalag15',.6],['pebbles',1]])});
+  decor15:ok([['fungus15',1.4],['rock15s',1.2],['stalag15',.6],['pebbles',1]]),
+  /* 11-26f 加寬區（干擾物約佔 1/3 以上權重） */
+  batW15:ok([['stalag15',.8],['rock15s',1],['fungus15',.8],['pebbles',.6],['umbrella15',0.136],['hardhat15',0.117],['sock15',0.117],['paper15',0.117]]), /* 干擾物 ×0.39 */
+  colW15:ok([['column15',.5],['stalag15',.8],['rock15s',1],['fungus15',.6],['pebbles',.6],['hoe15',0.117],['onion15',0.117],['cheese15',0.117],['bluebell15',0.117]]), /* 干擾物 ×0.39 */
+  restW15:ok([['box15',.8],['rock15s',1],['lamp15',.25],['fungus15',.5],['pebbles',.6],['hardhat15',0.136],['barrow15',0.117],['paper15',0.117],['pencil15',0.117]]), /* 干擾物 ×0.39 */
+  mossE15:ok([['mossS15',1.2],['rock15s',.6],['fungus15',.6],['stalag15',.5],['bluebell15',0.297],['sock15',0.255],['onion15',0.255],['umbrella15',0.212]]), /* 干擾物 ×0.85 */
+  lavaE15:ok([['rock15s',1.2],['stalag15',.8],['steam15',.4],['pebbles',.6],['cheese15',0.297],['pencil15',0.255],['hoe15',0.255],['onion15',0.212]]), /* 干擾物 ×0.85 */
+  steamE15:ok([['box15',.7],['rock15s',.8],['steam15',.4],['lamp15',.25],['pebbles',.6],['barrow15',0.297],['cheese15',0.255],['sock15',0.255],['paper15',0.255]])}); /* steamE15 干擾物 ×0.85 */
  const v=o=>Object.fromEntries(Object.entries(o).filter(([k])=>KIND[k]));
  Object.assign(VPLAN,{lake15:v({walker:4,chat:3,handInHand:2,reading:1}),mine15:v({walker:3,chat:2,carryBox:2}),crystal15:v({walker:4,chat:3,handInHand:1}),
   terrace15:v({walker:4,chat:3,handInHand:1}),center15:v({walker:5,chat:4,handInHand:2,benchPair:1}),geyser15:v({walker:3,chat:3,handInHand:1}),
-  camp15:v({walker:7,chat:5,carryBox:3,handInHand:2,reading:1})})};
+  camp15:v({walker:7,chat:5,carryBox:3,handInHand:2,reading:1}),
+  batW15:v({walker:1,chat:1}),colW15:v({walker:2,chat:1}),restW15:v({walker:1,chat:1}),
+  mossE15:v({walker:1,chat:1}),lavaE15:v({walker:1,chat:1}),steamE15:v({walker:2,chat:1})})};
 
 function structures(){
  late();
@@ -309,10 +385,21 @@ function structures(){
  add(1400,1700,80,56,'table15',table15());
  add(STAIR.x-130,2010,58,68,'sign15',sign15());
  [[STAIR.x-110,2060],[STAIR.x+110,2060],[STAIR.x-40,1640],[STAIR.x+40,1400],[STAIR.x-40,1160],[STAIR.x+40,920],[1000,1810],[1500,1810]].forEach(([x,y])=>add(x,y,44,80,'lamp15',lamp15()));
+ /* 11-26f 西：蝙蝠觀察角、巨石柱大廳（主石柱＋幾根石柱）、礦工休息站 */
+ add(440,700,150,150,'batLedge15',X15.batLedge(),{sh:.8});add(575,770,90,70,'watchG15',X15.G.watch());
+ add(450,1240,80,220,'columnD15',X15.columnD(),{sh:.8});mark(450,1250,160,40,1);
+ [[340,1040,.95],[570,1100,.85],[350,1420,.9],[590,1440,.8]].forEach(([x,y,s])=>add(x,y,60*s,200*s,'column15',X15.column(s),{sh:.8}));
+ add(470,1330,100,80,'hugG15',X15.G.hug());
+ add(450,1740,140,80,'shed15',X15.shed(),{sh:.8});add(600,1650,90,60,'lunchG15',X15.G.lunch());
+ /* 11-26f 東：螢光苔蘚坡、熔岩觀景台、地熱蒸籠 */
+ add(2040,720,150,70,'mossB15',X15.mossB(),{sh:.8});[[1930,620],[2140,880],[1960,900]].forEach(([x,y])=>add(x,y,56,36,'mossS15',X15.mossS()));
+ add(1950,800,80,60,'torchG15',X15.G.torch());add(2120,780,50,60,'sketchG15',X15.G.sketch());
+ add(2040,1230,180,90,'lava15',X15.lava(),{sh:.8});mark(2040,1200,220,130,1);add(1990,1340,100,60,'peekG15',X15.G.peek());
+ add(2040,1760,150,80,'vents15',X15.vents(),{sh:.8});add(1920,1830,100,60,'queueG15',X15.G.queue());add(2140,1870,70,60,'blowG15',X15.G.blow());
  /* 小故事要放的固定位置先佔好 */
  mark(STAIR.x,2160,220,150,1);mark(MINE.x+78,MINE.y+24,44,50,1);mark(1150,1720,40,64,1);mark(1560,1880,40,64,1);
  /* 石筍：沿著洞壁、空地補幾根 */
- for(let i=0;i<26;i++){const x=sr(660,1860),y=sr(560,2020);if(canPlace(x,y,44,80,false,.7)&&!H.WATERFN[N](x,y))add(x,y,44,80,'stalag15',stalag15(sr(.8,1.2)),{sh:.8})}
+ for(let i=0;i<26;i++){const x=sr(300,2200),y=sr(560,2020);if(canPlace(x,y,44,80,false,.7)&&!H.WATERFN[N](x,y))add(x,y,44,80,'stalag15',stalag15(sr(.8,1.2)),{sh:.8})}
 }
 function scatterAll(){
  const S=H.dbg.storySp();
@@ -320,28 +407,31 @@ function scatterAll(){
  scatter('lake15',POOL.lake15,2400,48);scatter('mine15',POOL.mine15,2600,52);scatter('crystal15',POOL.crystal15,2800,52);
  scatter('terrace15',POOL.terrace15,3000,52);scatter('center15',POOL.center15,2400,48);scatter('geyser15',POOL.geyser15,3000,52);
  scatter('camp15',POOL.camp15,3400,52);
- scatter('all15',POOL.decor15,6000,90);
+ /* 11-26f 加寬區 */
+ scatter('batW15',POOL.batW15,1600,22);scatter('colW15',POOL.colW15,2000,26);scatter('restW15',POOL.restW15,1800,22);
+ scatter('mossE15',POOL.mossE15,1600,22);scatter('lavaE15',POOL.lavaE15,2000,26);scatter('steamE15',POOL.steamE15,1800,22);
+ scatter('all15',POOL.decor15,6000,28);
 }
 function moveSp(sp,p){if(!sp||!p)return;sp.svg=sp.svg.replace(/translate\([^)]*\)/,`translate(${f(p[0])},${f(p[1])})`).replace(/data-x="[^"]*" data-y="[^"]*"/,`data-x="${f(p[0])}" data-y="${f(p[1])}"`);sp.x=p[0];sp.y=p[1]}
 SCENE_IMPL[N]={ground,structures,scatter:scatterAll};
-Object.assign(HOSTN,{stalag15:'石筍',crystal15:'水晶',tent15:'帳篷',boxes15:'補給箱',table15:'營地桌',lamp15:'掛燈',mineGate15:'礦坑口',bigCart15:'大礦車',fungus15:'洞窟菇',sign15:'告示牌'});
-['stalag15','crystal15','tent15','boxes15','table15','lamp15','mineGate15','bigCart15','fungus15','sign15'].forEach(k=>HOSTK.add(k));
+Object.assign(HOSTN,{stalag15:'石筍',crystal15:'水晶',tent15:'帳篷',boxes15:'補給箱',table15:'營地桌',lamp15:'掛燈',mineGate15:'礦坑口',bigCart15:'大礦車',fungus15:'洞窟菇',sign15:'告示牌',column15:'石柱',columnD15:'巨石柱',shed15:'休息木棚',mossB15:'苔蘚圓石'});
+['stalag15','crystal15','tent15','boxes15','table15','lamp15','mineGate15','bigCart15','fungus15','sign15','column15','columnD15','shed15','mossB15'].forEach(k=>HOSTK.add(k));
 /* 物件的合理位置 */
 H.SPOTS[N]={
- headlamp15:[['tent15',.3,.4],['mineGate15',.5,.2],['boxes15',.5,-.4]],
- sulfur15:[['geyser15',.5,.2],['stalag15',.5,.3],['crystal15',.5,.4]],
- geode15:[['crystal15',.45,.4],['table15',.3,-.6],['boxes15',.55,.3]],
- thermo15:[['geyser15',.45,-.3],['table15',.2,-.6],['lamp15',.6,.2]],
- bat15:[['stalag15',.4,-.5],['mineGate15',.3,-.4],['lamp15',.5,-.6]],
- cart15:[['bigCart15',.6,.3],['mineGate15',.5,.3],['boxes15',.6,.2]],
- pick15:[['mineGate15',.55,.2],['boxes15',.6,.1],['crystal15',.5,.3]],
- shroom15:[['fungus15',.5,.2],['stalag15',.5,.3],['crystal15',.5,.5]],
- salamander15:[['rock15s',.5,.3],['stalag15',.45,.4],['fungus15',.6,.2]],
- map15:[['table15',.2,-.6],['tent15',.4,.4],['sign15',.4,.3]],
- tub:[['tent15',.4,.4],['boxes15',.5,.2],['lamp15',.5,.3]],
- egg:[['eggG15',.4,.3],['table15',.3,-.5],['rock15s',.5,.3]]};
+ headlamp15:[['tent15',.3,.4],['mineGate15',.5,.2],['boxes15',.5,-.4],['shed15',.5,.3]],
+ sulfur15:[['geyser15',.5,.2],['stalag15',.5,.3],['crystal15',.5,.4],['lava15',.2,.5],['mossS15',.5,.3]],
+ geode15:[['crystal15',.45,.4],['table15',.3,-.6],['boxes15',.55,.3],['column15',.1,.6],['mossS15',.5,-.4]],
+ thermo15:[['geyser15',.45,-.3],['table15',.2,-.6],['lamp15',.6,.2],['lava15',.2,-.4],['shed15',.4,-.3]],
+ bat15:[['stalag15',.4,-.5],['mineGate15',.3,-.4],['lamp15',.5,-.6],['batLedge15',.6,.3],['column15',.5,-.5]],
+ cart15:[['bigCart15',.6,.3],['mineGate15',.5,.3],['boxes15',.6,.2],['shed15',.2,.5],['vents15',.3,.5]],
+ pick15:[['mineGate15',.55,.2],['boxes15',.6,.1],['crystal15',.5,.3],['column15',.15,.5],['shed15',.3,.2]],
+ shroom15:[['fungus15',.5,.2],['stalag15',.5,.3],['crystal15',.5,.5],['mossB15',.4,.5],['mossS15',.5,.3]],
+ salamander15:[['rock15s',.5,.3],['stalag15',.45,.4],['fungus15',.6,.2],['mossS15',.5,-.4],['lava15',.2,.45]],
+ map15:[['table15',.2,-.6],['tent15',.4,.4],['sign15',.4,.3],['batLedge15',.2,.4],['vents15',.3,-.5]],
+ tub:[['tent15',.4,.4],['boxes15',.5,.2],['lamp15',.5,.3],['vents15',.3,.45],['column15',.1,-.5]],
+ egg:[['eggG15',.4,.3],['table15',.3,-.5],['rock15s',.5,.3],['vents15',.2,.3],['shed15',.3,.4]]};
 H.BLEND[N]={headlamp15:['hardhat15','lamp15'],sulfur15:['cheese15','crystal15'],geode15:['onion15','crystal15'],thermo15:['pencil15','lamp15'],bat15:['umbrella15','stalag15'],
- cart15:['barrow15','bigCart15'],pick15:['hoe15','boxes15'],shroom15:['bluebell15','fungus15'],salamander15:['sock15','rock15s'],map15:['paper15','table15'],
+ cart15:['barrow15','bigCart15'],pick15:['hoe15','boxes15'],shroom15:['bluebell15','fungus15','mossS15'],salamander15:['sock15','rock15s'],map15:['paper15','table15'],
  tub:['box15','boxes15'],egg:['rock15s','pebbles']};
 
 /* ================= 8. 連環小故事：頭燈沒電的小鼴鼠 ================= */

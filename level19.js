@@ -26,13 +26,13 @@ const shelf=(x,y,w,h,rows,wood='#8a5a34',seed)=>{if(seed)SEED=seed;let s=`<rect 
  return s+`<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}" fill="none" stroke-width="2.4"/>`};
 
 /* ================= 1. 場景範圍、場地外（兩側高書牆） ================= */
-H.SCENES[N]={x0:600,x1:1900,y1:2150,c:[1250,1880]};
+H.SCENES[N]={x0:250,x1:2250,y1:2150,c:[1250,1880]};   /* 2026-11-26l 加寬：600～1900 → 250～2250（西＝地圖室、東＝印刷工坊） */
 H.TARGET[N]=330;
 H.SKYC[N]='#5a3e2c';H.SKYY[N]=0;
 H.EDGEM[N]='';H.EDGED[N]='';
 H.EDGEDECO[N]=[];
 H.FRINGE[N]=[['bookstack19',.6],['plant19',.25],['stool19',.25]];
-H.FRINGEX[N]=[[0,0,2600,690]];
+H.FRINGEX[N]=[[-600,0,3200,690],[-600,690,600,2700],[1900,690,3200,2700]];   /* 加寬區有自己的佈景，不長靠邊佈景 */
 H.DENS[N]=1;
 const WY=640;   /* 北牆腳（地板從這裡開始） */
 if(H.FOGFN)H.FOGFN[N]=({X0,X1,Y1})=>{const C='#3a2a20';
@@ -155,25 +155,29 @@ Object.assign(KIND,{
 const OLD={gkey17:{id:'gkey17',name:'城門大鑰匙',short:'大鑰匙',r:15,rot:30}};
 const old=(id,regions)=>({...(typeOf(id)||OLD[id]),regions});
 const TYPES=[
- old('gkey17',['north19','south19','east19','west19']),
- {id:'tome19',name:'紫色扣鎖古書',short:'古書',r:16,rot:10,regions:['west19','north19','center19','east19']},
- {id:'quill19',name:'羽毛筆',short:'羽毛筆',r:16,rot:20,regions:['east19','west19','north19','south19']},
- {id:'ink19',name:'墨水瓶',short:'墨水瓶',r:15,rot:6,regions:['east19','west19','south19','north19']},
- {id:'glass19',name:'圓框眼鏡',short:'眼鏡',r:16,rot:15,regions:['west19','south19','north19','center19']},
- {id:'lens19',name:'放大鏡',short:'放大鏡',r:16,rot:20,regions:['east19','west19','center19','south19']},
- {id:'globe19',name:'桌上地球儀',short:'地球儀',r:15,rot:6,regions:['north19','center19','west19','south19']},
+ old('gkey17',['north19','pressE19','south19','mapW19']),
+ {id:'tome19',name:'紫色扣鎖古書',short:'古書',r:16,rot:10,regions:['scrollW19','north19','center19','typeE19']},
+ {id:'quill19',name:'羽毛筆',short:'羽毛筆',r:16,rot:20,regions:['dryE19','terrW19','north19','south19']},
+ {id:'ink19',name:'墨水瓶',short:'墨水瓶',r:15,rot:6,regions:['pressE19','west19','south19','north19']},
+ {id:'glass19',name:'圓框眼鏡',short:'眼鏡',r:16,rot:15,regions:['mapW19','south19','north19','center19']},
+ {id:'lens19',name:'放大鏡',short:'放大鏡',r:16,rot:20,regions:['east19','scrollW19','center19','typeE19']},
+ {id:'globe19',name:'桌上地球儀',short:'地球儀',r:15,rot:6,regions:['north19','center19','terrW19','south19']},
  {id:'bmark19',name:'流蘇書籤',short:'書籤',r:15,rot:20,regions:['west19','south19','center19','east19']},
- {id:'wax19',name:'封蠟印章',short:'印章',r:15,rot:8,regions:['north19','east19','south19','west19']},
- {id:'owl19',name:'小貓頭鷹',short:'貓頭鷹',r:15,rot:6,regions:['center19','north19','east19','south19']},
- {id:'abc19',name:'字母積木',short:'積木',r:15,rot:8,nofl:true,regions:['south19','center19','west19','east19']},
- {id:'watch19',name:'懷錶',short:'懷錶',r:15,rot:15,regions:['south19','east19','north19','center19']}];
+ {id:'wax19',name:'封蠟印章',short:'印章',r:15,rot:8,regions:['north19','typeE19','south19','mapW19']},
+ {id:'owl19',name:'小貓頭鷹',short:'貓頭鷹',r:15,rot:6,regions:['center19','north19','east19','terrW19']},
+ {id:'abc19',name:'字母積木',short:'積木',r:15,rot:8,nofl:true,regions:['south19','dryE19','west19','scrollW19']},
+ {id:'watch19',name:'懷錶',short:'懷錶',r:15,rot:15,regions:['south19','pressE19','north19','center19']}];
 LEVELS[N].types=TYPES;
 /* BORROW：不借 */
 
 /* ================= 5. 區域、建築位置 ================= */
 Object.assign(REG,{north19:{x:640,y:690,w:1220,h:170},west19:{x:620,y:900,w:460,h:700},center19:{x:1090,y:880,w:320,h:720},
- east19:{x:1420,y:900,w:460,h:700},south19:{x:620,y:1650,w:1260,h:480},all19:{x:620,y:690,w:1260,h:1440}});
-H.SCREG[N]=['north19','west19','center19','east19','south19'];
+ east19:{x:1420,y:900,w:460,h:700},south19:{x:620,y:1650,w:1260,h:480},all19:{x:620,y:690,w:1260,h:1440},
+ /* 2026-11-26l 加寬區：西＝地圖室、東＝印刷工坊（石牆在 x 600／1900） */
+ mapW19:{x:280,y:700,w:300,h:360},scrollW19:{x:280,y:1060,w:300,h:360},terrW19:{x:280,y:1420,w:300,h:380},southW19:{x:280,y:1800,w:300,h:330},
+ pressE19:{x:1920,y:700,w:300,h:360},dryE19:{x:1920,y:1060,w:300,h:360},typeE19:{x:1920,y:1420,w:300,h:380},southE19:{x:1920,y:1800,w:300,h:330}});
+H.SCREG[N]=['north19','west19','center19','east19','south19','mapW19','scrollW19','terrW19','southW19','pressE19','dryE19','typeE19','southE19'];
+const WALLX=[600,1900],GAPS=[[1000,1090],[1460,1550],[1880,1970]];   /* 石牆和拱門口 */
 const WINX=[760,1010,1490,1740];   /* 北牆高拱窗 */
 const DESK={x:1250,y:820};          /* 館長大書桌（腳底中心）；桌鈴在 (DESK.x+60, DESK.y-58) */
 const STAIR={x:1250,y:1330};        /* 木頭螺旋梯（腳底中心） */
@@ -197,14 +201,14 @@ function ground(){
  let bl='';for(let y=60,k=0;y<GAL-200;y+=32,k++){bl+=`M${X0},${y} H${X1} `;for(let x=X0+(k%2)*40;x<X1;x+=80)bl+=`M${x},${y} V${y+32} `}
  g+=`<path d="${bl}" fill="none" stroke="#cfc2a2" stroke-width="1.2"/>`;
  g+=`<rect x="${X0}" y="-420" width="${WW}" height="440" fill="#5a3e2c" stroke="none" opacity=".5"/><rect x="${X0}" y="6" width="${WW}" height="30" fill="#6a4228"/><path d="M${X0},14 H${X1}" fill="none" stroke="#4a3022" stroke-width="1.4"/>`;
- for(let x=640;x<=1880;x+=155)g+=`<path d="M${x-12},36 h24 l-7,30 h-10Z" fill="#6a4228"/>`;
+ for(let x=640-155*3;x<=1880+155*3;x+=155)g+=`<path d="M${x-12},36 h24 l-7,30 h-10Z" fill="#6a4228"/>`;
  const win=cx=>{const w=46,y0=90,y1=250;let s=`<path d="M${cx-w-10},${y1+8} V${y0+w} Q${cx-w-10},${y0-12} ${cx},${y0-32} Q${cx+w+10},${y0-12} ${cx+w+10},${y0+w} V${y1+8}Z" fill="#c9bf9f"/>`;
   s+=`<path d="M${cx-w},${y1} V${y0+w} Q${cx-w},${y0} ${cx},${y0-20} Q${cx+w},${y0} ${cx+w},${y0+w} V${y1}Z" fill="url(#sky19)"/>`;
   s+=`<ellipse cx="${cx-14}" cy="${y0+50}" rx="20" ry="7" fill="#fbfbf6" stroke="none" opacity=".9"/>`;
   s+=`<path d="M${cx},${y0-20} V${y1} M${cx-w},${y0+70} H${cx+w} M${cx-w},${y0+120} H${cx+w}" fill="none" stroke="#6a4228" stroke-width="3.4"/>`;
   s+=`<path d="M${cx-w},${y1} V${y0+w} Q${cx-w},${y0} ${cx},${y0-20} Q${cx+w},${y0} ${cx+w},${y0+w} V${y1}Z" fill="none" stroke-width="2.4"/><rect x="${cx-w-14}" y="${y1+4}" width="${2*w+28}" height="12" rx="3" fill="#cbbf9f"/>`;
   return s};
- WINX.forEach(x=>g+=win(x));
+ WINX.forEach(x=>g+=win(x));[425,2075].forEach(x=>g+=win(x));   /* 2026-11-26l 兩側房間的高拱窗 */
  /* 中間的大圓窗 */
  {const cx=1250,cy=160,R=74;g+=`<circle cx="${cx}" cy="${cy}" r="${R+12}" fill="#c9bf9f"/><circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#sky19)"/>`+
   Array.from({length:12},(_,i)=>{const a=i*Math.PI/6;return `<path d="M${cx},${cy} L${f(cx+Math.cos(a)*R)},${f(cy+Math.sin(a)*R)}" fill="none" stroke="#6a4228" stroke-width="3"/>`}).join('')+
@@ -234,6 +238,12 @@ function ground(){
  /* 東邊抄寫室：石板地 */
  g+=`<rect x="1440" y="930" width="440" height="660" rx="10" fill="#d6cbae" opacity=".75"/>`;
  let st='';for(let y=966;y<1590;y+=36)st+=`M1440,${y} H1880 `;for(let x=1480;x<1880;x+=44)st+=`M${x},930 V1590 `;g+=`<path d="${st}" fill="none" stroke="#c4b896" stroke-width="1.2"/>`;
+ /* 2026-11-26l 加寬區地板：西＝地圖室深藍地毯（金邊、四角羅盤星）；東＝印刷工坊石板地＋幾滴墨漬 */
+ g+=`<rect x="300" y="740" width="270" height="1360" rx="12" fill="#2f4f8a" opacity=".42"/><rect x="314" y="754" width="242" height="1332" rx="8" fill="none" stroke="#e0b44a" stroke-width="2.4" opacity=".7"/>`;
+ [[330,784],[540,784],[330,2056],[540,2056]].forEach(([x,y])=>g+=`<path d="M${x},${y-12} L${x+3},${y} L${x},${y+12} L${x-3},${y}Z M${x-12},${y} L${x},${y-3} L${x+12},${y} L${x},${y+3}Z" fill="#e0b44a" opacity=".8" stroke="none"/>`);
+ g+=`<rect x="1916" y="660" width="320" height="1490" fill="#d6cbae" opacity=".8" stroke="none"/>`;
+ {let st='';for(let y=696;y<2150;y+=36)st+=`M1916,${y} H2236 `;for(let x=1956;x<2236;x+=44)st+=`M${x},660 V2150 `;g+=`<path d="${st}" fill="none" stroke="#c4b896" stroke-width="1.2"/>`}
+ [[1990,1040],[2140,1210],[2010,1580],[2170,1860]].forEach(([x,y])=>g+=`<ellipse cx="${x}" cy="${y}" rx="9" ry="4" fill="#2b2420" opacity=".35" stroke="none"/><circle cx="${x+12}" cy="${y+2}" r="2" fill="#2b2420" opacity=".3" stroke="none"/>`);
  /* ---- 中間的圓形大地毯（螺旋梯在中央） ---- */
  g+=`<ellipse cx="${RUG.x}" cy="${RUG.y}" rx="${RUG.rx}" ry="${RUG.ry}" fill="#8e2630"/><ellipse cx="${RUG.x}" cy="${RUG.y}" rx="${RUG.rx-16}" ry="${RUG.ry-10}" fill="none" stroke="#e0b44a" stroke-width="4"/>`+
   `<ellipse cx="${RUG.x}" cy="${RUG.y}" rx="${RUG.rx-40}" ry="${RUG.ry-26}" fill="#a83a3a" stroke="none"/>`+Array.from({length:16},(_,i)=>{const a=i*Math.PI/8;return `<circle cx="${f(RUG.x+Math.cos(a)*(RUG.rx-28))}" cy="${f(RUG.y+Math.sin(a)*(RUG.ry-18))}" r="4" fill="#e0b44a" stroke="none"/>`}).join('');
@@ -287,6 +297,79 @@ const lectern=(o,say)=>{let s=sh(34,5)+`<path d="M-22,0 L-18,-20 M-6,0 L-10,-20"
 const chairS=(x,dir)=>`<g transform="translate(${x},0) scale(${dir},1)"><path d="M-10,0 V-16 M8,0 V-16 M-10,-16 V-42" fill="none" stroke="${OL}" stroke-width="4.4"/><path d="M-10,0 V-16 M8,0 V-16 M-10,-16 V-42" fill="none" stroke="#8a5a34" stroke-width="2.6"/><rect x="-13" y="-19" width="24" height="5" rx="1.4" fill="#a8703f"/><rect x="-13" y="-44" width="6" height="16" rx="1.4" fill="#6a3f8a"/></g>`;
 const roundTbl=(pa,pb,deco='')=>sh(56,6)+chairS(-34,1)+chairS(34,-1)+act(-30,-18,1,{view:'side',pose:'sit',...pa},pa.an??'nod')+act(30,-18,-1,{view:'side',pose:'sit',...pb},pb.an??'lean')+
  `<path d="M0,-26 V0 M-12,0 H12" fill="none" stroke="${OL}" stroke-width="4.4"/><path d="M0,-26 V0 M-12,0 H12" fill="none" stroke="#8a5a34" stroke-width="2.6"/><ellipse cx="0" cy="-28" rx="22" ry="6" fill="#a8703f"/>`+deco;
+/* ================= 3b. 2026-11-26l 加寬：西＝地圖室（大地圖立架 C、扁抽屜地圖櫃 D、地形沙盤 A）、東＝印刷工坊（印刷機＋墨球 B、紙堆 C、小抽屜鉛字櫃 B）、中間石牆＋拱門 ================= */
+const X19=(()=>{
+const WD='#a8703f',WD2='#8a5a34',WD3='#6a4228',PA='#f4ecd6',apron=`<path d="M-7,-14 H7 L8,0 H-8Z" fill="#5a4a3a" stroke-width="1.1"/>`;
+const leg=(d,w=4.4,c=WD2)=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w}"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w-1.8}"/>`;
+const P=(o,x,y,dir,an)=>act(x,y,dir,{hat:-1,...o},an||'nod');
+const K=(o,x,y,dir,s=.82)=>T(x,y,s,kid({hat:-1,...o}),dir<0);
+const mapArt=(w,h)=>{const x0=-w/2,y0=-h/2,u=w/100,v=h/100;const X=a=>f(x0+a*u),Y=b=>f(y0+b*v);
+ let s=`<rect x="${f(x0)}" y="${f(y0)}" width="${f(w)}" height="${f(h)}" rx="2" fill="#efe0b8"/>`;
+ s+=`<path d="M${X(0)},${Y(0)} H${X(42)} Q${X(36)},${Y(30)} ${X(46)},${Y(52)} Q${X(30)},${Y(70)} ${X(34)},${Y(100)} H${X(0)}Z" fill="#9ac8dc" stroke="none"/>`;
+ s+=`<path d="M${X(52)},${Y(12)} Q${X(70)},${Y(4)} ${X(86)},${Y(16)} Q${X(96)},${Y(36)} ${X(84)},${Y(50)} Q${X(90)},${Y(70)} ${X(74)},${Y(88)} Q${X(58)},${Y(92)} ${X(50)},${Y(76)} Q${X(58)},${Y(56)} ${X(54)},${Y(42)} Q${X(44)},${Y(28)} ${X(52)},${Y(12)}Z" fill="#a8c884" stroke-width="1.2"/>`;
+ s+=`<path d="M${X(10)},${Y(30)} Q${X(20)},${Y(22)} ${X(28)},${Y(34)} Q${X(24)},${Y(46)} ${X(12)},${Y(44)}Z" fill="#a8c884" stroke-width="1.2"/>`;
+ s+=`<path d="M${X(60)},${Y(30)} l${f(3*u)},${f(-6*v)} l${f(3*u)},${f(6*v)}Z M${X(68)},${Y(36)} l${f(3*u)},${f(-7*v)} l${f(3*u)},${f(7*v)}Z" fill="#b08a5a" stroke-width="1"/>`;
+ s+=`<path d="M${X(20)},${Y(38)} Q${X(40)},${Y(60)} ${X(62)},${Y(64)} T${X(80)},${Y(40)}" fill="none" stroke="#c4473a" stroke-width="1.6" stroke-dasharray="3 2.4"/><path d="M${X(80)},${Y(36)} l-3,-3 m3,3 l3,-3 m-3,3 l-3,3 m3,-3 l3,3" fill="none" stroke="#c4473a" stroke-width="2"/>`;
+ const cx=x0+16*u,cy=y0+80*v,R=Math.min(w,h)*.1;s+=`<path d="M${f(cx)},${f(cy-R)} L${f(cx+R*.25)},${f(cy)} L${f(cx)},${f(cy+R)} L${f(cx-R*.25)},${f(cy)}Z M${f(cx-R)},${f(cy)} L${f(cx)},${f(cy-R*.25)} L${f(cx+R)},${f(cy)} L${f(cx)},${f(cy+R*.25)}Z" fill="#fbf6ea" stroke-width="1"/>`;
+ return s+`<rect x="${f(x0)}" y="${f(y0)}" width="${f(w)}" height="${f(h)}" rx="2" fill="none" stroke="#8a6a3a" stroke-width="1.6"/>`};
+const roll=(x,y,l=26,c='#efe0b8',a=0)=>`<g transform="translate(${x},${y}) rotate(${a})"><rect x="${-l/2}" y="-3.4" width="${l}" height="6.8" rx="3.4" fill="${c}" stroke-width="1.2"/><ellipse cx="${l/2}" cy="0" rx="2.2" ry="3.4" fill="#d8c494" stroke-width="1"/><path d="M-2,-3.4 V3.4" fill="none" stroke="#c4473a" stroke-width="1.6"/></g>`;
+const flag=(x,y,c)=>`<path d="M${x},${y} v-14" fill="none" stroke-width="1.4"/><path d="M${x},${y-14} l8,3 l-8,3Z" fill="${c}" stroke-width="1"/>`;
+const castle=(x,y,s=1)=>`<g transform="translate(${x},${y}) scale(${s})"><rect x="-8" y="-14" width="16" height="14" fill="#d6cbae" stroke-width="1.1"/><rect x="-12" y="-20" width="6" height="20" fill="#cbbf9f" stroke-width="1.1"/><rect x="6" y="-20" width="6" height="20" fill="#cbbf9f" stroke-width="1.1"/><path d="M-13,-20 L-9,-27 L-5,-20Z M5,-20 L9,-27 L13,-20Z" fill="#8e2630" stroke-width="1"/></g>`;
+/* 西 1C：大地圖立架，老學者（側面舉手）拿指示棒，兩個小朋友坐著聽；指示棒從他的手（65,-25）指到地圖上 */
+const mapStand=()=>{let s=sh(100,8)+leg('M-60,0 L-50,-150 M60,0 L50,-150 M0,4 L0,-40',5)+`<rect x="-66" y="-150" width="132" height="10" rx="3" fill="${WD2}"/>`;
+ s+=`<g transform="translate(0,-96)">${mapArt(116,96)}</g><rect x="-60" y="-46" width="120" height="7" fill="${WD2}"/>`;
+ s+=P({hat:HAT_SOFT,shirt:'#3a2e4a',extra:robe('#3a2e4a'),view:'side',pose:'up',hair:'#e8e4dc',beard:true},86,0,-1,'nod')+leg('M65,-25 L36,-84',2.6,WD3);
+ s+=K({view:'back',pose:'crouch',shirt:'#4f86c4'},-40,6,1,.75)+K({view:'bq',pose:'crouch',shirt:'#d8413a'},10,8,1,.75);
+ return s};
+/* 西 2D：扁抽屜地圖櫃，學者（側面伸手）拉開一格；手在抽屜右前角（62,-18） */
+const drawer=()=>{let s=sh(90,7);const W=160;s+=`<rect x="${-W/2}" y="-70" width="${W}" height="70" fill="${WD2}"/>`;
+ for(let j=0;j<6;j++)s+=`<rect x="${-W/2+6}" y="${-66+j*11}" width="${W-12}" height="9" fill="${WD}" stroke-width="1.2"/><rect x="-6" y="${-63+j*11}" width="12" height="3" rx="1.4" fill="#e0b44a" stroke-width=".8"/>`;
+ s+=`<path d="M${-W/2+10},-30 L${-W/2+2},-14 H${W/2-18} L${W/2-18},-30Z" fill="${WD}"/><g transform="translate(-14,-22) scale(1,.3)">${mapArt(110,40)}</g>`;
+ s+=`<rect x="${-W/2-4}" y="-76" width="${W+8}" height="8" rx="2" fill="${WD}"/>`+roll(-40,-82,30)+roll(30,-82,24,'#e8d6a8',-6);
+ return s+P({hat:HAT_SOFT,shirt:'#1f5f6a',extra:robe('#1f5f6a'),view:'side',pose:'reach'},76,0,-1,'nod')};
+/* 西 3A：地形沙盤，兩邊小朋友踮腳看 */
+const sandbox=()=>{const w=200;let s=sh(110,8)+K({view:'bq',pose:'up2',shirt:'#6fc06a'},-92,-6,1,.8);
+ s+=`<path d="M${-w/2},-34 L${-w/2+14},-74 H${w/2-14} L${w/2},-34Z" fill="#d8c48a"/><rect x="${-w/2}" y="-34" width="${w}" height="34" fill="${WD2}"/><path d="M${-w/2},-34 L${-w/2+14},-74 H${w/2-14} L${w/2},-34Z" fill="none" stroke="${WD3}" stroke-width="4"/>`;
+ s+=`<path d="M${-w/2+20},-44 Q-10,-60 10,-50 T${w/2-20},-62" fill="none" stroke="#6aa8d0" stroke-width="5"/><path d="M-60,-46 l14,-20 l12,20Z M-40,-50 l12,-16 l10,16Z" fill="#8aa868" stroke-width="1.4"/><path d="M-50,-62 l4,-4 l4,4Z" fill="#fbfbf6" stroke="none"/>`;
+ s+=`<ellipse cx="40" cy="-46" rx="14" ry="5" fill="#7ab85a" stroke-width="1"/>`+castle(24,-56,.9)+castle(60,-44,.7)+flag(-20,-48,'#c4473a')+flag(70,-62,'#2f4f8a')+flag(-74,-56,'#f0c94a');
+ return s+K({view:'fq',pose:'up',shirt:'#d8413a'},98,2,-1,.8)};
+/* 東 1B：大木頭印刷機；右邊師傅（側面 hold）握著拉桿尾端（63,-20）；左邊學徒（正斜 up2）兩手各拿一顆墨球往版面拍 */
+const inkBall=(x,y,a)=>`<g transform="translate(${x},${y}) rotate(${a})"><path d="M0,0 V-14" fill="none" stroke="${OL}" stroke-width="4"/><path d="M0,0 V-14" fill="none" stroke="#8a5a34" stroke-width="2.4"/><path d="M-9,0 Q0,10 9,0Z" fill="#2b2420"/></g>`;
+const press=()=>{let s=sh(100,8)+P({shirt:'#a8502e',view:'fq',pose:'up2',extra:apron+inkBall(14,-13,-10)+inkBall(22,-11,14)},-80,0,1,'work');
+ s+=leg('M-44,0 V-150 M44,0 V-150',9,WD2)+`<rect x="-54" y="-160" width="108" height="16" rx="2" fill="${WD}"/><rect x="-54" y="-100" width="108" height="12" fill="${WD2}"/>`;
+ s+=`<rect x="-6" y="-146" width="12" height="40" fill="#5a5e6a"/><path d="M-6,-140 l12,4 M-6,-132 l12,4 M-6,-124 l12,4 M-6,-116 l12,4" fill="none" stroke="#2b2420" stroke-width="1.2"/><rect x="-30" y="-108" width="60" height="10" fill="#8a929c"/>`;
+ s+=`<rect x="-62" y="-56" width="124" height="12" fill="${WD}"/><rect x="-40" y="-62" width="80" height="6" fill="#2b2420"/><rect x="-36" y="-66" width="72" height="5" fill="${PA}" stroke-width="1"/>`+leg('M-56,-44 V0 M56,-44 V0',5);
+ s+=P({shirt:'#f4ecd6',view:'side',pose:'hold',extra:apron},76,0,-1,'work')+`<path d="M2,-112 L63,-20" fill="none" stroke="${OL}" stroke-width="6" stroke-linecap="round"/><path d="M2,-112 L63,-20" fill="none" stroke="#8a5a34" stroke-width="3.6" stroke-linecap="round"/>`;
+ return s};
+/* 東 2C：一落落高高的紙堆＋抱紙的學徒（側面 hold，紙疊的底在手上 13,-18） */
+const stackP=(x,n,w=30)=>{let s=`<g transform="translate(${x},0)">`;for(let i=0;i<n;i++)s+=`<rect x="${-w/2+((i*7)%3)-1}" y="${-(i+1)*5}" width="${w}" height="5" fill="${i%4===3?'#f0e4c4':'#fbf8f0'}" stroke-width=".9"/>`;return s+`</g>`};
+const papers=()=>sh(90,8)+stackP(-60,22)+stackP(-24,30)+stackP(12,16)+stackP(46,26)+P({shirt:'#c99a3a',view:'side',pose:'hold',extra:`<g transform="translate(14,-17)">${stackP(0,8,24)}</g>`},94,0,-1,'step');
+/* 東 3B：整面牆的小抽屜鉛字櫃＋梯子；學徒（背面 up2）站在梯子第 4 階，伸手拉最上面的抽屜 */
+const typeCab=()=>{let s=sh(80,8)+`<rect x="-70" y="-170" width="140" height="170" fill="${WD2}"/>`;
+ for(let j=0;j<9;j++)for(let i=0;i<6;i++)s+=`<rect x="${-64+i*22}" y="${-164+j*18}" width="20" height="16" fill="${WD}" stroke-width="1"/><rect x="${-58+i*22}" y="${-158+j*18}" width="8" height="4" fill="#fbf6ea" stroke-width=".7"/><circle cx="${-54+i*22}" cy="${-151+j*18}" r="1.4" fill="#e0b44a" stroke="none"/>`;
+ s+=`<rect x="-74" y="-176" width="148" height="8" rx="2" fill="${WD}"/>`+leg('M54,4 L80,-120 M70,4 L94,-120 M58,-20 H74 M63,-44 H79 M68,-68 H84 M73,-92 H89',4,WD);
+ return s+P({shirt:'#5a6a3a',view:'back',pose:'up2',extra:apron},82,-92,1,'step')};
+/* 小組（2026-11-26l：拿的東西都在手上；側面 hold 手在 13,-18，正斜 hold 手在 9～13,-17） */
+const G={
+ argue:()=>P({hat:-1,hs:1,shirt:'#3f6a4a',view:'side',pose:'up'},-26,0,1,'nod')+P({hat:HAT_BERET,shirt:'#8e2630',view:'side',pose:'up'},26,0,-1,'nod')+`<g transform="translate(0,-32)"><rect x="-14" y="-10" width="28" height="20" fill="#efe0b8" stroke-width="1.1"/><path d="M-8,0 Q0,-6 8,2" fill="none" stroke="#c4473a" stroke-width="1.4" stroke-dasharray="2 1.6"/></g>`,
+ explorer:()=>P({hat:-1,hs:0,shirt:'#7a5a3a',view:'side',pose:'hold',legs:'walk',extra:`<g transform="translate(-14,-30)"><rect x="-6" y="-8" width="12" height="18" rx="3" fill="#a8502e" stroke-width="1.1"/></g>`+roll(15,-18,22)},0,0,1,'step'),
+ upside:()=>K({view:'fq',pose:'hold',shirt:'#f5d34a',extra:`<g transform="translate(15,-14) rotate(180)"><rect x="-14" y="-10" width="28" height="20" fill="#efe0b8" stroke-width="1.1"/><path d="M-10,-4 l3,-5 l3,5Z" fill="#b08a5a" stroke-width=".8"/></g>`},0,0,1,.9),
+ rolls:()=>P({...scribeO({hair:'#8a5a2a'}),view:'fq',pose:'hold',extra:robe('#7a5a3a')+`<g transform="translate(9,-20)">${[0,1,2,3,4].map(i=>roll(((i*5)%7)-3,-i*6,24+((i*3)%3)*3,i%2?'#e8d6a8':'#efe0b8',(i%2?8:-6))).join('')}</g>${roll(24,-4,20,'#efe0b8',40)}`},0,0,1,'step'),
+ north:()=>P({hat:HAT_SOFT,shirt:'#4a3a6a',extra:robe('#4a3a6a'),view:'side',pose:'up',hair:'#e8e4dc',beard:true},-20,0,1,'nod')+K({view:'bq',pose:'up',shirt:'#4f86c4'},24,0,1,.8),
+ inky:()=>P({shirt:'#f4ecd6',view:'fq',pose:'stand',extra:apron+`<circle cx="2" cy="-31" r="3" fill="#2b2420" stroke="none"/><circle cx="-6" cy="-27" r="2" fill="#2b2420" stroke="none" opacity=".7"/>`},0,0,1,'nod'),
+ tall:()=>P({shirt:'#c99a3a',view:'side',pose:'hold',extra:`<g transform="translate(13,-17)">${stackP(0,12,24)}</g>`},0,0,1,'step'),
+ check:()=>P({hat:-1,hs:0,hair:'#c9c4bc',beard:true,shirt:'#f4ecd6',view:'fq',pose:'up2',extra:apron+`<g transform="translate(18,-36)"><rect x="-14" y="-10" width="28" height="20" fill="#fbf8f0" stroke-width="1.1"/><path d="M-10,-5 H10 M-10,-1 H10 M-10,3 H6" fill="none" stroke="#2b2420" stroke-width=".9"/></g>`},0,0,1,'nod'),
+ tea:()=>P({...maidO(),view:'side',pose:'hold',extra:maidO().extra+`<g transform="translate(14,-16)"><ellipse cx="0" cy="0" rx="9" ry="3" fill="#fbfaf6" stroke-width="1.1"/><path d="M-4,0 V-6 H4 V0" fill="#fbfaf6" stroke-width="1.1"/><path d="M0,-8 q2,-4 0,-7" fill="none" stroke="#c9c4bc" stroke-width="1.2"/></g>`},-20,0,1,'step')+P({shirt:'#f4ecd6',view:'side',pose:'stand',extra:apron},24,0,-1,'nod'),
+ poster:()=>K({view:'side',pose:'hold',legs:'run',shirt:'#d8413a',extra:`<g transform="translate(15,-30)"><rect x="-10" y="-14" width="20" height="26" fill="#fbf8f0" stroke-width="1.1"/><path d="M-6,-8 l6,-4 l6,4 v8 h-12Z" fill="#c4473a" stroke-width=".8"/></g>`},0,0,1,.9)};
+/* 石牆（南北向，看得到牆頂和南端牆面）：一段一段放成 sprite，前後遮擋才對；門洞上面一條拱頂 */
+const WH=130;
+const wallSeg=(L,face)=>{let s=`<rect x="-14" y="${-WH-L}" width="28" height="${L}" fill="#cbbf9f"/>`;
+ let j='';for(let y=-WH-L+20;y<-WH;y+=20)j+=`M-14,${y} H14 `;s+=`<path d="${j}" fill="none" stroke="#b9ad8c" stroke-width="1.2"/>`;
+ if(face){s+=`<rect x="-14" y="${-WH}" width="28" height="${WH}" fill="#d6cbae"/>`;let b='';for(let y=-WH+22,k=0;y<0;y+=22,k++)b+=`M-14,${y} H14 M${k%2?-2:6},${y-22} V${y} `;s+=`<path d="${b}" fill="none" stroke="#bfb293" stroke-width="1.2"/><rect x="-14" y="${-WH}" width="28" height="6" fill="#bfb293" stroke="none"/>`}
+ return s};
+const lintel=L=>`<rect x="-15" y="${-WH-L}" width="30" height="${L}" fill="#c4b896"/><path d="M-15,${-WH-L+8} H15 M-15,${-WH-8} H15" fill="none" stroke="#a89c7c" stroke-width="1.4"/><rect x="-15" y="${-WH}" width="30" height="16" fill="#d6cbae"/><path d="M-10,${-WH+16} Q0,${-WH+6} 10,${-WH+16}" fill="#4a3a2c" opacity=".35" stroke="none"/>`;
+return {mapStand,drawer,sandbox,press,papers,typeCab,G,wallSeg,lintel,WH,mapArt,roll}})();
+
 /* ================= 7. 建築與佈景、人群小故事 ================= */
 Object.assign(POOL,{
  north19:[['bookstack19',.8],['stool19',.4],['plant19',.3],['jbox19',.2],['earr19',.2],['tie19',.2],['ring17',.2],['sugar19',.15]],
@@ -294,8 +377,21 @@ Object.assign(POOL,{
  center19:[['bookstack19',.7],['plant19',.3],['stool19',.3],['yarn19',.2],['pine19',.25],['top19',.2],['jbox19',.15]],
  east19:[['bookstack19',.6],['chest19',.3],['stool19',.3],['jam19',.3],['twig19',.3],['pan19',.15],['top19',.15],['pine19',.2],['ring17',.15]],
  south19:[['bookstack19',.7],['plant19',.4],['stool19',.3],['bcart19',.2],['yarn19',.25],['top19',.25],['sugar19',.2],['cookie19',.25],['jam19',.15],['ring17',.15],['pine19',.15]],
- decor19:[['bookstack19',1],['stool19',.4]]});
+ decor19:[['bookstack19',1],['stool19',.4]],
+ /* 2026-11-26l 加寬區 */
+ mapW19:[['bookstack19',.6],['stool19',.4],['plant19',.25],['chest19',.3],['earr19',.25],['tie19',.2],['ring17',.2],['jbox19',.2],['sugar19',.15],['yarn19',.2]],
+ scrollW19:[['bookstack19',.6],['stool19',.35],['chest19',.3],['twig19',.25],['pan19',.2],['cookie19',.25],['jbox19',.2],['earr19',.15]],
+ terrW19:[['plant19',.4],['stool19',.35],['bookstack19',.5],['top19',.25],['pine19',.25],['yarn19',.2],['cookie19',.2],['sugar19',.15]],
+ pressE19:[['paper19',.5],['chest19',.35],['stool19',.3],['jam19',.3],['twig19',.25],['top19',.2],['ring17',.2],['pan19',.15]],
+ dryE19:[['paper19',.5],['stool19',.3],['chest19',.3],['sugar19',.25],['tie19',.25],['earr19',.2],['jbox19',.2],['jam19',.15]],
+ typeE19:[['paper19',.4],['chest19',.35],['bookstack19',.3],['jam19',.25],['pine19',.2],['cookie19',.2],['top19',.2],['ring17',.2]]});
+/* 干擾物倍數（tune 只改這一行）：DM＝中間各區、DS＝兩側新區、CM＝中間 scatter cap 倍數、CS＝兩側 scatter cap */
+const DM19=2.7,DS19=1.3,CM19=.6,CS19=9;
+const DK19=new Set(['ring17','twig19','jam19','earr19','pan19','yarn19','tie19','top19','pine19','sugar19','cookie19','jbox19']);
+const dm=(pool,m)=>pool.map(([k,w])=>[k,DK19.has(k)?w*m:w]);
 const grp=(x,y,w,h,kind,svg,say,o={})=>add(x,y,w,h,kind,svg,{say,...o});
+/* 2026-11-26 加寬選項圖用：匯出畫圖小工具 */
+H.L19={sh,shelf,libO,scribeO,maidO,gown,robe,vest,openB,lamp,plant,stool,bookstack,chest,paper,bcart,shelfS,chairS,roundTbl,rdTable,HAT_SOFT,HAT_BERET,HAT_TIARA,HAT_CAP,RICH};
 let stairSp=null;
 function structures(){
  /* ---- 北：迴廊上的人（站在欄杆後面，mark:false）、迴廊欄杆、館長大書桌 ---- */
@@ -366,26 +462,59 @@ function structures(){
  [[660,900],[1840,900],[650,1540],[1840,1680]].forEach(([x,y])=>add(x,y,40,62,'plant19',plant(),{sh:.7}));
  [[1100,960],[1400,960],[1100,1600],[1600,2100]].forEach(([x,y])=>add(x,y,88,118,'shelfS19',shelfS(),{sh:.8}));
  /* 2026-11-21 使用者：北牆和兩邊的書架上也放一些顏色相近、要找的物件 → 北牆書架、迴廊拱門書架放看不見的定位點（SPOTS 用），不佔位置 */
- for(let x=690;x<=1830;x+=152){const sp=add(x,WY,140,150,'wallS19','<g></g>',{mark:false});sp.y=WY}
- for(let cx=614;cx<=1854;cx+=124){const sp=add(cx,GAL,80,150,'galS19','<g></g>',{mark:false});sp.y=GAL}
+ for(let x=310;x<=2210;x+=152){if(Math.abs(x-600)<60||Math.abs(x-1900)<60)continue;const sp=add(x,WY,140,150,'wallS19','<g></g>',{mark:false});sp.y=WY}
+ for(let cx=614-124*3;cx<=1854+124*3;cx+=124){const sp=add(cx,GAL,80,150,'galS19','<g></g>',{mark:false});sp.y=GAL}
  /* 不能放東西的地方：北牆、迴廊、故事角色的固定位置、螺旋梯周圍 */
- mk(600,0,1900,700);
+ mk(H.SCENES[N].x0,0,H.SCENES[N].x1,700);
+ structuresX();
  mk(STAIR.x-90,STAIR.y-400,STAIR.x+90,STAIR.y+12);   /* 螺旋梯後面（頂端平台擋住的地方）不放東西，不然人會像站在平台上 */
  Object.values(SPOT).forEach(([x,y])=>mk(x-44,y-100,x+44,y+8));
 }
+/* 2026-11-26l 加寬區：石牆、地圖室、印刷工坊 */
+function structuresX(){const Y1=H.SCENES[N].y1+20;
+ for(const wx of WALLX){const runs=[];let y=WY;for(const [a,b] of GAPS){runs.push([y,a]);y=b}runs.push([y,Y1]);
+  for(const [a,b] of runs){for(let y0=a;y0<b;y0+=120){const y1=b-y0<170?b:y0+120;const sp=add(wx,y1,30,X19.WH+(y1-y0),'pwall19',X19.wallSeg(y1-y0,y1===b),{mark:false});sp.y=y1}mk(wx-18,a,wx+18,b)}
+  for(const [a,b] of GAPS){const sp=add(wx,b,30,X19.WH+(b-a),'arch19',X19.lintel(b-a),{mark:false});sp.y=b}}
+ /* ---- 西：地圖室 ---- */
+ grp(430,930,160,160,'mapStand19',X19.mapStand(),'老學者：這條紅線是去海島港口的航線——後面的同學，不要在地圖上畫鬍子！');
+ grp(425,1300,140,90,'drawer19',X19.drawer(),'學者：第三格是山，第四格是海⋯咦，怎麼拉出來一張菜單？');
+ grp(425,1690,150,80,'sand19',X19.sandbox(),'小朋友：這座小城堡就是我們的城堡嗎？——另一個：那我家在哪裡？我要插一支旗子！');
+ grp(340,1110,70,80,'argueG19',X19.G.argue(),'學生：從這裡走比較近！——另一個：可是那邊是海耶！');
+ grp(525,1130,50,90,'rollsG19',X19.G.rolls(),'見習生：館長說一次搬完⋯哎呀，又掉了一卷！');
+ grp(330,1480,40,60,'upsideG19',X19.G.upside(),'小朋友：咦？地圖上的海怎麼在天上？');
+ grp(525,1480,70,80,'northG19',X19.G.north(),'老學者：記住喔，地圖的上面就是北方。——小朋友：那我轉過來，北方也會跟著轉嗎？');
+ grp(530,1930,40,80,'explorerG19',X19.G.explorer(),'探險家：地圖借好了、乾糧帶好了——出發去找沒人去過的地方！');
+ /* ---- 東：印刷工坊 ---- */
+ grp(2075,940,200,170,'press19',X19.press(),'印刷師傅：拍墨、放紙、用力一拉——好，一張新的書頁印好了！');
+ grp(2050,1320,120,150,'paper19s',X19.papers(),'學徒：這些紙都要印成書⋯師傅，今天印得完嗎？');
+ grp(2040,1720,130,180,'typeC19',X19.typeCab(),'學徒：（在梯子上）「龍」字在最上面那格⋯找到了！');
+ grp(1965,1100,40,70,'inkyG19',X19.G.inky(),'學徒：我、我的鼻子怎麼了？大家為什麼一直笑？');
+ grp(2185,1110,50,90,'tallG19',X19.G.tall(),'學徒：（抱著好高一疊紙）前面有人嗎？我什麼都看不到——');
+ grp(1960,1500,50,90,'checkG19',X19.G.check(),'老師傅：（把紙舉起來）墨色均勻、字也沒有歪⋯嗯，這張可以！');
+ grp(2185,1500,80,80,'teaG19',X19.G.tea(),'女僕：師傅，您的熱茶。——師傅：謝謝，手上都是墨，我用嘴巴喝就好⋯');
+ grp(2080,1950,40,60,'posterG19',X19.G.poster(),'小朋友：快看！新印好的說故事會海報，我要拿去給館長！');
+ /* 角落的植物、小凳子 */
+ [[300,780],[570,1580],[2200,780],[1940,1880]].forEach(([x,y])=>add(x,y,40,62,'plant19',plant(),{sh:.7}));
+ [[320,2060],[2200,2060]].forEach(([x,y])=>add(x,y,48,34,'chest19',chest(),{sh:.6}));
+}
 function scatterAll(){
  const S=H.dbg.storySp();if(S){moveSp(S.giver,SPOT.giver);moveSp(S.target,SPOT.target);moveSp(S.helper,SPOT.helper)}
- scatter('north19',POOL.north19,2100,18);scatter('west19',POOL.west19,3600,39);scatter('center19',POOL.center19,2700,24);   /* 2026-11-21 使用者：佈景再多 0.5 倍 */
- scatter('east19',POOL.east19,3600,39);scatter('south19',POOL.south19,3900,45);scatter('all19',POOL.decor19,3900,36);
+ const c=n=>Math.round(n*CM19);
+ scatter('north19',dm(POOL.north19,DM19),2100,c(18));scatter('west19',dm(POOL.west19,DM19),3600,c(39));scatter('center19',dm(POOL.center19,DM19),2700,c(24));   /* 2026-11-21 使用者：佈景再多 0.5 倍 */
+ scatter('east19',dm(POOL.east19,DM19),3600,c(39));scatter('south19',dm(POOL.south19,DM19),3900,c(45));scatter('all19',POOL.decor19,3900,c(36));
+ ['mapW19','scrollW19','terrW19','pressE19','dryE19','typeE19'].forEach(k=>scatter(k,dm(POOL[k],DS19),1600,CS19));
 }
 const CELL=H.CELL,occ=H.occ,GC=H.GC,GR=H.GR;
 function clearCells(x,y,w,h){const a=Math.floor((x-w*.3)/CELL),c=Math.floor((x+w*.3)/CELL),b=Math.floor((y-h*.5)/CELL),d=Math.floor(y/CELL);for(let j=Math.max(0,b);j<=Math.min(GR-1,d);j++)for(let i=Math.max(0,a);i<=Math.min(GC-1,c);i++)occ[j*GC+i]=0}
 function moveSp(sp,p){if(!sp||!p)return;clearCells(sp.x,sp.y,sp.w,sp.h);const[x,y]=p;sp.svg=sp.svg.replace(/translate\([^)]*\)/,`translate(${f(x)},${f(y)})`).replace(/data-x="[^"]*" data-y="[^"]*"/,`data-x="${f(x)}" data-y="${f(y)}"`);sp.x=x;sp.y=y}
 SCENE_IMPL[N]={ground,structures,scatter:scatterAll};
 Object.assign(VPLAN,{north19:{walker:6,chat:5,reading:3},west19:{walker:5,chat:3,reading:3},center19:{walker:6,chat:3,reading:2},   /* 2026-11-21 使用者：人再多 0.5 倍 */
- east19:{walker:5,chat:3,reading:2},south19:{walker:9,chat:6,handInHand:3,reading:3}});
+ east19:{walker:5,chat:3,reading:2},south19:{walker:9,chat:6,handInHand:3,reading:3},
+ mapW19:{walker:1,chat:1},scrollW19:{walker:1},terrW19:{walker:1,chat:1},southW19:{walker:2,chat:1},pressE19:{walker:1},dryE19:{walker:1,chat:1},typeE19:{walker:1},southE19:{walker:2,chat:1}});
 HOSTK.add('bookstack19');HOSTK.add('plant19');HOSTK.add('shelfS19');HOSTK.add('bcart19');HOSTK.add('chest19');HOSTK.add('rdTable19');HOSTK.add('rtbl19');
-Object.assign(HOSTN,{bookstack19:'書堆',plant19:'盆栽',shelfS19:'矮書架',bcart19:'推書車',chest19:'木箱',rdTable19:'閱覽長桌',rtbl19:'小圓桌'});
+['mapStand19','drawer19','sand19','press19','paper19s','typeC19'].forEach(k=>HOSTK.add(k));
+['drawer19','sand19','paper19s','typeC19'].forEach(k=>H.OCCK.add(k));
+Object.assign(HOSTN,{bookstack19:'書堆',plant19:'盆栽',shelfS19:'矮書架',bcart19:'推書車',chest19:'木箱',rdTable19:'閱覽長桌',rtbl19:'小圓桌',mapStand19:'大地圖架',drawer19:'地圖櫃',sand19:'地形沙盤',press19:'印刷機',paper19s:'紙堆',typeC19:'鉛字櫃'});
 /* 物件的合理位置：每種最多一個台子（桌面）選項，其他放在書堆、書架、植物、人群旁；2026-11-21 使用者：北牆書架、迴廊書架、矮書架的層板上也放顏色相近的（古書、墨水、書籤、印章、貓頭鷹、積木） */
 const onTop=(dy,w=80)=>sp=>[Math.random()*w-w/2,dy];
 /* 放在書架的某一層上（物件底部貼著層板）：北牆一樓大書架 3 層（層板 y 534／586／637）、迴廊拱門書架 2 層（y 367／417）、矮書架 4 層 */
@@ -394,18 +523,18 @@ const onWall=sp=>[Math.random()*110-55,pick([534,586,637])-WY-11];
 const onGal=sp=>[Math.random()*44-22,pick([367,417])-GAL-11];
 const onShelfS=sp=>[Math.random()*50-25,pick([-86,-58,-31])-9];
 H.SPOTS[N]={
- gkey17:[['desk19',.05,.6],['circ19',.05,.6],['chest19',.06,.7]],
- tome19:[['shelfS19',onTop(-118,50)],['wallS19',onWall],['galS19',onGal],['shelfS19',onShelfS],['armch19',.05,.6]],
- quill19:[['lect19',.04,.6],['bind19',.04,.6],['bookstack19',.05,-.7]],
- ink19:[['repair19',onTop(-34,50)],['galS19',onGal],['lect19',.04,-.6],['circ19',.05,-.6]],
- glass19:[['rdTable19',onTop(-36,200)],['story19',.05,.55],['bookstack19',.05,.7]],
- lens19:[['repair19',.05,.6],['shelfS19',.05,.6],['bookstack19',.05,-.7]],
- globe19:[['desk19',onTop(-60,120)],['shelfS19',.05,-.6],['plant19',.05,.7]],
- bmark19:[['wallS19',onWall],['shelfS19',onShelfS],['rtbl19',.05,-.6],['rdTable19',.05,.55],['story19',.05,-.55]],
- wax19:[['bind19',onTop(-36,60)],['wallS19',onWall],['circ19',.05,.6],['desk19',.05,-.6]],
- owl19:[['shelfS19',.05,.6],['galS19',onGal],['shelfS19',onShelfS],['stair19',.03,.55],['plant19',.05,-.7]],
- abc19:[['story19',.05,.55],['wallS19',onWall],['plant19',.05,.7]],
- watch19:[['chest19',.06,.7],['rtbl19',.05,.6],['circ19',.05,.6],['armch19',.05,-.6]]};
+ gkey17:[['press19',.05,.6],['desk19',.05,.6],['circ19',.05,.6],['chest19',.06,.7]],
+ tome19:[['drawer19',onTop(-84,110)],['typeC19',.05,-.62],['shelfS19',onTop(-118,50)],['wallS19',onWall],['galS19',onGal],['shelfS19',onShelfS],['armch19',.05,.6]],
+ quill19:[['paper19s',.05,.7],['sand19',.05,.75],['lect19',.04,.6],['bind19',.04,.6],['bookstack19',.05,-.7]],
+ ink19:[['press19',.05,-.6],['repair19',onTop(-34,50)],['galS19',onGal],['lect19',.04,-.6],['circ19',.05,-.6]],
+ glass19:[['mapStand19',.05,-.55],['rdTable19',onTop(-36,200)],['story19',.05,.55],['bookstack19',.05,.7]],
+ lens19:[['drawer19',.05,.62],['typeC19',.05,-.62],['repair19',.05,.6],['shelfS19',.05,.6],['bookstack19',.05,-.7]],
+ globe19:[['sand19',.05,.75],['desk19',onTop(-60,120)],['shelfS19',.05,-.6],['plant19',.05,.7]],
+ bmark19:[['paper19s',.05,-.7],['wallS19',onWall],['shelfS19',onShelfS],['rtbl19',.05,-.6],['rdTable19',.05,.55],['story19',.05,-.55]],
+ wax19:[['typeC19',.05,.62],['mapStand19',.05,-.55],['bind19',onTop(-36,60)],['wallS19',onWall],['circ19',.05,.6],['desk19',.05,-.6]],
+ owl19:[['sand19',.05,-.75],['press19',.05,.6],['shelfS19',.05,.6],['galS19',onGal],['shelfS19',onShelfS],['stair19',.03,.55],['plant19',.05,-.7]],
+ abc19:[['paper19s',.05,-.7],['drawer19',.05,-.62],['story19',.05,.55],['wallS19',onWall],['plant19',.05,.7]],
+ watch19:[['press19',.05,-.6],['chest19',.06,.7],['rtbl19',.05,.6],['circ19',.05,.6],['armch19',.05,-.6]]};
 /* 2026-11-23c 使用者重選的干擾物（同一個名稱在第 17～20 關都一樣，最後載入的檔案也會設成同一張圖） */
 Object.assign(DECOY,{ring17:"<g transform=\"rotate(-40)\"><path d=\"M-2.4,-14 V16 L0,22 L2.4,16 V-14Z\" fill=\"#3d4248\"/><rect x=\"-7\" y=\"-19\" width=\"14\" height=\"5\" rx=\"1.5\" fill=\"#3d4248\"/></g>",twig19:"<g transform=\"rotate(30)\"><path d=\"M0,-20 V10\" fill=\"none\" stroke=\"#2b2420\" stroke-width=\"5.8\" stroke-linecap=\"round\"/><path d=\"M0,-20 V10\" fill=\"none\" stroke=\"#a8703f\" stroke-width=\"3.4\" stroke-linecap=\"round\"/><path d=\"M-3,10 Q-4,18 0,24 Q4,18 3,10Z\" fill=\"#fbf9f3\"/></g>",tie19:"<circle cx=\"0\" cy=\"-14\" r=\"4\" fill=\"none\" stroke=\"#2b2420\" stroke-width=\"3.6\"/><circle cx=\"0\" cy=\"-14\" r=\"4\" fill=\"none\" stroke=\"#e0b44a\" stroke-width=\"2\"/><path d=\"M-4,-8 H4 L5,6 H-5Z\" fill=\"#8e2630\"/><path d=\"M-4,6 L-6,18 M-1,6 V18 M2,6 V18 M5,6 L7,18\" fill=\"none\" stroke=\"#8e2630\" stroke-width=\"1.6\"/>",top19:"<circle cx=\"0\" cy=\"-8\" r=\"8\" fill=\"#a8703f\"/><rect x=\"-3\" y=\"0\" width=\"6\" height=\"8\" fill=\"#8a5a32\"/><rect x=\"-10\" y=\"8\" width=\"20\" height=\"6\" rx=\"2\" fill=\"#8a5a32\"/><path d=\"M-4,-12 q2,-2 4,-2\" fill=\"none\" stroke=\"#c99a5b\" stroke-width=\"1.6\"/>",pine19:"<ellipse cx=\"0\" cy=\"-2\" rx=\"11\" ry=\"14\" fill=\"#a8703f\"/><path d=\"M-7,-8 Q0,-4 7,-8 M-9,2 Q0,6 9,2\" fill=\"none\" stroke=\"#7a4a2a\" stroke-width=\"1.2\"/><ellipse cx=\"0\" cy=\"13\" rx=\"8\" ry=\"2.6\" fill=\"#7a4a2a\"/>",sugar19:"<rect x=\"-16\" y=\"-2\" width=\"14\" height=\"14\" fill=\"#3f6f9a\"/><rect x=\"0\" y=\"-2\" width=\"14\" height=\"14\" fill=\"#e0b44a\"/><rect x=\"-8\" y=\"-16\" width=\"14\" height=\"14\" fill=\"#c4473c\"/>",cookie19:"<circle cx=\"-2\" cy=\"-4\" r=\"10\" fill=\"#dff1fa\"/><circle cx=\"-2\" cy=\"-4\" r=\"10\" fill=\"none\" stroke=\"#2b2420\" stroke-width=\"4.4\"/><circle cx=\"-2\" cy=\"-4\" r=\"10\" fill=\"none\" stroke=\"#e8c04a\" stroke-width=\"2.6\"/><path d=\"M-6,-9 Q-8,-4 -6,0\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2\"/><path d=\"M6,3 Q10,12 4,18 Q0,20 -4,16\" fill=\"none\" stroke=\"#e8c04a\" stroke-width=\"1.6\" stroke-dasharray=\"2 1.6\"/>"});
 H.BLEND[N]={gkey17:['ring17','bookstack19'],tome19:['jbox19','bookstack19'],quill19:['twig19','bookstack19'],ink19:['jam19','bookstack19'],glass19:['earr19','bookstack19'],
@@ -481,7 +610,7 @@ H.TAPHOOKS[N]=(x,y)=>{const sps=H.sprites||[];
    點塔樓側門本身（x 1852～1908）還是宮廷院原本的伏筆對話；書僮在門的左邊（x 1810～1850）。 */
 (function(){
 const H=window.TH;if(!H)return;const N=19;const {T,OL,act}=H;
-const EX={x:1830,y:958};
+const EX={x:2090,y:958};   /* 2026-11-26j 宮廷院圖書塔往東移（1880→2140），書僮跟著搬 */
 (H.RESERVE[18]||(H.RESERVE[18]=[])).push([EX.x,EX.y,50,60]);
 const keys=`<g transform="translate(13,-20)"><circle cx="0" cy="0" r="4" fill="none" stroke="#c99a3a" stroke-width="1.6"/><path d="M2,3 V9 H4 M-1,4 V10 H1" fill="none" stroke="#c99a3a" stroke-width="1.6"/></g>`;
 const vest=`<path d="M-6,-17 L-2,-17 L0,-10 L2,-17 L6,-17 L7,-6 H-7Z" fill="#3f6a4a" stroke-width="1.1"/>`;

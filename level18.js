@@ -16,14 +16,14 @@ const mk=(x0,y0,x1,y1)=>mark((x0+x1)/2,y1,x1-x0,y1-y0,1);   /* 佔掉一個長�
 const sh=(rx,ry=6)=>`<ellipse cx="0" cy="3" rx="${rx}" ry="${ry}" fill="#000" opacity=".15" stroke="none"/>`;
 
 /* ================= 1. 場景範圍、天空、場地邊緣 ================= */
-H.SCENES[N]={x0:600,x1:1900,y1:2150,c:[1250,1700]};
+H.SCENES[N]={x0:250,x1:2250,y1:2150,c:[1250,1700]};   /* 2026-11-26i 加寬：600～1900 → 250～2250（約 6.99 畫面） */
 H.TARGET[N]=330;
 H.SKYC[N]='#d6ebf5';H.SKYY[N]=300;
 H.EDGEM[N]='B';H.EDGED[N]='LRB';
 H.EDGEDECO[N]=[['round',2],['bush',2.4],['flowersY',1]];
 H.FRINGE[N]=[['bush',.8],['flowersY',.8],['pebbles',.6],['walker',.3]];
-H.FRINGEX[N]=[[0,0,2600,760],[0,0,690,770],[0,1800,2600,2600]];   /* 迷宮 11-21m 往北移，迷宮上面不長東西 */   /* 2026-11-21 使用者：南邊迴廊不長草長花 */
-if(H.EDGELAND)H.EDGELAND[N]=(x,y)=>(y>1640||(x<700&&y<780))?false:undefined;   /* 迴廊和南邊走道（場地外也是）不種樹、不長草叢 */
+H.FRINGEX[N]=[[0,0,2600,760],[0,0,420,770],[0,1800,2600,2600],[0,760,620,1830],[1880,0,2600,1830]];   /* 11-26i 加寬區有自己的佈景，不長靠邊的東西 */   /* 迷宮 11-21m 往北移，迷宮上面不長東西 */   /* 2026-11-21 使用者：南邊迴廊不長草長花 */
+if(H.EDGELAND)H.EDGELAND[N]=(x,y)=>(y>1640||(x<420&&y<780))?false:undefined;   /* 迴廊和南邊走道（場地外也是）不種樹、不長草叢 */
 H.DENS[N]=1;
 
 /* ================= 2. 當地人：宮廷貴族（華麗長袍、約 4 成禮服裙、小皇冠、羽毛扁帽）；園丁草帽綠圍裙；侍女白圍裙；衛兵 ================= */
@@ -210,38 +210,230 @@ Object.assign(KIND,{
  brush18c:dk('brush18c',34,26,-4),potbowl18c:dk('potbowl18c',32,22,-4),mortar18c:dk('mortar18c',32,30,-6),fern18c:dk('fern18c',30,40,-6),mush18c:dk('mush18c',34,30,-6),cinna18c:dk('cinna18c',36,24,-4),
  rpin17:KIND.rpin17||dk('rpin17',40,22,-2)});
 ['topi18c','urn18c','bench18c','rarch18c'].forEach(k=>H.OCCK.add(k));
+H.L18={sh,guard,gardener,maidO,gown,HAT_TIARA,HAT_BERET,HAT_STRAW,HAT_CAP,HAT_HELM,RICH,urn,fluff,hi,blob,bench,peacock,G,GL,GD,apronG};  /* 2026-11-26i 加寬區、選項圖共用 */
+/* ================= 3b. 2026-11-26i 加寬區造型（使用者選：西 1 溫室 C、西 2 鞦韆 A；東 1 西洋棋 B、東 2 馬車 D、東 3 鳥舍 A；小組全要） =================
+   沒選的 A～D 函式也留著（之後可以換）。 */
+const X18=(()=>{const wrapAn=H.wrapAn,L=H.L18;
+const horse17=(c='#a8703f',m='#4a3424',bl='#3f6f9a')=>sh(36,6)+
+ `<path d="M-28,-30 Q-42,-24 -37,-4" fill="none" stroke="${OL}" stroke-width="7.6" stroke-linecap="round"/><path d="M-28,-30 Q-42,-24 -37,-4" fill="none" stroke="${m}" stroke-width="5" stroke-linecap="round"/>`+
+ [-22,-13,15,24].map(x=>`<path d="M${x},-16 V-2" fill="none" stroke="${OL}" stroke-width="7.4" stroke-linecap="round"/><path d="M${x},-16 V-2" fill="none" stroke="${c}" stroke-width="4.6" stroke-linecap="round"/><rect x="${x-3.6}" y="-3" width="7.2" height="4" rx="1.2" fill="#3a2a22" stroke-width="1.1"/>`).join('')+
+ `<ellipse cx="0" cy="-27" rx="31" ry="14" fill="${c}"/><path d="M18,-34 Q22,-52 29,-60 L41,-52 Q31,-42 29,-22Z" fill="${c}"/>`+
+ `<path d="M28,-62 Q35,-68 44,-62 L53,-48 Q53,-41 47,-41 L36,-46Z" fill="${c}"/><path d="M32,-63 l1,-9 l5,7Z" fill="${c}" stroke-width="1.4"/>`+
+ `<path d="M30,-62 Q20,-52 17,-36 L22,-34 Q25,-48 33,-57Z" fill="${m}" stroke-width="1.4"/><circle cx="41" cy="-55" r="1.7" fill="${OL}" stroke="none"/><circle cx="50" cy="-45" r="1" fill="${OL}" stroke="none"/>`+
+ `<path d="M-12,-40 Q0,-43 12,-40 L14,-20 Q0,-17 -14,-20Z" fill="${bl}"/><path d="M-14,-20 Q0,-17 14,-20" fill="none" stroke="#e0b44a" stroke-width="2"/>`;
+const ln=(d,c,w=2)=>`<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
+const tube=(d,c,w=3.4)=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w+2.6}" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
+const wood='#a8784a',woodD='#7a5235',WH='#fbfaf6',GLS='#cfe6ef',GLS2='#b4d6e4';
+const leafy=(cx,cy,rx,ry,c=G)=>L.fluff(cx,cy,rx,ry,Math.max(8,Math.round((rx+ry)/4))).replace(/fill="[^"]*"/,`fill="${c}"`)+L.hi(cx,cy,rx,ry);
+const fl=(cx,cy,rx,ry,c)=>{const n=Math.max(8,Math.round((rx+ry)/4));let d='';for(let i=0;i<=n;i++){const a=i/n*Math.PI*2,x=cx+Math.cos(a)*rx,y=cy+Math.sin(a)*ry;
+ const a2=(i+.5)/n*Math.PI*2;d+=i?` Q${f(cx+Math.cos(a2)*rx*1.18)},${f(cy+Math.sin(a2)*ry*1.18)} ${f(x)},${f(y)}`:`M${f(x)},${f(y)}`}
+ return `<path d="${d}Z" fill="${c}"/>`};
+/* ---------- 共用：橘子樹盆栽（白色方木箱） ---------- */
+const orange=(k=1)=>T(0,0,k,sh(14,3)+`<path d="M-11,0 V-20 H11 V0Z" fill="${WH}"/><path d="M-11,-20 H11 V-23 H-11Z" fill="#e2dccb"/><circle cx="-11" cy="-24" r="2.4" fill="#e0b44a" stroke-width="1"/><circle cx="11" cy="-24" r="2.4" fill="#e0b44a" stroke-width="1"/><path d="M-7,-4 V-17 M7,-4 V-17" fill="none" stroke="#d6d0c0" stroke-width="1.2"/>`+
+ tube('M0,-22 V-34','#7a5235',2.4)+fl(0,-46,15,14,G)+`<ellipse cx="-5" cy="-51" rx="6" ry="4" fill="${GL}" stroke="none" opacity=".75"/>`+
+ [[-7,-44],[5,-50],[8,-40],[-2,-38],[-9,-52]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.8" fill="#f08a24" stroke-width="1"/>`).join(''));
+const pot=(c='#c4704a',fc='#d8413a')=>`<path d="M-8,0 L-10,-12 H10 L8,0Z" fill="${c}"/><path d="M-11,-12 H11 V-15 H-11Z" fill="${c}"/>`+fl(0,-20,9,6,G)+[[-4,-22],[3,-24],[6,-18],[-6,-17]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.3" fill="${fc}" stroke-width=".9"/>`).join('');
+const plantsIn=(x0,x1,yb,h)=>{let s='';for(let x=x0+14;x<x1-8;x+=22)s+=fl(x,yb-h*.45,12,h*.4,['#5f9a48','#4f8a3e','#78b85a'][Math.abs(x|0)%3]);
+ for(let x=x0+20;x<x1-10;x+=34)s+=`<circle cx="${x}" cy="${yb-h*.6}" r="3" fill="${['#f0a8b8','#d8413a','#f5d34a'][Math.abs(x|0)%3]}" stroke-width="1"/>`;return s};
+/* ---------- 西 1：玻璃溫室 ---------- */
+const glassPanes=(x0,x1,y0,y1,st=20)=>{let s='';for(let x=x0+st;x<x1-2;x+=st)s+=`M${f(x)},${f(y0)} V${f(y1)} `;return ln(s,WH,2.6)};
+const greenA=()=>{/* 白框半圓拱頂玻璃屋＋門口兩排橘子樹 */let s=sh(100,8);const x0=-86,x1=86,yb=0,yw=-56;
+ s+=`<path d="M${x0},${yb} V${yw} H${x1} V${yb}Z" fill="${GLS}"/>`+plantsIn(x0,x1,yb,46);
+ s+=`<path d="M${x0},${yw} Q${x0},-126 0,-126 Q${x1},-126 ${x1},${yw}Z" fill="${GLS2}"/>`;
+ let rib='';for(let i=1;i<8;i++){const t=i/8,x=x0+(x1-x0)*t;rib+=`M${f(x)},${yw} Q${f(x*.94)},${f(-126+Math.abs(x)*.22)} 0,-126 `}s+=ln(rib,WH,2.4);
+ s+=`<path d="M${x0},${yw} Q${x0},-126 0,-126 Q${x1},-126 ${x1},${yw}" fill="none"/>`+ln(`M${x0},${yw} H${x1}`,WH,4)+glassPanes(x0,x1,yw,yb,22);
+ s+=`<path d="M${x0},${yb} V${yw} H${x1} V${yb}" fill="none"/><path d="M${x0-4},0 H${x1+4} V-8 H${x0-4}Z" fill="#d8cdb2"/>`;
+ s+=`<path d="M-16,0 V-40 Q0,-52 16,-40 V0Z" fill="#9cc4d8"/>`+ln('M0,-48 V0 M-16,-22 H16',WH,2.4)+`<path d="M-16,0 V-40 Q0,-52 16,-40 V0" fill="none"/>`;
+ s+=`<path d="M-4,-126 V-138" fill="none" stroke-width="2.4"/><circle cx="-4" cy="-140" r="3.4" fill="#e0b44a" stroke-width="1.2"/>`;
+ for(const x of [-70,-40,40,70])s+=T(x,18,.9,orange());return s};
+const greenB=()=>{/* 人字屋頂長玻璃屋（側面），門口推車載花盆 */let s=sh(100,8);const x0=-92,x1=72,yw=-58,yr=-104;
+ s+=`<path d="M${x0},0 V${yw} H${x1} V0Z" fill="${GLS}"/>`+plantsIn(x0,x1,0,50);
+ s+=`<path d="M${x0-6},${yw} L${x0+20},${yr} H${x1+20} L${x1+6},${yw}Z" fill="${GLS2}"/>`+(()=>{let d='';for(let x=x0+18;x<x1;x+=24)d+=`M${x},${yw} L${x+22},${yr} `;return ln(d,WH,2.4)})();
+ s+=`<path d="M${x0-6},${yw} L${x0+20},${yr} H${x1+20} L${x1+6},${yw}Z" fill="none"/>`+ln(`M${x0-6},${yw} H${x1+6}`,WH,4)+glassPanes(x0,x1,yw,0,22);
+ s+=`<path d="M${x1},0 V${yw} L${x1+20},${yr} L${x1+20},${yw+14} L${x1},0" fill="${GLS2}"/><path d="M${x1+4},-6 L${x1+16},-12 V-46 L${x1+4},-40Z" fill="#9cc4d8" stroke-width="1.6"/>`;
+ s+=`<path d="M${x0},0 V${yw} H${x1} V0" fill="none"/><path d="M${x0-4},0 H${x1+24} V-7 H${x0-4}Z" fill="#d8cdb2"/>`;
+ s+=T(-30,20,1,`<path d="M-26,-10 H22 V-22 H-26Z" fill="${wood}"/><circle cx="-16" cy="-4" r="6" fill="${woodD}" stroke-width="1.4"/><circle cx="12" cy="-4" r="6" fill="${woodD}" stroke-width="1.4"/>`+tube('M22,-18 L36,-26',woodD,2.4)+T(-14,-22,.8,pot())+T(0,-22,.8,pot('#c4704a','#f0a8b8'))+T(14,-22,.8,pot('#c4704a','#f5d34a')));
+ s+=T(50,18,.9,orange());return s};
+const greenC=()=>{/* 八角形小圓頂溫室＋旁邊三層花盆架 */let s=sh(84,8);const R=56,yw=-62;
+ s+=`<path d="M${-R},0 V${yw} L${-R*.5},${yw-6} H${R*.5} L${R},${yw} V0Z" fill="${GLS}"/>`+plantsIn(-R,R,0,50);
+ s+=`<path d="M${-R},${yw} L${-R*.5},${yw-6} H${R*.5} L${R},${yw} Q${R*.8},-118 0,-122 Q${-R*.8},-118 ${-R},${yw}Z" fill="${GLS2}"/>`;
+ s+=ln(`M${-R*.5},${yw-6} Q${-R*.42},-110 0,-122 M${R*.5},${yw-6} Q${R*.42},-110 0,-122 M0,${yw-6} V-122`,WH,2.4);
+ s+=`<path d="M${-R},${yw} L${-R*.5},${yw-6} H${R*.5} L${R},${yw} Q${R*.8},-118 0,-122 Q${-R*.8},-118 ${-R},${yw}Z" fill="none"/>`+ln(`M${-R},${yw} L${-R*.5},${yw-6} H${R*.5} L${R},${yw}`,WH,3.6);
+ s+=ln(`M${-R*.5},${yw-6} V0 M${R*.5},${yw-6} V0 M${-R*.75},${yw-3} V0 M${R*.75},${yw-3} V0`,WH,2.8)+`<path d="M${-R},0 V${yw} M${R},0 V${yw}" fill="none"/>`;
+ s+=`<path d="M-12,0 V-38 Q0,-48 12,-38 V0Z" fill="#9cc4d8"/>`+ln('M0,-44 V0',WH,2.2)+`<path d="M-12,0 V-38 Q0,-48 12,-38 V0" fill="none"/>`;
+ s+=`<path d="M0,-122 V-134" fill="none" stroke-width="2.2"/><path d="M-5,-134 L0,-146 L5,-134Z" fill="#e0b44a" stroke-width="1.2"/><path d="${`M${-R-4},0 H${R+4} V-7 H${-R-4}Z`}" fill="#d8cdb2"/>`;
+ s+=T(92,2,1,`<path d="M-26,0 L-18,-60 M26,0 L18,-60" fill="none" stroke="${OL}" stroke-width="4.4"/><path d="M-26,0 L-18,-60 M26,0 L18,-60" fill="none" stroke="${WH}" stroke-width="2.4"/>`+
+  [-4,-24,-44].map((y,i)=>`<path d="M${-24+i*3},${y} H${24-i*3} V${y+4} H${-24+i*3}Z" fill="${WH}"/>`+[-12,0,12].slice(0,3-i%2).map(x=>T(x,y,.7,pot('#c4704a',['#d8413a','#f0a8b8','#f5d34a'][(i+Math.abs(x))%3]))).join('')).join(''));
+ s+=T(-82,16,.9,orange());return s};
+const greenD=()=>{/* 靠石牆的半邊溫室（玻璃斜屋頂）＋一排陶盆花 */let s=sh(100,8);const x0=-90,x1=90,yw=-50;
+ s+=`<path d="M${x0-6},-112 H${x1+6} V-8 H${x0-6}Z" fill="#e2d8c0"/>`;let st='';for(let y=-100;y<-10;y+=14)st+=`M${x0-6},${y} H${x1+6} `;s+=ln(st,'#cfc4a8',1.2);
+ s+=`<path d="M${x0-10},-112 H${x1+10} V-118 H${x0-10}Z" fill="#d6cbb0"/>`;
+ s+=`<path d="M${x0},0 V${yw} H${x1} V0Z" fill="${GLS}"/>`+plantsIn(x0,x1,0,44);
+ s+=`<path d="M${x0},${yw} L${x0+8},-104 H${x1-8} L${x1},${yw}Z" fill="${GLS2}" opacity=".92"/>`+glassPanes(x0,x1,-104,yw,24).replace(/M([-\d.]+),-104 V/g,'M$1,-104 V');
+ s+=`<path d="M${x0},${yw} L${x0+8},-104 H${x1-8} L${x1},${yw}Z" fill="none"/>`+ln(`M${x0},${yw} H${x1}`,WH,4)+glassPanes(x0,x1,yw,0,22)+`<path d="M${x0},0 V${yw} M${x1},0 V${yw}" fill="none"/>`;
+ s+=`<path d="M-14,0 V-42 H14 V0Z" fill="#9cc4d8"/>`+ln('M0,-42 V0 M-14,-22 H14',WH,2.2)+`<path d="M-14,0 V-42 H14 V0Z" fill="none"/><path d="M${x0-4},0 H${x1+4} V-7 H${x0-4}Z" fill="#d8cdb2"/>`;
+ [-76,-56,-36,36,56,76].forEach((x,i)=>s+=T(x,14,1,pot('#c4704a',['#d8413a','#f0a8b8','#f5d34a','#9a7ad0'][i%4])));return s};
+const greenhouse=[greenA,greenB,greenC,greenD];
+/* ---------- 西 2：大樹鞦韆＋野餐 ---------- */
+const trunk=(h=70,w=14)=>`<path d="M${-w},0 Q${-w*.6},${-h*.5} ${-w*.5},${-h} H${w*.5} Q${w*.6},${-h*.5} ${w},0 Q0,4 ${-w},0Z" fill="#8a5a3a"/>`+ln(`M${-w*.2},-10 Q${-w*.3},${-h*.4} ${-w*.1},${-h*.7} M${w*.3},-20 Q${w*.2},${-h*.5} ${w*.3},${-h*.8}`,'#6a4228',1.4);
+const oak=(rx=70,ry=46)=>sh(rx*.8,8)+trunk(80)+leafy(-rx*.45,-100,rx*.6,ry*.7)+leafy(rx*.45,-100,rx*.6,ry*.7)+leafy(0,-124,rx*.75,ry*.75);
+const ropeSwing=(x,top,len,flower=false,who='')=>{const seat=`<path d="M-14,0 H14 V5 H-14Z" fill="${wood}"/>`;
+ let r=ln(`M-11,${-len} V0 M11,${-len} V0`,'#d9c4a0',1.8);if(flower)for(let y=-len+8;y<-4;y+=10)r+=`<circle cx="-11" cy="${y}" r="2.4" fill="${y%20?'#f0a8b8':'#d8413a'}" stroke-width=".8"/><circle cx="11" cy="${y+5}" r="2.4" fill="#f5d34a" stroke-width=".8"/>`+`<path d="M-11,${y+3} l-3,2 M11,${y+8} l3,2" stroke="#5f9a48" stroke-width="1.4" fill="none"/>`;
+ return T(x,top,1,wrapAn('swing',`<g transform="translate(0,${len})">${r}${seat}${who}</g>`,true))};
+const blanket=(w=70,h=26,c='#d8413a')=>{let s=`<path d="M${-w/2},0 L${-w/2+12},${-h} H${w/2+12} L${w/2},0Z" fill="${WH}"/>`;let p='';
+ for(let i=1;i<6;i++){const t=i/6;p+=`M${f(-w/2+w*t)},0 l12,${-h} `}for(let j=1;j<4;j++){const t=j/4;p+=`M${f(-w/2+12*t)},${f(-h*t)} H${f(w/2+12*t)} `}
+ return s+ln(p,c,4.2)+`<path d="M${-w/2},0 L${-w/2+12},${-h} H${w/2+12} L${w/2},0Z" fill="none"/>`};
+const basketP=()=>`<path d="M-11,0 L-13,-14 H13 L11,0Z" fill="#c99a5b"/><path d="M-12,-7 H12" fill="none" stroke="#8a6a3a" stroke-width="1.2"/><path d="M-9,-14 Q0,-26 9,-14" fill="none" stroke-width="2.4"/><path d="M-11,-14 L-2,-18 L11,-14Z" fill="${WH}" stroke-width="1.2"/>`;
+const sandw=`<path d="M-7,0 L0,-8 L7,0Z" fill="#f2dba8" stroke-width="1.2"/><path d="M-6,-1 H6" stroke="#7aa856" stroke-width="1.6" fill="none"/>`;
+const teaset=`<path d="M-6,0 Q-8,-9 0,-10 Q8,-9 6,0Z" fill="${WH}" stroke-width="1.2"/><path d="M6,-6 q5,0 4,4" fill="none" stroke-width="1.2"/><path d="M-6,-6 l-5,-3" fill="none" stroke-width="1.4"/><ellipse cx="16" cy="0" rx="5" ry="2" fill="${WH}" stroke-width="1"/>`;
+const cake=`<path d="M-9,0 V-9 H9 V0Z" fill="#f6c8d4"/><path d="M-9,-9 Q-5,-6 0,-9 Q5,-6 9,-9" fill="none" stroke="${WH}" stroke-width="2"/><circle cx="0" cy="-12" r="2.6" fill="#d8413a" stroke-width="1"/>`;
+const picnic=(c,extra='')=>blanket(70,26,c)+T(-14,-8,1,basketP())+T(12,-12,1,sandw)+T(26,-6,.9,teaset)+extra;
+const swingA=()=>oak()+ln('M10,-84 Q40,-96 66,-92','#8a5a3a',7)+ln('M10,-84 Q40,-96 66,-92','#8a5a3a',5)+ropeSwing(52,-92,64)+T(-40,16,1,picnic('#d8413a'));
+const swingB=()=>oak(66,44)+ln('M-8,-84 Q-40,-96 -64,-92','#8a5a3a',6)+ropeSwing(-50,-92,62,true)+T(32,18,1,picnic('#d8413a',T(-30,-14,.8,cake)));
+const willow=()=>{let s=sh(56,7)+trunk(76,12)+leafy(0,-108,56,34,'#7aa856');let d='';for(let x=-54;x<=54;x+=9){const l=40+Math.abs(Math.sin(x))*30;d+=`M${x},${-100+Math.abs(x)*.25} q${x>0?4:-4},${l/2} 0,${l} `}
+ return s+ln(d,OL,5)+ln(d,'#8cc06a',3)};
+const benchSwing=()=>`<g>`+ln('M-30,-74 V-26 M30,-74 V-26','#d9c4a0',1.8)+`<path d="M-34,-28 H34 V-22 H-34Z" fill="${WH}"/><path d="M-34,-28 V-48 H34 V-28" fill="none" stroke="${OL}" stroke-width="4.4"/><path d="M-34,-28 V-48 H34 V-28 M-34,-38 H34" fill="none" stroke="${WH}" stroke-width="2.4"/></g>`;
+const swingC=()=>willow()+T(-50,8,1,wrapAn('swing',`<g transform="translate(0,-60)"><g transform="translate(0,60)">${benchSwing()}</g></g>`,true))+ln('M-90,-72 Q-50,-82 -10,-74','#8a5a3a',5)+T(40,18,1,picnic('#4f86c4'));
+const aFrame=()=>{let s=sh(50,6)+tube('M-46,0 L-36,-96 M-26,0 L-36,-96 M46,0 L36,-96 M26,0 L36,-96',wood,3.4)+tube('M-40,-94 H40',woodD,4);
+ return s+ropeSwing(-14,-94,70)+ropeSwing(16,-94,70,true)};
+const swingD=()=>T(-48,0,1,aFrame())+T(56,-6,.7,oak())+T(46,22,1,picnic('#3f8a5a'));
+const swing=[swingA,swingB,swingC,swingD];
+/* ---------- 東 1：草地巨型西洋棋 ---------- */
+const BW='#f6f1e6',BK='#3a3438';
+const piece={
+ pawn:(c)=>`<path d="M-9,0 Q-10,-4 -6,-6 L-4,-18 H4 L6,-6 Q10,-4 9,0Z" fill="${c}"/><circle cx="0" cy="-24" r="7" fill="${c}"/>`,
+ rook:(c)=>`<path d="M-11,0 Q-12,-4 -8,-6 V-28 H8 V-6 Q12,-4 11,0Z" fill="${c}"/><path d="M-10,-28 V-38 H-5 V-34 H-2 V-38 H2 V-34 H5 V-38 H10 V-28Z" fill="${c}"/>`,
+ knight:(c)=>`<path d="M-11,0 Q-12,-4 -8,-6 V-12 H8 V-6 Q12,-4 11,0Z" fill="${c}"/><path d="M-8,-12 Q-10,-28 -2,-38 L0,-44 L4,-38 Q14,-34 14,-24 L10,-22 L4,-26 Q2,-20 8,-12Z" fill="${c}"/><circle cx="3" cy="-33" r="1.4" fill="${c===BK?BW:OL}" stroke="none"/>`,
+ bishop:(c)=>`<path d="M-10,0 Q-11,-4 -6,-6 L-4,-22 H4 L6,-6 Q11,-4 10,0Z" fill="${c}"/><path d="M0,-44 Q-10,-34 -7,-26 Q0,-20 7,-26 Q10,-34 0,-44Z" fill="${c}"/><circle cx="0" cy="-46" r="2.4" fill="${c}"/>`,
+ queen:(c)=>`<path d="M-11,0 Q-12,-4 -7,-6 L-5,-30 H5 L7,-6 Q12,-4 11,0Z" fill="${c}"/><path d="M-9,-30 L-11,-44 L-5,-38 L0,-48 L5,-38 L11,-44 L9,-30Z" fill="${c}"/>`,
+ king:(c)=>`<path d="M-11,0 Q-12,-4 -7,-6 L-5,-32 H5 L7,-6 Q12,-4 11,0Z" fill="${c}"/><path d="M-8,-32 Q-9,-42 0,-42 Q9,-42 8,-32Z" fill="${c}"/><path d="M0,-42 V-54 M-4,-49 H4" fill="none" stroke="${OL}" stroke-width="4.4"/><path d="M0,-42 V-54 M-4,-49 H4" fill="none" stroke="${c}" stroke-width="2.2"/>`};
+const pc=(k,c,x,y,s=1)=>T(x,y,s,`<ellipse cx="0" cy="1" rx="11" ry="3" fill="#000" opacity=".15" stroke="none"/>`+piece[k](c));
+/* 斜向透視的方格板：n×m，左下原點、寬 W 深 D、往右上斜 sk */
+const board=(W,D,n,m,c1,c2,sk=22,frame='')=>{let s='';const P=(i,j)=>[f(-W/2+W*i/n+sk*j/m),f(-D*j/m)];
+ for(let j=0;j<m;j++)for(let i=0;i<n;i++){const a=P(i,j),b=P(i+1,j),c=P(i+1,j+1),d=P(i,j+1);s+=`<path d="M${a} L${b} L${c} L${d}Z" fill="${(i+j)%2?c2:c1}" stroke="none"/>`}
+ const A=P(0,0),B=P(n,0),C=P(n,m),D_=P(0,m);return (frame?`<path d="M${f(+A[0]-8)},${f(+A[1]+6)} L${f(+B[0]+8)},${f(+B[1]+6)} L${f(+C[0]+8)},${f(+C[1]-4)} L${f(+D_[0]-8)},${f(+D_[1]-4)}Z" fill="${frame}"/>`:'')+s+`<path d="M${A} L${B} L${C} L${D_}Z" fill="none"/>`};
+const pos=(W,D,n,m,i,j,sk=22)=>[-W/2+W*(i+.5)/n+sk*(j+.5)/m,-D*(j+.5)/m+4];
+const chessSet=(W,D,n,m,list,sk)=>list.sort((p,q)=>q[3]-p[3]).map(([k,c,i,j])=>{const [x,y]=pos(W,D,n,m,i,j,sk);return pc(k,c,x,y)}).join('');
+const chessA=()=>sh(110,8)+board(200,74,6,4,BW,BK,24)+chessSet(200,74,6,4,[['king','w',1,0],['queen','b',3,3],['knight','w',2,1],['rook','b',5,3],['pawn','w',3,1],['pawn','b',4,2],['bishop','w',0,1],['pawn','b',2,2]].map(p=>[p[0],p[1]==='w'?BW:BK,p[2],p[3]]),24);
+const chessB=()=>sh(110,8)+board(200,74,6,4,'#8cc06a','#5f9a48',24)+chessSet(200,74,6,4,[['king','w',4,0],['queen','w',1,1],['knight','b',2,3],['rook','w',0,0],['pawn','b',3,2],['pawn','w',2,1],['bishop','b',5,3],['pawn','b',4,3]].map(p=>[p[0],p[1]==='w'?BW:BK,p[2],p[3]]),24);
+const chessC=()=>sh(110,8)+board(190,70,6,4,'#ece4d0','#8a6a5a',22,'#c9bfa4')+chessSet(190,70,6,4,[['king','b',3,3],['rook','w',0,0],['knight','w',2,1],['pawn','b',4,2],['queen','w',5,0],['pawn','w',1,2]].map(p=>[p[0],p[1]==='w'?BW:BK,p[2],p[3]]),22)+
+ T(-100,-6,1,`<path d="M-8,0 V-30 M8,0 V-30" fill="none" stroke="${OL}" stroke-width="4"/><path d="M-8,0 V-30 M8,0 V-30" fill="none" stroke="${wood}" stroke-width="2.2"/><path d="M-12,-30 H12 V-35 H-12Z" fill="${wood}"/><path d="M-10,-35 V-58 H10 V-35" fill="none" stroke="${OL}" stroke-width="4"/><path d="M-10,-35 V-58 H10 V-35 M-10,-46 H10" fill="none" stroke="${wood}" stroke-width="2.2"/>`);
+const chessD=()=>sh(100,8)+board(150,60,4,3,BW,BK,20)+chessSet(150,60,4,3,[['king','w',0,0],['knight','b',2,2],['pawn','w',1,1],['rook','b',3,1]].map(p=>[p[0],p[1]==='w'?BW:BK,p[2],p[3]]),20)+
+ T(98,6,1,sh(26,4)+`<path d="M-22,-8 H22 V-20 H-22Z" fill="${wood}"/><circle cx="-14" cy="-2" r="6" fill="${woodD}" stroke-width="1.4"/><circle cx="14" cy="-2" r="6" fill="${woodD}" stroke-width="1.4"/>`+pc('pawn',BK,-10,-20,.8)+pc('bishop',BW,4,-20,.8)+pc('pawn',BW,14,-20,.7));
+const chess=[chessA,chessB,chessC,chessD];
+/* ---------- 東 2：皇家馬車（側面，朝右，馬在右邊） ---------- */
+const wheel=(x,y,R,c='#e0b44a')=>{let sp='';for(let i=0;i<8;i++){const a=i*Math.PI/4;sp+=`M${x},${y} L${f(x+Math.cos(a)*R)},${f(y+Math.sin(a)*R)} `}
+ return `<circle cx="${x}" cy="${y}" r="${R}" fill="none" stroke="${OL}" stroke-width="5.6"/><circle cx="${x}" cy="${y}" r="${R}" fill="none" stroke="${c}" stroke-width="3.4"/>`+ln(sp,OL,3.2)+ln(sp,c,1.6)+`<circle cx="${x}" cy="${y}" r="3.4" fill="${c}" stroke-width="1.4"/>`};
+const swirl=(x,y,s=1,c='#e0b44a')=>T(x,y,s,`<path d="M-6,4 Q-8,-6 0,-6 Q6,-6 4,0 Q2,3 -1,1" fill="none" stroke="${OL}" stroke-width="3.4" stroke-linecap="round"/><path d="M-6,4 Q-8,-6 0,-6 Q6,-6 4,0 Q2,3 -1,1" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round"/>`);
+const horseW=(m='#d9d2c0',bl='#8e2630')=>horse17('#f4f0e6',m,bl);
+const coachman=(x,y)=>act(x,y,1,{view:'side',pose:'hold',hat:HAT_BERET,shirt:'#8e2630',mood:1,s:.8,pants:'#3a2e2a'},false);
+const carrA=()=>{/* 金色南瓜馬車 */let s=sh(110,8);
+ s+=T(70,0,1,horseW());s+=tube('M10,-24 L44,-28',woodD,2.6);
+ s+=`<path d="M-62,-20 Q-80,-44 -60,-80 Q-30,-104 0,-80 Q14,-46 -4,-20Z" fill="#e8a83a"/>`+ln('M-48,-22 Q-62,-50 -48,-84 M-30,-20 Q-34,-56 -30,-92 M-14,-22 Q-4,-52 -14,-86','#c4842a',2);
+ s+=`<path d="M-44,-46 Q-46,-66 -32,-68 Q-18,-66 -20,-46Z" fill="#9cc4d8"/>`+ln('M-32,-68 V-46','#e0b44a',2);
+ s+=`<path d="M-36,-94 Q-30,-104 -24,-94" fill="none" stroke="#5f9a48" stroke-width="3.4"/><path d="M-30,-98 Q-26,-110 -18,-108" fill="none" stroke="#5f9a48" stroke-width="2"/>`;
+ s+=swirl(-66,-28,1)+swirl(4,-30,1)+`<path d="M2,-38 H18 V-34 H2Z" fill="#e0b44a"/>`+coachman(10,-38);
+ s+=wheel(-56,-14,16)+wheel(-6,-12,13);return s};
+const carrB=()=>{/* 白金方形宮廷馬車＋兩匹白馬 */let s=sh(124,8);
+ s+=T(92,2,.92,horseW('#d9d2c0','#3f6f9a'))+T(68,-2,.92,horseW('#d9d2c0','#3f6f9a'));s+=tube('M14,-22 L50,-28',woodD,2.6);
+ s+=`<path d="M-76,-22 L-80,-70 Q-44,-80 -6,-70 L-10,-22Z" fill="${BW}"/><path d="M-82,-70 Q-44,-82 -4,-70 L-8,-78 Q-44,-90 -78,-78Z" fill="#e0b44a"/>`;
+ s+=`<path d="M-66,-36 V-60 H-50 V-36Z M-38,-36 V-60 H-22 V-36Z" fill="#9cc4d8"/>`+ln('M-76,-30 H-10 M-80,-66 H-6','#e0b44a',2.2);
+ s+=`<path d="M-48,-90 l4,-10 l4,10 l-4,-3Z" fill="#e0b44a" stroke-width="1.2"/><path d="M-80,-24 Q-90,-28 -92,-36" fill="none" stroke-width="2"/>`;
+ s+=`<path d="M-4,-38 H16 V-34 H-4Z" fill="#e0b44a"/>`+coachman(6,-38)+wheel(-66,-14,16,'#e0b44a')+wheel(-18,-12,13,'#e0b44a');return s};
+const carrC=()=>{/* 藍色車廂金邊、紅輪＋褐馬 */let s=sh(110,8);
+ s+=T(72,0,1,horse17('#a8703f','#4a3424','#e0b44a'));s+=tube('M10,-24 L46,-28',woodD,2.6);
+ s+=`<path d="M-72,-22 Q-78,-48 -70,-72 H-8 Q-2,-48 -8,-22Z" fill="#2f4f8a"/><path d="M-74,-72 H-6 Q-12,-84 -40,-86 Q-68,-84 -74,-72Z" fill="#3f6f9a"/>`;
+ s+=`<path d="M-58,-38 V-60 Q-48,-66 -38,-60 V-38Z" fill="#9cc4d8"/>`+ln('M-72,-24 Q-78,-48 -70,-72 H-8 Q-2,-48 -8,-24','#e0b44a',2.6)+`<path d="M-40,-86 V-96" fill="none" stroke-width="2"/><circle cx="-40" cy="-98" r="3.6" fill="#e0b44a" stroke-width="1.2"/>`;
+ s+=`<path d="M-30,-40 Q-22,-50 -14,-40 L-22,-30Z" fill="#e0b44a" stroke-width="1.2"/><path d="M-2,-38 H16 V-34 H-2Z" fill="#8a5a30"/>`+coachman(6,-38)+wheel(-62,-14,16,'#c4473a')+wheel(-14,-12,13,'#c4473a');return s};
+const carrD=()=>{/* 敞篷馬車（摺起來的半篷）＋白馬 */let s=sh(110,8);
+ s+=T(70,0,1,horseW('#d9d2c0','#3f6a4a'));s+=tube('M8,-22 L44,-28',woodD,2.6);
+ s+=`<path d="M-76,-22 Q-82,-40 -74,-50 H-6 Q0,-40 -8,-22Z" fill="#8e2630"/>`+ln('M-74,-50 H-6','#e0b44a',2.6);
+ s+=`<path d="M-80,-48 Q-84,-80 -56,-82 L-52,-50Z" fill="#3a3040"/>`+ln('M-78,-56 Q-78,-74 -60,-78 M-80,-64 Q-74,-76 -62,-80','#5a5060',1.6);
+ s+=`<path d="M-40,-50 V-60 H-14 V-50Z" fill="#c4473a"/>`+swirl(-30,-34,1.1);
+ s+=`<path d="M-6,-40 H14 V-36 H-6Z" fill="#8a5a30"/>`+coachman(4,-40)+wheel(-62,-14,16,'#e0b44a')+wheel(-14,-12,13,'#e0b44a');return s};
+const carriage=[carrA,carrB,carrC,carrD];
+/* ---------- 東 3：大圓頂鳥舍 ---------- */
+const bird=(c,x,y,fl=1)=>T(x,y,1,`<g transform="scale(${fl},1)"><path d="M-6,0 Q-7,-8 0,-9 Q7,-8 6,-2 L10,0 L6,1 Q0,4 -6,0Z" fill="${c}" stroke-width="1.2"/><circle cx="3" cy="-8" r="3.6" fill="${c}" stroke-width="1.1"/><path d="M6,-8 l3,1 l-3,1Z" fill="#e0b44a" stroke-width=".8"/><circle cx="4" cy="-9" r=".9" fill="${OL}" stroke="none"/></g>`);
+const BIRDC=['#4f86c4','#f5d34a','#d8413a','#6aa64e','#f08a24','#9a7ad0'];
+const birds=(pts)=>pts.map(([x,y],i)=>bird(BIRDC[i%6],x,y,i%2?-1:1)).join('');
+const bars=(x0,x1,ytop,ybot,st=8,c=WH,curve=0)=>{let d='';for(let x=x0+st;x<x1-1;x+=st){const t=(x-x0)/(x1-x0);d+=`M${f(x)},${f(ybot)} V${f(ytop+curve*(1-Math.sin(t*Math.PI)))} `}return ln(d,'#9aa3ad',3.2)+ln(d,c,1.8)};
+const perch=(x0,x1,y)=>tube(`M${x0},${y} H${x1}`,'#8a6a40',2.2);
+const aviA=()=>{/* 白鐵框鐘形圓頂大鳥籠 */let s=sh(64,7)+`<path d="M-60,0 V-12 H60 V0Z" fill="#d8cdb2"/>`;
+ s+=`<path d="M-54,-12 V-70 Q-54,-128 0,-130 Q54,-128 54,-70 V-12Z" fill="#e6f0e6" opacity=".55"/>`+tube('M0,-12 V-100','#8a6a40',3)+perch(-40,40,-56)+perch(-30,30,-88)+tube('M-30,-30 L30,-30','#8a6a40',2);
+ s+=birds([[-26,-56],[14,-56],[36,-56],[-12,-88],[20,-88],[-36,-30],[24,-30]]);
+ let d='';for(let i=1;i<12;i++){const x=-54+108*i/12;d+=`M${f(x)},-12 V-70 Q${f(x*.9)},${f(-128+Math.abs(x)*.1)} 0,-130 `}s+=ln(d,'#9aa3ad',3.2)+ln(d,WH,1.8);
+ s+=`<path d="M-54,-12 V-70 Q-54,-128 0,-130 Q54,-128 54,-70 V-12" fill="none" stroke="${OL}" stroke-width="5"/><path d="M-54,-12 V-70 Q-54,-128 0,-130 Q54,-128 54,-70 V-12" fill="none" stroke="${WH}" stroke-width="3"/>`;
+ s+=ln('M-56,-70 H56 M-55,-40 H55',WH,3)+`<path d="M-4,-130 Q-6,-146 0,-148 Q6,-146 4,-130Z" fill="${WH}"/><circle cx="0" cy="-152" r="4" fill="#e0b44a" stroke-width="1.2"/>`;return s};
+const aviB=()=>{/* 洋蔥頂鳥舍＋石台 */let s=sh(60,7)+`<path d="M-58,0 V-16 H58 V0Z" fill="#cfc4a8"/>`+ln('M-58,-8 H58','#b5a988',1.4);
+ s+=`<path d="M-48,-16 V-86 H48 V-16Z" fill="#e6f0e6" opacity=".55"/>`+perch(-36,36,-58)+perch(-26,26,-34);
+ s+=birds([[-22,-58],[10,-58],[30,-58],[-14,-34],[16,-34]])+bars(-48,48,-86,-16,9);
+ s+=`<path d="M-48,-16 V-86 H48 V-16" fill="none" stroke="${OL}" stroke-width="5"/><path d="M-48,-16 V-86 H48 V-16" fill="none" stroke="${WH}" stroke-width="3"/>`;
+ s+=`<path d="M-54,-86 Q-62,-116 -20,-130 Q0,-140 0,-158 Q0,-140 20,-130 Q62,-116 54,-86Z" fill="#5f9aa0"/>`+ln('M-30,-90 Q-30,-118 0,-150 M30,-90 Q30,-118 0,-150 M0,-88 V-150','#4a7a80',1.6);
+ s+=`<path d="M-56,-86 H56 V-92 H-56Z" fill="${WH}"/><circle cx="0" cy="-162" r="4" fill="#e0b44a" stroke-width="1.2"/>`;return s};
+const aviC=()=>{/* 六角亭鳥舍：紅瓦屋頂＋鐵網 */let s=sh(64,7);const pts=[-54,-30,0,30,54];
+ s+=`<path d="M-54,0 V-78 H54 V0Z" fill="#e6f0e6" opacity=".55"/>`+perch(-40,40,-54)+perch(-30,10,-28);
+ s+=birds([[-28,-54],[4,-54],[32,-54],[-16,-28],[-2,-28]]);let net='';for(let y=-70;y<-4;y+=10)net+=`M-54,${y} H54 `;s+=ln(net,'#9aa3ad',1.1)+bars(-54,54,-78,0,12,WH);
+ pts.forEach((x,i)=>s+=tube(`M${x},0 V-78`,i%2?'#e2d8c0':WH,4));
+ s+=`<path d="M-66,-78 L-40,-118 H40 L66,-78Z" fill="#c4704a"/><path d="M-40,-118 L0,-138 L40,-118Z" fill="#a85a3a"/>`+ln('M-30,-80 L-20,-118 M0,-80 V-118 M30,-80 L20,-118','#a85a3a',1.6)+`<path d="M-68,-78 H68 V-72 H-68Z" fill="${WH}"/>`;
+ s+=`<path d="M0,-138 V-148" fill="none" stroke-width="2"/><path d="M0,-148 l8,3 l-8,3Z" fill="#e0b44a" stroke-width="1.1"/>`;return s};
+const aviD=()=>{/* 一大一小兩個圓頂鳥籠＋飼料桶 */const cage=(R,Hh,pts)=>{let s=sh(R+6,5)+`<path d="M${-R-4},0 V-8 H${R+4} V0Z" fill="#d8cdb2"/><path d="M${-R},-8 V${-Hh} Q${-R},${-Hh-R} 0,${-Hh-R} Q${R},${-Hh-R} ${R},${-Hh} V-8Z" fill="#e6f0e6" opacity=".55"/>`+perch(-R*.7,R*.7,-Hh*.55)+birds(pts);
+  let d='';for(let i=1;i<10;i++){const x=-R+2*R*i/10;d+=`M${f(x)},-8 V${-Hh} Q${f(x*.9)},${f(-Hh-R+Math.abs(x)*.12)} 0,${-Hh-R} `}s+=ln(d,'#9aa3ad',3)+ln(d,WH,1.6);
+  return s+`<path d="M${-R},-8 V${-Hh} Q${-R},${-Hh-R} 0,${-Hh-R} Q${R},${-Hh-R} ${R},${-Hh} V-8" fill="none" stroke="${OL}" stroke-width="4.6"/><path d="M${-R},-8 V${-Hh} Q${-R},${-Hh-R} 0,${-Hh-R} Q${R},${-Hh-R} ${R},${-Hh} V-8" fill="none" stroke="${WH}" stroke-width="2.8"/><circle cx="0" cy="${-Hh-R-4}" r="3.4" fill="#e0b44a" stroke-width="1.2"/>`};
+ return T(-28,0,1,cage(42,70,[[-20,-39],[8,-39],[22,-39],[-6,-20]]))+T(46,4,1,cage(26,40,[[-6,-22],[10,-22]]))+T(82,8,1,`<path d="M-8,0 V-16 H8 V0Z" fill="#a8784a"/><ellipse cx="0" cy="-16" rx="8" ry="3" fill="#e6c25a"/><path d="M-8,-8 H8" fill="none" stroke="#7a5235" stroke-width="1.2"/>`)};
+const aviary=[aviA,aviB,aviC,aviD];
+/* ---------- 小組 ---------- */
+const noble=(o)=>Object.assign({hat:-1},o);
+const westX=[
+ ['園丁推手推車載橘子樹',()=>act(-26,0,1,{...gardener(),view:'side',pose:'reach',mood:1},'step')+T(14,0,1,`<path d="M-14,-8 H22 L26,-22 H-18Z" fill="${wood}"/>`+tube('M-14,-14 L-30,-22',woodD,2)+`<circle cx="18" cy="-4" r="6" fill="${woodD}" stroke-width="1.4"/>`+T(4,-20,.75,orange()))],
+ ['侍女捧著一大盆花',()=>act(0,0,1,{...maidO(),view:'side',pose:'hold',mood:1,extra:`<g transform="translate(15,-12) scale(.78)">${pot('#c4704a','#f0a8b8')}</g>`},'step')],
+ ['盪鞦韆的小孩＋推鞦韆的爸爸',()=>ropeSwing(14,-80,62,false,T(0,6,.8,kid({view:'side',pose:'sit',hat:-1,mood:1})))+act(-22,0,1,noble({view:'side',pose:'reach',hat:HAT_BERET,mood:1}),'nod')],
+ ['坐在野餐布上分三明治的一家人',()=>T(0,4,1,blanket(80,24,'#d8413a'))+act(-20,-4,1,noble({view:'fq',pose:'sit',mood:1}),'nod')+act(14,-8,-1,noble({view:'fq',pose:'sit',hat:HAT_TIARA,hs:2,mood:1}),'lean')+T(0,-4,.8,kid({view:'front',pose:'sit',hat:-1,mood:3}))+T(-2,-14,1,sandw)],
+ ['小孩追蝴蝶',()=>T(0,0,.8,kid({view:'side',pose:'run',hat:-1,mood:1}))+T(26,-44,1,wrapAn('flap',`<path d="M0,0 Q-8,-8 -6,2 Q-2,6 0,0 Q8,-8 6,2 Q2,6 0,0Z" fill="#f5d34a" stroke-width="1.2"/>`,true))]];
+const eastX=[
+ ['兩位貴族托著下巴想下一步',()=>act(-22,0,1,noble({view:'fq',pose:'hold',hat:HAT_BERET,mood:2}),'nod')+act(22,0,-1,noble({view:'fq',pose:'hold',hat:HAT_TIARA,hs:2,mood:0,extra:gown('#7a3a5a')}),'lean')+T(0,-6,1,piece.pawn(BW))],
+ ['小孩抱著大棋子跑',()=>T(0,0,.8,kid({view:'side',pose:'up2',hat:-1,mood:1}))+T(8,-32,.6,piece.knight(BK))],
+ ['車夫擦馬車輪子',()=>act(0,0,1,{view:'side',pose:'crouch',hat:HAT_BERET,shirt:'#8e2630',pants:'#3a2e2a',mood:1},'work')+T(30,-4,.9,wheel(0,-10,14,'#e0b44a'))],
+ ['侍從扶貴婦人下馬車',()=>act(-18,0,1,noble({view:'side',pose:'reach',hat:-1,hs:0,shirt:'#3f6f9a',mood:1}),'nod')+act(18,-6,-1,noble({view:'side',pose:'reach',hat:HAT_TIARA,hs:2,shirt:'#d98a9a',mood:1,extra:gown('#d98a9a')}),'lean')],
+ ['飼鳥員手上停著小鳥',()=>act(0,0,1,{...gardener({hat:-1,shirt:'#5f7a4a'}),view:'fq',pose:'up',mood:1},'nod')+bird('#4f86c4',22,-58)+T(-26,2,1,`<path d="M-8,0 V-16 H8 V0Z" fill="#a8784a"/><ellipse cx="0" cy="-16" rx="8" ry="3" fill="#e6c25a"/>`)]];
+return {greenhouse,swing,chess,carriage,aviary,westX,eastX,orange,pot,blanket,picnic,oak,ropeSwing,piece,pc,board,wheel,bird,birds,kid}})();
+/* 加寬區佈景：w 只算實心那段（露一角用：位置在 x±(w/2-r*.42)、y-40 左右） */
+Object.assign(KIND,{ghouse18c:{w:112,h:130,fn:X18.greenhouse[2]},
+ oak18c:{w:150,h:170,fn:()=>X18.oak()+`<path d="M10,-84 Q40,-96 66,-92" fill="none" stroke="#8a5a3a" stroke-width="6" stroke-linecap="round"/>`+X18.ropeSwing(52,-92,64,false,T(0,6,.8,kid({view:'side',pose:'sit',hat:-1,mood:1})))+T(-40,16,1,X18.picnic('#d8413a'))},
+ chess18c:{w:224,h:120,fn:X18.chess[1]},carr18c:{w:150,h:110,fn:()=>T(-24,0,1,X18.carriage[3]())},avi18c:{w:120,h:150,fn:X18.aviary[0]}});
+['ghouse18c','carr18c'].forEach(k=>H.OCCK.add(k));
 
 /* ================= 4. 12 種 × 4 個（11 種新東西＋1 種第 17 關的老朋友） ================= */
 /* 2026-11-21 使用者：老朋友只留捲軸信，盾牌改成蝸牛 */
 const OLD={scroll17:{id:'scroll17',name:'封蠟捲軸信',short:'捲軸信',r:15,rot:20}};
 const old=(id,regions)=>({...(typeOf(id)||OLD[id]),regions});
 const TYPES=[
- old('scroll17',['north18c','plaza18c','south18c','east18c']),
- {id:'shears18c',name:'修枝大剪刀',short:'大剪刀',r:16,rot:20,regions:['west18c','lawn18c','east18c','north18c']},
- {id:'can18c',name:'銅澆花壺',short:'澆花壺',r:16,rot:10,regions:['west18c','east18c','lawn18c','plaza18c']},
- {id:'pearl18c',name:'珍珠項鍊',short:'項鍊',r:15,rot:15,regions:['east18c','plaza18c','south18c','north18c']},
- {id:'mallet18c',name:'槌球木槌',short:'槌球木槌',r:16,rot:20,regions:['lawn18c','west18c','south18c','plaza18c']},
- {id:'cage18c',name:'金色鳥籠',short:'鳥籠',r:16,rot:8,regions:['east18c','north18c','south18c','west18c']},
- {id:'rose18c',name:'玫瑰花束',short:'花束',r:15,rot:15,regions:['east18c','lawn18c','plaza18c','north18c']},
- {id:'cup18c',name:'骨瓷茶杯組',short:'茶杯',r:15,rot:8,regions:['east18c','south18c','plaza18c','lawn18c']},
- {id:'sundial18c',name:'日晷',short:'日晷',r:15,rot:6,regions:['west18c','lawn18c','north18c','plaza18c']},
- {id:'feather18c',name:'孔雀羽毛',short:'孔雀羽毛',r:16,rot:20,regions:['lawn18c','west18c','east18c','south18c']},
- {id:'parasol18c',name:'蕾絲陽傘',short:'陽傘',r:16,rot:12,regions:['plaza18c','south18c','lawn18c','north18c']},
- {id:'snail18c',name:'花園蝸牛',short:'蝸牛',r:15,rot:8,regions:['west18c','east18c','lawn18c','south18c']}];
+ old('scroll17',['north18c','plaza18c','carrE18c','chessE18c']),
+ {id:'shears18c',name:'修枝大剪刀',short:'大剪刀',r:16,rot:20,regions:['ghW18c','lawn18c','east18c','north18c']},
+ {id:'can18c',name:'銅澆花壺',short:'澆花壺',r:16,rot:10,regions:['ghW18c','east18c','lawn18c','aviE18c']},
+ {id:'pearl18c',name:'珍珠項鍊',short:'項鍊',r:15,rot:15,regions:['carrE18c','plaza18c','south18c','swingW18c']},
+ {id:'mallet18c',name:'槌球木槌',short:'槌球木槌',r:16,rot:20,regions:['lawn18c','west18c','chessE18c','plaza18c']},
+ {id:'cage18c',name:'金色鳥籠',short:'鳥籠',r:16,rot:8,regions:['aviE18c','north18c','south18c','west18c']},
+ {id:'rose18c',name:'玫瑰花束',short:'花束',r:15,rot:15,regions:['east18c','ghW18c','plaza18c','carrE18c']},
+ {id:'cup18c',name:'骨瓷茶杯組',short:'茶杯',r:15,rot:8,regions:['east18c','swingW18c','plaza18c','carrE18c']},
+ {id:'sundial18c',name:'日晷',short:'日晷',r:15,rot:6,regions:['ghW18c','lawn18c','north18c','chessE18c']},
+ {id:'feather18c',name:'孔雀羽毛',short:'孔雀羽毛',r:16,rot:20,regions:['lawn18c','west18c','aviE18c','swingW18c']},
+ {id:'parasol18c',name:'蕾絲陽傘',short:'陽傘',r:16,rot:12,regions:['carrE18c','south18c','lawn18c','north18c']},
+ {id:'snail18c',name:'花園蝸牛',short:'蝸牛',r:15,rot:8,regions:['west18c','aviE18c','lawn18c','south18c']}];
 LEVELS[N].types=TYPES;
 /* BORROW：不借 */
 
 /* ================= 5. 區域、建築位置 ================= */
-Object.assign(REG,{north18c:{x:780,y:730,w:940,h:200},west18c:{x:620,y:850,w:270,h:750},plaza18c:{x:990,y:1150,w:520,h:240},
- east18c:{x:1550,y:1000,w:330,h:610},lawn18c:{x:630,y:1590,w:1240,h:230},south18c:{x:620,y:2010,w:1260,h:130},all18c:{x:620,y:730,w:1260,h:1090}});
-H.SCREG[N]=['north18c','west18c','plaza18c','east18c','lawn18c','south18c'];
+Object.assign(REG,{ghW18c:{x:270,y:860,w:340,h:300},swingW18c:{x:270,y:1310,w:350,h:510},aviE18c:{x:1960,y:980,w:280,h:170},chessE18c:{x:1910,y:1150,w:320,h:270},carrE18c:{x:1910,y:1520,w:320,h:250},
+ north18c:{x:780,y:730,w:940,h:200},west18c:{x:620,y:850,w:270,h:750},plaza18c:{x:990,y:1150,w:520,h:240},
+ east18c:{x:1550,y:1000,w:330,h:610},lawn18c:{x:630,y:1590,w:1240,h:230},south18c:{x:620,y:2010,w:1260,h:130},southW18c:{x:270,y:2010,w:340,h:130},southE18c:{x:1890,y:2010,w:340,h:130},all18c:{x:270,y:730,w:1960,h:1090}});
+H.SCREG[N]=['north18c','west18c','plaza18c','east18c','lawn18c','south18c','ghW18c','swingW18c','aviE18c','chessE18c','carrE18c','southW18c','southE18c'];
 const DOOR={x:1250,y:640};          /* 主殿大門（腳底中心）：奇幻晚宴的入口（level20.js） */
 const FOUNT={x:1250,y:1292};         /* 噴水池（腳底中心）；2026-11-21 使用者：最底層水池落地那圈的圓心（FOUNT.y-30）要和廣場石子圓（cy 1262）一致 */
 const PART=[[1020,1040],[1480,1040],[1020,1470],[1480,1470]],PW=230,PHt=150;   /* 四塊花壇中心 */
 const ARC={y0:1838,y1:1996};         /* 南邊迴廊 */
 let towS='';
-const TOW={x:1880,y:950};           /* 東北塔樓（圖書館的伏筆） */
-const MAZE={x0:600,x1:680,y0:480,y1:758,ax:610};   /* 2026-11-21u 使用者選 B＋C：綠籬牆往左 40、往上 70（佔的地方變小），牆前種一排柏樹＋圓球灌木；小缺口跟著搬到 (610,758)（level102.js GAP） */   /* 2026-11-21 使用者：迷宮再往北（入口拱門底部約在 y 834，整個比 11-21c 往上 140） */   /* 2026-11-21 使用者：迷宮、塔樓再往兩側、往上，不要佔太多空間 */   /* 西北綠籬迷宮 */
+const TOW={x:2140,y:950};   /* 2026-11-26j 使用者：主殿拉寬，圖書塔往東移（1880→2140；level19.js 書僮跟著搬） */           /* 東北塔樓（圖書館的伏筆） */
+const MAZE={x0:250,x1:400,y0:480,y1:758,ax:326};   /* 2026-11-26j 使用者：綠籬牆往西移（右端 680→400，小缺口 610→326，level102.js GAP 跟著改） */   /* 2026-11-21u 使用者選 B＋C：綠籬牆往左 40、往上 70（佔的地方變小），牆前種一排柏樹＋圓球灌木；小缺口跟著搬到 (610,758)（level102.js GAP） */   /* 2026-11-21 使用者：迷宮再往北（入口拱門底部約在 y 834，整個比 11-21c 往上 140） */   /* 2026-11-21 使用者：迷宮、塔樓再往兩側、往上，不要佔太多空間 */   /* 西北綠籬迷宮 */
 const SPOT={giver:[1590,1300],target:[760,1312],helper:[1430,1720]};   /* 故事角色固定位置 */
 
 /* ---- 花壇（原點在花壇下緣中央，寬 PW、高 PHt） ---- */
@@ -299,7 +491,7 @@ function ground(){
  g+=`<ellipse cx="780" cy="150" rx="80" ry="22" fill="#fbfbf6" stroke="none" opacity=".9"/><ellipse cx="1440" cy="100" rx="96" ry="24" fill="#fbfbf6" stroke="none" opacity=".9"/>`;
  g+=`<path d="M${X0},330 Q700,262 980,316 Q1250,250 1520,312 Q1800,262 ${X1},326 V700 H${X0}Z" fill="#a9c3b2" stroke="none"/>`;
  /* ---- 主殿正面（2026-11-21 使用者：主殿改成兩層樓；中央高塔加高、比兩邊圓塔再高一點；兩邊圓塔往內收，右邊圓塔和圖書塔之間有空中廊道） ---- */
- const pl=DOOR.y,MW0=900,MW1=1600,F2=480,RT=330,CT=160,SX=[870,1630];
+ const pl=DOOR.y,MW0=640,MW1=1860,F2=480,RT=330,CT=160,SX=[610,1890];   /* 2026-11-26j 使用者：主殿兩邊各拉寬 260（900～1600 → 640～1860），兩旁圓塔跟著往外 */
  g+=`<path d="M${X0},${pl-60} H${X1} V${pl+70} H${X0}Z" fill="#9fc060" stroke="none"/>`;
  /* 2026-11-21w 使用者：兩側圓塔改放在主殿後面，看得到完整的主殿屋簷 → 先畫圓塔、再畫主殿 */
  /* 2026-11-21w 使用者：圓塔底部的圓弧露在主殿牆腳前面很怪 → 塔底往後（往北）收 34，圓弧最低點剛好落在主殿牆腳；塔頂高度不變 */
@@ -311,9 +503,9 @@ function ground(){
   else{g+=`<path d="${ev} L${MW1-30},${RT-62} H${MW0+30}Z" fill="#5c6f96"/><path d="M${MW0-16},${RT} L${MW0+30},${RT-62} L${MW0+60},${RT-62} L${MW0+26},${RT+ex*.4}Z" fill="#46577c" stroke="none"/><path d="M${MW1+16},${RT} L${MW1-30},${RT-62} L${MW1-60},${RT-62} L${MW1-26},${RT+ex*.4}Z" fill="#46577c" stroke="none"/>`+
    `<path d="${ev} L${MW1-30},${RT-62} H${MW0+30}Z" fill="none"/><path d="M${MW0+6},${RT-20} H${MW1-6} M${MW0+18},${RT-40} H${MW1-18}" fill="none" stroke="#4a5a80" stroke-width="1.4"/>`}
   g+=`<path d="M${MW0},${RT+1} Q1250,${RT+ex*2+1} ${MW1},${RT+1} V${RT+12} Q1250,${RT+ex*2+12} ${MW0},${RT+12}Z" fill="#000" opacity=".14" stroke="none"/>`}
- [980,1070,1430,1520].forEach(x=>g+=`<path d="M${x-14},${RT-28} V${RT-44} L${x},${RT-56} L${x+14},${RT-44} V${RT-28}Z" fill="#ece4d0" stroke-width="1.6"/><rect x="${x-6}" y="${RT-44}" width="12" height="13" fill="#8cb8d0" stroke-width="1.2"/>`);
+ [740,850,960,1070,1430,1540,1650,1760].forEach(x=>g+=`<path d="M${x-14},${RT-28} V${RT-44} L${x},${RT-56} L${x+14},${RT-44} V${RT-28}Z" fill="#ece4d0" stroke-width="1.6"/><rect x="${x-6}" y="${RT-44}" width="12" height="13" fill="#8cb8d0" stroke-width="1.2"/>`);
  /* 2026-11-21 使用者：兩側的窗離圓塔太近 → 在圓塔（930／1570）和中間塔（1150／1350）之間平均分配 */
- const WX=[978,1040,1102,1398,1460,1522];
+ const WX=[715,792,869,946,1023,1100,1400,1477,1554,1631,1708,1785];   /* 11-26j 拉寬後一層 12 扇 */
  /* 一樓：高高的尖拱窗＋窗台花箱 */
  WX.forEach(x=>{g+=`<path d="M${x-15},${pl-56} V${pl-120} Q${x},${pl-142} ${x+15},${pl-120} V${pl-56}Z" fill="#9cc4d8"/><path d="M${x},${pl-136} V${pl-56} M${x-15},${pl-92} H${x+15}" fill="none" stroke="#ece4d0" stroke-width="2.4"/>`;
   g+=`<rect x="${x-20}" y="${pl-58}" width="40" height="10" rx="2" fill="#a8784a"/>`+[-12,-4,4,12].map((d,i)=>`<circle cx="${x+d}" cy="${pl-60}" r="3.4" fill="${['#d8413a','#f0a8b8','#f5d34a','#d8413a'][i]}" stroke-width="1"/>`).join('')});
@@ -340,14 +532,16 @@ function ground(){
  g+=`<path d="M1190,${pl+58} H1310 V${Sc.y1+300} H1190Z" fill="${PATH}" stroke="none"/>`;
  g+=`<path d="M820,1206 H1690 V1300 H820Z" fill="${PATH}" stroke="none"/>`;
  g+=`<ellipse cx="${FOUNT.x}" cy="1262" rx="262" ry="150" fill="${PATH}" stroke="none"/>`;
- g+=`<path d="M780,${pl+70} H1720 V${pl+160} H780Z" fill="${PATH}" stroke="none"/>`;
+ g+=`<path d="M520,${pl+70} H1980 V${pl+160} H520Z" fill="${PATH}" stroke="none"/>`;
  g+=`<path d="M1640,1150 H1770 V1640 H1640Z" fill="${PATH}" stroke="none"/>`;
- g+=`<path d="M1705,1160 Q1712,1010 ${TOW.x-10},${TOW.y+16}" fill="none" stroke="${PATH}" stroke-width="56" stroke-linecap="round"/>`;
- g+=`<path d="M620,1206 H820 V1300 H700 Q660,1250 620,1300Z" fill="${PATH}" stroke="none"/>`;
+ g+=`<path d="M1950,770 Q2070,800 ${TOW.x-10},${TOW.y+16}" fill="none" stroke="${PATH}" stroke-width="56" stroke-linecap="round"/>`;   /* 11-26j 往圖書塔的小路改從北邊步道接過去 */
+ g+=`<path d="M310,1206 H820 V1300 H310 Q290,1253 310,1206Z" fill="${PATH}" stroke="none"/>`;   /* 11-26i 西邊橫道一路通到溫室和鞦韆之間 */
+ g+=`<path d="M1760,1440 H2200 Q2222,1475 2200,1510 H1760Z" fill="${PATH}" stroke="none"/>`;   /* 11-26i 東邊：玫瑰步道往東接到西洋棋和馬車之間 */
+ g+=`<ellipse cx="2075" cy="1650" rx="150" ry="46" fill="${PATH}" stroke="none"/><ellipse cx="2110" cy="900" rx="84" ry="24" fill="${PATH}" stroke="none"/><ellipse cx="440" cy="1046" rx="130" ry="28" fill="${PATH}" stroke="none"/>`;
  g+=`<path d="M${X0},2000 H${X1} V${Sc.y1+420} H${X0}Z" fill="${PATH}" stroke="none"/>`;
- let pb='';for(let i=0;i<900;i++){const x=sr(620,1880),y=sr(700,2140);pb+=`M${f(x)},${f(y)} h2 `}g+=`<path d="${pb}" fill="none" stroke="${PE}" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>`;
+ let pb='';for(let i=0;i<1300;i++){const x=sr(Sc.x0+20,Sc.x1-20),y=sr(700,2140);pb+=`M${f(x)},${f(y)} h2 `}g+=`<path d="${pb}" fill="none" stroke="${PE}" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>`;
  /* 草地上的小花和草 */
- const onPath=(x,y)=>(x>1180&&x<1320)||(y>1196&&y<1310&&x>810&&x<1700)||((x-FOUNT.x)**2/270**2+(y-1262)**2/158**2<1)||(y>pl+60&&y<pl+170&&x>770&&x<1730)||(x>1630&&x<1780&&y>1140&&y<1650);
+ const onPath=(x,y)=>(x>1180&&x<1320)||(y>1196&&y<1310&&x>810&&x<1700)||((x-FOUNT.x)**2/270**2+(y-1262)**2/158**2<1)||(y>pl+60&&y<pl+170&&x>510&&x<1990)||(x>1630&&x<1780&&y>1140&&y<1650)||(x<830&&y>1196&&y<1310)||(x>1750&&y>1430&&y<1520)||((x-2075)**2/160**2+(y-1650)**2/52**2<1);
  let tu='';for(let i=0;i<520;i++){const x=sr(X0,X1),y=sr(pl+60,ARC.y0-40);if(onPath(x,y))continue;tu+=`M${f(x)},${f(y)} l-3,-6 M${f(x)},${f(y)} l3,-6 `}g+=`<path d="${tu}" fill="none" stroke="#7a9a45" stroke-width="1.3" opacity=".7"/>`;
  /* ---- 四塊花壇（2026-11-21 使用者選：左上、右下 D 刺繡花壇；右上、左下 C 玫瑰花叢＋四角樹籬球＋薰衣草邊） ---- */
  PART.forEach(([cx,cy],k)=>g+=`<g transform="translate(${cx},${cy+PHt/2})">${BED[k===0||k===3?'D':'C'](k)}</g>`);
@@ -369,8 +563,8 @@ function ground(){
   g+=`<path d="M${x1},${yB} V${yG} H${x0}" fill="none" stroke-width="2"/>`;
   g+=`<path d="M${x0},${yB-3}${bumps(x0,yB-3,x1,yB-3,0,1,9,7)} Z" fill="${HT[2]}" stroke="#2f5a26" stroke-width="1.2"/>`;
   /* 牆腳一排細高柏樹＋圓球灌木（11-21u 使用者選 C），讓方方的牆不突兀；小缺口 (MAZE.ax±25) 前面空著 */
-  for(const [x,k] of [[262,.95],[380,1],[500,1.05],[668,.95]])g+=`<g transform="translate(${x},${yG+6}) scale(${k})"><ellipse cx="0" cy="0" rx="16" ry="4" fill="#000" opacity=".15" stroke="none"/><path d="M0,0 Q-15,-30 -9,-62 Q0,-90 9,-62 Q15,-30 0,0Z" fill="#3f7030"/><path d="M-6,-12 Q-10,-40 -3,-70 M5,-16 Q8,-40 3,-62" fill="none" stroke="#548a3c" stroke-width="2.4"/></g>`;
-  for(const x of [320,440,548])g+=`<g transform="translate(${x},${yG+2})"><circle cx="0" cy="-14" r="15" fill="#4f8a3e"/><path d="M-7,-18 q4,-5 9,-2" fill="none" stroke="#78b85a" stroke-width="2"/></g>`}
+  for(const [x,k] of [[142,.95],[204,1],[266,1.05],[386,.95]])g+=`<g transform="translate(${x},${yG+6}) scale(${k})"><ellipse cx="0" cy="0" rx="16" ry="4" fill="#000" opacity=".15" stroke="none"/><path d="M0,0 Q-15,-30 -9,-62 Q0,-90 9,-62 Q15,-30 0,0Z" fill="#3f7030"/><path d="M-6,-12 Q-10,-40 -3,-70 M5,-16 Q8,-40 3,-62" fill="none" stroke="#548a3c" stroke-width="2.4"/></g>`;
+  for(const x of [173,235])g+=`<g transform="translate(${x},${yG+2})"><circle cx="0" cy="-14" r="15" fill="#4f8a3e"/><path d="M-7,-18 q4,-5 9,-2" fill="none" stroke="#78b85a" stroke-width="2"/></g>`}
  /* ---- 東北：塔樓（紫屋頂、爬藤、小側門＝圖書館的伏筆） ---- */
  /* 右邊圓塔 → 圖書塔的空中廊道（有屋頂、小拱窗、紅瓦），圖書塔加高，廊道接在它上面幾層 */
  {const corr=(x0,x1,by)=>{let c=`<path d="M${x0},${by} V${by-40} H${x1} V${by}Z" fill="#ece4d0"/>`+stn(x0,x1,by-40,by,13,30);for(let x=x0+24;x<x1-14;x+=46)c+=`<path d="M${x-6},${by-8} V${by-24} Q${x},${by-32} ${x+6},${by-24} V${by-8}Z" fill="#3a3040"/>`;
@@ -408,8 +602,8 @@ function ground(){
    c+=`<path d="M${L(0,-38)} L${L(1,-38)} L${L(1,-30)} L${L(0,-30)}Z" fill="#6a5a46" opacity=".28" stroke="none"/>`;
    c+=`</g><path d="M${f(x0-2)},${yb} Q${f(x0-6)},${f(ty+6)} ${tx},${ty}" fill="none"/>`;
    return c};
-  /* 2026-11-21 使用者選 F（只稍微斜一點），而且要接在右邊圓塔中間偏上，不是屋頂 */const dy=90;
-  g+=corrS(1668,392,TOW.x-40,392+dy);towS=rTower(TOW.x,TOW.y,150,TOW.y-180,'#6a4f8a')}
+  /* 2026-11-21 使用者選 F（只稍微斜一點），而且要接在右邊圓塔中間偏上，不是屋頂 */const dy=40;   /* 11-26j 廊道變短，斜度跟著改小 */
+  g+=corrS(SX[1]+38,392,TOW.x-40,392+dy);towS=rTower(TOW.x,TOW.y,150,TOW.y-180,'#6a4f8a')}
  towS+=`<path d="M${TOW.x-24},${TOW.y+8} V${TOW.y-46} Q${TOW.x},${TOW.y-76} ${TOW.x+24},${TOW.y-46} V${TOW.y+8}Z" fill="#6a4228"/><path d="M${TOW.x-24},${TOW.y-30} H${TOW.x+24} M${TOW.x-24},${TOW.y-8} H${TOW.x+24}" fill="none" stroke="#4a4f5c" stroke-width="3"/><circle cx="${TOW.x+12}" cy="${TOW.y-20}" r="2.6" fill="#e0b44a" stroke-width="1"/>`;
  towS+=`<path d="M${TOW.x-48},${TOW.y-70} h-10 M${TOW.x-54},${TOW.y-70} v12" fill="none" stroke="#3a3a40" stroke-width="3"/><path d="M${TOW.x-62},${TOW.y-58} h16 l-2,16 h-12Z" fill="#f5e0a0" stroke-width="1.6"/>`;
  towS+=`<circle cx="${TOW.x}" cy="${TOW.y-250}" r="16" fill="#9cc4d8"/><path d="M${TOW.x-8},${TOW.y-244} h6 v-10 h-6Z M${TOW.x},${TOW.y-244} h5 v-12 h-5Z M${TOW.x+5},${TOW.y-244} h4 v-8 h-4Z" fill="#8e2630" stroke-width="1"/>`;
@@ -432,7 +626,14 @@ Object.assign(POOL,{
  east18c:[['bush',.6],['flowersY',1],['grassClump',.6],['pebbles',.3],['lamp18c',.25],['beads18c',.25],['brush18c',.3],['fern18c',.25],['cinna18c',.2],['potbowl18c',.2]],
  lawn18c:[['bush',.6],['flowersY',.8],['grassClump',1.2],['pebbles',.4],['ladle18c',.3],['tongs18c',.2],['mortar18c',.2],['fern18c',.3],['mush18c',.3],['cinna18c',.2]],
  south18c:[['urn18c',.25],['pebbles',.5],['beads18c',.2],['lamp18c',.2],['cinna18c',.2],['potbowl18c',.2],['rpin17',.2]],
- decor18c:[['pebbles',1.2],['flowersY',.6],['grassClump',.8]]});
+ decor18c:[['pebbles',1.2],['flowersY',.6],['grassClump',.8]],
+ ghW18c:[['flowersY',.6],['grassClump',.6],['pebbles',.3],['potbowl18c',.3],['fern18c',.3],['milk18c',.25],['brush18c',.2],['mush18c',.2]],
+ swingW18c:[['flowersY',.6],['grassClump',.8],['pebbles',.3],['ladle18c',.3],['cinna18c',.25],['tongs18c',.2],['mush18c',.25],['beads18c',.2]],
+ aviE18c:[['flowersY',.5],['grassClump',.6],['pebbles',.3],['lamp18c',.3],['fern18c',.25],['brush18c',.2],['mortar18c',.2]],
+ chessE18c:[['grassClump',.6],['pebbles',.3],['rpin17',.25],['beads18c',.25],['potbowl18c',.2],['mortar18c',.25],['flowersY',.4]],
+ carrE18c:[['pebbles',.5],['grassClump',.5],['lamp18c',.25],['tongs18c',.2],['cinna18c',.2],['rpin17',.2],['milk18c',.2]]});
+/* 2026-11-26i 加寬後：中間各區的干擾物權重 ×DM18，兩側新區 ×DS18（tune18.py 調出來的） */
+const DM18=2.9,DS18=.75,CM18=1.5,CS18=10;for(const k in POOL)if(/18c$/.test(k)&&k!=='decor18c'){const m=/W18c$|E18c$/.test(k)?DS18:DM18;POOL[k]=POOL[k].map(([id,w])=>[id,(DECOY[id]!==undefined&&id!=='flowersY')?w*m:w])}
 const grp=(x,y,w,h,kind,svg,say,o={})=>add(x,y,w,h,kind,svg,{say,...o});
 const flower1=`<path d="M12,-20 L22,-40" fill="none" stroke="#5f9a48" stroke-width="2"/><circle cx="23" cy="-42" r="4" fill="#fbf6ea" stroke-width="1.2"/><circle cx="23" cy="-42" r="1.6" fill="#f5d34a" stroke="none"/>`;
 const clarinet=`<path d="M8,-28 L20,-4" fill="none" stroke="${OL}" stroke-width="4.4" stroke-linecap="round"/><path d="M8,-28 L20,-4" fill="none" stroke="#2f2f3a" stroke-width="2.6" stroke-linecap="round"/><path d="M18,-6 l5,4 l-7,2Z" fill="#2f2f3a" stroke-width="1"/>`;
@@ -490,7 +691,7 @@ function structures(){
  grp(790,866,100,80,'peek18c',T(-26,0,.8,kid({view:'bq',pose:'reach',hat:-1,mood:1}))+act(20,0,-1,{view:'fq',pose:'hold',hat:HAT_BERET,shirt:'#1f5f6a',mood:2},'nod'),'小朋友：爸爸，這面樹籬好高喔，後面有什麼？——爸爸：應該就是一大片樹籬吧⋯');
  grp(712,1120,50,70,'rake18c',act(0,0,1,{...gardener(),view:'side',pose:'reach',mood:1,extra:rake},'work'),'園丁：碎石小路要耙得整整齊齊，客人走起來才舒服。');
  /* 東：塔樓前抱著一疊書的管理員、看書的小朋友 */
- grp(1800,1030,50,110,'libr18c',act(0,0,-1,{view:'fq',pose:'up2',hat:-1,hs:0,hair:'#c9c4bc',shirt:'#4a3a6a',mood:2,extra:books},'step'),'管理員：這些書要搬回塔樓⋯哎呀，最上面那本快掉下來了！');
+ grp(1990,890,50,110,'libr18c',act(0,0,-1,{view:'fq',pose:'up2',hat:-1,hs:0,hair:'#c9c4bc',shirt:'#4a3a6a',mood:2,extra:books},'step'),'管理員：這些書要搬回塔樓⋯哎呀，最上面那本快掉下來了！');
  grp(1650,1020,70,60,'kidread18c',T(-14,0,.8,kid({view:'front',pose:'crouch',hat:-1,mood:1}))+T(16,0,.8,kid({view:'side',pose:'crouch',hat:-1,mood:3})),'小朋友：這本圖畫書裡有會噴火的龍耶！——另一個：好可怕，翻下一頁快！');
  /* 北邊空地：放風箏的小孩、聞花香的貴婦人 */
  grp(1660,880,60,170,'kite18c',act(0,0,1,{view:'bq',pose:'up',hat:-1,mood:1,extra:kiteS},'step'),'小朋友：風來了！風箏飛得比塔樓還高！');
@@ -511,23 +712,58 @@ function structures(){
  grp(1602,AY,64,80,'knights18c',act(-14,0,1,{view:'side',pose:'hold',hat:HAT_HELM,shirt:'#c4cad2',pants:'#8a929c',mood:2},'nod')+act(16,0,-1,{view:'side',pose:'stand',hat:-1,hs:1,shirt:'#c4cad2',pants:'#8a929c',mood:1},'lean'),'騎士：比武大會累死我了⋯晚上一定要多吃兩塊肉！');
  grp(1746,AY,64,70,'pup18c',T(-12,0,.8,kid({view:'side',pose:'reach',hat:-1,mood:1}))+T(16,0,1,H.KIND.dog?H.KIND.dog.fn():''),'小男孩：小狗狗，握手！——（小狗伸出了左腳）');
  grp(1818,AY,40,80,'sweep18c',act(0,0,-1,{...maidO(),view:'side',pose:'reach',mood:1,extra:broom},'work'),'女僕：迴廊的地板要擦得亮晶晶，晚上客人才會走這裡！');
+ /* 2026-11-26i 使用者：迴廊加長後兩端（x 250～600、1900～2250）也要有人在互動；人站在柱子之間（柱子在 -170＋72k、1350＋72k） */
+ const garland=`<path d="M10,-46 Q24,-34 40,-46" fill="none" stroke="#5f9a48" stroke-width="3"/>`+[[16,-41],[24,-38],[32,-40]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="2.8" fill="${['#f0a8b8','#f5d34a','#d8413a'][i]}" stroke-width=".9"/>`).join('');
+ const hop=`<path d="M-34,2 h14 v-6 h-14Z M-18,2 h14 v-6 h-14Z M-2,2 h14 v-6 h-14Z M14,2 h14 v-6 h-14Z" fill="none" stroke="#fbfaf6" stroke-width="1.4"/>`;
+ const cloths=`<g transform="translate(0,-36)">${['#fbfaf6','#f4ecd6','#fbfaf6','#e8d8c0'].map((c,i)=>`<rect x="-11" y="${-i*5}" width="22" height="5" rx="1.4" fill="${c}" stroke-width="1.1"/>`).join('')}</g>`;
+ const zz=`<path d="M10,-62 h6 l-6,6 h6 M18,-72 h5 l-5,5 h5" fill="none" stroke="#4a4f5c" stroke-width="1.6"/>`;
+ const plume=`<g transform="translate(14,-24)"><ellipse cx="0" cy="0" rx="9" ry="3" fill="#3f6a4a" stroke-width="1.1"/><path d="M-3,-2 Q-2,-8 0,-3 Q2,-8 3,-2 Q0,0 -3,-2Z" fill="#3f6a4a" stroke-width="1"/><path d="M2,-3 Q8,-14 14,-12" fill="none" stroke="#fbfaf6" stroke-width="2.4"/></g>`;
+ grp(298,AY,80,70,'hopG18c',hop+T(-24,0,.8,H.wrapAn('hop',kid({view:'side',pose:'run',hat:-1,mood:1}),true))+T(22,0,.8,kid({view:'fq',pose:'stand',hat:-1,mood:3})),'小朋友：跳到第四格不能踩線喔！——另一個：你的腳碰到了啦！');
+ grp(442,AY,70,80,'garG18c',act(-10,0,1,{...maidO(),view:'side',pose:'up',mood:1,extra:garland},'work'),'侍女：今晚有宴會，柱子之間都要掛上花環⋯再高一點點就好！');
+ grp(586,AY,64,80,'hatG18c',act(-14,0,1,{view:'side',pose:'hold',hat:-1,hs:2,shirt:'#7a3a5a',mood:1,extra:gown('#7a3a5a')+plume},'nod')+act(16,0,-1,{view:'side',pose:'stand',hat:HAT_TIARA,hs:2,shirt:'#7aa8c4',mood:3,extra:gown('#7aa8c4')},'lean'),'貴婦人：妳看這頂新帽子，羽毛是從東邊的鳥舍撿來的喔！');
+ grp(1962,AY,40,92,'napG18c',act(0,0,1,{view:'fq',pose:'hold',hat:HAT_HELM,hair:'#4a3424',shirt:'#3f6f9a',pants:'#4a4f5c',mood:4,extra:tabard+spear+zz},'lean'),'衛兵：呼⋯呼⋯（靠著柱子站著睡著了）');
+ grp(2106,AY,64,70,'curtG18c',T(-16,0,.8,H.wrapAn('nod',kid({view:'side',pose:'stand',hat:HAT_TIARA,hs:2,shirt:'#d98a9a',mood:1,extra:gown('#d98a9a')}),true))+T(16,0,.75,kid({view:'side',pose:'reach',hat:-1,mood:2}),true),'小姊姊：見到王后要這樣——提起裙子，腳往後，蹲一下！——弟弟：我又沒有裙子⋯');
+ grp(2178,AY,40,80,'clothG18c',act(0,0,-1,{...maidO(),view:'side',pose:'up2',mood:1,extra:cloths},'step'),'侍女：乾淨的桌巾要送去大餐廳，晚宴快開始了！');
  {const sp=add(0,TOW.y+30,4,4,'towF18c',`<g transform="translate(0,${-(TOW.y+30)})" stroke="${OL}" stroke-width="2" stroke-linejoin="round">${towS}</g>`,{mark:false});sp.y=TOW.y+30}
  [[H.SCENES[N].x0-420,1150],[1350,H.SCENES[N].x1+420]].forEach(([a,b])=>{const sp=add(0,ARC.y1+1,4,4,'arcF18c',arcFront(a,b),{mark:false});sp.y=ARC.y1+1});
  /* 南：迴廊前摺餐巾的侍女 */
  grp(880,2070,110,70,'nap18c',napTable()+act(-30,0,1,{...maidO(),view:'side',pose:'reach',mood:1},'work')+act(32,0,-1,{...maidO({hat:-1,hs:3}),view:'fq',pose:'reach',mood:2},'work'),'侍女：餐巾要摺成天鵝的樣子⋯咦，怎麼摺成鴨子了？');
+ /* ---- 2026-11-26i 加寬區（西：溫室 C、大樹鞦韆＋野餐 A；東：鳥舍 A、西洋棋 B、馬車 D；小組全放） ---- */
+ const xw=i=>X18.westX[i][1](),xe=i=>X18.eastX[i][1]();
+ add(440,1040,112,130,'ghouse18c',KIND.ghouse18c.fn(),{sh:.9});mk(336,890,560,1048);
+ grp(300,1150,60,80,'potG18c',xw(1),'侍女：這盆粉紅色的花要擺到涼亭的茶桌上，小心別摔了⋯');
+ grp(580,1140,80,70,'cartG18c',xw(0),'園丁：橘子樹冬天要推進溫室，夏天再推出來曬太陽。');
+ add(440,1480,150,170,'oak18c',KIND.oak18c.fn(),{sh:.9});mk(370,1330,520,1488);
+ grp(470,1488,40,70,'pushG18c',act(0,0,1,{view:'side',pose:'reach',hat:HAT_BERET,mood:1},'nod'),'爸爸：抓緊繩子喔——一、二、三，推！');
+ grp(350,1660,90,70,'famG18c',xw(3),'一家人：小黃瓜三明治一人一塊，最後一塊⋯咦，被誰吃掉了？');
+ grp(560,1730,60,70,'flyG18c',xw(4),'小朋友：黃色蝴蝶飛到樹籬那邊去了！等等我！');
+ add(2150,1150,120,150,'avi18c',KIND.avi18c.fn(),{sh:.9});mk(2088,1000,2212,1156);   /* 11-26j 圖書塔移過來，鳥舍搬到塔下 */
+ grp(2040,1140,60,80,'feedG18c',xe(4),'飼鳥員：小藍站到我手上了！牠最喜歡吃葵花子。');
+ add(2060,1320,224,120,'chess18c',KIND.chess18c.fn(),{sh:.9});mk(1964,1242,2200,1326);
+ grp(2170,1410,90,70,'thinkG18c',xe(0),'貴族：嗯⋯騎士走這一步，還是城堡走這一步呢⋯——對手：你已經想半個小時了！');
+ grp(1960,1400,50,70,'pieceG18c',xe(1),'小朋友：我把黑色的馬搬走了，看他們怎麼下！');
+ add(2080,1680,150,110,'carr18c',KIND.carr18c.fn(),{sh:.9});mk(1972,1590,2180,1690);
+ grp(1950,1580,70,60,'wheelG18c',xe(2),'車夫：車輪要擦得金光閃閃，王后等一下要坐車去兜風。');
+ grp(2200,1600,70,70,'helpG18c',xe(3),'侍從：夫人，請扶著我的手，小心台階。');
+ /* 加寬區也放幾個樹籬雕塑、石甕（露一角用） */
+ [[590,890,'ball'],[300,1330,'swan'],[1950,1110,'rabbit']].forEach(([x,y,k])=>add(x,y,76,120,'topi18c',TOPI[k](),{sh:.8}));
+ [[610,1580],[2235,1235],[2225,1545],[300,1800]].forEach(([x,y])=>add(x,y,38,50,'urn18c',urn(),{sh:.7}));
+ [[730,2128],[1520,2128],[1770,2128]].forEach(([x,y])=>add(x,y,38,50,'urn18c',urn(),{sh:.7}));   /* 11-26j 南邊大路旁的石甕（露一角用） */
  /* 不能放東西的地方：主殿（侍從站的石階下留給晚宴入口）、迷宮、塔樓、花壇、迴廊、故事角色的固定位置 */
- mk(600,0,1900,DOOR.y+86);mk(MAZE.x0,MAZE.y0,MAZE.x1+4,MAZE.y1+10);mk(TOW.x-90,620,1900,TOW.y+14);
+ mk(540,0,1960,DOOR.y+86);mk(MAZE.x0,MAZE.y0,MAZE.x1+4,MAZE.y1+10);mk(TOW.x-90,620,TOW.x+90,TOW.y+14);
  PART.forEach(([cx,cy])=>mk(cx-PW/2-6,cy-PHt/2-4,cx+PW/2+6,cy+PHt/2+12));
  mk(1636,1380,1846,1600);   /* 涼亭後面（圓頂擋住的地方）不放東西 */
- mk(600,ARC.y0-80,1900,ARC.y1+12);
+ mk(250,ARC.y0-80,2250,ARC.y1+12);mk(250,0,540,770);mk(1960,0,2250,720);
  Object.values(SPOT).forEach(([x,y])=>mk(x-40,y-90,x+40,y+8));
 }
 function scatterAll(){
  /* 故事角色搬到固定的地方 */
  const S=H.dbg.storySp();if(S){moveSp(S.giver,SPOT.giver);moveSp(S.target,SPOT.target);moveSp(S.helper,SPOT.helper)}
- scatter('north18c',POOL.north18c,1600,14);scatter('west18c',POOL.west18c,2600,34);scatter('plaza18c',POOL.plaza18c,1600,12);
- scatter('east18c',POOL.east18c,2600,30);scatter('lawn18c',POOL.lawn18c,3200,40);scatter('south18c',POOL.south18c,1800,16);
+ scatter('north18c',POOL.north18c,1600,Math.round(14*CM18));scatter('west18c',POOL.west18c,2600,Math.round(34*CM18));scatter('plaza18c',POOL.plaza18c,1600,Math.round(12*CM18));
+ scatter('east18c',POOL.east18c,2600,Math.round(30*CM18));scatter('lawn18c',POOL.lawn18c,3200,Math.round(40*CM18));scatter('south18c',POOL.south18c,1800,Math.round(16*CM18));
  scatter('all18c',POOL.decor18c,3000,30);
+ for(const k of ['ghW18c','swingW18c','aviE18c','chessE18c','carrE18c'])scatter(k,POOL[k],1600,CS18);
+ scatter('southW18c',POOL.south18c,800,6);scatter('southE18c',POOL.south18c,800,6);
 }
 const CELL=H.CELL,occ=H.occ,GC=H.GC,GR=H.GR;
 function clearCells(x,y,w,h){const a=Math.floor((x-w*.3)/CELL),c=Math.floor((x+w*.3)/CELL),b=Math.floor((y-h*.5)/CELL),d=Math.floor(y/CELL);for(let j=Math.max(0,b);j<=Math.min(GR-1,d);j++)for(let i=Math.max(0,a);i<=Math.min(GC-1,c);i++)occ[j*GC+i]=0}
@@ -535,23 +771,24 @@ function moveSp(sp,p){if(!sp||!p)return;clearCells(sp.x,sp.y,sp.w,sp.h);const[x,
 SCENE_IMPL[N]={ground,structures,scatter:scatterAll};
 /* 人要多：照晚宴的密度（路上 1.5 倍） */
 Object.assign(VPLAN,{north18c:{chat:5,walker:6,handInHand:2},west18c:{walker:4,chat:3,handInHand:1},plaza18c:{chat:4,walker:5,handInHand:2,reading:1},
- east18c:{walker:4,chat:3,handInHand:2,reading:1},lawn18c:{chat:5,walker:6,dogWalk:2,throwCatch:1},south18c:{chat:6,walker:7,handInHand:2,dogWalk:1}});
-HOSTK.add('topi18c');HOSTK.add('urn18c');HOSTK.add('bench18c');HOSTK.add('rarch18c');HOSTK.add('gaz18c');
-Object.assign(HOSTN,{topi18c:'樹籬雕塑',urn18c:'石甕花盆',bench18c:'白色長椅',rarch18c:'玫瑰拱門',gaz18c:'涼亭'});
+ east18c:{walker:4,chat:3,handInHand:2,reading:1},lawn18c:{chat:5,walker:6,dogWalk:2,throwCatch:1},south18c:{chat:6,walker:7,handInHand:2,dogWalk:1},
+ ghW18c:{walker:1,chat:1},swingW18c:{walker:2,chat:1},aviE18c:{walker:1,chat:1},chessE18c:{walker:1,chat:1},carrE18c:{walker:2,chat:1},southW18c:{walker:2,chat:1},southE18c:{walker:2,chat:1}});
+HOSTK.add('topi18c');HOSTK.add('urn18c');HOSTK.add('bench18c');HOSTK.add('rarch18c');HOSTK.add('gaz18c');['ghouse18c','oak18c','chess18c','carr18c','avi18c','famG18c','cartG18c'].forEach(k=>HOSTK.add(k));
+Object.assign(HOSTN,{topi18c:'樹籬雕塑',urn18c:'石甕花盆',bench18c:'白色長椅',rarch18c:'玫瑰拱門',gaz18c:'涼亭',ghouse18c:'玻璃溫室',oak18c:'大橡樹鞦韆',chess18c:'巨型西洋棋',carr18c:'皇家馬車',avi18c:'大鳥舍',famG18c:'野餐布',cartG18c:'手推車'});
 /* 物件的合理位置：每種最多一個台子（涼亭茶桌）選項，其他放在雕塑、長椅、石甕、人群旁；BLEND 是顏色相近的東西 */
 H.SPOTS[N]={
- scroll17:[['guard18c',.04,.7],['bench18c',.4,.2],['nap18c',.03,.6]],
- shears18c:[['topi18c',.04,.6],['trim18c',.03,.6]],
- can18c:[['urn18c',.05,.7],['rarch18c',.03,.6],['topi18c',.04,-.6]],
- pearl18c:[['bench18c',.4,-.2],['knee18c',.03,.6],['paint18c',.03,.6]],
- mallet18c:[['croq18c',.03,.6],['bench18c',.05,.6],['topi18c',.04,.6]],
- cage18c:[['rarch18c',.03,-.6],['urn18c',.05,-.7],['guard18c',.04,-.7]],
- rose18c:[['rarch18c',.03,.6],['knee18c',.03,-.6],['urn18c',.05,.7]],
- cup18c:[['gaz18c',()=>[Math.random()*40-20,-64]],['bench18c',.4,.25],['nap18c',.03,-.6]],
- sundial18c:[['topi18c',.04,.6],['urn18c',.05,-.7],['croq18c',.03,-.6]],
- feather18c:[['pcock18c',.05,.7],['chase18c',.03,.6],['topi18c',.04,-.6]],
- parasol18c:[['bench18c',.05,-.6],['paint18c',.03,-.6],['fount18c',.04,.55]],
- snail18c:[['topi18c',.04,.6],['rarch18c',.03,.6],['urn18c',.05,.7]]};
+ scroll17:[['carr18c',.04,.6],['thinkG18c',.03,.6],['guard18c',.04,.7],['bench18c',.4,.2],['nap18c',.03,.6]],
+ shears18c:[['ghouse18c',.04,.6],['cartG18c',.03,.6],['oak18c',.04,.6],['topi18c',.04,.6],['trim18c',.03,.6]],
+ can18c:[['cartG18c',.03,.6],['ghouse18c',.04,.6],['feedG18c',.03,.6],['urn18c',.05,.7],['rarch18c',.03,.6],['topi18c',.04,-.6]],
+ pearl18c:[['helpG18c',.03,.6],['famG18c',.03,.6],['bench18c',.4,-.2],['knee18c',.03,.6],['paint18c',.03,.6]],
+ mallet18c:[['famG18c',.03,.6],['chess18c',.04,.6],['pieceG18c',.03,.6],['croq18c',.03,.6],['bench18c',.05,.6],['topi18c',.04,.6]],
+ cage18c:[['avi18c',.04,.6],['feedG18c',.03,.6],['thinkG18c',.03,.6],['rarch18c',.03,-.6],['urn18c',.05,-.7],['guard18c',.04,-.7]],
+ rose18c:[['potG18c',.03,.6],['ghouse18c',.04,.6],['helpG18c',.03,.6],['rarch18c',.03,.6],['knee18c',.03,-.6],['urn18c',.05,.7]],
+ cup18c:[['famG18c',.05,.2],['oak18c',.04,.6],['thinkG18c',.03,.6],['gaz18c',()=>[Math.random()*40-20,-64]],['bench18c',.4,.25],['nap18c',.03,-.6]],
+ sundial18c:[['chess18c',.04,.6],['ghouse18c',.04,.6],['topi18c',.04,.6],['urn18c',.05,-.7],['croq18c',.03,-.6]],
+ feather18c:[['flyG18c',.03,.6],['avi18c',.04,.6],['oak18c',.04,.6],['pcock18c',.05,.7],['chase18c',.03,.6],['topi18c',.04,-.6]],
+ parasol18c:[['carr18c',.04,.6],['oak18c',.04,.6],['bench18c',.05,-.6],['paint18c',.03,-.6],['fount18c',.04,.55]],
+ snail18c:[['oak18c',.04,.6],['ghouse18c',.04,.6],['avi18c',.04,.6],['topi18c',.04,.6],['rarch18c',.03,.6],['urn18c',.05,.7]]};
 /* 2026-11-23c 使用者重選的干擾物（同一個名稱在第 17～20 關都一樣，最後載入的檔案也會設成同一張圖） */
 Object.assign(DECOY,{rpin17:"<g transform=\"rotate(-15)\"><rect x=\"-17\" y=\"-7\" width=\"34\" height=\"14\" rx=\"3\" fill=\"#efe4cc\"/><ellipse cx=\"-17\" cy=\"0\" rx=\"3.6\" ry=\"7\" fill=\"#e2d4b4\"/><path d=\"M-17,-3 Q-15,0 -17,3\" fill=\"none\" stroke=\"#c9b48a\" stroke-width=\"1.1\"/><path d=\"M-3,-7.6 V7.6\" fill=\"none\" stroke=\"#c4473c\" stroke-width=\"2.2\"/><path d=\"M-3,6 q-5,4 -7,8 M-3,6 q3,5 6,7\" fill=\"none\" stroke=\"#c4473c\" stroke-width=\"1.6\"/></g>",milk18c:"<path d=\"M-11,-12 Q0,-24 11,-12\" fill=\"none\" stroke-width=\"2\"/><path d=\"M-12,-10 L-10,12 H10 L12,-10Z\" fill=\"#c8794a\"/><ellipse cx=\"0\" cy=\"-10\" rx=\"12\" ry=\"3\" fill=\"#e09a6a\"/><path d=\"M-11,0 H11\" fill=\"none\" stroke=\"#a8603a\" stroke-width=\"1.4\"/>",lamp18c:"<path d=\"M-15,10 Q-15,-16 0,-16 Q15,-16 15,10Z\" fill=\"#fff8e0\" opacity=\".9\"/><path d=\"M-15,10 Q-15,-16 0,-16 Q15,-16 15,10 M-10,10 Q-8,-14 0,-16 M10,10 Q8,-14 0,-16 M-15,-2 Q0,-6 15,-2\" fill=\"none\" stroke=\"#c9a03a\" stroke-width=\"1.4\"/><circle cx=\"0\" cy=\"-18\" r=\"2.6\" fill=\"#e8c04a\" stroke-width=\"1\"/><ellipse cx=\"0\" cy=\"11\" rx=\"16\" ry=\"3\" fill=\"#e8c04a\"/>",brush18c:"<path d=\"M-10,-2 L0,20 L10,-2Z\" fill=\"#efe4cc\"/><circle cx=\"-6\" cy=\"-6\" r=\"5\" fill=\"#c4473c\" stroke-width=\"1.2\"/><circle cx=\"5\" cy=\"-8\" r=\"5\" fill=\"#c4473c\" stroke-width=\"1.2\"/><circle cx=\"0\" cy=\"-14\" r=\"5\" fill=\"#c4473c\" stroke-width=\"1.2\"/><circle cx=\"-1\" cy=\"-3\" r=\"5\" fill=\"#c4473c\" stroke-width=\"1.2\"/>",potbowl18c:"<path d=\"M-11,-6 Q-12,12 0,12 Q12,12 11,-6Z\" fill=\"#fbf9f3\"/><path d=\"M-11,-6 Q0,-10 11,-6\" fill=\"#fbf9f3\"/><path d=\"M-6,-8 Q0,-16 6,-8Z\" fill=\"#fbf9f3\"/><circle cx=\"0\" cy=\"-14\" r=\"2.4\" fill=\"#e0b44a\" stroke-width=\"1\"/><path d=\"M-6,2 q3,-3 6,0 q3,3 6,0\" fill=\"none\" stroke=\"#5f86b0\" stroke-width=\"1.4\"/>",mortar18c:"<ellipse cx=\"0\" cy=\"-8\" rx=\"16\" ry=\"5\" fill=\"#b4b0a6\"/><ellipse cx=\"0\" cy=\"-9\" rx=\"12\" ry=\"3\" fill=\"#9ac8e0\" stroke=\"none\"/><path d=\"M-4,-4 V12 M4,-4 V12\" fill=\"none\" stroke-width=\"2\"/><rect x=\"-4\" y=\"-4\" width=\"8\" height=\"16\" fill=\"#b4b0a6\"/><ellipse cx=\"0\" cy=\"13\" rx=\"10\" ry=\"3\" fill=\"#a8a49a\"/>",fern18c:"<g transform=\"rotate(20)\"><path d=\"M0,4 V22\" fill=\"none\" stroke=\"#2b2420\" stroke-width=\"5.4\" stroke-linecap=\"round\"/><path d=\"M0,4 V22\" fill=\"none\" stroke=\"#a8703f\" stroke-width=\"3\" stroke-linecap=\"round\"/><path d=\"M0,4 Q-12,-6 -6,-20 Q0,-24 6,-20 Q12,-6 0,4Z\" fill=\"#2f8a9a\"/><path d=\"M-3,-10 Q0,-16 3,-10\" fill=\"none\" stroke=\"#e0b44a\" stroke-width=\"1.6\"/></g>"});
 H.BLEND[N]={scroll17:['rpin17','pebbles'],shears18c:['tongs18c','bush'],can18c:['milk18c','urn18c'],pearl18c:['beads18c','pebbles'],mallet18c:['ladle18c','grassClump'],

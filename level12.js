@@ -10,13 +10,13 @@ const {T,f,r,sr,pk,ri,OL,kid,act,wrapAn,add,mark,canPlace,scatter,skyBirds,KIND,
 const tube=(d,c,w=3.4)=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w+2.6}" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
 
 /* ================= 1. 場景範圍、天空、場地邊緣 ================= */
-H.SCENES[N]={x0:600,x1:1900,y1:2150,c:[1250,1650]};
+H.SCENES[N]={x0:350,x1:2150,y1:2150,c:[1250,1650]}; /* 2026-11-26 難度調整：東西各加寬 250（原本 x0:600,x1:1900）；西邊沙雕比賽、東邊沙地踢球＋涼飲小攤 */
 H.TARGET[N]=330;
 H.SKYC[N]='#f8e6bd';H.SKYY[N]=300;
-H.EDGEM[N]='LRB';H.EDGED[N]='LRB';
+H.EDGEM[N]='B';/* 2026-11-26 加寬後左右不鏡像（不然沙雕地面、踢球場會在場地外再出現一次；地面層本身就有沙地） */H.EDGED[N]='LRB';
 H.EDGEDECO[N]=[['palm12',1.6],['cactus12',1],['duneRock12',1.4],['dryBush12',2.4]];
 H.FRINGE[N]=[['dryBush12',2.4],['duneRock12',1.2],['cactus12',.8],['palm12',.5],['pebbles',1.2],['walker',.3]];
-H.DENS[N]=1.15;
+H.DENS[N]=1;/* 2026-11-26 加寬後從 1.15 降到 1（sprite 不要太多） */
 
 /* ================= 2. 當地人：長袍＋頭巾（和綠洲市集一樣） ================= */
 const turbanHat=v=>H.HATKIT.turbanV(pk(['#f4ecd6','#f4ecd6','#e8d8b0','#3f6f9a','#a4442f','#f4ecd6']))(v); /* 2026-11-25k 頭巾跟著方向轉（art.js HATKIT.turbanV） */
@@ -137,6 +137,7 @@ Object.assign(KIND,{
  camelS12:{w:70,h:80,fn:()=>CAMEL.stand(pk(['#d6aa66','#c99a58','#dcb878']),'#b98a4a',r()<.5)},camelR12:{w:76,h:40,fn:()=>CAMEL.rest()},camelRide12:{w:72,h:100,fn:()=>camelRide(pk(['#d6aa66','#c99a58','#dcb878']))},
  hut12:{w:130,h:90,fn:hut},rack12:{w:70,h:64,fn:rack},boardStuck12:{w:28,h:56,fn:boardStuck},boarder12:{w:60,h:70,fn:()=>boarder({tilt:pk([-6,0,6]),spray:1})},
  stand12:{w:130,h:94,fn:stand},arch12:{w:190,h:100,fn:arch},bunting12:{w:130,h:70,fn:()=>buntingLine(120,10)},flagPile12:{w:70,h:36,fn:flagPile},fence12:{w:64,h:26,fn:fence},
+ pail12:{w:20,h:22,fn:()=>pail12(pk(['#2f6f73','#c4473a','#e0a030']))},
  cutboard12:dk('cutboard12',36,20,0),glasses12:dk('glasses12',34,22,0),tablecloth12:dk('tablecloth12',34,26,0),satchel12:dk('satchel12',28,30,-2),pot12:dk('pot12',30,24,-4),
  ribbon12:dk('ribbon12',32,26,-4),vase12:dk('vase12',24,40,-4),stone12:dk('stone12',26,22,-2),leaf12:dk('leaf12',32,26,-2),paperroll12:dk('paperroll12',44,34,0)});
 
@@ -144,18 +145,19 @@ Object.assign(KIND,{
 /* 老朋友：定義寫在自己檔案（和綠洲市集一樣，載入時第 4 關可能還沒載入） */
 const OLD={compass:{id:'compass',name:'黃銅羅盤',short:'羅盤',r:14,rot:30},amphora:{id:'amphora',name:'古陶罐',short:'陶罐',r:15,rot:10}};
 const old=(id,regions)=>({...(typeOf(id)||OLD[id]),regions});
+/* 2026-11-26e 使用者發現兩側很少物件：每種 4 個區域裡放 1～2 個兩側（加寬區），合理位置也加兩側的佈景 */
 const TYPES=[
- old('compass',['ride12','track12','slopeU12','pyr12']),old('amphora',['ride12','track12','slopeL12','ride12']),
- {id:'sandboard12',name:'滑沙板',short:'滑沙板',r:17,rot:12,regions:['slopeU12','slopeL12','ride12','track12']},
- {id:'goggles12',name:'防沙護目鏡',short:'護目鏡',r:15,rot:8,regions:['slopeU12','track12','ride12','slopeL12']},
- {id:'saddleblanket12',name:'駱駝織鞍毯',short:'鞍毯',r:16,rot:6,regions:['ride12','track12','slopeU12','ride12']},
- {id:'waterskin12',name:'皮水袋',short:'水袋',r:14,rot:14,regions:['ride12','slopeU12','track12','pyr12']},
- {id:'bell12',name:'駱駝銅鈴',short:'銅鈴',r:14,rot:8,regions:['ride12','track12','slopeL12','ride12']},
- {id:'flags12',name:'賽跑彩旗串',short:'彩旗串',r:16,rot:6,regions:['track12','slopeU12','ride12','track12']},
- {id:'hourglass12',name:'沙漏',short:'沙漏',r:14,rot:10,regions:['slopeU12','track12','ride12','slopeL12']},
- {id:'scarab12',name:'金色聖甲蟲',short:'聖甲蟲',r:14,rot:20,regions:['pyr12','ride12','slopeL12','track12']},
- {id:'palmfan12',name:'棕櫚葉扇',short:'葉扇',r:16,rot:14,regions:['track12','ride12','slopeU12','pyr12']},
- {id:'telescope12',name:'黃銅望遠鏡',short:'望遠鏡',r:17,rot:8,regions:['slopeU12','pyr12','track12','slopeL12']}];
+ old('compass',['ride12','sportE12','slopeU12','sculptW12']),old('amphora',['ride12','sculptW12','slopeL12','sculptW12']),
+ {id:'sandboard12',name:'滑沙板',short:'滑沙板',r:17,rot:12,regions:['slopeU12','slopeL12','ride12','westD12']},
+ {id:'goggles12',name:'防沙護目鏡',short:'護目鏡',r:15,rot:8,regions:['slopeU12','westD12','ride12','eastD12']},
+ {id:'saddleblanket12',name:'駱駝織鞍毯',short:'鞍毯',r:16,rot:6,regions:['ride12','sportE12','slopeU12','sculptW12']},
+ {id:'waterskin12',name:'皮水袋',short:'水袋',r:14,rot:14,regions:['ride12','slopeU12','track12','sportE12']},
+ {id:'bell12',name:'駱駝銅鈴',short:'銅鈴',r:14,rot:8,regions:['ride12','eastD12','slopeL12','westD12']},
+ {id:'flags12',name:'賽跑彩旗串',short:'彩旗串',r:16,rot:6,regions:['track12','westD12','ride12','eastD12']},
+ {id:'hourglass12',name:'沙漏',short:'沙漏',r:14,rot:10,regions:['slopeU12','track12','sportE12','sculptW12']},
+ {id:'scarab12',name:'金色聖甲蟲',short:'聖甲蟲',r:14,rot:20,regions:['pyr12','sculptW12','sculptW12','sportE12']},
+ {id:'palmfan12',name:'棕櫚葉扇',short:'葉扇',r:16,rot:14,regions:['track12','sportE12','slopeU12','westD12']},
+ {id:'telescope12',name:'黃銅望遠鏡',short:'望遠鏡',r:17,rot:8,regions:['slopeU12','pyr12','track12','sculptW12']}];
 LEVELS[N].types=TYPES;
 /* BORROW：不借（沙漠物件不混進前面的關卡） */
 
@@ -163,8 +165,10 @@ LEVELS[N].types=TYPES;
 const SLOPE={y0:716,y1:1330};   /* 大沙丘：脊線在北、坡腳在南 */
 const inSlope=(x,y)=>y>760&&y<1310&&Math.abs(x-1250)<300+(y-760)*.72;
 Object.assign(REG,{pyr12:{x:660,y:470,w:1200,h:220},slopeU12:{x:760,y:740,w:980,h:300},slopeL12:{x:700,y:1040,w:1100,h:290},
- track12:{x:640,y:1370,w:1230,h:340},ride12:{x:640,y:1730,w:1230,h:330},all12:{x:620,y:430,w:1260,h:1680}});
-H.SCREG[N]=['slopeU12','slopeL12','track12','ride12'];  /* 故事和路人只放坡上、坡腳、賽道、騎駱駝區 */
+ track12:{x:640,y:1370,w:1230,h:340},ride12:{x:640,y:1730,w:1230,h:330},all12:{x:370,y:430,w:1760,h:1680},
+ /* 2026-11-26 加寬：西邊沙雕比賽、東邊沙地踢球＋涼飲小攤、兩邊的沙地 */
+ sculptW12:{x:375,y:1280,w:250,h:620},sportE12:{x:1880,y:1180,w:255,h:800},westD12:{x:370,y:440,w:240,h:1690},eastD12:{x:1895,y:440,w:240,h:1690}});
+H.SCREG[N]=['slopeU12','slopeL12','track12','ride12','sculptW12','sportE12'];  /* 故事和路人只放坡上、坡腳、賽道、騎駱駝區 */
 
 function ground(){
  const Sc=H.SCENES[N],X0=Sc.x0-420,WW=Sc.x1-Sc.x0+840;let g='';
@@ -197,6 +201,11 @@ function ground(){
  for(let i=0;i<14;i++){const y=1420+i*22;g+=`<path d="M${f(1500+(i%3)*30)},${y} q14,-5 28,0" fill="none" stroke="#cfa860" stroke-width="1.6" opacity=".8"/>`}
  /* 騎駱駝體驗的小圈（駱駝繞著走的壓平的沙） */
  g+=`<ellipse cx="1110" cy="1930" rx="190" ry="62" fill="#e4c58a"/><ellipse cx="1110" cy="1930" rx="190" ry="62" fill="none" stroke="#c9a460" stroke-width="2.2" stroke-dasharray="3 14"/>`;
+ /* 2026-11-26 西邊沙雕比賽的地面（潑濕的深色沙）＋往騎駱駝區的小路；東邊踢球場（壓平的沙＋白線）＋小路 */
+ ['M760,1810 Q640,1700 560,1600','M1700,1860 Q1840,1820 1960,1760'].forEach(d=>{g+=`<path d="${d}" fill="none" stroke="#d9b678" stroke-width="60" stroke-linecap="round" opacity=".85"/>`});
+ g+=`<ellipse cx="500" cy="1580" rx="132" ry="270" fill="#e0c286" stroke="none" opacity=".85"/>`;
+ for(let i=0;i<9;i++)g+=`<ellipse cx="${f(sr(420,580))}" cy="${f(sr(1360,1820))}" rx="${f(sr(16,30))}" ry="${f(sr(6,10))}" fill="#cfae6c" stroke="none" opacity=".55"/>`;
+ g+=`<rect x="1905" y="1230" width="225" height="420" rx="10" fill="#e4c58a" stroke="#cfa860"/><path d="M1920,1440 H2115 M1920,1250 H2115 V1630 H1920Z" fill="none" stroke="#f6ecd0" stroke-width="3"/><ellipse cx="2017" cy="1440" rx="40" ry="26" fill="none" stroke="#f6ecd0" stroke-width="3"/>`;
  for(let i=0;i<46;i++){const x=sr(X0,X0+WW),y=sr(1340,Sc.y1+300);g+=`<path d="M${f(x)},${f(y)} q14,-5 28,0 q14,5 28,0" fill="none" stroke="#d9bb7e" stroke-width="1.6" opacity=".9"/>`}
  return `<g stroke="${OL}" stroke-width="2" stroke-linejoin="round">${g}</g>`}
 
@@ -207,7 +216,37 @@ Object.assign(POOL,{
  slopeL12:[['dryBush12',.9],['duneRock12',.9],['boardStuck12',.6],['pebbles',.8],['stone12',.3],['cutboard12',.25],['jar12',.5],['leaf12',.2]],
  track12:[['jar12',1],['fence12',.6],['flagPile12',.3],['dryBush12',.8],['duneRock12',.8],['pebbles',.7],['ribbon12',.3],['satchel12',.3],['tablecloth12',.3],['leaf12',.25],['stone12',.25],['pot12',.3],['paperroll12',.2]],
  ride12:[['camelS12',.8],['camelR12',.9],['jar12',1],['dryBush12',.7],['duneRock12',.7],['crate',.5],['barrel',.6],['tablecloth12',.3],['satchel12',.3],['pot12',.3],['leaf12',.25],['vase12',.2],['stone12',.25]],
- decor12:[['dryBush12',1.6],['duneRock12',1],['pebbles',1],['cactus12',.4],['jar12',.3]]});
+ decor12:[['dryBush12',1.6],['duneRock12',1],['pebbles',1],['cactus12',.4],['jar12',.3]],
+ /* 2026-11-26 新區域（11-26e：兩側干擾物權重再 ×1.6） */
+ sculptW12:[['pail12',1],['duneRock12',.5],['pebbles',.6],['dryBush12',.4],['jar12',.4],['stone12',0.48],['satchel12',0.4],['pot12',0.4],['cutboard12',0.32],['vase12',0.32]],
+ sportE12:[['jar12',.8],['dryBush12',.5],['pebbles',.6],['crate',.4],['tablecloth12',0.48],['ribbon12',0.48],['leaf12',0.4],['satchel12',0.32],['glasses12',0.32],['paperroll12',0.24]],
+ sideD12:[['dryBush12',2],['duneRock12',1.3],['pebbles',1],['cactus12',.4],['jar12',.4],['stone12',0.72],['leaf12',0.576],['pot12',0.576],['paperroll12',0.576],['vase12',0.48]]});
+/* ===== 2026-11-26 新區域的造型（使用者選：沙雕 A 三座沙雕＋雕刻師、運動 B 沙地踢球＋D 涼飲小攤、位置 A 沙雕西運動東） ===== */
+const SA12='#ead09a',SD12='#cfae6c',SL12='#f6e4b8';
+const shd12=rx=>`<ellipse cx="0" cy="3" rx="${rx}" ry="${f(rx*.16)}" fill="#000" opacity=".13" stroke="none"/>`;
+const sCastle12=()=>shd12(56)+`<g transform="scale(1.2)"><path d="M-44,0 Q-46,-14 -30,-16 H30 Q46,-14 44,0Z" fill="${SD12}"/>`+
+ [[-26,-48,16],[26,-48,16],[0,-66,22]].map(([x,y,w])=>`<rect x="${x-w/2}" y="${y}" width="${w}" height="${-y-14}" fill="${SA12}"/>`+[0,1,2].map(i=>`<rect x="${f(x-w/2+i*(w/2.5))}" y="${y-6}" width="${f(w/5)}" height="6" fill="${SA12}"/>`).join('')).join('')+
+ `<rect x="-36" y="-32" width="72" height="18" fill="${SA12}"/>`+[-30,-18,-6,6,18,30].map(x=>`<rect x="${x-3}" y="-37" width="6" height="5" fill="${SA12}"/>`).join('')+
+ `<path d="M-6,-14 V-24 Q0,-30 6,-24 V-14Z" fill="#8a6a3a"/><path d="M-22,-34 H-18 M18,-34 H22 M-2,-52 H2" stroke="#8a6a3a" stroke-width="3"/><path d="M-36,-20 H36" stroke="${SL12}" stroke-width="1.4" fill="none"/></g>`;
+const sCamel12=()=>shd12(54)+`<g transform="scale(1.15)"><path d="M-40,0 Q-42,-12 -30,-14 H34 Q44,-12 42,0Z" fill="${SD12}"/><path d="M-30,-14 Q-28,-30 -14,-30 Q-8,-46 2,-32 Q10,-46 20,-30 Q30,-28 30,-14Z" fill="${SA12}"/>`+
+ `<path d="M28,-20 Q40,-26 40,-44 Q42,-52 50,-50 Q56,-46 50,-42 L46,-40 Q46,-24 34,-14Z" fill="${SA12}"/><circle cx="48" cy="-47" r="1.6" fill="${OL}" stroke="none"/><path d="M-10,-22 Q2,-26 14,-22" fill="none" stroke="${SL12}" stroke-width="1.6"/></g>`;
+const sSphinx12=()=>shd12(60)+`<g transform="scale(1.2)"><path d="M-48,0 Q-50,-10 -38,-12 H40 Q50,-10 48,0Z" fill="${SD12}"/><path d="M-40,-12 Q-42,-30 -20,-32 H14 L14,-12Z" fill="${SA12}"/><path d="M14,-12 H46 Q50,-16 44,-18 H14Z" fill="${SA12}"/>`+
+ `<path d="M6,-30 Q2,-58 18,-62 Q34,-58 30,-30 L36,-16 H0Z" fill="${SA12}"/><path d="M10,-36 Q18,-56 26,-36 Q26,-26 18,-24 Q10,-26 10,-36Z" fill="${SL12}"/><path d="M4,-30 L1,-20 M8,-40 L4,-32 M28,-40 L32,-32 M32,-30 L35,-20" stroke="${SD12}" stroke-width="2"/><circle cx="15" cy="-40" r="1.4" fill="${OL}" stroke="none"/><circle cx="21" cy="-40" r="1.4" fill="${OL}" stroke="none"/></g>`;
+const pail12=(c='#2f6f73')=>`<ellipse cx="0" cy="1" rx="9" ry="2.4" fill="#000" opacity=".12" stroke="none"/><path d="M-7,0 L-8,-12 H8 L7,0Z" fill="${c}"/><ellipse cx="0" cy="-12" rx="8" ry="2.2" fill="#e0c286" stroke-width="1.2"/><path d="M-8,-12 Q0,-21 8,-12" fill="none" stroke-width="1.4"/>`;
+/* 雕刻師：側面彎腰、手拿小鏟子（work 動畫）；旁邊一個小水桶 */
+const sculptor12=(c)=>act(0,0,1,{pose:'reach',shirt:c,hat:HAT_T,hs:0,force:1,extra:''},'work')+`<path d="M13,-17 L22,-8" stroke="#7a5235" stroke-width="2.4"/><path d="M19,-11 L26,-6 L22,-2Z" fill="#a8a8a0" stroke-width="1"/>`+T(-16,0,1,pail12(pk(['#2f6f73','#c4473a','#e0a030'])));
+/* 踢球：球門（正面看）、跑來跑去的人、滾來滾去的球（自己的 keyframes，一直會跑） */
+const STY12=`<style>@keyframes kk12a{0%,100%{transform:translateX(-26px)}50%{transform:translateX(26px)}}@keyframes kk12b{0%,100%{transform:translate(20px,0)}50%{transform:translate(-24px,8px)}}@keyframes ball12{0%,100%{transform:translate(-40px,0)}25%{transform:translate(0,-14px)}50%{transform:translate(40px,0)}75%{transform:translate(0,-10px)}}</style>`;
+const goal12=()=>`<ellipse cx="0" cy="2" rx="30" ry="4" fill="#000" opacity=".1" stroke="none"/><path d="M-24,0 V-34 H24 V0" fill="none" stroke="${OL}" stroke-width="6"/><path d="M-24,0 V-34 H24 V0" fill="none" stroke="#f4ecd8" stroke-width="3.4"/><path d="M-20,-30 L-12,-4 M-8,-30 L0,-4 M4,-30 L12,-4 M-22,-18 H22" stroke="#d8cfb8" stroke-width="1" fill="none"/>`;
+const kicker12=(c,k)=>`<g style="animation:${k} ${f(sr(2.4,3.4))}s ease-in-out infinite;animation-delay:-${f(sr(0,3))}s">${act(0,0,pk([1,-1]),{pose:'run',shirt:c,hat:r()<.5?HAT_T:-1,hs:0,force:1},'step')}</g>`;
+const ball12=()=>STY12+`<g style="animation:ball12 3.2s ease-in-out infinite"><circle cy="-6" r="6" fill="#f4ecd8"/><path d="M-2,-9 L2,-9 L3,-5 L0,-3 L-3,-5Z" fill="#3a2a22" stroke="none"/></g>`;
+/* 涼飲小攤：條紋遮陽篷、陶罐、攤販 */
+const stall12=()=>`<ellipse cx="0" cy="3" rx="48" ry="6" fill="#000" opacity=".13" stroke="none"/><path d="M-40,0 V-48 M40,0 V-48" stroke="#7a5235" stroke-width="4"/>`+
+ T(0,-14,.66,chibi({view:'front',skin:'#b97a4e',top:'long',shirt:'#c4573a',bottom:'pants',pants:'#e8d9b4',hat:HAT_T,hs:0,arm:1,mood:2}))+
+ `<rect x="-42" y="-28" width="84" height="28" fill="#c99a5b"/><path d="M-42,-18 H42" stroke="#a8703f" stroke-width="1.2"/>`+
+ [-32,-21,21,32].map((x,i)=>`<g transform="translate(${x},-28)"><path d="M-5,0 Q-8,-7 -3.4,-11 H3.4 Q8,-7 5,0Z" fill="${['#c4642f','#e3f0ee','#d6a23a','#c4642f'][i]}"/></g>`).join('')+
+ `<path d="M-50,-48 H50 L44,-64 H-44Z" fill="#f3e2b8"/>`+[-38,-14,10,34].map(x=>`<path d="M${x},-64 H${x+10} L${x+12},-48 H${x+2}Z" fill="#2f6f73" stroke="none"/>`).join('')+`<path d="M-50,-48 H50 L44,-64 H-44Z" fill="none"/><path d="M-50,-48 q6,6 12.5,0 q6,6 12.5,0 q6,6 12.5,0 q6,6 12.5,0 q6,6 12.5,0 q6,6 12.5,0 q6,6 12.5,0 q6,6 12.5,0" fill="#f3e2b8"/>`;
+const CHEER12=['射門！射門啊！','這球踢得真漂亮！','沙地上跑好累，等一下要喝涼的。','守門員快撲！','我們這隊領先一球！'];
 function structures(){
  skyBirds(N);
  /* 北邊：棕櫚、仙人掌、岩石 */
@@ -234,31 +273,52 @@ function structures(){
  add(1560,1990,70,64,'rack12',rack(),{sh:.7});
  [[1250,1850],[1700,1830],[800,1700]].forEach(([x,y])=>add(x,y,30,34,'jar12',jar('#c4642f',1),{sh:.4}));
  [[700,2050],[1860,2060]].forEach(([x,y])=>add(x,y,44,60,'cactus12',cactusBig(),{sh:.6}));
+ /* ===== 2026-11-26 西邊：沙雕比賽（三座沙雕＋雕刻師、圍觀的人） ===== */
+ add(480,1420,130,90,'sculpt12',sCastle12(),{sh:.8,say:'雕刻師：塔頂要拍緊一點，不然一陣風就沒了！'});
+ add(520,1610,130,70,'sculpt12',sCamel12(),{sh:.8,say:'雕刻師：駱駝的脖子最難，一不小心就斷掉。'});
+ add(470,1800,140,90,'sculpt12',sSphinx12(),{sh:.8,say:'雕刻師：再給我一桶水，鼻子還要修一修。'});
+ [[400,1440,'#c4573a'],[600,1630,'#2f6f73'],[570,1820,'#d89a3a']].forEach(([x,y,c],i)=>add(x,y,46,62,'sculptor12',x>500?T(0,0,1,sculptor12(c),true):sculptor12(c),{say:['我的沙堡一定拿第一！','水不能潑太多，沙會塌⋯⋯','加油，太陽下山前要完成！'][i]}));
+ [[590,1350,-1],[400,1560,1],[600,1720,-1],[400,1900,1]].forEach(([x,y,d],i)=>add(x,y,30,62,'watch12',act(0,0,d,{arm:i%2},'nod'),{say:['那座人面獅身好像真的！','我覺得駱駝最可愛。','明年我也要報名！','評審什麼時候來呀？'][i]}));
+ /* ===== 2026-11-26 東邊：沙地踢球＋涼飲小攤 ===== */
+ add(2017,1262,60,40,'goal12',goal12(),{sh:.4,say:'守門員：今天一球都別想進！'});add(2017,1640,60,40,'goal12',goal12(),{sh:.4});
+ add(2017,1450,40,24,'ball12',ball12(),{mark:false});
+ [[1960,1330,'#c4573a','kk12a'],[2080,1380,'#2f6f73','kk12b'],[1990,1500,'#2f6f73','kk12a'],[2070,1560,'#c4573a','kk12b'],[1950,1420,'#c4573a','kk12b'],[2090,1470,'#2f6f73','kk12a']].forEach(([x,y,c,k],i)=>add(x,y,36,62,'kick12',kicker12(c,k),{say:['傳給我！傳給我！','沙子好燙，跑快一點！','差一點點就進了！','換我守門吧～','這球是我的！','呼⋯⋯先喘口氣。'][i]}));
+ mark(2017,1652,232,430,1);/* 球場上不要長草叢、石頭 */
+ [[1895,1300,1],[1895,1560,1],[2140,1350,-1]].forEach(([x,y,d],i)=>add(x,y,30,62,'watch12',act(0,0,d,{arm:2},'nod'),{say:CHEER12[i]}));
+ add(2030,1780,100,70,'stall12',stall12(),{sh:.9,say:'攤販：薄荷涼水、椰棗汁，踢完球來一杯！'});
+ [[1950,1820,1],[2110,1830,-1]].forEach(([x,y,d],i)=>add(x,y,30,62,'watch12',act(0,0,d,{arm:1},'nod'),{say:CHEER12[i+3]}));
+ /* 兩邊加寬的地方：棕櫚、仙人掌、岩石 */
+ [[440,640,1],[2060,620,-1],[420,1100,1],[2090,1060,-1]].forEach(([x,y,l])=>add(x,y,50,92,'palm12',palm(l,1),{sh:.8}));
+ [[540,900],[1960,880],[430,2040],[2080,2040]].forEach(([x,y])=>add(x,y,44,60,'cactus12',cactusBig(),{sh:.6}));
+ add(560,1150,150,70,'tent12',tent('#d89a3a'),{sh:.9});
 }
 function scatterAll(){
  scatter('pyr12',POOL.pyr12,2600,40);scatter('slopeU12',POOL.slopeU12,3400,50);scatter('slopeL12',POOL.slopeL12,3400,50);
  scatter('track12',POOL.track12,3400,50);scatter('ride12',POOL.ride12,3400,50);
- scatter('all12',POOL.decor12,6000,90);
+ scatter('sculptW12',POOL.sculptW12,1800,14);scatter('sportE12',POOL.sportE12,1800,12);scatter('westD12',POOL.sideD12,3000,26);scatter('eastD12',POOL.sideD12,3000,26);
+ scatter('all12',POOL.decor12,6000,55);
 }
 SCENE_IMPL[N]={ground,structures,scatter:scatterAll};
 Object.assign(VPLAN,{slopeU12:{chat:4,walker:4,stretch:2,carryBox:2},slopeL12:{walker:6,chat:4,handInHand:2,flute:1},
- track12:{chat:6,walker:6,benchPair:2,flute:2,carryBox:2,handInHand:2},ride12:{chat:4,walker:4,sleeping:2,stretch:2,carryBox:2,benchPair:1}});
+ track12:{chat:6,walker:6,benchPair:2,flute:2,carryBox:2,handInHand:2},sculptW12:{walker:2,chat:2},sportE12:{walker:2,chat:2,carryBox:1},ride12:{chat:4,walker:4,sleeping:2,stretch:2,carryBox:2,benchPair:1}});
 HOSTK.add('palm12');HOSTK.add('hut12');HOSTK.add('stand12');HOSTK.add('jar12');HOSTK.add('tent12');
-HOSTN.palm12='棕櫚樹';HOSTN.hut12='滑沙板租借小屋';HOSTN.stand12='觀眾台';HOSTN.jar12='水罐';HOSTN.tent12='帳篷';
+HOSTK.add('sculpt12');HOSTK.add('stall12');HOSTN.sculpt12='沙雕';HOSTN.stall12='涼飲小攤';HOSTN.palm12='棕櫚樹';HOSTN.hut12='滑沙板租借小屋';HOSTN.stand12='觀眾台';HOSTN.jar12='水罐';HOSTN.tent12='帳篷';
 /* 物件的合理位置：SPOTS 放在那個東西上或旁邊；BLEND 是顏色相近的東西 */
 H.SPOTS[N]={
- sandboard12:[['rack12',.3,.1],['hut12',.55,.2],['boardStuck12',.15,.55]],
- goggles12:[['hut12',.42,.3],['rack12',.3,-.3],['stand12',.45,.4]],
- saddleblanket12:[['camelS12',.55,.2],['tent12',.06,.5],['camelR12',.2,.62]],
- waterskin12:[['camelS12',.5,.5],['jar12',.12,.7],['tent12',.06,-.55]],
- bell12:[['camelS12',.55,.45],['arch12',.45,.3],['stand12',.45,.4]],
- flags12:[['arch12',.4,.3],['stand12',.45,.2],['flagPile12',.3,.2]],
- hourglass12:[['hut12',.42,-.3],['stand12',.45,.4],['tent12',.06,.5]],
- scarab12:[['duneRock12',.1,.55],['tent12',.06,-.55],['stand12',.45,-.3]],
- palmfan12:[['stand12',.45,.3],['palm12',.04,.3],['tent12',.08,.62]],
- telescope12:[['stand12',.45,-.4],['hut12',.42,.1],['arch12',.5,.3]],
- compass:[['camelS12',.55,.45],['hut12',.42,.4],['jar12',.12,.7]],
- amphora:[['jar12',.1,.7],['tent12',.06,.58],['hut12',.42,-.4]]};
+ sandboard12:[['rack12',.3,.1],['hut12',.55,.2],['boardStuck12',.15,.55],['sculpt12',0.1,0.6],['stall12',0.06,0.6]],
+ goggles12:[['hut12',.42,.3],['rack12',.3,-.3],['stand12',.45,.4],['sculpt12',0.1,0.6],['stall12',0.06,0.6]],
+ saddleblanket12:[['camelS12',.55,.2],['tent12',.06,.5],['camelR12',.2,.62],['sculpt12',0.1,0.6],['stall12',0.06,0.6]],
+ waterskin12:[['camelS12',.5,.5],['jar12',.12,.7],['tent12',.06,-.55],['sculpt12',0.1,0.6],['stall12',0.06,0.6]],
+ bell12:[['camelS12',.55,.45],['arch12',.45,.3],['stand12',.45,.4],['sculpt12',0.1,0.6],['stall12',0.06,0.6]],
+ flags12:[['arch12',.4,.3],['stand12',.45,.2],['flagPile12',.3,.2],['sculpt12',0.1,0.6],['stall12',0.06,0.6]],
+ hourglass12:[['hut12',.42,-.3],['stand12',.45,.4],['tent12',.06,.5],['sculpt12',0.1,0.6],['stall12',0.06,0.6]],
+ scarab12:[['sculpt12',.1,.6],['duneRock12',.1,.55],['tent12',.06,-.55],['stand12',.45,-.3],['stall12',0.06,0.6]],
+ palmfan12:[['stall12',.06,.6],['stand12',.45,.3],['palm12',.04,.3],['tent12',.08,.62],['sculpt12',0.1,0.6]],
+ telescope12:[['stand12',.45,-.4],['hut12',.42,.1],['arch12',.5,.3],['sculpt12',0.1,0.6],['stall12',0.06,0.6]],
+ compass:[['camelS12',.55,.45],['hut12',.42,.4],['jar12',.12,.7],['sculpt12',0.1,0.6],['stall12',0.06,0.6]],
+ amphora:[['jar12',.1,.7],['tent12',.06,.58],['hut12',.42,-.4],['sculpt12',0.1,0.6],['stall12',0.06,0.6]]};
+/* 2026-11-26 難度調整：遮擋物（每種 1 個露一角藏在這些東西後面） */
+['rack12','stand12','tent12','hut12','camelS12','camelR12','camelRide12','flagPile12','sculpt12','stall12'].forEach(k=>H.OCCK.add(k));
 H.BLEND[N]={sandboard12:['cutboard12','boardStuck12'],goggles12:['glasses12','dryBush12'],saddleblanket12:['tablecloth12','camelR12'],waterskin12:['satchel12','jar12'],
  bell12:['pot12','jar12'],flags12:['ribbon12','flagPile12'],hourglass12:['vase12','jar12'],scarab12:['stone12','duneRock12'],palmfan12:['leaf12','dryBush12'],
  telescope12:['paperroll12','fence12'],compass:['pot12','duneRock12'],amphora:['jar12','jar12']};

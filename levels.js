@@ -12,7 +12,7 @@
    要開放某一關：把編號從清單拿掉，並把那一關的 level{n}.js 上傳到 GitHub。
    注意：系列關卡要一起處理（例：18 要靠 17 才進得去，開放 18 之前 17 也要開放）。
    自己測試完整版時，改成 const HIDE_LEVELS=[]; 就好。 */
-const HIDE_LEVELS=[21,22,23];
+const HIDE_LEVELS=[21,22,23,201,202];
 {const add0=addLevel;addLevel=L=>{if(!HIDE_LEVELS.includes(L.n))add0(L)}}
 
 addLevel({n:1,title:'第 1 關．奇幻小鎮',file:'level1.js',c:[900,760],map:{x:120,y:170,ic:'🏰',name:'奇幻小鎮'},
@@ -39,6 +39,17 @@ addLevel({n:101,secret:true,home:5,per:3,title:'海上秘境．復活島',pre:'s
 /* 2026-11-21 秘境：樹籬迷宮（入口在第 18 關宮廷院西邊高綠籬牆的小缺口，宮廷院 2 星後小男孩會探頭；過場 RIDES.maze102；全部寫在 level102.js） */
 addLevel({n:102,secret:true,home:18,needStars:2,per:3,title:'秘境．樹籬迷宮',pre:'secret.js',file:'level102.js',c:[1390,2170],map:{x:100,y:198,ic:'🌿',name:'樹籬迷宮'},next:{btn:'鑽進樹籬迷宮',had:'綠籬牆的小缺口隨時可以鑽進去',fresh:'小男孩在綠籬的小缺口等你',ride:'maze102'},
  hint:['路人：宮廷院西邊那面高高的綠籬牆，偶爾會沙沙作響⋯好像有人躲在裡面？','路人：聽說宮廷院西邊的綠籬牆後面，藏著一座走不出來的迷宮！','園丁：宮廷院西邊的綠籬，底下好像被誰鑽出一個小洞⋯我還沒空補呢。']});
+/* 2026-11-24 室內小關卡：沉船酒館（港口海盜酒館試做關，PRD《奇幻小鎮大搜查-酒吧PRD》）。room:true＝用 room.js 的點單圖卡玩法，控制器登記在 SECRETS[201]。
+   入口在第 5 關西南小島的沙灘（小服務生＋提燈小船，寫在 level201.js 最後），過場 RIDES.boat201。 */
+addLevel({n:201,secret:true,room:true,home:5,needStars:2,per:3,title:'沉船酒館',pre:'room.js',file:'level201.js',c:[990,620],
+ cond:()=>isFound(14)||isFound(16),   /* 去過綠島或海底世界，而且海島港口 2 星，才有路人提、入口才出現 */
+ next:{btn:'搭提燈小船出發',had:'提燈小船隨時可以出發',fresh:'小服務生提著燈在沙灘等你',ride:'boat201'},
+ hint:['路人：聽說海島港口西南邊的海上，有一艘擱淺的舊海盜船，晚上窗戶都會亮燈⋯','路人：西南邊那座有茅屋的小島，沙灘上常常有個提著燈的小服務生在等客人。','老漁夫：那艘沉船後來改成酒館了！聽說調酒師會把故事調進杯子裡。']});
+
+/* 2026-11-25 室內小關卡：晚宴後廚（room.js 第二間）。入口在第 20 關奇幻晚宴後廚西南角的小木門（女主廚擦汗，寫在 level202.js 最後），過場 RIDES.kitchen202。 */
+addLevel({n:202,secret:true,room:true,home:20,needStars:2,per:3,title:'晚宴後廚',pre:'room.js',file:'level202.js',c:[990,620],
+ next:{btn:'跟主廚進後廚',had:'後廚的小門隨時開著',fresh:'女主廚在後廚的小門口擦汗',ride:'kitchen202'},
+ hint:['廚師：後廚西南角，洗碗盆旁邊那扇小門後面，是主廚自己的小廚房喔！','女僕：主廚剛剛又在小門口擦汗⋯她說今晚的單子多到做不完！','洗碗小弟：聽說主廚在找幫手，會做菜的人去小門那邊找她就對了。']});
 
 /* ---- 下一站預告圖（120×84） ---- */
 const farmPreview=()=>`<svg width="120" height="84" viewBox="0 0 120 84" aria-hidden="true"><rect width="120" height="84" fill="#f6efe0"/><path d="M0,52 Q30,38 60,48 Q90,36 120,46 V84 H0Z" fill="#a3ad66"/><rect y="60" width="120" height="24" fill="#d9c06a"/><path d="M0,60 H120" stroke="#2b2420" stroke-width="1.6"/><g transform="translate(44,58)"><path d="M-20,0 V-20 L-12,-30 L0,-35 L12,-30 L20,-20 V0Z" fill="#b14d27" stroke="#2b2420" stroke-width="2"/><path d="M-7,0 V-15 H7 V0 M-7,-15 L7,0 M7,-15 L-7,0" stroke="#fffaf0" stroke-width="1.6" fill="#7a3e2a"/></g><g transform="translate(78,58)"><path d="M-7,0 V-34 Q0,-42 7,-34 V0Z" fill="#c6ccc2" stroke="#2b2420" stroke-width="2"/></g><g transform="translate(98,58)"><path d="M-6,0 L-4,-26 L4,-26 L6,0Z" fill="#e2dccb" stroke="#2b2420" stroke-width="1.6"/><path d="M0,-28 l-12,-9 M0,-28 l12,-9 M0,-28 l-9,12 M0,-28 l9,12" stroke="#2b2420" stroke-width="2.4"/></g></svg>`;
@@ -143,9 +154,9 @@ addRegion({name:'北國雪嶺',get ids(){const T_=window.TH;return T_&&T_.isOpen
 /* 2026-11-19 城堡系列（第 17 關起）隸屬於奇幻小鎮：發現城門廣場之後，遠看只顯示大區名「奇幻小鎮」，放大才看得到「奇幻小鎮」「城堡」兩個名牌；還沒發現時完全不變 */
 addRegion({name:'奇幻小鎮',get ids(){const T_=window.TH;if(!T_||!T_.isOpen(17))return [17];return [1,17,18,19,20].filter(n=>n===1||T_.isOpen(n))},x:100,y:244});
 /* 2026-11-21w 地圖卡片、收集冊的分組（使用者選 B、b）。新關卡把編號加進某一組；秘境自動放「秘境」。 */
-addCardGroup({name:'奇幻小鎮',ic:'🏰',ids:[1,17,18,19,20]});
+addCardGroup({name:'奇幻小鎮',ic:'🏰',ids:[1,17,18,19,20,202]});
 addCardGroup({name:'農莊與森林',ic:'🌾',ids:[2,4]});
 addCardGroup({name:'雪山',ic:'❄️',ids:[3,10,15,21,22,23]});
-addCardGroup({name:'海島',ic:'⚓',ids:[5,14,16]});
+addCardGroup({name:'海島',ic:'⚓',ids:[5,14,16,201]});
 addCardGroup({name:'櫻花山城',ic:'🌸',ids:[6,7,8,9]});
 addCardGroup({name:'沙漠',ic:'🏜️',ids:[11,12,13]});
