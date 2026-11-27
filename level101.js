@@ -440,7 +440,7 @@ function tapView(x,y,E){if(!(Math.abs(x-VIEWPT.x)<34&&y<=VIEWPT.y+8&&y>=VIEWPT.y
    2026-11-11：原本是鏡頭拉遠到 0.3 倍，iPhone Safari 記憶體不夠會重新載入網頁（玩家說「跳出關卡」）。
    使用者決定改成顯示預先畫好的全島圖 rapa_island.jpg（760×1132，只有地景和佈景，沒有物件、角色；
    要重畫：tools/bake_isle.py（Playwright 截 #bg 的全景，再縮成 760 寬 JPEG））。紅點是玩家現在的位置。 */
-const ISLEIMG='rapa_island.jpg',ISLEW=760,ISLEH=1132;let isleIm=null;
+const ISLEIMG=window.vsrc?vsrc('rapa_island.jpg'):'rapa_island.jpg', /* 2026-11-27e 加版本碼：圖換了玩家會自動抓新的 */ISLEW=760,ISLEH=1132;let isleIm=null;
 const preIsle=()=>{if(!isleIm){isleIm=new Image();isleIm.src=ISLEIMG}};
 let lookBusy=false;
 function tapGiant(x,y,E){const G0=GIANT.F;if(!(Math.abs(x-G0.x)<62&&y<=G0.y+10&&y>=G0.y-345))return false;

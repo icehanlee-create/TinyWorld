@@ -353,7 +353,8 @@ body.secret .chip .ok{width:17px;height:17px;font-size:9px;right:-4px;top:-4px}
 /* 2026-11-27d 自動更新（使用者選 B）：
    ①開機先讀 ver.json（每個檔案的版本碼，不走快取），core.js、art.js、levels.js、各關檔案都加 ?v=版本碼 → 有改過的檔案才會重新下載，沒改的照樣用手機裡存的。
    ②玩的時候 core.js 會再偷偷看 ver.json（切回遊戲、過關時），有新版就等玩家打開地圖、換關卡、再玩一次時自動更新（不打斷找東西）。
-   ③沒有 ver.json（或讀不到、離線）就照原本的方式載入。網址上的 ?u= 是更新時用來避開舊快取的，開機後拿掉。 */
+   ③沒有 ver.json（或讀不到、離線）就照原本的方式載入。
+   ④11-27e 起 ver.json 也記 index.html 和圖片、音效等其他檔案：只改 index.html 也會觸發更新。之後新增的圖片、音效、css，載入時網址要用 vsrc('檔名') 才會抓新的。網址上的 ?u= 是更新時用來避開舊快取的，開機後拿掉。 */
 (function(){
  var q=new URLSearchParams(location.search);if(q.has('u')){q.delete('u');var s=q.toString();try{history.replaceState(null,'',location.pathname+(s?'?'+s:'')+location.hash)}catch(_){}}
  window.VER={};window.vsrc=function(f){return VER.f&&VER.f[f]?f+'?v='+VER.f[f]:f};
