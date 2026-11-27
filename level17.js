@@ -591,6 +591,13 @@ function scatterAll(){
  ['gardenW17','hawkW17','beeW17','cellarW17','tentE17','joustE17','orchardE17'].forEach(k=>scatter(k,POOL[k],1600,14));
 }
 SCENE_IMPL[N]={ground,structures,scatter:scatterAll};
+/* 2026-11-27 修正：玩家回報有物件「用了提示也看不到」（圖書館發現，這關同樣有）。
+   有些佈景實際畫的寬度和 add 的 w 不一樣（兩端站著人、馬，或左右不對稱），引擎把「露一角」放在 x±(w/2-…)，
+   結果物件整個落在佈景實心的地方，上面又蓋一份佈景的圖，完全看不到。
+   做法：佈景照原本的位置畫、佔位也不變，場景排好後只把引擎用來算露一角的中心 x（加 dx）和寬度 w 改掉。
+   數值是把物件放在左右露一角位置實測的（兩邊約露出 30～65%）。 */
+{const OF={stand17:[0,207],tents17:[-5,180]},sc0=SCENE_IMPL[N].scatter;
+ SCENE_IMPL[N].scatter=(...a)=>{const r=sc0(...a);H.sprites.forEach(s=>{const o=OF[s.kind];if(o&&!s.of27){s.x+=o[0];s.w=o[1];s.of27=1}});return r}}
 /* 人要多（照綠洲市集加倍後的密度） */
 Object.assign(VPLAN,{court17:{chat:5,walker:6,handInHand:2,dogWalk:1,reading:1},market17:{chat:8,walker:8,carryBox:3,handInHand:2,dogWalk:1,petCat:1},
  yard17:{chat:3,walker:4,carryBox:4,sweep:1,stretch:1},show17:{chat:4,walker:4,handInHand:2,flute:1,violin:1},

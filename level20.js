@@ -617,6 +617,13 @@ const CELL=H.CELL,occ=H.occ,GC=H.GC,GR=H.GR;
 function clearCells(x,y,w,h){const a=Math.floor((x-w*.3)/CELL),c=Math.floor((x+w*.3)/CELL),b=Math.floor((y-h*.5)/CELL),d=Math.floor(y/CELL);for(let j=Math.max(0,b);j<=Math.min(GR-1,d);j++)for(let i=Math.max(0,a);i<=Math.min(GC-1,c);i++)occ[j*GC+i]=0}
 function moveSp(sp,p){if(!sp||!p)return;clearCells(sp.x,sp.y,sp.w,sp.h);const[x,y]=p;sp.svg=sp.svg.replace(/translate\([^)]*\)/,`translate(${f(x)},${f(y)})`).replace(/data-x="[^"]*" data-y="[^"]*"/,`data-x="${f(x)}" data-y="${f(y)}"`);sp.x=x;sp.y=y}
 SCENE_IMPL[N]={ground,structures,scatter:scatterAll};
+/* 2026-11-27 修正：玩家回報有物件「用了提示也看不到」（圖書館發現，這關同樣有）。
+   有些佈景實際畫的寬度和 add 的 w 不一樣（兩端站著人、馬，或左右不對稱），引擎把「露一角」放在 x±(w/2-…)，
+   結果物件整個落在佈景實心的地方，上面又蓋一份佈景的圖，完全看不到。
+   做法：佈景照原本的位置畫、佔位也不變，場景排好後只把引擎用來算露一角的中心 x（加 dx）和寬度 w 改掉。
+   數值是把物件放在左右露一角位置實測的（兩邊約露出 30～65%）。 */
+{const OF={chests20:[0,184],cask18:[-18,136],oven18:[12,138]},sc0=SCENE_IMPL[N].scatter;
+ SCENE_IMPL[N].scatter=(...a)=>{const r=sc0(...a);H.sprites.forEach(s=>{const o=OF[s.kind];if(o&&!s.of27){s.x+=o[0];s.w=o[1];s.of27=1}});return r}}
 /* 人要多：玄關最熱鬧，走道和兩側也有人走動 */
 Object.assign(VPLAN,{hallW18:{walker:3,chat:2},hallC18:{walker:5,chat:1},hallE18:{walker:3,chat:2},music18:{chat:3,walker:2},sweets18:{chat:4,walker:3},
  kitchen18:{carryBox:3},foyer18:{chat:12,walker:12,handInHand:3,reading:1},
