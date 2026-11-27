@@ -349,13 +349,25 @@ body.secret .chip .ok{width:17px;height:17px;font-size:9px;right:-4px;top:-4px}
 (function(){const q=new URLSearchParams(location.search).get('test');if(!q||!(+q))return;window.TEST_LEVEL=+q;
  const M=new Map(),S=Storage.prototype;S.getItem=function(k){return M.has(k)?M.get(k):null};S.setItem=function(k,v){M.set(k,String(v))};S.removeItem=function(k){M.delete(k)};S.clear=function(){M.clear()}})();
 </script>
-<script src="core.js"></script>
-<script src="art.js"></script>
-<script src="levels.js"></script>
 <script>
-/* 引擎 core.js、圖庫 art.js、關卡清單 levels.js 都載好才開始；每一關的內容在 level1.js、level2.js⋯（boot 依序載入） */
-if(typeof boot==='function'&&typeof KIND!=='undefined'&&typeof LEVELS!=='undefined'&&LEVELS[1])boot();
-else{const el=document.getElementById('loading');if(el)el.textContent='找不到 core.js、art.js 或 levels.js，請確認它們和 index.html 放在同一個資料夾'}
+/* 2026-11-27d 自動更新（使用者選 B）：
+   ①開機先讀 ver.json（每個檔案的版本碼，不走快取），core.js、art.js、levels.js、各關檔案都加 ?v=版本碼 → 有改過的檔案才會重新下載，沒改的照樣用手機裡存的。
+   ②玩的時候 core.js 會再偷偷看 ver.json（切回遊戲、過關時），有新版就等玩家打開地圖、換關卡、再玩一次時自動更新（不打斷找東西）。
+   ③沒有 ver.json（或讀不到、離線）就照原本的方式載入。網址上的 ?u= 是更新時用來避開舊快取的，開機後拿掉。 */
+(function(){
+ var q=new URLSearchParams(location.search);if(q.has('u')){q.delete('u');var s=q.toString();try{history.replaceState(null,'',location.pathname+(s?'?'+s:'')+location.hash)}catch(_){}}
+ window.VER={};window.vsrc=function(f){return VER.f&&VER.f[f]?f+'?v='+VER.f[f]:f};
+ var done=false;function start(j){if(done)return;done=true;if(j&&j.v&&j.f)VER=j;
+  var list=['core.js','art.js','levels.js'],left=list.length,bad=false;
+  list.forEach(function(f){var sc=document.createElement('script');sc.src=vsrc(f);sc.async=false;
+   sc.onload=function(){if(--left===0)fin()};sc.onerror=function(){bad=true;if(--left===0)fin()};document.body.appendChild(sc)})}
+ /* 引擎 core.js、圖庫 art.js、關卡清單 levels.js 都載好才開始；每一關的內容在 level1.js、level2.js⋯（boot 依序載入） */
+ function fin(){if(typeof boot==='function'&&typeof KIND!=='undefined'&&typeof LEVELS!=='undefined'&&LEVELS[1])boot();
+  else{var el=document.getElementById('loading');if(el)el.textContent='找不到 core.js、art.js 或 levels.js，請確認它們和 index.html 放在同一個資料夾'}}
+ if(location.protocol==='file:'||!window.fetch){start(null);return}
+ setTimeout(function(){start(null)},2500); /* 網路太慢就不等了 */
+ fetch('ver.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(start,function(){start(null)});
+})();
 </script>
 </body>
 </html>

@@ -666,7 +666,7 @@ function advCeremony(then){try{localStorage.setItem(ADVK,'1')}catch(_){}const ov
  <button class="pbtn" id="advGo">🔍 接下任務</button></div>`;
  ov.classList.remove('hide');[523,659,784,1047,1319,1568].forEach((q,i)=>tone(q,.22,'triangle',.12,.5+i*.1));
  ov.querySelector('#advGo').onclick=()=>{ov.classList.add('hide');then&&then()}}
-function win(){if(PANO)panoSet(false);st.running=false;clearInterval(timer);const total=elapsed();$('#time').textContent=fmt(total);
+function win(){updCheck(true);if(PANO)panoSet(false);st.running=false;clearInterval(timer);const total=elapsed();$('#time').textContent=fmt(total);
  const BK='townhunt-best-L'+level;let best=null;try{best=parseFloat(localStorage.getItem(BK))}catch(_){}
  const isBest=!best||total<best;if(isBest){best=total;try{localStorage.setItem(BK,String(total))}catch(_){}}
  const crit=[['全部找到',true],['提示 1 次內',(st.hintsUsed||0)<=1],['故事幸運草',!!st.clover]],ns=crit.filter(c=>c[1]).length;
@@ -694,7 +694,7 @@ function win(){if(PANO)panoSet(false);st.running=false;clearInterval(timer);cons
  /* 第一次可以自己找新關卡（第 10 關之後）：先跳「晉升進階搜查家」慶祝，再顯示過關畫面 */
  const adv=!LEVELS[level].secret&&!hasNext&&FIND_IDS.some(canFind)&&!advSeen();
  setTimeout(()=>{sfx.win();if(adv)advCeremony(()=>$('#winOv').classList.remove('hide'));else $('#winOv').classList.remove('hide')},900)}
-$('#againBtn').onclick=()=>{$('#winOv').classList.add('hide');curtain(()=>{setLevel(level);newGame()})};
+$('#againBtn').onclick=()=>{if(updNow({a:'go',n:level}))return;$('#winOv').classList.add('hide');curtain(()=>{setLevel(level);newGame()})};
 $('#startBtn').onclick=()=>{ac();curtain(()=>{loadScene(level);$('#startOv').classList.add('hide');newGame()},'把東西藏好⋯')};
 let tCount=0,tTimer;
 $('#gameTitle').onclick=()=>{tCount++;clearTimeout(tTimer);tTimer=setTimeout(()=>tCount=0,2500);if(tCount>=5){tCount=0;testMode=!testMode;try{localStorage.setItem('townhunt-test',testMode?'1':'0')}catch(_){}applyTestUI();toast(testMode?'🧪 測試模式：開啟':'測試模式：關閉')}};
@@ -911,7 +911,7 @@ function mapFly(n){const m=MAPNODES.find(x=>x.n===n);if(!m||!MV)return;if(MV.svg
   MV.svg.appendChild(g);setTimeout(()=>g.remove(),2600)}}
 /* 2026-11-18 使用者：從場景出口出發（找路關卡），就算已經去過也要播過場；在冒險地圖上點地點直接前往，維持第一次才播。
    2026-11-18e：剛過關打開地圖、點的是「下一站」（WINGO），也跟按下一站按鈕一樣播過場 */
-function goLevel(n,viaExit){if(BGBUSY){whenReady(()=>goLevel(n,viaExit));return}if(PANO)panoSet(false);if(LEVELS[n]&&LEVELS[n].secret&&isNewPlace(n)){if(!canDiscover(n)){toast(DAYMSG.replace('<br>',''),4200);return}noteDiscover(n)}if(WINGO&&WINGO===n)viaExit=true;WINGO=0;if(LEVELS[n]&&LEVELS[n].file&&!LEVELS[n].types){ensureFull(n,()=>goLevel(n,viaExit));return}
+function goLevel(n,viaExit){if(!viaExit&&!WINGO&&updNow({a:'go',n}))return;if(BGBUSY){whenReady(()=>goLevel(n,viaExit));return}if(PANO)panoSet(false);if(LEVELS[n]&&LEVELS[n].secret&&isNewPlace(n)){if(!canDiscover(n)){toast(DAYMSG.replace('<br>',''),4200);return}noteDiscover(n)}if(WINGO&&WINGO===n)viaExit=true;WINGO=0;if(LEVELS[n]&&LEVELS[n].file&&!LEVELS[n].types){ensureFull(n,()=>goLevel(n,viaExit));return}
  if((viaExit||!rodeHas(n))&&NEXTINFO[n]){$('#mapOv').classList.add('hide');mapUnder=[];st.running=false;clearInterval(timer);['winOv','startOv'].forEach(id=>$('#'+id).classList.add('hide'));rodeAdd(n);
   ride(()=>{loadScene(n);setLevel(n);newGame();clockHold();$('#time').textContent='0:00'},()=>{clockRun(true);toast(`${LEVELS[n].title}，開始！`,2200)},NEXTINFO[n].ride);return}
  $('#mapOv').classList.add('hide');const under=mapUnder;mapUnder=[];if(n===level&&scene===n&&!st.running&&under.includes('startOv')){$('#startOv').classList.remove('hide');return}if(n===level&&scene===n&&st.running)return;st.running=false;clearInterval(timer);$('#winOv').classList.add('hide');
@@ -976,7 +976,7 @@ function mapZoomAt(x,y,k){const r=$('#mapSvg').getBoundingClientRect(),m=MV,ux=m
  box.addEventListener('dblclick',e=>{if(!MV)return;e.preventDefault();mapZoomAt(e.clientX,e.clientY,MV.k<MV.kMin*1.45?MV.kMin*2:MV.kMin)});
 })();
 let MAPINVITE=0;
-function openMap(){if(BGBUSY){whenReady(openMap);return}renderMap();if(MAPINVITE){MAPINVITE=0;$('#mapSub').textContent='今天要去哪裡探險呢？點地圖上的地方，或下面的卡片出發吧！'}mapUnder=['startOv','winOv'].filter(id=>!$('#'+id).classList.contains('hide'));mapUnder.forEach(id=>$('#'+id).classList.add('hide'));$('#mapOv').classList.remove('hide');mapSetup()}
+function openMap(){if(updNow({a:'map'}))return;if(BGBUSY){whenReady(openMap);return}renderMap();if(MAPINVITE){MAPINVITE=0;$('#mapSub').textContent='今天要去哪裡探險呢？點地圖上的地方，或下面的卡片出發吧！'}mapUnder=['startOv','winOv'].filter(id=>!$('#'+id).classList.contains('hide'));mapUnder.forEach(id=>$('#'+id).classList.add('hide'));$('#mapOv').classList.remove('hide');mapSetup()}
 function ride(mid,done,kind){const RX=RIDES[kind]||{svg:()=>'',text:'出發⋯',every:1000,tick:()=>{}},el=$('#ride');el.innerHTML=RX.svg()+`<span>${RX.text}</span>`;el.classList.add('on');document.body.classList.add('riding');/* 過場時上方 HUD、下方清單先藏起來，畫面比較完整（2026-11-10） */
  let clop=0;const ci=setInterval(()=>{RX.tick(clop++)},RX.every);
  setTimeout(()=>{try{mid()}catch(e){console.error(e)}},1100);
@@ -1110,7 +1110,8 @@ const loadedLv={};
    ②所有檔案先用 <link rel=preload> 同時下載，再照原本的順序執行（比一個等一個快很多）。
    ③載入中蓋一層「遊戲讀取中」：開機時一定蓋；背景還沒載完時按地圖、收集冊、換關卡，也先蓋著等載完再繼續。 */
 const PRELOADED=new Set();
-function preload(ns){ns.forEach(n=>{const L=LEVELS[n];if(!L||!L.file||L.types||loadedLv[n]==='ok')return;[L.pre,L.file].forEach(src=>{if(!src||PRELOADED.has(src))return;PRELOADED.add(src);const l=document.createElement('link');l.rel='preload';l.as='script';l.href=src;document.head.appendChild(l)})})}
+function vs_(f){return window.vsrc?window.vsrc(f):f} /* 2026-11-27d 檔名加 ?v=版本碼（index.html 讀 ver.json） */
+function preload(ns){ns.forEach(n=>{const L=LEVELS[n];if(!L||!L.file||L.types||loadedLv[n]==='ok')return;[L.pre,L.file].forEach(src=>{if(!src||PRELOADED.has(src))return;PRELOADED.add(src);const l=document.createElement('link');l.rel='preload';l.as='script';l.href=vs_(src);document.head.appendChild(l)})})}
 let BGBUSY=false,BGWAIT=[],LOADP=[0,1];
 function loadOv(on){let o=document.getElementById('loadOv');
  if(!o){o=document.createElement('div');o.id='loadOv';   /* 2026-11-22c 使用者選 D 點亮提燈：夜晚提燈＋5 盞小燈（進度），主標題「故事即將開始⋯」 */
@@ -1122,10 +1123,10 @@ function whenReady(fn){if(!BGBUSY){fn();return true}if(!BGWAIT.length)loadOv(tru
 function runSteps(steps,done){LOADP=[0,steps.length];loadBar();const next=()=>{if(!steps.length){done();return}const f=steps.shift();f(()=>{LOADP[0]++;loadBar();next()})};next()}
 function ensureLevel(n,cb,fail){const L=LEVELS[n];if(!L||!L.file||L.types||loadedLv[n]==='ok'){cb();return}
  if(L.pre&&loadedLv['pre:'+L.pre]!=='ok'){const k='pre:'+L.pre;if(loadedLv[k]&&loadedLv[k].push){loadedLv[k].push(()=>ensureLevel(n,cb,fail));return}
-  loadedLv[k]=[()=>ensureLevel(n,cb,fail)];const ps=document.createElement('script');ps.src=L.pre;ps.onload=()=>{const q=loadedLv[k];loadedLv[k]='ok';q.forEach(c=>c())};
+  loadedLv[k]=[()=>ensureLevel(n,cb,fail)];const ps=document.createElement('script');ps.src=vs_(L.pre);ps.onload=()=>{const q=loadedLv[k];loadedLv[k]='ok';q.forEach(c=>c())};
   ps.onerror=()=>{loadedLv[k]=null;ps.remove();setTimeout(()=>toast(`找不到 ${L.pre}，請確認它和 index.html 放在同一個資料夾`,4200),1500);fail&&fail()};document.head.appendChild(ps);return}
  if(loadedLv[n]&&loadedLv[n].push){loadedLv[n].push([cb,fail]);return}
- loadedLv[n]=[[cb,fail]];const sc=document.createElement('script');sc.src=L.file;
+ loadedLv[n]=[[cb,fail]];const sc=document.createElement('script');sc.src=vs_(L.file);
  sc.onload=()=>{const q=loadedLv[n];loadedLv[n]='ok';q.forEach(([c])=>c())};
  sc.onerror=()=>{const q=loadedLv[n];loadedLv[n]=null;sc.remove();setTimeout(()=>toast(`找不到 ${L.file}，請確認它和 index.html 放在同一個資料夾`,4200),1500);q.forEach(([,fl])=>fl&&fl())};
  document.head.appendChild(sc)}
@@ -1133,6 +1134,20 @@ function ensureLevel(n,cb,fail){const L=LEVELS[n];if(!L||!L.file||L.types||loade
 function ensureFull(n,cb){ensureLevel(n,()=>{const S=SECRET_IDS.filter(s=>LEVELS[s].home===n).concat(FIND_IDS.filter(m=>LEVELS[m].find.from===n&&(canFind(m)||isFound(m)))),next=()=>S.length?ensureLevel(S.shift(),next,next):cb();next()},cb)} /* 出口在這一關的新關卡（find）也一起載入 */
 function ensureUpTo(m,cb){const need=[];for(let n=1;n<=m;n++)if(LEVELS[n]&&LEVELS[n].file)need.push(n);
  const next=()=>need.length?ensureFull(need.shift(),next):cb();next()}
+/* ================= 2026-11-27d 自動更新（使用者選 B） =================
+   使用者：每次更新都要提醒玩家重新整理很麻煩。
+   玩的時候（切回遊戲、過關、每 5 分鐘）偷偷讀 ver.json，版本碼和開機時不一樣＝有新版（UPD=1）。
+   不在找東西的時候更新：打開冒險地圖、換關卡、再玩一次時，先記下玩家要做的事（sessionStorage townhunt-upd），
+   蓋提燈讀取畫面、重新整理（reload 會重新確認 index.html；各檔案的 ?v= 換了就抓新的），開機後接著做那件事。進度本來就存在 localStorage，不會掉。
+   測試模式、沒有 ver.json 時不檢查。 */
+let UPD=0,UPDT=0;
+function updCheck(force){if(window.TEST_LEVEL||UPD||!window.VER||!VER.v||document.hidden)return;const t=Date.now();if(!force&&t-UPDT<60000)return;UPDT=t;
+ fetch('ver.json?t='+t,{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.f&&j.v!==VER.v)UPD=1}).catch(()=>{})}
+function updNow(todo){if(UPD!==1)return false;UPD=2;try{sessionStorage.setItem('townhunt-upd',JSON.stringify(todo))}catch(_){}
+ st.running=false;clearInterval(timer);toast('小鎮有新消息，馬上回來⋯',2000);setTimeout(()=>{loadOv(true);location.reload()},700);return true}
+function updAfter(){let t=null;try{t=JSON.parse(sessionStorage.getItem('townhunt-upd')||'null');sessionStorage.removeItem('townhunt-upd')}catch(_){}return t}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)updCheck()});
+setInterval(()=>updCheck(true),300000);
 /* ================= boot（index.html 載入 core.js、art.js、levels.js 之後呼叫） ================= */
 function boot(){
 /* 單關測試頁（index.html?test=關卡編號；test.html 會轉過來）：進度只存在記憶體，直接開到那一關，測試模式自動打開 */
@@ -1176,6 +1191,8 @@ setTimeout(()=>{
  /* 第二段：背景載其他關卡（已經載過的會直接跳過）。載完之前按地圖、收集冊、換關卡會先蓋「遊戲讀取中」 */
  const rest=MAIN.concat(FOUND);preload(rest.concat(...rest.map(extras)));BGBUSY=true;
  /* 2026-11-21w 使用者：第 10 關之後（第 10 關過關過），打開遊戲先顯示冒險地圖，邀請玩家選一個地方探險（背景載完才打開，期間蓋讀取畫面） */
- if(starsOf(10)>=1){MAPINVITE=1;openMap()}
+ const TODO=updAfter(); /* 2026-11-27d 自動更新完，接著做玩家原本要做的事 */
+ if(TODO&&TODO.a==='map')openMap();else if(TODO&&TODO.a==='go'&&LEVELS[TODO.n])goLevel(TODO.n);
+ else if(starsOf(10)>=1){MAPINVITE=1;openMap()}
  setTimeout(()=>runSteps(rest.map(n=>cb=>ensureFull(n,cb)),()=>{BGBUSY=false;const w=BGWAIT;BGWAIT=[];loadOv(false);w.forEach(f=>{try{f()}catch(e){console.error(e)}})}),400);
 },30)}}
