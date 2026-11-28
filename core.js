@@ -678,7 +678,7 @@ function win(){cloudWin();updCheck(true);if(PANO)panoSet(false);st.running=false
  $('#winTag').textContent=isBest?'這一關的新紀錄':`最佳紀錄 ${fmt(best)}`;
  const nx=$('#winNext'),nb=$('#nextBtn');
  if(LEVELS[level].secret){const hm=LEVELS[level].home,I=NEXTINFO[hm];nx.innerHTML=`<div class="pv">${I&&I.pv?I.pv():mistPreview()}</div><div><small>回到出發地</small><b>${MAPNODES.find(m=>m.n===hm).name}</b><small>${(SECRETS[level]&&SECRETS[level].homeNote)||'隨時可以再回來'}</small></div>`;
-  nb.innerHTML=((SECRETS[level]&&SECRETS[level].homeBtn)||'回到出發地')+ICO.arrow;nb.dataset.act='home';$('#winMap').style.display='';$('#againBtn').style.display='';setTimeout(()=>{sfx.win();$('#winOv').classList.remove('hide')},900);cloudAfterWin();return}
+  nb.innerHTML=((SECRETS[level]&&SECRETS[level].homeBtn)||'回到出發地')+ICO.arrow;nb.dataset.act='home';$('#winMap').style.display='';$('#againBtn').style.display='';setTimeout(()=>{sfx.win();$('#winOv').classList.remove('hide')},900);cloudAfterWin(ns);return}
  const nl=level+1,hasNext=!!linNext(level),had=prog.unlocked>=nl,gotS=starsOf(level);
  if(hasNext&&!had&&gotS>=NEED_STARS){prog.unlocked=nl;saveProg()}
  if(hasNext&&prog.unlocked>=nl){const I=NEXTINFO[nl];nx.innerHTML=`<div class="pv">${I.pv()}</div><div><small>下一站</small><b>${MAPNODES.find(m=>m.n===nl).name}</b><small>${had?I.had:I.fresh}</small></div>`;nb.innerHTML=I.btn+ICO.arrow;nb.dataset.act='ride';if(LEVELS[nl].file)ensureFull(nl,()=>{})}
@@ -693,7 +693,7 @@ function win(){cloudWin();updCheck(true);if(PANO)panoSet(false);st.running=false
  /* 剛過關的「下一站」：從冒險地圖點它也要播過場（2026-11-18e 使用者） */WINGO=hasNext&&prog.unlocked>=nl?nl:0;
  /* 第一次可以自己找新關卡（第 10 關之後）：先跳「晉升進階搜查家」慶祝，再顯示過關畫面 */
  const adv=!LEVELS[level].secret&&!hasNext&&FIND_IDS.some(canFind)&&!advSeen();
- setTimeout(()=>{sfx.win();if(adv)advCeremony(()=>$('#winOv').classList.remove('hide'));else $('#winOv').classList.remove('hide')},900);cloudAfterWin()}
+ setTimeout(()=>{sfx.win();if(adv)advCeremony(()=>$('#winOv').classList.remove('hide'));else $('#winOv').classList.remove('hide')},900);cloudAfterWin(ns)}
 $('#againBtn').onclick=()=>{if(updNow({a:'go',n:level}))return;$('#winOv').classList.add('hide');curtain(()=>{setLevel(level);newGame()})};
 $('#startBtn').onclick=()=>{ac();curtain(()=>{loadScene(level);$('#startOv').classList.add('hide');newGame()},'把東西藏好⋯')};
 let tCount=0,tTimer;
@@ -1148,7 +1148,7 @@ function updNow(todo){if(UPD!==1)return false;UPD=2;try{sessionStorage.setItem('
 function updAfter(){let t=null;try{t=JSON.parse(sessionStorage.getItem('townhunt-upd')||'null');sessionStorage.removeItem('townhunt-upd')}catch(_){}return t}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)updCheck()});
 setInterval(()=>updCheck(true),300000);
-/* ================= 雲端存檔（2026-11-28a 使用者） =================
+/* ================= 雲端存檔（2026-11-28a 使用者；11-28d 加流水帳 thlog） =================
    使用者決定：破完第 1 關才請玩家取名字；系統另外發一組 8 碼代碼（玩家看不到）；資料只有使用者看得到（Google 試算表）。
    換手機的按鈕只在測試模式出現（選單「🧪 雲端存檔」）；一般玩家換手機：使用者從試算表查代碼，傳「搬家連結」index.html?move=代碼。
    上傳：過關時、打開冒險地圖時（1 分鐘內不重傳）；切到背景時有新紀錄就用 sendBeacon 補傳；失敗會記著，下次再傳。
@@ -1166,18 +1166,26 @@ const cloudCode=()=>{const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';const r
 const statOf=n=>STATS.L[n]||(STATS.L[n]={s:0,w:0,t:0,h:0});
 let CL={lv:0,t0:0,h:0};
 /* 把這一局到現在的時間、提示加進記錄；end＝這一局結束了 */
-function cloudTick(end){if(CL.lv&&cloudOn()&&typeof st!=='undefined'&&st&&st.running&&!document.hidden){const now=performance.now(),R=statOf(CL.lv),dt=(now-CL.t0)/1000;if(dt>0&&dt<7200)R.t=Math.round((R.t+dt)*10)/10;const hu=st.hintsUsed||0;if(hu>CL.h)R.h+=hu-CL.h;CL.t0=now;CL.h=hu;saveStats()}if(end)CL.lv=0}
-function cloudStart(){if(!cloudOn()){CL.lv=0;return}CL={lv:level,t0:performance.now(),h:0};statOf(level).s++;saveStats()}
-function cloudWin(){if(!cloudOn()||!CL.lv)return;const n=CL.lv;cloudTick(1);statOf(n).w++;saveStats()}
+function cloudTick(end,won){const run=CL.lv&&cloudOn()&&typeof st!=='undefined'&&st&&st.running;if(run&&!document.hidden){const now=performance.now(),R=statOf(CL.lv),dt=(now-CL.t0)/1000;if(dt>0&&dt<7200){R.t=Math.round((R.t+dt)*10)/10;CL.sec=(CL.sec||0)+dt}const hu=st.hintsUsed||0;if(hu>CL.h)R.h+=hu-CL.h;CL.t0=now;CL.h=hu;saveStats()}
+ if(end&&run&&!won)logPush({t:Date.now(),lv:CL.lv,r:'離開',s:Math.round(CL.sec||0),h:CL.h,st:0}); /* 2026-11-28d 流水帳：沒過關就換關、重新開始 */
+ if(end)CL.lv=0}
+function cloudStart(){if(!cloudOn()){CL.lv=0;return}CL={lv:level,t0:performance.now(),h:0,sec:0};statOf(level).s++;saveStats()}
+let CLEV=null;
+function cloudWin(){CLEV=null;if(!cloudOn()||!CL.lv)return;const n=CL.lv;cloudTick(1,1);statOf(n).w++;saveStats();CLEV={t:Date.now(),lv:n,r:'過關',s:Math.round(CL.sec||0),h:CL.h,st:0}}
+/* 流水帳（2026-11-28d 使用者）：每一局結束（過關、沒過關就換關／重新開始）記一筆，存在 thlog，上傳成功就清掉；最多留 300 筆。
+   直接關掉遊戲時那一局不會記（開始次數還是有算）。 */
+let LOG=[];try{const v=JSON.parse(localStorage.getItem('thlog')||'[]');if(Array.isArray(v))LOG=v}catch(_){}
+const saveLog=()=>{try{localStorage.setItem('thlog',JSON.stringify(LOG))}catch(_){}};
+function logPush(e){LOG.push(e);if(LOG.length>300)LOG.splice(0,LOG.length-300);saveLog();CLD.dirty=1;saveCLD()}
 function cloudSnap(){const S={};try{Object.keys(localStorage).forEach(k=>{if(k.startsWith('townhunt-')&&k!=='townhunt-test'&&k!=='townhunt-muted')S[k]=localStorage.getItem(k)})}catch(_){}return S}
 const cloudDev=()=>{const u=navigator.userAgent;return /iPad/.test(u)?'iPad':/iPhone/.test(u)?'iPhone':/Android/.test(u)?'Android':/Mac/.test(u)?'Mac':/Windows/.test(u)?'Windows':'其他'};
-const cloudBody=()=>JSON.stringify({act:'save',code:CLD.code,name:CLD.name,dev:cloudDev(),save:cloudSnap()});
+const cloudBody=n=>JSON.stringify({act:'save',code:CLD.code,name:CLD.name,dev:cloudDev(),save:cloudSnap(),log:LOG.slice(0,n)});
 let CLBUSY=0;
 function cloudSync(force,cb,manual){const ready=CLOUD_URL&&CLD.code&&CLD.name;if(!ready||(!cloudOn()&&!manual)){cb&&cb({ok:false,err:ready?'test':'off'});return}
- if(CLBUSY||(!force&&!CLD.pend&&Date.now()-CLD.last<60000)){cb&&cb({ok:false,err:'busy'});return}CLBUSY=1;cloudTick();
- fetch(CLOUD_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:cloudBody()}).then(r=>r.json()).then(j=>{CLBUSY=0;if(j&&j.ok){CLD.last=Date.now();CLD.pend=0;CLD.dirty=0}else CLD.pend=1;saveCLD();cb&&cb(j||{ok:false})})
+ if(CLBUSY||(!force&&!CLD.pend&&Date.now()-CLD.last<60000)){cb&&cb({ok:false,err:'busy'});return}CLBUSY=1;cloudTick();const nL=LOG.length;
+ fetch(CLOUD_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:cloudBody(nL)}).then(r=>r.json()).then(j=>{CLBUSY=0;if(j&&j.ok){CLD.last=Date.now();CLD.pend=0;CLD.dirty=0;LOG.splice(0,nL);saveLog()}else CLD.pend=1;saveCLD();cb&&cb(j||{ok:false})})
  .catch(e=>{CLBUSY=0;CLD.pend=1;saveCLD();cb&&cb({ok:false,err:String(e)})})}
-document.addEventListener('visibilitychange',()=>{if(document.hidden){cloudTick();if(cloudOn()&&CLOUD_URL&&CLD.code&&CLD.name&&(CLD.dirty||CLD.pend)&&navigator.sendBeacon){try{if(navigator.sendBeacon(CLOUD_URL,new Blob([cloudBody()],{type:'text/plain;charset=utf-8'}))){CLD.last=Date.now();CLD.dirty=0;CLD.pend=0;saveCLD()}}catch(_){}}}else CL.t0=performance.now()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){cloudTick();if(cloudOn()&&CLOUD_URL&&CLD.code&&CLD.name&&(CLD.dirty||CLD.pend)&&navigator.sendBeacon){try{const nL=LOG.length;if(navigator.sendBeacon(CLOUD_URL,new Blob([cloudBody(nL)],{type:'text/plain;charset=utf-8'}))){CLD.last=Date.now();CLD.dirty=0;CLD.pend=0;saveCLD();LOG.splice(0,nL);saveLog()}}catch(_){}}}else CL.t0=performance.now()});
 window.addEventListener('online',()=>{if(CLD.pend)cloudSync(true)});
 /* 合併兩份存檔（和 Code.gs 一樣）：最佳時間取小的、其他數字取大的、陣列取聯集、物件逐項合併；今天的探索次數、文字用 A */
 const cParse=v=>{try{return JSON.parse(v)}catch(_){return v}};
@@ -1230,7 +1238,7 @@ function cloudPanel(){const link=CLD.code?location.origin+location.pathname+'?mo
  ov.querySelector('#cPing').onclick=()=>{if(!CLOUD_URL){msg('還沒設定網址');return}msg('連線中⋯');fetch(CLOUD_URL+'?act=ping').then(r=>r.json()).then(j=>msg(j&&j.ok?'✅ 連得上（後端版本 '+j.ver+'）':'❌ 回應不對')).catch(e=>msg('❌ 連不上：'+e))};
  ov.querySelector('#cUp').onclick=()=>{const v=ov.querySelector('#cName').value.replace(/[<>=\u0000-\u001f]/g,'').trim().slice(0,12);if(!v){msg('先填名字');return}CLD.name=v;if(!CLD.code)CLD.code=cloudCode();saveCLD();msg('上傳中⋯');cloudSync(true,j=>{if(j&&j.ok){msg('✅ 上傳好了，去試算表看看');setTimeout(cloudPanel,1200)}else msg('❌ 沒成功：'+((j&&j.err)||''))},1)}}
 {const a=document.getElementById('tGiver');if(a){const b=document.createElement('button');b.id='tCloud';b.className='tbtn';b.style.display='none';b.innerHTML='<span>🧪 雲端存檔（代碼、搬家連結）</span>';b.onclick=()=>{closeMenu();cloudPanel()};a.parentNode.insertBefore(b,a)}}
-function cloudAfterWin(){cloudSync(true);setTimeout(cloudAsk,1900)}
+function cloudAfterWin(ns){if(CLEV){CLEV.st=ns||0;logPush(CLEV);CLEV=null}cloudSync(true);setTimeout(cloudAsk,1900)}
 /* ================= boot（index.html 載入 core.js、art.js、levels.js 之後呼叫） ================= */
 function boot(){
 if(cloudMoveBoot())return; /* 2026-11-28a 搬家連結 ?move=代碼 */
