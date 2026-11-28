@@ -568,12 +568,12 @@ function clockRun(reset){if(!st.running)return;if(reset)st.t0=performance.now();
 let testMode=false;try{testMode=localStorage.getItem('townhunt-test')==='1'}catch(_){}if(location.hash==='#test')testMode=true;
 function setHintUI(){const b=$('#hintBtn');$('#hintN').textContent=testMode?'∞':st.hintsLeft;b.disabled=(!testMode&&st.hintsLeft<=0)||hintLock}
 function applyTestUI(){document.querySelectorAll('.tbtn').forEach(b=>b.style.display=testMode?'':'none');$('#testBadge').style.display=testMode?'':'none';$('#winBtn').style.display=testMode?'':'none';{const pb=$('#panoBtn');if(pb)pb.style.display=testMode?'':'none';if(!testMode&&PANO)panoSet(false)}$('#resetBtn').style.display=testMode?'':'none';setHintUI()}
-function newGame(keepView){if(PANO)panoSet(false);WINGO=0;const S=SEC();
+function newGame(keepView){cloudTick(1);if(PANO)panoSet(false);WINGO=0;const S=SEC();
  if(S){items=S.items();clovers={story:null,bonus:null};itemsL.innerHTML='';marks.innerHTML='';fx.innerHTML=''}else{placeItems();placeClover();renderItems()}
  reunionReset();story={step:0,done:false};storyBubble();renderTray();updateCounts();
  st={running:true,t0:performance.now(),hintsLeft:HINTS,misses:0,clover:false,bonus:false};setHintUI();
  measure();if(S)S.start();else if(!keepView){const c=LEVELS[level].c;view={s:base,tx:SW/2-c[0]*base,ty:SH/2-c[1]*base}}clampV();apply();reveal(true);clearInterval(timer);timer=setInterval(tick,250);tick();
- NGHOOKS.forEach(h=>{try{h(scene)}catch(e){console.error(e)}});drawExits();pickSecretHint()}
+ NGHOOKS.forEach(h=>{try{h(scene)}catch(e){console.error(e)}});drawExits();pickSecretHint();cloudStart()}
 /* 秘境提示（2026-11-11 使用者要求）：玩家過關過的關卡裡，如果還有沒完成的秘境，每局隨機挑「一位」頭上是「…」的路人，
    點他會說一句那個秘境的提示（一局只有一位，免得太雜）。秘境在 levels.js 的 addLevel 加 hint:['…','…'] 就會自動加入。
    條件：這一關過關過（有 best）、秘境的出發地過關過、秘境還沒過關。挑人在 newGame 最後做，不影響物件和場景的亂數。 */
@@ -666,7 +666,7 @@ function advCeremony(then){try{localStorage.setItem(ADVK,'1')}catch(_){}const ov
  <button class="pbtn" id="advGo">🔍 接下任務</button></div>`;
  ov.classList.remove('hide');[523,659,784,1047,1319,1568].forEach((q,i)=>tone(q,.22,'triangle',.12,.5+i*.1));
  ov.querySelector('#advGo').onclick=()=>{ov.classList.add('hide');then&&then()}}
-function win(){updCheck(true);if(PANO)panoSet(false);st.running=false;clearInterval(timer);const total=elapsed();$('#time').textContent=fmt(total);
+function win(){cloudWin();updCheck(true);if(PANO)panoSet(false);st.running=false;clearInterval(timer);const total=elapsed();$('#time').textContent=fmt(total);
  const BK='townhunt-best-L'+level;let best=null;try{best=parseFloat(localStorage.getItem(BK))}catch(_){}
  const isBest=!best||total<best;if(isBest){best=total;try{localStorage.setItem(BK,String(total))}catch(_){}}
  const crit=[['全部找到',true],['提示 1 次內',(st.hintsUsed||0)<=1],['故事幸運草',!!st.clover]],ns=crit.filter(c=>c[1]).length;
@@ -678,7 +678,7 @@ function win(){updCheck(true);if(PANO)panoSet(false);st.running=false;clearInter
  $('#winTag').textContent=isBest?'這一關的新紀錄':`最佳紀錄 ${fmt(best)}`;
  const nx=$('#winNext'),nb=$('#nextBtn');
  if(LEVELS[level].secret){const hm=LEVELS[level].home,I=NEXTINFO[hm];nx.innerHTML=`<div class="pv">${I&&I.pv?I.pv():mistPreview()}</div><div><small>回到出發地</small><b>${MAPNODES.find(m=>m.n===hm).name}</b><small>${(SECRETS[level]&&SECRETS[level].homeNote)||'隨時可以再回來'}</small></div>`;
-  nb.innerHTML=((SECRETS[level]&&SECRETS[level].homeBtn)||'回到出發地')+ICO.arrow;nb.dataset.act='home';$('#winMap').style.display='';$('#againBtn').style.display='';setTimeout(()=>{sfx.win();$('#winOv').classList.remove('hide')},900);return}
+  nb.innerHTML=((SECRETS[level]&&SECRETS[level].homeBtn)||'回到出發地')+ICO.arrow;nb.dataset.act='home';$('#winMap').style.display='';$('#againBtn').style.display='';setTimeout(()=>{sfx.win();$('#winOv').classList.remove('hide')},900);cloudAfterWin();return}
  const nl=level+1,hasNext=!!linNext(level),had=prog.unlocked>=nl,gotS=starsOf(level);
  if(hasNext&&!had&&gotS>=NEED_STARS){prog.unlocked=nl;saveProg()}
  if(hasNext&&prog.unlocked>=nl){const I=NEXTINFO[nl];nx.innerHTML=`<div class="pv">${I.pv()}</div><div><small>下一站</small><b>${MAPNODES.find(m=>m.n===nl).name}</b><small>${had?I.had:I.fresh}</small></div>`;nb.innerHTML=I.btn+ICO.arrow;nb.dataset.act='ride';if(LEVELS[nl].file)ensureFull(nl,()=>{})}
@@ -693,7 +693,7 @@ function win(){updCheck(true);if(PANO)panoSet(false);st.running=false;clearInter
  /* 剛過關的「下一站」：從冒險地圖點它也要播過場（2026-11-18e 使用者） */WINGO=hasNext&&prog.unlocked>=nl?nl:0;
  /* 第一次可以自己找新關卡（第 10 關之後）：先跳「晉升進階搜查家」慶祝，再顯示過關畫面 */
  const adv=!LEVELS[level].secret&&!hasNext&&FIND_IDS.some(canFind)&&!advSeen();
- setTimeout(()=>{sfx.win();if(adv)advCeremony(()=>$('#winOv').classList.remove('hide'));else $('#winOv').classList.remove('hide')},900)}
+ setTimeout(()=>{sfx.win();if(adv)advCeremony(()=>$('#winOv').classList.remove('hide'));else $('#winOv').classList.remove('hide')},900);cloudAfterWin()}
 $('#againBtn').onclick=()=>{if(updNow({a:'go',n:level}))return;$('#winOv').classList.add('hide');curtain(()=>{setLevel(level);newGame()})};
 $('#startBtn').onclick=()=>{ac();curtain(()=>{loadScene(level);$('#startOv').classList.add('hide');newGame()},'把東西藏好⋯')};
 let tCount=0,tTimer;
@@ -976,7 +976,7 @@ function mapZoomAt(x,y,k){const r=$('#mapSvg').getBoundingClientRect(),m=MV,ux=m
  box.addEventListener('dblclick',e=>{if(!MV)return;e.preventDefault();mapZoomAt(e.clientX,e.clientY,MV.k<MV.kMin*1.45?MV.kMin*2:MV.kMin)});
 })();
 let MAPINVITE=0;
-function openMap(){if(updNow({a:'map'}))return;if(BGBUSY){whenReady(openMap);return}renderMap();if(MAPINVITE){MAPINVITE=0;$('#mapSub').textContent='今天要去哪裡探險呢？點地圖上的地方，或下面的卡片出發吧！'}mapUnder=['startOv','winOv'].filter(id=>!$('#'+id).classList.contains('hide'));mapUnder.forEach(id=>$('#'+id).classList.add('hide'));$('#mapOv').classList.remove('hide');mapSetup()}
+function openMap(){if(updNow({a:'map'}))return;setTimeout(()=>{cloudAsk();cloudSync()},600);if(BGBUSY){whenReady(openMap);return}renderMap();if(MAPINVITE){MAPINVITE=0;$('#mapSub').textContent='今天要去哪裡探險呢？點地圖上的地方，或下面的卡片出發吧！'}mapUnder=['startOv','winOv'].filter(id=>!$('#'+id).classList.contains('hide'));mapUnder.forEach(id=>$('#'+id).classList.add('hide'));$('#mapOv').classList.remove('hide');mapSetup()}
 function ride(mid,done,kind){const RX=RIDES[kind]||{svg:()=>'',text:'出發⋯',every:1000,tick:()=>{}},el=$('#ride');el.innerHTML=RX.svg()+`<span>${RX.text}</span>`;el.classList.add('on');document.body.classList.add('riding');/* 過場時上方 HUD、下方清單先藏起來，畫面比較完整（2026-11-10） */
  let clop=0;const ci=setInterval(()=>{RX.tick(clop++)},RX.every);
  setTimeout(()=>{try{mid()}catch(e){console.error(e)}},1100);
@@ -1148,8 +1148,92 @@ function updNow(todo){if(UPD!==1)return false;UPD=2;try{sessionStorage.setItem('
 function updAfter(){let t=null;try{t=JSON.parse(sessionStorage.getItem('townhunt-upd')||'null');sessionStorage.removeItem('townhunt-upd')}catch(_){}return t}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)updCheck()});
 setInterval(()=>updCheck(true),300000);
+/* ================= 雲端存檔（2026-11-28a 使用者） =================
+   使用者決定：破完第 1 關才請玩家取名字；系統另外發一組 8 碼代碼（玩家看不到）；資料只有使用者看得到（Google 試算表）。
+   換手機的按鈕只在測試模式出現（選單「🧪 雲端存檔」）；一般玩家換手機：使用者從試算表查代碼，傳「搬家連結」index.html?move=代碼。
+   上傳：過關時、打開冒險地圖時（1 分鐘內不重傳）；切到背景時有新紀錄就用 sendBeacon 補傳；失敗會記著，下次再傳。
+   每關記錄 townhunt-stats {L:{關卡:{s 開始次數,w 過關次數,t 秒,h 提示次數}}}（沒過關就離開＝s−w，在試算表算）。
+   測試模式、?test=n 都不記錄、不上傳。名字和代碼存在 thcloud（不是 townhunt- 開頭，重置進度不會清掉）。
+   後端程式：Code.gs（Google Apps Script），合併規則和下面的 mergeSave 一樣，改一邊要兩邊一起改。 */
+const CLOUD_URL='https://script.google.com/macros/s/AKfycbwFssqv7_iKp3PPGrvFnU0dRQYxKgflK6r9mb5Hkqip54_FwbAakXU_Z_y-ySDlP33F/exec';/* ← 部署好的 Apps Script 網址（https://script.google.com/macros/s/…/exec）貼在引號裡；空的＝不上傳 */
+const CLK='thcloud',STK='townhunt-stats';
+let CLD={name:'',code:'',last:0,pend:0,dirty:0};try{Object.assign(CLD,JSON.parse(localStorage.getItem(CLK)||'{}'))}catch(_){}
+const saveCLD=()=>{try{localStorage.setItem(CLK,JSON.stringify(CLD))}catch(_){}};
+let STATS={L:{}};try{const v=JSON.parse(localStorage.getItem(STK)||'null');if(v&&v.L)STATS=v}catch(_){}
+const saveStats=()=>{try{localStorage.setItem(STK,JSON.stringify(STATS))}catch(_){}CLD.dirty=1;saveCLD()};
+const cloudOn=()=>!testMode&&!window.TEST_LEVEL;
+const cloudCode=()=>{const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';const r=new Uint32Array(8);try{crypto.getRandomValues(r)}catch(_){for(let i=0;i<8;i++)r[i]=Math.random()*1e9}for(let i=0;i<8;i++)s+=A[r[i]%A.length];return s};
+const statOf=n=>STATS.L[n]||(STATS.L[n]={s:0,w:0,t:0,h:0});
+let CL={lv:0,t0:0,h:0};
+/* 把這一局到現在的時間、提示加進記錄；end＝這一局結束了 */
+function cloudTick(end){if(CL.lv&&cloudOn()&&typeof st!=='undefined'&&st&&st.running&&!document.hidden){const now=performance.now(),R=statOf(CL.lv),dt=(now-CL.t0)/1000;if(dt>0&&dt<7200)R.t=Math.round((R.t+dt)*10)/10;const hu=st.hintsUsed||0;if(hu>CL.h)R.h+=hu-CL.h;CL.t0=now;CL.h=hu;saveStats()}if(end)CL.lv=0}
+function cloudStart(){if(!cloudOn()){CL.lv=0;return}CL={lv:level,t0:performance.now(),h:0};statOf(level).s++;saveStats()}
+function cloudWin(){if(!cloudOn()||!CL.lv)return;const n=CL.lv;cloudTick(1);statOf(n).w++;saveStats()}
+function cloudSnap(){const S={};try{Object.keys(localStorage).forEach(k=>{if(k.startsWith('townhunt-')&&k!=='townhunt-test'&&k!=='townhunt-muted')S[k]=localStorage.getItem(k)})}catch(_){}return S}
+const cloudDev=()=>{const u=navigator.userAgent;return /iPad/.test(u)?'iPad':/iPhone/.test(u)?'iPhone':/Android/.test(u)?'Android':/Mac/.test(u)?'Mac':/Windows/.test(u)?'Windows':'其他'};
+const cloudBody=()=>JSON.stringify({act:'save',code:CLD.code,name:CLD.name,dev:cloudDev(),save:cloudSnap()});
+let CLBUSY=0;
+function cloudSync(force,cb,manual){const ready=CLOUD_URL&&CLD.code&&CLD.name;if(!ready||(!cloudOn()&&!manual)){cb&&cb({ok:false,err:ready?'test':'off'});return}
+ if(CLBUSY||(!force&&!CLD.pend&&Date.now()-CLD.last<60000)){cb&&cb({ok:false,err:'busy'});return}CLBUSY=1;cloudTick();
+ fetch(CLOUD_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:cloudBody()}).then(r=>r.json()).then(j=>{CLBUSY=0;if(j&&j.ok){CLD.last=Date.now();CLD.pend=0;CLD.dirty=0}else CLD.pend=1;saveCLD();cb&&cb(j||{ok:false})})
+ .catch(e=>{CLBUSY=0;CLD.pend=1;saveCLD();cb&&cb({ok:false,err:String(e)})})}
+document.addEventListener('visibilitychange',()=>{if(document.hidden){cloudTick();if(cloudOn()&&CLOUD_URL&&CLD.code&&CLD.name&&(CLD.dirty||CLD.pend)&&navigator.sendBeacon){try{if(navigator.sendBeacon(CLOUD_URL,new Blob([cloudBody()],{type:'text/plain;charset=utf-8'}))){CLD.last=Date.now();CLD.dirty=0;CLD.pend=0;saveCLD()}}catch(_){}}}else CL.t0=performance.now()});
+window.addEventListener('online',()=>{if(CLD.pend)cloudSync(true)});
+/* 合併兩份存檔（和 Code.gs 一樣）：最佳時間取小的、其他數字取大的、陣列取聯集、物件逐項合併；今天的探索次數、文字用 A */
+const cParse=v=>{try{return JSON.parse(v)}catch(_){return v}};
+function mergeVal(a,b,key){if(a===undefined)return b;if(b===undefined)return a;
+ if(typeof a==='number'&&typeof b==='number')return /best/.test(key)?Math.min(a,b):Math.max(a,b);
+ if(Array.isArray(a)&&Array.isArray(b)){const o=a.slice();b.forEach(x=>{if(!o.includes(x))o.push(x)});return o}
+ if(a&&b&&typeof a==='object'&&typeof b==='object'&&!Array.isArray(a)&&!Array.isArray(b)){const r={};Object.keys(a).concat(Object.keys(b)).forEach(k=>{if(!(k in r))r[k]=mergeVal(a[k],b[k],k)});return r}
+ if(typeof a==='boolean'||typeof b==='boolean')return !!(a||b);return a}
+function mergeSave(A,B){const R={};Object.keys(A).concat(Object.keys(B)).forEach(k=>{if(k in R)return;if(!(k in A)){R[k]=B[k];return}if(!(k in B)||k==='townhunt-day'){R[k]=A[k];return}const m=mergeVal(cParse(A[k]),cParse(B[k]),k);R[k]=typeof m==='string'?m:JSON.stringify(m)});return R}
+/* 小視窗（取名字、搬家、測試用） */
+function cloudCard(html){let ov=$('#cloudOv');if(!ov){ov=document.createElement('div');ov.id='cloudOv';ov.className='overlay';ov.style.zIndex=75;document.body.appendChild(ov)}ov.classList.remove('hide');ov.innerHTML=`<div class="pcard" style="padding:22px 18px 18px;text-align:center">${html}</div>`;return ov}
+const cloudClose=()=>{const ov=$('#cloudOv');if(ov)ov.classList.add('hide')};
+const CINP='width:100%;box-sizing:border-box;font:inherit;font-size:19px;padding:10px 12px;border:2.5px solid var(--ink);border-radius:14px;background:#fff;text-align:center;margin:0 0 12px';
+const cEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+/* 破完第 1 關才問名字（舊玩家下次過關或打開地圖時問） */
+function cloudAsk(){if(!cloudOn()||CLD.name||starsOf(1)<1||($('#cloudOv')&&!$('#cloudOv').classList.contains('hide')))return;
+ const ov=cloudCard(`<small style="display:block;color:var(--muted);font-size:13px;letter-spacing:.2em">旅人登記</small><b style="font-size:23px;display:block;margin:2px 0 10px">旅人，請留下你的名字</b>
+ <p style="margin:0 0 12px;font-size:15px;line-height:1.65">小鎮的居民想記住你。<br>之後的冒險，大家都會這樣稱呼你！</p>
+ <input id="cName" maxlength="12" placeholder="你的名字" autocomplete="off" style="${CINP}"><button class="pbtn" id="cNameGo" disabled style="opacity:.5">就叫這個名字</button>`);
+ const inp=ov.querySelector('#cName'),go=ov.querySelector('#cNameGo'),val=()=>inp.value.replace(/[<>=\u0000-\u001f]/g,'').trim().slice(0,12);
+ inp.oninput=()=>{const ok=!!val();go.disabled=!ok;go.style.opacity=ok?1:.5};
+ inp.onkeydown=e=>{if(e.key==='Enter'&&val())go.onclick()};
+ go.onclick=()=>{const v=val();if(!v)return;CLD.name=v;if(!CLD.code)CLD.code=cloudCode();CLD.pend=1;saveCLD();cloudClose();toast(`歡迎你，${v}！`,2400);cloudSync(true)}}
+/* 搬家連結：index.html?move=代碼（在 boot 最前面處理，處理完重新整理） */
+function cloudMoveBoot(){let mv='';try{mv=(new URLSearchParams(location.search).get('move')||'').toUpperCase()}catch(_){}if(!mv)return false;
+ const clean=()=>{const u=new URL(location.href);u.searchParams.delete('move');location.replace(u.pathname+u.search+u.hash)};
+ const ld=$('#loading');if(ld)ld.style.visibility='hidden';
+ if(!CLOUD_URL||!/^[A-Z2-9]{8}$/.test(mv)){cloudCard(`<b style="font-size:21px;display:block;margin:0 0 10px">搬家連結不能用</b><p style="margin:0 0 14px;font-size:15px">這個連結好像不完整，先照原本的進度玩吧！</p><button class="pbtn" id="cOk">好</button>`).querySelector('#cOk').onclick=clean;return true}
+ cloudCard(`<b style="font-size:21px;display:block;margin:6px 0">正在找你的行李⋯</b>`);
+ fetch(CLOUD_URL+'?act=load&code='+mv).then(r=>r.json()).then(j=>{
+  if(!j||!j.ok){cloudCard(`<b style="font-size:21px;display:block;margin:0 0 10px">找不到這位旅人</b><p style="margin:0 0 14px;font-size:15px">連結可能打錯了，先照原本的進度玩吧！</p><button class="pbtn" id="cOk">好</button>`).querySelector('#cOk').onclick=clean;return}
+  const ov=cloudCard(`<small style="display:block;color:var(--muted);font-size:13px;letter-spacing:.2em">搬家</small><b style="font-size:22px;display:block;margin:2px 0 10px">找到旅人「${cEsc(j.name)}」的行李！</b>
+  <p style="margin:0 0 14px;font-size:15px;line-height:1.65">要搬到這支手機嗎？<br>這支手機原本的進度也會留著，合在一起。</p><button class="pbtn" id="cYes">搬過來</button><button class="sbtn" id="cNo" style="margin-top:10px;width:100%">先不要</button>`);
+  ov.querySelector('#cNo').onclick=clean;
+  ov.querySelector('#cYes').onclick=()=>{const R=mergeSave(cloudSnap(),j.save||{});try{Object.keys(R).forEach(k=>localStorage.setItem(k,R[k]))}catch(_){}
+   CLD={name:j.name,code:mv,last:0,pend:1,dirty:1};saveCLD();cloudCard(`<b style="font-size:21px;display:block;margin:6px 0">搬好了！歡迎回來，${cEsc(j.name)}</b>`);setTimeout(clean,1400)}})
+ .catch(()=>{cloudCard(`<b style="font-size:21px;display:block;margin:0 0 10px">連不上小鎮郵局</b><p style="margin:0 0 14px;font-size:15px">請確認有網路，再點一次搬家連結。</p><button class="pbtn" id="cOk">好</button>`).querySelector('#cOk').onclick=clean});
+ return true}
+/* 測試模式：選單「🧪 雲端存檔」（看名字、代碼、搬家連結，測連線、手動上傳） */
+function cloudPanel(){const link=CLD.code?location.origin+location.pathname+'?move='+CLD.code:'';const when=CLD.last?new Date(CLD.last).toLocaleString('zh-TW'):'還沒上傳過';
+ const ov=cloudCard(`<b style="font-size:21px;display:block;margin:0 0 10px">🧪 雲端存檔</b>
+ <div style="text-align:left;font-size:15px;line-height:1.8;margin:0 0 10px">網址：${CLOUD_URL?'已設定':'<b style="color:#c4473a">還沒設定（core.js 的 CLOUD_URL）</b>'}<br>名字：${CLD.name?cEsc(CLD.name):'（還沒取）'}<br>代碼：<b>${CLD.code||'（還沒有）'}</b><br>上次上傳：${when}${CLD.pend?'（有等待上傳的資料）':''}</div>
+ <input id="cName" maxlength="12" placeholder="名字（測試用，可改）" value="${cEsc(CLD.name)}" style="${CINP};font-size:16px;padding:8px">
+ ${link?`<input id="cLink" readonly value="${cEsc(link)}" style="${CINP};font-size:12px;padding:8px"><button class="sbtn" id="cCopy" style="width:100%;margin-bottom:8px">複製搬家連結</button>`:''}
+ <button class="sbtn" id="cPing" style="width:100%;margin-bottom:8px">測試連線</button><button class="sbtn" id="cUp" style="width:100%;margin-bottom:8px">用現在的進度上傳一次</button>
+ <p id="cMsg" style="margin:0 0 10px;font-size:14px;min-height:20px;color:var(--muted)"></p><button class="pbtn" id="cOk">關閉</button>`);
+ const msg=t=>ov.querySelector('#cMsg').textContent=t;
+ ov.querySelector('#cOk').onclick=cloudClose;
+ const cp=ov.querySelector('#cCopy');if(cp)cp.onclick=()=>{const i=ov.querySelector('#cLink');i.select();try{navigator.clipboard.writeText(i.value).then(()=>msg('已複製'),()=>{document.execCommand('copy');msg('已複製')})}catch(_){document.execCommand('copy');msg('已複製')}};
+ ov.querySelector('#cPing').onclick=()=>{if(!CLOUD_URL){msg('還沒設定網址');return}msg('連線中⋯');fetch(CLOUD_URL+'?act=ping').then(r=>r.json()).then(j=>msg(j&&j.ok?'✅ 連得上（後端版本 '+j.ver+'）':'❌ 回應不對')).catch(e=>msg('❌ 連不上：'+e))};
+ ov.querySelector('#cUp').onclick=()=>{const v=ov.querySelector('#cName').value.replace(/[<>=\u0000-\u001f]/g,'').trim().slice(0,12);if(!v){msg('先填名字');return}CLD.name=v;if(!CLD.code)CLD.code=cloudCode();saveCLD();msg('上傳中⋯');cloudSync(true,j=>{if(j&&j.ok){msg('✅ 上傳好了，去試算表看看');setTimeout(cloudPanel,1200)}else msg('❌ 沒成功：'+((j&&j.err)||''))},1)}}
+{const a=document.getElementById('tGiver');if(a){const b=document.createElement('button');b.id='tCloud';b.className='tbtn';b.style.display='none';b.innerHTML='<span>🧪 雲端存檔（代碼、搬家連結）</span>';b.onclick=()=>{closeMenu();cloudPanel()};a.parentNode.insertBefore(b,a)}}
+function cloudAfterWin(){cloudSync(true);setTimeout(cloudAsk,1900)}
 /* ================= boot（index.html 載入 core.js、art.js、levels.js 之後呼叫） ================= */
 function boot(){
+if(cloudMoveBoot())return; /* 2026-11-28a 搬家連結 ?move=代碼 */
 /* 單關測試頁（index.html?test=關卡編號；test.html 會轉過來）：進度只存在記憶體，直接開到那一關，測試模式自動打開 */
 const TL=window.TEST_LEVEL;
 if(TL){const L=LEVELS[TL];if(!L){$('#loading').textContent=`levels.js 裡沒有第 ${TL} 關：請先在 levels.js 加一行 addLevel({n:${TL},…})`;return}
